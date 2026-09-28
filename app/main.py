@@ -43,6 +43,46 @@ SESSIONS: dict[str, str] = {}          # session_id -> username
 CSRF_TOKENS: dict[str, dict] = {}      # token -> {"session": sid, "used": bool}
 
 
+# ---------------------------------------------------------------------------
+# Store skin — cosmetic only. It wraps page content in a shared header/footer
+# and CSS so the training app looks like the "Globomantics Store". It must NEVER
+# change the vulnerable sink strings the demo relies on (the raw XSS reflections
+# in /greet, the SQL error surfaced by /search, the CSRF token in the form).
+# The shared header deliberately contains NO `value="..."` attribute, so the
+# first `value="..."` on the /greet page is always the XSS reflection.
+# ---------------------------------------------------------------------------
+STORE_CSS = (
+    "<style>"
+    ":root{--ink:#1f2933;--muted:#647084;--line:#e3e8ef;--brand:#3b5bdb;--bg:#f7f9fc}"
+    "*{box-sizing:border-box}body{margin:0;font:16px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg)}"
+    ".topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:#fff;border-bottom:1px solid var(--line)}"
+    ".brand{font-weight:700;color:var(--brand)}.topbar nav a{margin-left:18px;color:var(--muted);text-decoration:none}"
+    ".topbar nav a:hover{color:var(--brand)}.wrap{max-width:960px;margin:26px auto;padding:0 22px}"
+    "h1{font-size:22px;margin:0 0 16px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}"
+    ".card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px}"
+    ".pname{font-weight:600}.pcat{color:var(--muted);font-size:13px;margin:4px 0}.pprice{color:var(--brand);font-weight:700}"
+    "input,button{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:8px}"
+    "button{background:var(--brand);color:#fff;border:0;cursor:pointer}"
+    ".foot{color:var(--muted);font-size:13px;text-align:center;padding:24px}"
+    "</style>"
+)
+NAV = (
+    '<header class="topbar"><div class="brand">Globomantics Store</div>'
+    '<nav><a href="/">Home</a><a href="/search?q=Router">Search</a>'
+    '<a href="/account/email">Account</a></nav></header>'
+)
+
+
+def shell(title: str, body: str) -> str:
+    return (
+        f'<!doctype html><html><head><meta charset="utf-8"><title>{title}</title>'
+        f"{STORE_CSS}</head><body>{NAV}"
+        f'<main class="wrap">{body}</main>'
+        '<footer class="foot">Globomantics training store — authorized testing only</footer>'
+        "</body></html>"
+    )
+
+
 def pg_conn():
     return psycopg.connect(PG_DSN)
 
@@ -73,17 +113,26 @@ def health() -> JSONResponse:
 
 @app.get("/", response_class=HTMLResponse)
 def index() -> str:
-    return (
-        "<html><head><title>Globomantics</title></head><body>"
-        "<h1>Globomantics Portal</h1>"
-        "<ul>"
-        '<li><a href="/search?q=Router">Product search</a></li>'
-        '<li><a href="/api/account?username=alice">Account lookup</a></li>'
-        '<li><a href="/admin/ping?host=127.0.0.1">Admin ping</a></li>'
-        '<li><a href="/greet?name=Globomantics">Greeting</a></li>'
-        '<li><a href="/account/email">Change email</a></li>'
-        "</ul></body></html>"
+    rows = []
+    try:
+        with pg_conn() as c, c.cursor() as cur:
+            cur.execute("SELECT name, category, price FROM products ORDER BY id")
+            rows = cur.fetchall()
+    except Exception:  # noqa: BLE001
+        rows = []
+    cards = "".join(
+        f'<div class="card"><div class="pname">{html.escape(str(n))}</div>'
+        f'<div class="pcat">{html.escape(str(cat))}</div>'
+        f'<div class="pprice">${html.escape(str(p))}</div></div>'
+        for (n, cat, p) in rows
     )
+    body = (
+        '<form action="/search" method="get" style="margin-bottom:18px">'
+        '<input type="text" name="q" placeholder="Search products">'
+        "<button>Search</button></form>"
+        f'<h1>Products</h1><div class="grid">{cards}</div>'
+    )
+    return shell("Globomantics Store", body)
 
 
 # ---------------------------------------------------------------------------
@@ -121,7 +170,7 @@ def search(q: str = "") -> str:
     if error:
         # Surfacing the DB error message aids ZAP's error-based SQLi detection.
         body += f"<pre>{html.escape(error)}</pre>"
-    return f"<html><head><title>Search</title></head><body>{body}</body></html>"
+    return shell("Search — Globomantics Store", body)
 
 
 # ---------------------------------------------------------------------------
@@ -217,13 +266,16 @@ def greet(name: str = "friend") -> str:
         attr_ctx = html.escape(name, quote=True)
         js_ctx = json.dumps(name)[1:-1]  # escape for a JS string literal
 
-    return (
-        "<html><head><title>Greeting</title></head><body>"
+    # The three sink strings below are UNCHANGED — the demo checks for them
+    # verbatim. Only the surrounding store shell is new.
+    body = (
+        '<div class="card">'
         f"<p>Hello {body_ctx}</p>"
         f'<input type="text" value="{attr_ctx}">'
         f'<script>var greeting = "{js_ctx}"; </script>'
-        "</body></html>"
+        "</div>"
     )
+    return shell("Welcome — Globomantics Store", body)
 
 
 # ---------------------------------------------------------------------------
@@ -250,16 +302,15 @@ def email_form(request: Request) -> HTMLResponse:
     if sid not in SESSIONS:
         return HTMLResponse("<p>Please log in first.</p>", status_code=401)
     token = _issue_csrf(sid)
-    html_body = (
-        "<html><head><title>Change email</title></head><body>"
-        "<h1>Change email</h1>"
+    body = (
+        '<div class="card"><h1>Change email</h1>'
         '<form method="POST" action="/account/email">'
         f'<input type="hidden" name="csrf_token" value="{token}">'
         '<input type="email" name="email" value="">'
         '<button type="submit">Update</button>'
-        "</form></body></html>"
+        "</form></div>"
     )
-    return HTMLResponse(html_body)
+    return HTMLResponse(shell("Account — Globomantics Store", body))
 
 
 @app.post("/account/email")
