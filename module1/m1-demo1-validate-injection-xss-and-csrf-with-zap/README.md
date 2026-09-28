@@ -1,27 +1,61 @@
 # Validate Injection, XSS, and CSRF with ZAP
 
 A hands-on lab where you turn a broad ZAP scan into **four proven security
-checks** against one deliberately vulnerable application — the Globomantics
-training app.
+checks** against a deliberately vulnerable web app — the **Globomantics Store**.
+
+You will run each step yourself, one screen at a time, and see the evidence that
+each finding is real.
 
 ---
 
 ## The problem you are solving
 
 A default scan hands you a long list of alerts, but a list is not a decision.
-Which findings are real? Can you reproduce each one against the application's
-actual behavior? Security engineer **Maya Chen** at Globomantics needs to
-confirm injection, XSS, and CSRF findings against concrete behavior — then write
-down a defensible disposition for each. That is the difference between "I ran a
-scanner" and "I validated the risk."
-
-**What you gain:** in four short steps you run one targeted scan that proves
-three injection findings, capture reflected XSS across its output contexts, show
-a CSRF token being replayed, and record a disposition for every alert.
+Which findings are real? Can you reproduce each one against the app's actual
+behavior? In this lab you confirm SQL, NoSQL, and command injection, capture
+reflected XSS across its output contexts, replay a CSRF token, and record a
+disposition for every alert — the difference between "I ran a scanner" and "I
+validated the risk."
 
 > **Authorization and scope.** Every request here targets **only** the local
-> Globomantics training app. Never point these techniques at any system you are
-> not explicitly authorized to test.
+> Globomantics Store. Never point these techniques at any system you are not
+> explicitly authorized to test.
+
+---
+
+## How to follow along
+
+**1. Install the tools (once).** From the repo root:
+```bash
+./env-setup/setup-macos.sh
+```
+Wait until the readiness table shows every component **READY**.
+
+**2. Start the lab.** From the repo root:
+```bash
+./module1/m1-demo1-validate-injection-xss-and-csrf-with-zap/scripts/demo_reset.sh
+```
+This brings up the Globomantics Store on the **vulnerable** build and prints
+**Up** when everything is healthy (ZAP takes ~90 seconds the first time). Open
+the store at <http://localhost:8000/> to see what you are testing.
+
+**3. Move into the lab folder** (every command below is relative to it):
+```bash
+cd module1/m1-demo1-validate-injection-xss-and-csrf-with-zap
+```
+
+**4. Run the four steps, one at a time.** Read each screen, then run the next:
+```bash
+./scripts/run_step.sh 1     # targeted injection scan
+./scripts/run_step.sh 2     # reflected XSS in three contexts
+./scripts/run_step.sh 3     # CSRF token replay
+./scripts/run_step.sh 4     # alert disposition
+```
+Each step is self-contained and prints one clean screen. Step 1 runs a real scan
+(~30–60s); Steps 2–4 are instant.
+
+> **Tip:** the exact alert IDs, risk, and confidence you see are the live values
+> from your run. The samples below are from one run and may differ slightly.
 
 ---
 
@@ -39,7 +73,7 @@ a CSRF token being replayed, and record a disposition for every alert.
 | missing / invalid | the request should be rejected |
 | replayed (already used once) | the request should be rejected |
 
-`./scripts/run_step.sh ref` prints this same reference in the terminal.
+Print this same reference in the terminal any time with `./scripts/run_step.sh ref`.
 
 ---
 
@@ -54,30 +88,12 @@ a CSRF token being replayed, and record a disposition for every alert.
 
 ---
 
-## Before you start
-
-```bash
-./env-setup/setup-macos.sh          # once — installs dependencies, pulls ZAP
-./module1/m1-demo1-validate-injection-xss-and-csrf-with-zap/scripts/demo_reset.sh
-```
-
-Run each step on its own when you are ready (any order; each is self-contained):
-
-```bash
-cd module1/m1-demo1-validate-injection-xss-and-csrf-with-zap
-./scripts/run_step.sh 1
-```
-
-`APP` below is `http://app:8000` as ZAP sees it on the container network.
-
----
-
 ## Step 1 — Targeted injection scan
 
 **Why you run this:** a scoped policy turns a broad scan into a targeted test of
 specific weaknesses.
 **What you learn:** how ZAP confirms SQL, NoSQL, and command injection from the
-application's own responses — three injection types in one focused scan.
+app's own responses — three injection types in one focused scan.
 
 ```bash
 ./scripts/run_step.sh 1
@@ -97,10 +113,10 @@ Findings — alert raised per endpoint:
 
   ★ NoSQL injection · /api/account (username): alert 40033 · Medium/Medium
 
-  ★ Command injection · /admin/ping (host): alert 90037 · High/Medium
+  ★ Command injection · /admin/ping (host): alert 90020 (or 90037)
 ```
 
-Read the three highlighted alert IDs — one real finding per endpoint.
+Read the highlighted alert IDs — one real finding per endpoint.
 
 **Proof artifact:** *Targeted scan policy and rule list.*
 
@@ -175,8 +191,8 @@ is **not single-use** — it can be replayed.
 
 **Why you run this:** validation ends in a decision. A disposition is what you
 hand to a developer or keep for the record.
-**What you learn:** to reconcile each alert with what the application actually
-did and mark it confirmed.
+**What you learn:** to reconcile each alert with what the app actually did and
+mark it confirmed.
 
 ```bash
 ./scripts/run_step.sh 4
@@ -188,7 +204,7 @@ did and mark it confirmed.
 │ WHY:   Turns raw alerts into decisions you can defend (EO1a/b/c)       │
 └──────────────────────────────────────────────────────────────────────┘
 
-  ★ 40018 SQL injection · /search: confirmed — DB error: unterminated quoted string
+  ★ 40018 SQL injection · /search: confirmed — DB error: unterminated quoted string at or near "'"
 
   ★ 40033 NoSQL injection · /api/account: confirmed — accounts 1 → 4 under operator injection
 
@@ -200,6 +216,20 @@ did and mark it confirmed.
 Record the full table in [`docs/alert-disposition-template.md`](../../docs/alert-disposition-template.md).
 
 **Proof artifact:** *Alert disposition record.*
+
+---
+
+## Optional — see why a finding is exploitable (the vulnerable code)
+
+Any time you want the "why," print the exact vulnerable line(s) from the app:
+
+```bash
+./scripts/show_code.sh sqli    # or: nosql · cmd · xss · csrf
+```
+
+It shows the line numbers, so in your editor you can jump straight to them
+(VS Code: `Cmd+P` → `main.py`, then `Ctrl+G` → the line). This is a reference
+aid, not one of the four steps.
 
 ---
 
@@ -220,21 +250,10 @@ prompt to fix it. When you are done:
 
 ---
 
-## Optional reference — the vulnerable code (not a recorded step)
-
-To see *why* a finding is exploitable, print the exact vulnerable line(s) from
-the app. This is a reference aid, not one of the four steps above:
-
-```bash
-./scripts/show_code.sh sqli    # or: nosql · cmd · xss · csrf
-```
-
----
-
 ## See the fixes hold (optional exploration)
 
-The same application ships a remediated build — parameterized SQL, type-checked
-Mongo input, a validated command with no shell, context-encoded XSS output, and
+The same app ships a **remediated** build — parameterized SQL, type-checked Mongo
+input, a validated command with no shell, context-encoded XSS output, and
 single-use, session-bound CSRF tokens:
 
 ```bash
@@ -242,4 +261,5 @@ APP_BUILD=remediated docker compose up -d --build app
 ```
 
 Re-run the steps: the injection alerts disappear, the XSS output becomes encoded,
-and the replayed CSRF token is rejected with `403`.
+and the replayed CSRF token is rejected with `403`. Switch back with
+`./scripts/demo_reset.sh`.

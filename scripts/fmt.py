@@ -149,4 +149,14 @@ def _main(argv) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(_main(sys.argv[1:]))
+    try:
+        _rc = _main(sys.argv[1:])
+    except BrokenPipeError:
+        # A downstream reader (e.g. `| head`) closed the pipe. Exit quietly
+        # instead of dumping a traceback.
+        try:
+            sys.stdout.close()
+        except Exception:
+            pass
+        _rc = 0
+    raise SystemExit(_rc)

@@ -17,7 +17,7 @@ fm() { python3 "${FMT}" "$@"; }
 APP_INTERNAL="http://app:8000"        # how ZAP reaches the app (compose DNS)
 ZAP="http://localhost:8090"           # ZAP API + proxy (same port)
 PROXY="http://localhost:8090"
-K="${ZAP_API_KEY:?ZAP_API_KEY must be set (is .env present?)}"
+K="${ZAP_API_KEY:-}"   # lazy: the reference panel needs no key; ensure_ready checks it
 POLICY="m1demo1"
 POLICY_IDS="40018 40019 40020 40021 40022 40027 40033 90020 90037"
 
@@ -37,6 +37,11 @@ zap() { # <path> <query> -> body (asserts HTTP 200)
 
 # ---- readiness -------------------------------------------------------------
 ensure_ready() {
+    [ -n "${K}" ] || {
+        fail "ZAP_API_KEY is not set" "the .env file is missing or not loaded" \
+             "run from the repo so .env loads, or export ZAP_API_KEY"
+        return 1
+    }
     zap core/view/version | grep -q '"version"' || {
         fail "ZAP API not reachable" "the stack may still be starting" \
              "run scripts/demo_up.sh, wait for 'Up', then retry"
@@ -147,7 +152,9 @@ step2_xss() {
     fm star "Request" "GET /greet?name=${marker}"
     fm section "Response body — reflected unescaped"
     b1="$(echo "${body}" | grep -o '<p>Hello[^<]*' | head -1)"
-    b2="$(echo "${body}" | grep -o 'value="[^"]*"' | head -1)"
+    # Anchor to the greeting input so a future header 'value=' can never be
+    # picked up as the attribute context; strip the type= prefix for display.
+    b2="$(echo "${body}" | grep -oE 'type="text" value="[^"]*"' | head -1 | sed 's/^type="text" //')"
     b3="$(echo "${body}" | grep -o 'var greeting = "[^;]*' | head -1)"
     fm star "HTML body context" "${b1}" focus
     fm star "HTML attribute context" "${b2}" focus

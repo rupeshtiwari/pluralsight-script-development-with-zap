@@ -18,11 +18,11 @@ FMT="${REPO_ROOT}/scripts/fmt.py"
 fm() { python3 "${FMT}" "$@"; }
 
 case "${1:-}" in
-    sqli)  ANCHOR="VULNERABLE: query built by string concatenation."; N=6; TITLE="SQL injection · product search";;
-    nosql) ANCHOR="VULNERABLE: the query string is parsed qs-style";  N=11; TITLE="NoSQL injection · account lookup";;
+    sqli)  ANCHOR="VULNERABLE: query built by string concatenation."; N=5; TITLE="SQL injection · product search";;
+    nosql) ANCHOR="VULNERABLE: the query string is parsed qs-style";  N=15; TITLE="NoSQL injection · account lookup";;
     cmd)   ANCHOR="VULNERABLE: host interpolated into a shell command"; N=5; TITLE="Command injection · admin ping";;
     xss)   ANCHOR="VULNERABLE: raw reflection into HTML body";        N=4; TITLE="Reflected XSS · greeting";;
-    csrf)  ANCHOR="VULNERABLE: token presence/validity is checked";   N=5; TITLE="CSRF · email change";;
+    csrf)  ANCHOR="VULNERABLE: token presence/validity is checked";   N=4; TITLE="CSRF · email change";;
     *) echo "usage: show_code.sh {sqli|nosql|cmd|xss|csrf}"; exit 2;;
 esac
 
