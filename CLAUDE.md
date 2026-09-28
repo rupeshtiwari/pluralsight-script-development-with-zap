@@ -39,6 +39,18 @@ Key constraints from the outline:
   resonates with business audiences and students can apply it to their own projects.
   It is a cosmetic skin over the same endpoints; the LO behavior never changes.
 
+## Recording environment per clip (owner's rule)
+
+- Clip shows source code during the demo → **VS Code integrated terminal** (code +
+  terminal in one window).
+- Clip shows no code → **plain terminal** (clean, no editor clutter).
+- Clip has both code and terminal → **prefer VS Code**.
+- Exception set by the outline: the ZAP **scripting** clips (M1 C4 JavaScript, M1 C5
+  Python) author code in ZAP's **Script Console** (the outline's proof artifacts are
+  "Script console output", "Saved script registration", "Python active-rule source").
+  That code lives in the ZAP GUI, NOT VS Code — using VS Code there would break the
+  specified artifacts.
+
 ## Commit attribution (owner's rule)
 
 - All commits are authored and committed by **Rupesh Tiwari <roopkt@gmail.com>** only.
