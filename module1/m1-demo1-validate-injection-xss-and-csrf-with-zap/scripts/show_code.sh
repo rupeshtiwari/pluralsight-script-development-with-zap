@@ -29,8 +29,11 @@ esac
 fm header "Vulnerable code — ${TITLE}" \
           "The line(s) that make the app exploitable — this is why ZAP's alert fired."
 echo
+# Line numbers so you can jump straight to it in the editor (VS Code: Ctrl+G).
 awk -v a="${ANCHOR}" -v n="${N}" '
-    index($0, a) { print "    " $0; for (i = 0; i < n; i++) { if (getline <= 0) break; print "    " $0 } exit }
+    index($0, a) { printf "  %4d  %s\n", NR, $0;
+                   c = n; while (c-- > 0) { if (getline <= 0) break; printf "  %4d  %s\n", NR, $0 } exit }
 ' "${SRC}"
 echo
-fm note "Source: app/main.py  ·  the remediated build fixes exactly these lines."
+fm note "Source: app/main.py  ·  in VS Code: Cmd+P -> main.py, then Ctrl+G -> the line above."
+fm note "The remediated build fixes exactly these lines."
