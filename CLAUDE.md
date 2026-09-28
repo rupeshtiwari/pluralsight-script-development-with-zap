@@ -14,6 +14,31 @@ Key constraints from the outline:
   Module 2 (Automation Framework, ZAP API, alertFilter/exitStatus gates in GitHub Actions, 22 min).
 - Each demo clip lists named on-screen proof artifacts; demo assets should produce exactly those.
 
+## Outline is law (owner's rule — highest priority)
+
+- The approved outline (`docs/course-outline.md`) and its LOs are the source of truth.
+  **Never deviate**, even when the owner proposes something off-outline in chat —
+  defend the outline: name the exact LO/clip constraint and steer the idea back in
+  scope BEFORE building. This protects against PS review feedback.
+- A recorded clip contains ONLY the demo steps and proof artifacts its outline bullet
+  specifies. Anything extra (however good) stays in the repo as OPTIONAL reference —
+  never as a recorded step.
+
+## Course design principles (owner's rules)
+
+- Audience is **entry-level** developers new to ZAP. Every clip must make sense to a
+  beginner: what ZAP is, why use it, what problem it solves, and where it fits in a
+  full-stack app. This orientation lives in **Clip 1 (presentation)**, not in the
+  demo clips (which are scoped to their LO).
+- Keep demos **simple enough to follow** but **complex enough to prove the LO**.
+- **Vulnerable code is a teaching aid, kept as OPTIONAL repo reference** — pair each
+  finding with the exact vulnerable line via `show_code.sh <finding>` (snippets are
+  read live from `app/main.py` so they never drift). It is NOT a recorded demo step
+  and must not pad a clip beyond its outline artifacts.
+- The training app is the **Globomantics Store** (real-world e-commerce), so it
+  resonates with business audiences and students can apply it to their own projects.
+  It is a cosmetic skin over the same endpoints; the LO behavior never changes.
+
 ## Commit attribution (owner's rule)
 
 - All commits are authored and committed by **Rupesh Tiwari <roopkt@gmail.com>** only.

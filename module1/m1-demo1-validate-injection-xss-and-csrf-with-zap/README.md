@@ -220,6 +220,17 @@ prompt to fix it. When you are done:
 
 ---
 
+## Optional reference — the vulnerable code (not a recorded step)
+
+To see *why* a finding is exploitable, print the exact vulnerable line(s) from
+the app. This is a reference aid, not one of the four steps above:
+
+```bash
+./scripts/show_code.sh sqli    # or: nosql · cmd · xss · csrf
+```
+
+---
+
 ## See the fixes hold (optional exploration)
 
 The same application ships a remediated build — parameterized SQL, type-checked
