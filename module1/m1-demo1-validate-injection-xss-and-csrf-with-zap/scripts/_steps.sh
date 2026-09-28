@@ -197,10 +197,11 @@ step4_disposition() {
     fm header "Alert disposition — reconcile each alert with app behavior" \
               "Turns raw alerts into decisions you can defend (EO1a, EO1b, EO1c)."
     local sqlerr b i ping xss
-    sqlerr="$(curl -s -x "${PROXY}" "${APP_INTERNAL}/search?q=Router%27" | grep -o 'unterminated[^<]*' | head -1)"
+    sqlerr="$(curl -s -x "${PROXY}" "${APP_INTERNAL}/search?q=Router%27" | grep -o 'unterminated[^<]*' | head -1 \
+              | python3 -c 'import html,sys;print(html.unescape(sys.stdin.read().strip()))')"
     b="$(curl -s -x "${PROXY}" "${APP_INTERNAL}/api/account?username=alice"     | python3 -c 'import json,sys;print(json.load(sys.stdin).get("count","?"))')"
     i="$(curl -s -x "${PROXY}" "${APP_INTERNAL}/api/account?username%5B%24ne%5D=" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("count","?"))')"
-    ping="$(curl -s -x "${PROXY}" "${APP_INTERNAL}/admin/ping?host=127.0.0.1"    | grep -o 'bytes from[^,]*' | head -1)"
+    ping="$(curl -s -x "${PROXY}" "${APP_INTERNAL}/admin/ping?host=127.0.0.1"    | grep -oE 'bytes from [0-9.]+' | head -1)"
     if curl -s -x "${PROXY}" "${APP_INTERNAL}/greet?name=zzMARKzz" | grep -q '<p>Hello zzMARKzz'; then xss="reflected unescaped"; else xss="encoded"; fi
 
     fm star "40018 SQL injection · /search" "confirmed — DB error: ${sqlerr:-none}" focus
