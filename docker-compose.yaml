@@ -56,6 +56,8 @@ services:
       ZAP_API_KEY: ${ZAP_API_KEY}
     volumes:
       - ./zap/entrypoint.sh:/zap-entrypoint.sh:ro
+      # Course ZAP scripts, read-only, so the demos can load them by path.
+      - ./module1/m1-demo2-write-a-javascript-security-script-in-zap/zap-scripts:/zap-scripts:ro
     ports:
       - "127.0.0.1:8080:8080"   # Webswing GUI
       - "127.0.0.1:8090:8090"   # ZAP proxy + API

@@ -35,7 +35,7 @@ prints a readiness table and writes a full transcript to `env-setup/logs/`.
 | # | Lab | You will learn | Objectives | Links |
 |---|-----|----------------|------------|-------|
 | 1 | **Validate injection, XSS, and CSRF with ZAP** | Build a focused scan policy; prove SQL, NoSQL, and command injection; map reflected XSS to its three contexts; compare CSRF token states; record an alert disposition | EO1a · EO1b · EO1c | [Runbook](module1/m1-demo1-validate-injection-xss-and-csrf-with-zap/README.md) · [Scripts](module1/m1-demo1-validate-injection-xss-and-csrf-with-zap/scripts) |
-| 2 | Write a JavaScript security script in ZAP | Extend ZAP with an HTTP Sender script | EO2a | Coming next |
+| 2 | [Write a JavaScript security script in ZAP](module1/m1-demo2-write-a-javascript-security-script-in-zap/README.md) | Extend ZAP with an HTTP Sender script | EO2a | Ready |
 | 3 | Write Python scan and authentication scripts in ZAP | Custom Python scan rule and scripted login | EO2b · EO2c | Planned |
 
 ### Module 2 — Automated ZAP security gates in DevSecOps pipelines
