@@ -1,203 +1,131 @@
 # Validate Injection, XSS, and CSRF with ZAP
 
-A hands-on lab where you turn a broad ZAP scan into a set of **targeted, proven
-security checks** against one deliberately vulnerable application — the
-Globomantics training app.
+A hands-on lab where you turn a broad ZAP scan into **four proven security
+checks** against one deliberately vulnerable application — the Globomantics
+training app.
 
 ---
 
 ## The problem you are solving
 
-A default ZAP scan gives you a long list of alerts, but a list is not a
-decision. Which alerts are real? Which are noise? Can you *reproduce* each one
-against the application's actual behavior? Security engineer **Maya Chen** at
-Globomantics needs to answer exactly that: confirm injection, XSS, and CSRF
-findings against concrete application behavior — not just trust the scanner.
+A default scan hands you a long list of alerts, but a list is not a decision.
+Which findings are real? Can you reproduce each one against the application's
+actual behavior? Security engineer **Maya Chen** at Globomantics needs to
+confirm injection, XSS, and CSRF findings against concrete behavior — then write
+down a defensible disposition for each. That is the difference between "I ran a
+scanner" and "I validated the risk."
 
-**What you gain in this lab:** by the end you can build a focused scan policy,
-prove three injection findings and a reflected-XSS finding are real, show why a
-weak CSRF protection fails, and write down a defensible disposition for every
-alert. These are the skills that separate "I ran a scanner" from "I validated
-the risk."
+**What you gain:** in four short steps you run one targeted scan that proves
+three injection findings, capture reflected XSS across its output contexts, show
+a CSRF token being replayed, and record a disposition for every alert.
 
-> **Authorization and scope.** Every request in this lab targets **only** the
-> local Globomantics training app on your machine. Never point these techniques
-> at any system you are not explicitly authorized to test.
+> **Authorization and scope.** Every request here targets **only** the local
+> Globomantics training app. Never point these techniques at any system you are
+> not explicitly authorized to test.
+
+---
+
+## Before you test: map each case to its context / state
+
+| XSS execution context | Where the input lands |
+|-----------------------|-----------------------|
+| HTML body | between tags |
+| HTML attribute | inside a quoted attribute value |
+| JavaScript string | inside a quoted JS string |
+
+| CSRF token state | Expected result |
+|------------------|-----------------|
+| valid | the request should succeed |
+| missing / invalid | the request should be rejected |
+| replayed (already used once) | the request should be rejected |
+
+`./scripts/run_step.sh ref` prints this same reference in the terminal.
 
 ---
 
 ## What each step teaches (learning-objective coverage)
 
-| Step | You will… | Objective |
-|------|-----------|-----------|
-| 1 | Build a scan policy scoped to exactly the rules you want | EO1a |
-| 2 | Prove SQL injection on the product-search parameter | EO1a |
-| 3 | Prove NoSQL injection on the account lookup | EO1a |
-| 4 | Prove OS command injection on the admin diagnostic | EO1a |
-| 5 | Map reflected XSS to its three output contexts | EO1b |
-| 6 | Compare five CSRF token states and find the two that fail | EO1c |
-| 7 | Record a disposition for every alert you observed | EO1a · EO1b · EO1c |
+| Step | You will… | Objective | Proof artifact |
+|------|-----------|-----------|----------------|
+| 1 | Run one targeted scan and confirm SQL, NoSQL, and command injection | EO1a | Targeted scan policy and rule list |
+| 2 | Capture reflected XSS across its three output contexts | EO1b | XSS request and response body |
+| 3 | Replay a CSRF token and show it is accepted | EO1c | CSRF token replay result |
+| 4 | Reconcile every alert with app behavior and record it | EO1a · EO1b · EO1c | Alert disposition record |
 
 ---
 
 ## Before you start
 
-1. Prepare your machine once:
-   ```bash
-   ./env-setup/setup-macos.sh
-   ```
-   Wait for the readiness table to show every component **READY**.
+```bash
+./env-setup/setup-macos.sh          # once — installs dependencies, pulls ZAP
+./module1/m1-demo1-validate-injection-xss-and-csrf-with-zap/scripts/demo_reset.sh
+```
 
-2. Bring the lab up (starts on the vulnerable build):
-   ```bash
-   ./module1/m1-demo1-validate-injection-xss-and-csrf-with-zap/scripts/demo_up.sh
-   ```
-   When it prints **Up**, open the ZAP GUI at <http://localhost:8080/zap/> and
-   set your browser's HTTP proxy to `localhost:8090` so traffic flows through
-   ZAP.
+Run each step on its own when you are ready (any order; each is self-contained):
 
-3. To return to a clean starting point at any time:
-   ```bash
-   ./module1/m1-demo1-validate-injection-xss-and-csrf-with-zap/scripts/demo_reset.sh
-   ```
+```bash
+cd module1/m1-demo1-validate-injection-xss-and-csrf-with-zap
+./scripts/run_step.sh 1
+```
 
-Throughout, `APP` is `http://app:8000` as ZAP sees it on the container network.
+`APP` below is `http://app:8000` as ZAP sees it on the container network.
 
 ---
 
-## Step 1 — Build the targeted scan policy
+## Step 1 — Targeted injection scan
 
-**Why you run this:** a broad scan wastes time and buries the findings you care
-about. A scoped policy is the difference between "scan everything" and "test
-these specific weaknesses."
-**What you learn:** how a scan policy is assembled from individual rule IDs, and
-which rules map to which weakness.
+**Why you run this:** a scoped policy turns a broad scan into a targeted test of
+specific weaknesses.
+**What you learn:** how ZAP confirms SQL, NoSQL, and command injection from the
+application's own responses — three injection types in one focused scan.
 
-Enable only the SQL-injection family, the NoSQL rule `40033`, and the two
-command-injection rules in a policy named `m1demo1`, then list what is enabled.
+```bash
+./scripts/run_step.sh 1
+```
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│ WHAT:  The exact scan rules this policy enables — and nothing else     │
-│ WHY:   A focused policy turns a broad scan into a targeted test (EO1a)  │
+│ WHAT:  Targeted injection scan — one policy, three endpoints           │
+│ WHY:   Proves SQL, NoSQL, and command injection are real findings      │
 └──────────────────────────────────────────────────────────────────────┘
 
-  ★ Enabled scan rules: 40018 40019 40020 40021 40022 40027 40033 90020 90037
+  ★ Policy rules enabled: SQL-injection family + NoSQL 40033 + command 90020/90037
+
+Findings — alert raised per endpoint:
+
+  ★ SQL injection · /search (q): alert 40018 · High/Medium
+
+  ★ NoSQL injection · /api/account (username): alert 40033 · Medium/Medium
+
+  ★ Command injection · /admin/ping (host): alert 90037 · High/Medium
 ```
 
-The highlighted rule IDs are the ones this lab proves: **40018/40022** (SQL),
-**40033** (NoSQL), **90020/90037** (command injection).
+Read the three highlighted alert IDs — one real finding per endpoint.
 
-**Proof artifact:** *Configured targeted scan policy and rule list.*
+**Proof artifact:** *Targeted scan policy and rule list.*
 
 ---
 
-## Step 2 — Validate SQL injection on product search
+## Step 2 — Reflected XSS in three contexts
 
-**Why you run this:** the product search builds its query from your input, so a
-crafted value can change the query itself.
-**What you learn:** how ZAP confirms SQL injection from the application's own
-response, and how to read the alert's risk and confidence.
-
-Active-scan `GET ${APP}/search?q=Router` with the policy, then read the alert.
-
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│ WHAT:  ZAP alert raised on the product-search parameter                │
-│ WHY:   Confirms the SQL-injection finding is real behavior (EO1a)      │
-└──────────────────────────────────────────────────────────────────────┘
-
-  ★ pluginId: 40018
-
-  ★ risk: High
-
-  ★ confidence: Medium
-
-  ★ param: q
-```
-
-Read the **pluginId** and **confidence** aloud: alert `40018` on parameter `q`.
-
-**Proof artifact:** contributes to *Configured targeted scan policy and rule list.*
-
----
-
-## Step 3 — Validate NoSQL injection on account lookup
-
-**Why you run this:** the account lookup queries MongoDB. If the parameter can
-smuggle a query operator, an equality check becomes an "any account" match.
-**What you learn:** to see NoSQL injection as a **behavior change** first, then
-confirm it with ZAP's dedicated rule `40033`.
-
-Compare a normal lookup with an operator-injection lookup, then scan the endpoint.
-
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│ WHAT:  A normal lookup returns one account; an injected one returns many│
-│ WHY:   Shows the MongoDB weakness as behavior, then confirms it (EO1a) │
-└──────────────────────────────────────────────────────────────────────┘
-
-  ★ Accounts for a normal lookup: 1
-
-  ★ Accounts when an operator is injected: 4
-
-  ★ pluginId: 40033
-```
-
-The jump from **1** to **4** is the injection; alert **40033** is ZAP's
-confirmation.
-
-**Proof artifact:** contributes to *Configured targeted scan policy and rule list.*
-
----
-
-## Step 4 — Validate command injection on admin diagnostics
-
-**Why you run this:** the admin "ping" tool runs a real OS command built from
-the `host` value.
-**What you learn:** how ZAP detects that untrusted input reached a shell, and
-which rule reports it.
-
-Active-scan `GET ${APP}/admin/ping?host=127.0.0.1`, then read the alert.
-
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│ WHAT:  ZAP alert raised on the admin ping host parameter               │
-│ WHY:   Confirms untrusted input reaches an OS command (EO1a)           │
-└──────────────────────────────────────────────────────────────────────┘
-
-  ★ pluginId: 90037
-
-  ★ risk: High
-
-  ★ confidence: Medium
-
-  ★ param: host
-```
-
-Read the **pluginId**: command-injection alert `90037` on parameter `host`.
-(`90020` detects the same weakness; either is a valid confirmation.)
-
-**Proof artifact:** contributes to *Configured targeted scan policy and rule list.*
-
----
-
-## Step 5 — Map reflected XSS to its three output contexts
-
-**Why you run this:** the payload that works for XSS depends on *where* your
-input lands in the page. The same value behaves differently in an HTML body, an
-HTML attribute, and a JavaScript string.
+**Why you run this:** the payload that works depends on *where* your input lands
+in the page.
 **What you learn:** to identify the output context first, because it decides the
 payload you would use.
 
-Send a harmless marker to `GET ${APP}/greet?name=zzMARKzz` and see where it
-lands, unescaped, in the response.
+```bash
+./scripts/run_step.sh 2
+```
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│ WHAT:  The same marker echoed into three different output contexts     │
-│ WHY:   The context decides the payload — this is why it matters (EO1b) │
+│ WHAT:  Reflected XSS — one input, three output contexts                │
+│ WHY:   The output context decides the payload (EO1b)                    │
 └──────────────────────────────────────────────────────────────────────┘
+
+  ★ Request: GET /greet?name=zzMARKzz
+
+Response body — reflected unescaped:
 
   ★ HTML body context: <p>Hello zzMARKzz
 
@@ -206,71 +134,70 @@ lands, unescaped, in the response.
   ★ JavaScript string context: var greeting = "zzMARKzz"
 ```
 
-All three reflect the marker unescaped — three different contexts, one input.
+One input, reflected unescaped in all three contexts.
 
 **Proof artifact:** *XSS request and response body.*
 
 ---
 
-## Step 6 — Compare CSRF token states
+## Step 3 — CSRF token replay
 
-**Why you run this:** a CSRF token is only as good as its rules. A token that is
-checked for *presence* but not for *freshness* or *session ownership* still
-leaves the form exploitable.
-**What you learn:** to test a protection by its state transitions, and to spot
-which two states reveal the real weakness.
+**Why you run this:** a CSRF token is only as good as its rules. A token checked
+for *presence* but not *freshness* can be replayed.
+**What you learn:** to test a protection by replaying a token that was already
+used once.
 
-Log in, then submit the email-change form under five token states and read the
-HTTP status code for each.
+```bash
+./scripts/run_step.sh 3
+```
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│ WHAT:  The same request under five CSRF token states                   │
-│ WHY:   The two that still succeed reveal the real weakness (EO1c)      │
+│ WHAT:  CSRF — token replay                                             │
+│ WHY:   A token with no freshness check can be replayed (EO1c)          │
 └──────────────────────────────────────────────────────────────────────┘
 
-  ★ valid token, own session: 200
+  ★ valid token: 200
 
   ★ missing token: 403
 
-  ★ invalid token: 403
-
-  ★ token reused after first use: 200
-
-  ★ session A token with session B cookie: 200
+  ★ replayed token (already used once): 200
 ```
 
-Presence is checked (missing and invalid are both `403`), but the two
-highlighted `200`s show the token is **not single-use** and **not bound to the
-session** — the weakness this endpoint hides.
+Presence is checked (missing = `403`), but the highlighted `200` shows the token
+is **not single-use** — it can be replayed.
 
-**Proof artifact:** *CSRF token-state comparison.*
+**Proof artifact:** *CSRF token replay result.*
 
 ---
 
-## Step 7 — Record the alert disposition
+## Step 4 — Alert disposition record
 
 **Why you run this:** validation ends in a decision. A disposition is what you
 hand to a developer or keep for the record.
 **What you learn:** to reconcile each alert with what the application actually
-did and mark it confirmed or a false positive.
+did and mark it confirmed.
+
+```bash
+./scripts/run_step.sh 4
+```
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│ WHAT:  Each alert reconciled with observed application behavior        │
+│ WHAT:  Alert disposition — reconcile each alert with app behavior      │
 │ WHY:   Turns raw alerts into decisions you can defend (EO1a/b/c)       │
 └──────────────────────────────────────────────────────────────────────┘
 
-  ★ SQL injection (40018/40022) on /search: confirmed
+  ★ 40018 SQL injection · /search: confirmed — DB error: unterminated quoted string
 
-  ★ NoSQL injection (40033) on /api/account: confirmed
+  ★ 40033 NoSQL injection · /api/account: confirmed — accounts 1 → 4 under operator injection
 
-  ★ Command injection (90020/90037) on /admin/ping: confirmed
+  ★ 90020/90037 Command injection · /admin/ping: confirmed — OS command ran: bytes from 127.0.0.1
 
-  ★ Reflected XSS on /greet: confirmed
+  ★ XSS reflected · /greet: confirmed — reflected unescaped
 ```
 
-Fill in the full table in [`docs/alert-disposition-template.md`](../../docs/alert-disposition-template.md).
+Record the full table in [`docs/alert-disposition-template.md`](../../docs/alert-disposition-template.md).
 
 **Proof artifact:** *Alert disposition record.*
 
@@ -278,15 +205,14 @@ Fill in the full table in [`docs/alert-disposition-template.md`](../../docs/aler
 
 ## Check your work
 
-Run the validator; it walks these seven steps, proves each one, and writes a
-readable log to `logs/`:
+Run all four steps in order and write a reviewable log to `logs/`:
 
 ```bash
 ./scripts/preflight_check.sh
 ```
 
-Every step prints **PASS** or **FAIL**. On a failure it prints the reason and a
-prompt you can use to fix it. When you are done:
+Every step prints **PASS** or **FAIL**; on a failure it prints the reason and a
+prompt to fix it. When you are done:
 
 ```bash
 ./scripts/demo_down.sh
@@ -296,14 +222,13 @@ prompt you can use to fix it. When you are done:
 
 ## See the fixes hold (optional exploration)
 
-The same application ships a remediated build where the query is parameterized,
-the Mongo lookup treats input as a plain string, the command validates its
-input, XSS output is context-encoded, and CSRF tokens are single-use and
-session-bound:
+The same application ships a remediated build — parameterized SQL, type-checked
+Mongo input, a validated command with no shell, context-encoded XSS output, and
+single-use, session-bound CSRF tokens:
 
 ```bash
 APP_BUILD=remediated docker compose up -d --build app
 ```
 
-Re-run the steps and watch the injection alerts disappear, the XSS output become
-encoded, and the two CSRF `200`s become `403`.
+Re-run the steps: the injection alerts disappear, the XSS output becomes encoded,
+and the replayed CSRF token is rejected with `403`.

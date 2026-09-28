@@ -6,73 +6,40 @@
   "steps": [
     {
       "id": 1,
-      "title": "Build the targeted scan policy",
+      "title": "Targeted injection scan",
       "lo": "EO1a",
-      "artifact": "Configured targeted scan policy and rule list",
-      "endpoint": null,
+      "artifact": "Targeted scan policy and rule list",
+      "endpoints": ["/search", "/api/account", "/admin/ping"],
       "focus": ["40018", "40033", "90020", "90037"],
-      "expected": "policy enables exactly the SQL-injection family, NoSQL 40033, and command-injection 90020/90037"
+      "expected": "one focused scan raises SQL (40018/40022), NoSQL (40033), and command (90020/90037) alerts"
     },
     {
       "id": 2,
-      "title": "Validate SQL injection on product search",
-      "lo": "EO1a",
-      "artifact": "Configured targeted scan policy and rule list",
-      "endpoint": "/search",
-      "param": "q",
-      "input": "Router",
-      "focus": ["pluginId", "confidence"],
-      "expected": "alert 40018 (or 40022) raised on /search"
-    },
-    {
-      "id": 3,
-      "title": "Validate NoSQL injection on account lookup",
-      "lo": "EO1a",
-      "artifact": "Configured targeted scan policy and rule list",
-      "endpoint": "/api/account",
-      "param": "username",
-      "input": "alice",
-      "focus": ["baseline_count", "injected_count", "pluginId"],
-      "expected": "operator injection returns more accounts than the baseline AND alert 40033 raised"
-    },
-    {
-      "id": 4,
-      "title": "Validate command injection on admin diagnostics",
-      "lo": "EO1a",
-      "artifact": "Configured targeted scan policy and rule list",
-      "endpoint": "/admin/ping",
-      "param": "host",
-      "input": "127.0.0.1",
-      "focus": ["pluginId", "confidence"],
-      "expected": "alert 90037 (or 90020) raised on /admin/ping"
-    },
-    {
-      "id": 5,
-      "title": "Map reflected XSS to its three output contexts",
+      "title": "Reflected XSS in three contexts",
       "lo": "EO1b",
       "artifact": "XSS request and response body",
       "endpoint": "/greet",
       "param": "name",
       "focus": ["html_body", "html_attribute", "js_string"],
-      "expected": "the marker is reflected unescaped in the HTML body, an HTML attribute, and a JS string"
+      "expected": "the marker reflects unescaped in the HTML body, an HTML attribute, and a JS string"
     },
     {
-      "id": 6,
-      "title": "Compare CSRF token states",
+      "id": 3,
+      "title": "CSRF token replay",
       "lo": "EO1c",
-      "artifact": "CSRF token-state comparison",
+      "artifact": "CSRF token replay result",
       "endpoint": "/account/email",
-      "focus": ["reused_token", "cross_session"],
-      "expected": "valid=200, missing=403, invalid=403, reused=200, cross-session=200 on the vulnerable build"
+      "focus": ["replayed_token"],
+      "expected": "valid=200, missing=403, replayed=200 on the vulnerable build (no freshness check)"
     },
     {
-      "id": 7,
-      "title": "Record the alert disposition",
+      "id": 4,
+      "title": "Alert disposition record",
       "lo": "EO1a, EO1b, EO1c",
       "artifact": "Alert disposition record",
-      "endpoint": null,
+      "endpoints": ["/search", "/api/account", "/admin/ping", "/greet"],
       "focus": ["disposition"],
-      "expected": "each observed alert is reconciled with app behavior and marked confirmed or false positive"
+      "expected": "each finding is reconciled with live app behavior and recorded as confirmed"
     }
   ]
 }

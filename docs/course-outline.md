@@ -116,11 +116,14 @@ Covers TO1 (EO1a–c) and TO2 (EO2a–c).
 
 #### Clip 3: Demo: Validate injection, XSS, and CSRF with ZAP (6 min)
 
-- Before sending payloads, Maya maps each XSS case to HTML body, attribute, or JavaScript execution context and each CSRF case to valid, missing or invalid, or replayed token state so the request tests the intended protection
-- Maya creates a focused scan policy, enables the SQL injection, NoSQL Injection - MongoDB, and command-injection rules, sets rule Threshold and Strength, then runs the scan — proof artifact: **"Configured targeted scan policy and rule list"**
-- For XSS, Maya runs a context-matched case and captures the exact request and response body — proof artifact: **"XSS request and response body"**
-- Maya establishes a valid-token baseline, repeats the request with the token missing or invalid, then replays the captured token to test freshness and session binding — proof artifact: **"CSRF token-state comparison"**
-- Maya reconciles ZAP alerts with application behavior and records the disposition — proof artifact: **"Alert disposition record"**
+Built as 4 recording steps; see the runbook at
+`module1/m1-demo1-validate-injection-xss-and-csrf-with-zap/README.md`.
+
+- Before sending payloads, Maya maps each XSS case to HTML body, attribute, or JavaScript execution context and each CSRF case to valid, missing or invalid, or replayed token state so the request tests the intended protection — presentation table: **"XSS execution contexts and CSRF token state"**
+- (Step 1) Maya runs one preconfigured focused ZAP scan across the SQL, MongoDB NoSQL, and command-injection training endpoints — proof artifact: **"Targeted scan policy and rule list"**
+- (Step 2) For XSS, Maya runs a context-matched case and captures the exact request and response body — proof artifact: **"XSS request and response body"**
+- (Step 3) Maya exercises the CSRF-protected action with and without valid state, replaying a used token — proof artifact: **"CSRF token replay result"**
+- (Step 4) Maya reconciles ZAP alerts with application behavior and records the disposition — proof artifact: **"Alert disposition record"**
 - Learning objectives: TO1, EO1a, EO1b, EO1c
 
 #### Clip 4: Demo: Write a JavaScript security script in ZAP (5 min)
