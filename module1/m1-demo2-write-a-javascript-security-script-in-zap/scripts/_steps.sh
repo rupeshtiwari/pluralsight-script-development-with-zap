@@ -163,10 +163,14 @@ step3_console_output() {
 step4_registration() {
     fm header "The saved, reusable script registration" \
               "A named, saved script is what the Automation Framework calls later (EO2a)."
-    local info; info="$(zap script/view/scripts | python3 -c '
+    local info; info="$(zap script/view/listScripts | python3 -c '
 import json,sys
 name = sys.argv[1]
-for s in json.load(sys.stdin).get("scripts", []):
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    print(""); raise SystemExit
+for s in data.get("listScripts", []):
     if s.get("name") == name:
         print("%s|%s|%s|%s" % (s.get("name"), s.get("type"), s.get("engine"), s.get("enabled")))
         raise SystemExit
