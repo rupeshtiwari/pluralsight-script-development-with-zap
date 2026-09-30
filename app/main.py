@@ -345,3 +345,33 @@ def change_email(
 
     SESSIONS[sid + ":email"] = email
     return JSONResponse({"status": "email updated", "email": email})
+
+
+# ---------------------------------------------------------------------------
+# 6. Authenticated profile page — the target for Clip 5's custom Python
+#    active-scan rule. It is SESSION-GATED (401 without a valid login cookie),
+#    so the custom rule only reaches it after ZAP's scripted authentication has
+#    logged in. In the vulnerable build the `note` parameter is reflected
+#    without output encoding — the exact condition the custom rule detects.
+# ---------------------------------------------------------------------------
+@app.get("/account/profile", response_class=HTMLResponse)
+def profile(request: Request, note: str = "") -> HTMLResponse:
+    sid = request.cookies.get("session", "")
+    if sid not in SESSIONS:
+        # Not authenticated: the custom rule cannot reach this content until the
+        # authentication script has logged in and ZAP replays the session cookie.
+        return HTMLResponse("<p>Please log in first.</p>", status_code=401)
+    username = SESSIONS[sid]
+    if VULNERABLE:
+        # VULNERABLE: the note is reflected verbatim, without output encoding.
+        note_ctx = note
+    else:
+        # REMEDIATED: the note is HTML-encoded for its context.
+        note_ctx = html.escape(note)
+    body = (
+        '<div class="card"><h1>Your profile</h1>'
+        f"<p>Signed in as {html.escape(username)}</p>"
+        f"<p>Note: {note_ctx}</p>"
+        "</div>"
+    )
+    return HTMLResponse(shell("Profile — Globomantics Store", body))

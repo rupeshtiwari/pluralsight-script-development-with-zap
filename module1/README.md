@@ -18,4 +18,4 @@ findings, then extends ZAP with her own JavaScript and Python scripts.
 |---|-----|------------|--------|
 | 1 | [Validate injection, XSS, and CSRF with ZAP](m1-demo1-validate-injection-xss-and-csrf-with-zap/README.md) | EO1a · EO1b · EO1c | Ready |
 | 2 | [Write a JavaScript security script in ZAP](m1-demo2-write-a-javascript-security-script-in-zap/README.md) | EO2a | Ready |
-| 3 | Write Python scan and authentication scripts in ZAP | EO2b · EO2c | Planned |
+| 3 | [Write Python scan and authentication scripts in ZAP](m1-demo3-write-python-scan-and-authentication-scripts-in-zap/README.md) | EO2b · EO2c | New |

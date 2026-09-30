@@ -130,6 +130,30 @@ if [ -n "${BETA_MAJOR}" ] && [ "${BETA_MAJOR}" -lt 66 ] 2>/dev/null; then
 fi
 echo "[zap-entrypoint] ascanrulesBeta v${BETA_VER:-unknown} installed; NoSQL rule 40033 available."
 
+# Install Python Scripting (jython) so ZAP can run Jython 2.7.2 scripts
+# (custom active-scan rules and authentication scripts) unless already present.
+if api autoupdate/view/installedAddons | grep -q '"jython"'; then
+    echo "[zap-entrypoint] Python Scripting (jython) already installed."
+else
+    echo "[zap-entrypoint] installing Python Scripting (jython) from the marketplace..."
+    api autoupdate/action/installAddon "id=jython" >/dev/null
+fi
+
+# Wait for the Jython script engine to register (marketplace download can take ~30s).
+JYTHON_OK=""
+for _ in $(seq 1 90); do
+    if api script/view/listEngines | grep -iq 'jython'; then
+        JYTHON_OK=1
+        break
+    fi
+    sleep 2
+done
+if [ -z "${JYTHON_OK}" ]; then
+    echo "[zap-entrypoint] ERROR: Python (jython) script engine did not become available" >&2
+    exit 1
+fi
+echo "[zap-entrypoint] Python Scripting (jython) installed; Jython engine available."
+
 touch /tmp/zap-ready
 echo "[zap-entrypoint] READY. GUI: http://localhost:${GUI_PORT}/zap/  API/proxy: :${API_PORT}"
 

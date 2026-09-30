@@ -58,6 +58,8 @@ services:
       - ./zap/entrypoint.sh:/zap-entrypoint.sh:ro
       # Course ZAP scripts, read-only, so the demos can load them by path.
       - ./module1/m1-demo2-write-a-javascript-security-script-in-zap/zap-scripts:/zap-scripts:ro
+      # Clip 5 Python (Jython) scripts: custom active rule + authentication.
+      - ./module1/m1-demo3-write-python-scan-and-authentication-scripts-in-zap/zap-scripts:/zap-scripts-py:ro
     ports:
       - "127.0.0.1:8080:8080"   # Webswing GUI
       - "127.0.0.1:8090:8090"   # ZAP proxy + API
