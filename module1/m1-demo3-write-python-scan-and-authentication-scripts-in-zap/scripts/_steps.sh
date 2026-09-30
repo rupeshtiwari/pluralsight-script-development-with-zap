@@ -96,9 +96,17 @@ status_no_cookie() {  # <url> -> HTTP code (through the ZAP proxy)
 }
 
 # --- active scan helpers ----------------------------------------------------
-scan_only_script_rule() {
-    zap ascan/action/disableAllScanners >/dev/null 2>&1 || true
+# Use the full default policy so ZAP discovers the parameter and runs every
+# enabled active rule (our script rule included). Re-enable all scanners in case
+# an earlier run left the policy stripped down.
+enable_all_scanners() {
+    zap ascan/action/enableAllScanners >/dev/null 2>&1 || true
     zap ascan/action/enableScanners "ids=${SCRIPT_RULES_ID}" >/dev/null 2>&1 || true
+}
+scan_messages_count() { # <scanId> -> number of probe requests the scan sent
+    zap ascan/view/messagesIds "scanId=$1" | python3 -c 'import json,sys
+try: print(len(json.load(sys.stdin).get("messagesIds",[])))
+except Exception: print("0")'
 }
 # Force every scanner request to carry the session cookie, so the active scan
 # runs authenticated regardless of ZAP's session management (best-effort: needs
@@ -232,25 +240,30 @@ step3_authenticated_scan() {
         return "${STEP_RC}"
     fi
 
-    # 3b. Run an active scan that uses ONLY the custom script rule, against the
-    #     seeded authenticated request. Inject the session cookie into all scan
-    #     traffic so the scanner reaches the logged-in content.
-    scan_only_script_rule
+    # 3b. Run an active scan with the full default policy (so ZAP discovers the
+    #     note parameter and runs every enabled active rule, ours included).
+    #     Inject the session cookie into all scan traffic, and re-seed the
+    #     authenticated request so the scanned node carries the cookie + note.
+    enable_all_scanners
     add_auth_cookie_header "${cookie}"
+    curl -s -x "${PROXY}" -o /dev/null -b "session=${cookie}" "${PROFILE_URL}"
     local sid; sid="$(start_scan "${PROFILE_URL}")"
     if [ -z "${sid}" ]; then
+        remove_auth_cookie_header
         fail "could not start the active scan" "ascan/action/scan returned no scan id" \
              "ask: 'the active scan did not start against the authenticated profile URL'"
         return "${STEP_RC}"
     fi
     local i
-    for i in $(seq 1 60); do
+    for i in $(seq 1 90); do
         scan_done "${sid}" && break
         sleep 2
     done
     remove_auth_cookie_header
+    local sent; sent="$(scan_messages_count "${sid}")"
     if scan_done "${sid}"; then
         fm star "Scan target" "${PROFILE_URL} (param: note)"
+        fm star "Probe requests the scan sent" "${sent}"
         pass "the custom rule ran an authenticated active scan to completion"
     else
         fail "the active scan did not finish in time" "it is still running after ~2 minutes" \
