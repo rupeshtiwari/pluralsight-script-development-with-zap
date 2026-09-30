@@ -59,6 +59,12 @@ by wiring ZAP into a CI/CD pipeline as an automated security gate.
 > One script, one time. When it prints a green readiness table, you are ready
 > for every lab in the course.
 
+> [!NOTE]
+> **You don't need to start Docker yourself.** Colima (the Docker engine on
+> macOS) stops when your Mac sleeps or restarts — so each lab's `demo_up.sh`
+> now **starts it automatically** if it's down and waits until it's ready.
+> Just run the lab; the stack comes up on its own.
+
 ---
 
 ## 📚 Labs

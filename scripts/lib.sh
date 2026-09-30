@@ -15,6 +15,29 @@ fi
 
 COMPOSE="docker compose"
 
+# Is the Docker engine reachable right now?
+docker_up() { docker info >/dev/null 2>&1; }
+
+# Make sure the Docker engine is running before we touch compose.
+# On macOS the engine is Colima, which stops when the Mac sleeps or reboots —
+# so if it is down and Colima is installed, start it automatically and wait
+# until Docker answers. This keeps `demo_up.sh` working after a restart without
+# the student having to know about Colima at all.
+ensure_docker() {
+    if docker_up; then return 0; fi
+    if command -v colima >/dev/null 2>&1; then
+        warn "Docker engine is not running — starting Colima (this can take ~30s)..."
+        colima start || die "Could not start Colima. Run 'colima start' yourself, then retry."
+        local i
+        for i in $(seq 1 45); do
+            if docker_up; then log "Docker engine is up."; return 0; fi
+            sleep 2
+        done
+        die "Colima started but Docker did not become reachable. Try 'colima restart'."
+    fi
+    die "Docker engine is not running and Colima is not installed. Run ./env-setup/setup-macos.sh first."
+}
+
 # ANSI colours (fall back to empty if not a tty).
 if [ -t 1 ]; then
     C_GREEN=$'\033[32m'; C_RED=$'\033[31m'; C_YEL=$'\033[33m'; C_RST=$'\033[0m'

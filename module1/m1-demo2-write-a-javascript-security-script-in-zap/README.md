@@ -56,6 +56,8 @@ The full source is in [`zap-scripts/globomantics-marker.js`](zap-scripts/globoma
    ./module1/m1-demo2-write-a-javascript-security-script-in-zap/scripts/demo_reset.sh
    ```
    When it prints **Up**, open <http://localhost:8080/zap/> in your browser.
+   (If the Docker engine isn't running, this starts it for you and waits — you
+   don't need to start Colima yourself.)
 2. In your browser, set the HTTP proxy to `localhost:8090` so your requests pass
    through ZAP.
 

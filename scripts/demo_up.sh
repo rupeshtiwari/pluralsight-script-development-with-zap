@@ -5,6 +5,8 @@ set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 cd "${REPO_ROOT}"
 
+ensure_docker
+
 BUILD="${APP_BUILD:-vulnerable}"
 log "Starting demo stack (APP_BUILD=${BUILD})..."
 APP_BUILD="${BUILD}" ${COMPOSE} up -d --build
