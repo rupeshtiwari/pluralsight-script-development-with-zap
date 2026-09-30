@@ -26,29 +26,32 @@ def scan(sas, msg, param, value):
 
     # Put our probe into the parameter under test, then send it.
     sas.setParam(probe_msg, param, PROBE)
-    sas.sendAndReceive(probe_msg)
+    sas.sendAndReceive(probe_msg, False, False)
 
     body = probe_msg.getResponseBody().toString()
 
     # If the probe comes back unchanged, the value was reflected without
     # encoding — raise the Globomantics alert on this parameter.
     if PROBE in body:
-        sas.raiseAlert(
-            2,                       # risk:       0 info, 1 low, 2 medium, 3 high
-            2,                       # confidence: 0 fp, 1 low, 2 medium, 3 high
-            ALERT_NAME,              # name
-            "The parameter value is reflected in the response without output "
-            "encoding, so attacker-controlled markup reaches the page.",
-            probe_msg.getRequestHeader().getURI().toString(),  # url
-            param,                   # the vulnerable parameter
-            PROBE,                   # attack (what we sent)
-            "",                      # otherInfo
-            "Encode output for the context it lands in before rendering it.",  # solution
-            PROBE,                   # evidence (what we found in the response)
-            79,                      # CWE-79 (improper neutralization of input)
-            20,                      # WASC-20 (improper input handling)
-            probe_msg,               # the message that proves it
+        alert = (
+            sas.newAlert()
+            .setRisk(2)          # 0 info, 1 low, 2 medium, 3 high
+            .setConfidence(2)    # 0 fp, 1 low, 2 medium, 3 high
+            .setName(ALERT_NAME)
+            .setDescription(
+                "The parameter value is reflected in the response without "
+                "output encoding, so attacker-controlled markup reaches the page."
+            )
+            .setParam(param)
+            .setAttack(PROBE)
+            .setEvidence(PROBE)
+            .setSolution("Encode output for the context it lands in before rendering it.")
+            .setCweId(79)        # CWE-79 improper neutralization of input
+            .setWascId(20)       # WASC-20 improper input handling
+            .setMessage(probe_msg)
         )
+        # `raise` is a Python keyword, so call the builder's raise() via getattr.
+        getattr(alert, "raise")()
 
 
 def scanNode(sas, msg):

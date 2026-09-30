@@ -213,14 +213,15 @@ ALERT_NAME = "Globomantics unsafe reflection (custom rule)"
 def scan(sas, msg, param, value):
     probe_msg = msg.cloneRequest()
     sas.setParam(probe_msg, param, PROBE)
-    sas.sendAndReceive(probe_msg)
+    sas.sendAndReceive(probe_msg, False, False)
     body = probe_msg.getResponseBody().toString()
     if PROBE in body:
-        sas.raiseAlert(2, 2, ALERT_NAME,
-            "The parameter value is reflected without output encoding.",
-            probe_msg.getRequestHeader().getURI().toString(),
-            param, PROBE, "", "Encode output for its context.", PROBE,
-            79, 20, probe_msg)
+        alert = (sas.newAlert()
+                 .setRisk(2).setConfidence(2).setName(ALERT_NAME)
+                 .setDescription("Reflected without output encoding.")
+                 .setParam(param).setAttack(PROBE).setEvidence(PROBE)
+                 .setMessage(probe_msg))
+        getattr(alert, "raise")()   # 'raise' is a keyword in Jython
 
 def scanNode(sas, msg):
     pass

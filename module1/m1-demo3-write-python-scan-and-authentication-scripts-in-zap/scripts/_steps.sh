@@ -100,6 +100,17 @@ scan_only_script_rule() {
     zap ascan/action/disableAllScanners >/dev/null 2>&1 || true
     zap ascan/action/enableScanners "ids=${SCRIPT_RULES_ID}" >/dev/null 2>&1 || true
 }
+# Force every scanner request to carry the session cookie, so the active scan
+# runs authenticated regardless of ZAP's session management (best-effort: needs
+# the Replacer add-on, which ships with ZAP).
+add_auth_cookie_header() { # <cookie>
+    zap replacer/action/addRule \
+        "description=globo-auth-cookie&enabled=true&matchType=REQ_HEADER&matchString=Cookie&matchRegex=false&replacement=$(enc "session=$1")&initiators=" \
+        >/dev/null 2>&1 || true
+}
+remove_auth_cookie_header() {
+    zap replacer/action/removeRule "description=$(enc 'globo-auth-cookie')" >/dev/null 2>&1 || true
+}
 start_scan() { # <url> -> scanId (empty on failure)
     zap ascan/action/scan "url=$(enc "$1")&recurse=false&inScopeOnly=false" \
         | python3 -c 'import json,sys
@@ -152,7 +163,7 @@ step1_active_rule_source() {
               "A Jython active rule runs your own check during an active scan — the house-specific test a built-in rule does not cover (EO2b)."
     local ok=1
     grep -q 'def scan(' "${RULE_FILE_HOST}" || ok=0
-    grep -q 'raiseAlert(' "${RULE_FILE_HOST}" || ok=0
+    grep -q 'newAlert(' "${RULE_FILE_HOST}" || ok=0
     grep -q 'Globomantics unsafe reflection' "${RULE_FILE_HOST}" || ok=0
     fm star "Script name" "${RULE_NAME}   (type: active · engine: ${JYTHON_ENGINE:-Jython})"
     fm star "Alert it raises" "${ALERT_NAME}" focus
@@ -222,8 +233,10 @@ step3_authenticated_scan() {
     fi
 
     # 3b. Run an active scan that uses ONLY the custom script rule, against the
-    #     seeded authenticated request (which carries the session cookie).
+    #     seeded authenticated request. Inject the session cookie into all scan
+    #     traffic so the scanner reaches the logged-in content.
     scan_only_script_rule
+    add_auth_cookie_header "${cookie}"
     local sid; sid="$(start_scan "${PROFILE_URL}")"
     if [ -z "${sid}" ]; then
         fail "could not start the active scan" "ascan/action/scan returned no scan id" \
@@ -235,6 +248,7 @@ step3_authenticated_scan() {
         scan_done "${sid}" && break
         sleep 2
     done
+    remove_auth_cookie_header
     if scan_done "${sid}"; then
         fm star "Scan target" "${PROFILE_URL} (param: note)"
         pass "the custom rule ran an authenticated active scan to completion"
