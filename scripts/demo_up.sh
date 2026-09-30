@@ -14,20 +14,31 @@ APP_BUILD="${BUILD}" ${COMPOSE} up -d --build
 SERVICES="postgres mongo app zap"
 log "Waiting for services to become healthy: ${SERVICES}"
 
-deadline=$(( $(date +%s) + 300 ))
+# ZAP's first boot (Webswing + add-on install) can take several minutes on a
+# cold engine, so wait generously and show a heartbeat so a long boot never
+# looks like a hang. Override with HEALTH_TIMEOUT=<seconds> if you need more.
+WAIT_SECS="${HEALTH_TIMEOUT:-600}"
+start=$(date +%s)
+deadline=$(( start + WAIT_SECS ))
+last_beat=0
 while :; do
-    all_ok=1
+    pending=""
     for svc in ${SERVICES}; do
         cid="$(${COMPOSE} ps -q "${svc}")"
-        if [ -z "${cid}" ]; then all_ok=0; break; fi
+        if [ -z "${cid}" ]; then pending="${pending} ${svc}(no-container)"; continue; fi
         health="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "${cid}")"
-        if [ "${health}" != "healthy" ]; then all_ok=0; break; fi
+        [ "${health}" = "healthy" ] || pending="${pending} ${svc}(${health})"
     done
-    if [ "${all_ok}" = "1" ]; then break; fi
-    if [ "$(date +%s)" -ge "${deadline}" ]; then
-        warn "Timed out waiting for health. Current status:"
+    [ -z "${pending}" ] && break
+    now=$(date +%s)
+    if [ "${now}" -ge "${deadline}" ]; then
+        warn "Timed out after ${WAIT_SECS}s. Current status:"
         ${COMPOSE} ps
-        die "Stack did not become healthy in time."
+        die "Stack did not become healthy in time. ZAP's first boot can be slow on a cold engine — re-run ./scripts/demo_up.sh, or give it longer with: HEALTH_TIMEOUT=900 ./scripts/demo_up.sh"
+    fi
+    if [ $(( now - last_beat )) -ge 30 ]; then
+        log "still starting ($(( now - start ))s elapsed) — waiting on:${pending}"
+        last_beat="${now}"
     fi
     sleep 3
 done
