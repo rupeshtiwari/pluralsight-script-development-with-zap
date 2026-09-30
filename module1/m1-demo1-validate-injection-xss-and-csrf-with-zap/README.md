@@ -59,6 +59,18 @@ Each step is self-contained and prints one clean screen. Step 1 runs a real scan
 
 ---
 
+## How to read this lab
+
+| Label | Meaning |
+|-------|---------|
+| 💻 **Run in your terminal** | Copy-paste these commands into your terminal. |
+| ✅ **You'll see** | This is the **output the command prints** — read it to confirm success. **Never type it as a command.** |
+
+> **Golden rule:** the only things you ever *type* are the 💻 commands. Anything
+> under ✅ is output you *read*, not a command.
+
+---
+
 ## Before you test: map each case to its context / state
 
 | XSS execution context | Where the input lands |
@@ -99,7 +111,9 @@ app's own responses — three injection types in one focused scan.
 ./scripts/run_step.sh 1
 ```
 
-```
+✅ **You'll see** this terminal output — read it, don't type it:
+
+```text
 ┌──────────────────────────────────────────────────────────────────────┐
 │ WHAT:  Targeted injection scan — one policy, three endpoints           │
 │ WHY:   Proves SQL, NoSQL, and command injection are real findings      │
@@ -133,7 +147,9 @@ payload you would use.
 ./scripts/run_step.sh 2
 ```
 
-```
+✅ **You'll see** this terminal output — read it, don't type it:
+
+```text
 ┌──────────────────────────────────────────────────────────────────────┐
 │ WHAT:  Reflected XSS — one input, three output contexts                │
 │ WHY:   The output context decides the payload (EO1b)                    │
@@ -167,7 +183,9 @@ used once.
 ./scripts/run_step.sh 3
 ```
 
-```
+✅ **You'll see** this terminal output — read it, don't type it:
+
+```text
 ┌──────────────────────────────────────────────────────────────────────┐
 │ WHAT:  CSRF — token replay                                             │
 │ WHY:   A token with no freshness check can be replayed (EO1c)          │
@@ -198,7 +216,9 @@ mark it confirmed.
 ./scripts/run_step.sh 4
 ```
 
-```
+✅ **You'll see** this terminal output — read it, don't type it:
+
+```text
 ┌──────────────────────────────────────────────────────────────────────┐
 │ WHAT:  Alert disposition — reconcile each alert with app behavior      │
 │ WHY:   Turns raw alerts into decisions you can defend (EO1a/b/c)       │
