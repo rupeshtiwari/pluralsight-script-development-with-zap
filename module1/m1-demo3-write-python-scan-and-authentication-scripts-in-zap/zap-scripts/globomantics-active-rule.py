@@ -10,48 +10,51 @@
 # ZAP calls these two functions:
 #   scan(sas, msg, param, value)  - run the active checks against one parameter
 #   scanNode(sas, msg)            - optional per-node hook (unused here)
-#
-# `sas` is a ScriptsActiveScanner; `msg` is the request being scanned.
 
 # A probe that is easy to spot and unlikely to occur naturally in a response.
-PROBE = "GLOBOxss7'\"<globo>"
+PROBE = "GLOBOxss7marker"
 
 # Alert identity (shown in the Alerts tab and in ZAP reports).
 ALERT_NAME = "Globomantics unsafe reflection (custom rule)"
+DESC = ("The parameter value is reflected in the response without output "
+        "encoding, so attacker-controlled markup reaches the page.")
+SOLN = "Encode output for the context it lands in before rendering it."
+
+
+def _raise(sas, param, url, msg):
+    """Raise the custom alert, supporting both the classic and builder APIs."""
+    # 1) Classic positional API (keyword-safe in Jython) — works on most helpers.
+    try:
+        sas.raiseAlert(2, 2, ALERT_NAME, DESC, url, param, PROBE, "", SOLN,
+                       PROBE, 79, 20, msg)
+        print("[globo-rule] alert raised via raiseAlert on param=%s" % param)
+        return
+    except Exception as e1:
+        print("[globo-rule] raiseAlert unavailable (%s); trying newAlert()" % e1)
+    # 2) Modern builder API. 'raise' is a Jython keyword, so call it via getattr.
+    try:
+        builder = (sas.newAlert()
+                   .setRisk(2).setConfidence(2).setName(ALERT_NAME)
+                   .setDescription(DESC).setParam(param).setAttack(PROBE)
+                   .setEvidence(PROBE).setMessage(msg))
+        getattr(builder, "raise")()
+        print("[globo-rule] alert raised via newAlert on param=%s" % param)
+    except Exception as e2:
+        print("[globo-rule] FAILED to raise alert on param=%s: %s" % (param, e2))
 
 
 def scan(sas, msg, param, value):
-    # Work on a copy so the original scanned message is left intact.
     probe_msg = msg.cloneRequest()
-
-    # Put our probe into the parameter under test, then send it.
     sas.setParam(probe_msg, param, PROBE)
     sas.sendAndReceive(probe_msg, False, False)
 
     body = probe_msg.getResponseBody().toString()
+    status = probe_msg.getResponseHeader().getStatusCode()
+    found = PROBE in body
+    print("[globo-rule] param=%s status=%s reflected=%s" % (param, status, found))
 
-    # If the probe comes back unchanged, the value was reflected without
-    # encoding — raise the Globomantics alert on this parameter.
-    if PROBE in body:
-        alert = (
-            sas.newAlert()
-            .setRisk(2)          # 0 info, 1 low, 2 medium, 3 high
-            .setConfidence(2)    # 0 fp, 1 low, 2 medium, 3 high
-            .setName(ALERT_NAME)
-            .setDescription(
-                "The parameter value is reflected in the response without "
-                "output encoding, so attacker-controlled markup reaches the page."
-            )
-            .setParam(param)
-            .setAttack(PROBE)
-            .setEvidence(PROBE)
-            .setSolution("Encode output for the context it lands in before rendering it.")
-            .setCweId(79)        # CWE-79 improper neutralization of input
-            .setWascId(20)       # WASC-20 improper input handling
-            .setMessage(probe_msg)
-        )
-        # `raise` is a Python keyword, so call the builder's raise() via getattr.
-        getattr(alert, "raise")()
+    if found:
+        _raise(sas, param, probe_msg.getRequestHeader().getURI().toString(), probe_msg)
 
 
 def scanNode(sas, msg):
