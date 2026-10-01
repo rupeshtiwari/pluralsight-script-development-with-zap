@@ -207,20 +207,19 @@ fix it.)
 **Custom active-scan rule — `globomantics-active-rule.py`** (Jython 2.7.2):
 
 ```python
-PROBE = "GLOBOxss7'\"<globo>"
+PROBE = "GLOBOxss7marker"
 ALERT_NAME = "Globomantics unsafe reflection (custom rule)"
 
 def scan(sas, msg, param, value):
-    probe_msg = msg.cloneRequest()
-    sas.setParam(probe_msg, param, PROBE)
-    sas.sendAndReceive(probe_msg, False, False)
-    body = probe_msg.getResponseBody().toString()
-    if PROBE in body:
+    probe = msg.cloneRequest()
+    sas.setParam(probe, param, PROBE)
+    sas.sendAndReceive(probe, False, False)
+    if PROBE in probe.getResponseBody().toString():
         alert = (sas.newAlert()
                  .setRisk(2).setConfidence(2).setName(ALERT_NAME)
                  .setDescription("Reflected without output encoding.")
                  .setParam(param).setAttack(PROBE).setEvidence(PROBE)
-                 .setMessage(probe_msg))
+                 .setMessage(probe))
         getattr(alert, "raise")()   # 'raise' is a keyword in Jython
 
 def scanNode(sas, msg):
