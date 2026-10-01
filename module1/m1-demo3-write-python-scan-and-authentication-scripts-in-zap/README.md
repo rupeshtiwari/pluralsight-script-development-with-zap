@@ -61,14 +61,14 @@ copy each into the Script Console.
 
 ---
 
-## What each step teaches (learning-objective coverage)
+## What each step produces
 
-| Step | You will… | Objective | Proof artifact |
-|------|-----------|-----------|----------------|
-| 1 | Install jython, write the Python active-scan rule, save it | EO2b | Python active-rule source |
-| 2 | Write the authentication script and save it separately | EO2c | Authentication script source |
-| 3 | Run scripted auth + the custom rule against the login-only page | EO2b · EO2c | Authenticated custom-scan result |
-| 4 | Confirm the rule raises its intended alert and record it | EO2b | Custom alert record |
+| Step | You will… | What you produce |
+|------|-----------|------------------|
+| 1 | Install Python scripting, write the custom active-scan rule, save it | Python active-rule source |
+| 2 | Write the authentication script and save it separately | Authentication script source |
+| 3 | Run scripted login + the custom rule against the login-only page | Authenticated custom-scan result |
+| 4 | Confirm the rule raises its named alert and read it | Custom alert record |
 
 ---
 
@@ -130,21 +130,52 @@ separately from the rule. That is your authentication script source.
 
 ## Step 3 — Run scripted authentication and the custom rule together
 
-Now prove the two work as a pair: log in with the script, then let the custom
-rule scan a page that only exists **when you are logged in**.
+Now prove the two scripts work as a pair: ZAP logs in with your **auth script**,
+then your **custom rule** scans a page that only exists **when you are logged in**.
+
+> **What is a Context?** In ZAP a *Context* is simply "this website **plus** how
+> to log into it." You attach your authentication script to a Context, add a
+> user, and ZAP then logs that user in automatically before it scans.
+
+First, visit the page once so ZAP knows about it:
+
+🖱️ **Do this in ZAP:** in your proxied browser, open
+`http://localhost:8000/account/profile?note=seed`. You'll get a *"Please log in
+first"* page (HTTP 401) — that's expected; it proves the page is login-only. The
+URL now appears in ZAP's **Sites** tree on the left.
+
+**A. Create a Context and attach your auth script**
 
 🖱️ **Do this in ZAP:**
 
-1. Create a **Context**, add `http://localhost:8000` to it, and set its
-   **Authentication** to **Script-based** → `globomantics-auth`, with **Login
-   URL** `http://localhost:8000/login`.
-2. Add a **user** (`alice`) and set a **logged-in indicator** of `Signed in as`.
-3. Enable **forced-user mode** for that user, then **Active Scan** the URL
-   `http://localhost:8000/account/profile?note=seed`.
+1. In the **Sites** tree, right-click `http://localhost:8000` →
+   **Include in Context → New Context**. Name it `Globomantics`.
+2. In the Context dialog, click **Authentication** → choose
+   **Script-based Authentication**.
+3. Select the **`globomantics-auth`** script. In **Login URL**, enter
+   `http://localhost:8000/login`.
+4. In **Logged in indicator (regex)**, enter `Signed in as`. Click **OK**.
 
-✅ **You'll see** the page is **HTTP 401 without login** and **HTTP 200 once the
-script authenticates** — so the scan runs as `alice`, and the custom rule reaches
-the authenticated content:
+**B. Add the user to log in as**
+
+🖱️ **Do this in ZAP:**
+
+5. In the Context dialog, click **Users → Add**. Name the user `alice`, set the
+   **username** field to `alice`, and **Save**.
+
+**C. Turn on the user and scan the page**
+
+🖱️ **Do this in ZAP:**
+
+6. On the toolbar, click the **Forced User Mode** button (the little person icon)
+   and select `alice`. Now every request ZAP sends is logged in as `alice`.
+7. In the **Sites** tree, right-click
+   `http://localhost:8000/account/profile?note=seed` →
+   **Attack → Active Scan** → **Start Scan**.
+
+✅ **You'll see** the page behave like this (read it — don't type it): locked out
+before login, reachable after the script logs in, so the scan runs as `alice` and
+your custom rule reaches the authenticated content:
 
 ```text
 Without login:        /account/profile -> 401 (gated)

@@ -69,82 +69,17 @@ by wiring ZAP into a CI/CD pipeline as an automated security gate.
 
 ## 📚 Labs
 
-<table>
-<thead>
-<tr>
-<th align="center">Module</th>
-<th>Title</th>
-<th>Objectives</th>
-<th align="center">Labs</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="center"><a href="module1/README.md"><b>1</b></a></td>
-<td>Targeted security testing and ZAP scripting</td>
-<td><code>EO1a–c</code> · <code>EO2a–c</code></td>
-<td align="center">🟢 1 ready · 2 to come</td>
-</tr>
-<tr>
-<td align="center"><a href="module2/README.md"><b>2</b></a></td>
-<td>Automated ZAP security gates in DevSecOps pipelines</td>
-<td><code>EO3a–c</code></td>
-<td align="center">🗓️ 3 planned</td>
-</tr>
-</tbody>
-</table>
+Work through them in order — each one builds on the skills before it. Every lab
+is self-contained: open its runbook and follow along.
 
-### 🧩 Module 1 — Targeted security testing and ZAP scripting
-
-| # | Lab | You will learn | Objectives | Status |
-|:-:|-----|----------------|:----------:|:------:|
-| 1 | **[Validate injection, XSS, and CSRF with ZAP](module1/m1-demo1-validate-injection-xss-and-csrf-with-zap/README.md)** | Build a focused scan policy; prove SQL, NoSQL, and command injection; map reflected XSS to its three contexts; compare CSRF token states; record an alert disposition | `EO1a` · `EO1b` · `EO1c` | 🟢 Ready |
-| 2 | **[Write a JavaScript security script in ZAP](module1/m1-demo2-write-a-javascript-security-script-in-zap/README.md)** | Extend ZAP with an HTTP Sender script that marks every request | `EO2a` | 🟢 Ready |
-| 3 | **[Write Python scan and authentication scripts in ZAP](module1/m1-demo3-write-python-scan-and-authentication-scripts-in-zap/README.md)** | Write a custom Jython active-scan rule and a scripted login, then scan a login-only page | `EO2b` · `EO2c` | 🟢 Ready |
-
-### ⚙️ Module 2 — Automated ZAP security gates in DevSecOps pipelines
-
-| # | Lab | You will learn | Objectives | Status |
-|:-:|-----|----------------|:----------:|:------:|
-| 1 | Run authenticated ZAP scripts in GitHub Actions | Headless ZAP running your scripts in a pipeline | `EO3a` | 🗓️ Planned |
-| 2 | Query the ZAP API and inspect scan evidence | Programmatic scan status, alerts, and reports | `EO3b` | 🗓️ Planned |
-| 3 | Enforce ZAP quality gates in GitHub Actions | Alert filters and exit-code gates | `EO3c` | 🗓️ Planned |
-
----
-
-## 🎯 Learning objectives
-
-<table>
-<tr>
-<td valign="top" width="33%">
-
-**1 · Scan for specific vulnerabilities**
-
-- `EO1a` Configure specialized scanners for injection (SQL, NoSQL, command)
-- `EO1b` Validate XSS with context-specific payloads
-- `EO1c` Execute CSRF token-bypass techniques
-
-</td>
-<td valign="top" width="33%">
-
-**2 · Script custom security tests**
-
-- `EO2a` Develop **JavaScript** scripts to extend ZAP
-- `EO2b` Implement **Python** scripts for custom scan rules
-- `EO2c` Automate **authentication** sequences
-
-</td>
-<td valign="top" width="33%">
-
-**3 · Integrate with DevSecOps**
-
-- `EO3a` Run ZAP headless in CI/CD
-- `EO3b` Drive ZAP through its API
-- `EO3c` Enforce threshold-based quality gates
-
-</td>
-</tr>
-</table>
+| # | Lab | What you'll learn | Status |
+|:-:|-----|-------------------|:------:|
+| 1 | **[Validate injection, XSS, and CSRF with ZAP](module1/m1-demo1-validate-injection-xss-and-csrf-with-zap/README.md)** | Build a focused scan policy; prove SQL, NoSQL, and command injection; map reflected XSS to its three contexts; replay a CSRF token; record an alert disposition | 🟢 Ready |
+| 2 | **[Write a JavaScript security script in ZAP](module1/m1-demo2-write-a-javascript-security-script-in-zap/README.md)** | Extend ZAP with an HTTP Sender script that marks every request | 🟢 Ready |
+| 3 | **[Write Python scan and authentication scripts in ZAP](module1/m1-demo3-write-python-scan-and-authentication-scripts-in-zap/README.md)** | Write a custom Python active-scan rule and a scripted login, then scan a login-only page | 🟢 Ready |
+| 4 | Run authenticated ZAP scripts in GitHub Actions | Headless ZAP running your scripts in a pipeline | 🗓️ Planned |
+| 5 | Query the ZAP API and inspect scan evidence | Programmatic scan status, alerts, and reports | 🗓️ Planned |
+| 6 | Enforce ZAP quality gates in GitHub Actions | Alert filters and exit-code gates | 🗓️ Planned |
 
 ---
 
@@ -163,13 +98,13 @@ docker-compose.yaml       zap + app + postgres + mongo (bound to 127.0.0.1)
 data/payloads/            Per-lab step manifests
 docs/                     Gap report, preflight report, alert-disposition template
 module1/
-  README.md               Module 1 overview: objectives and labs
+  README.md               Overview of the first set of labs
   m1-demo1-.../
     README.md             The lab runbook
     scripts/              demo_up · demo_down · demo_reset · capture · preflight_check
     logs/                 Validation logs (git-ignored)
 module2/
-  README.md               Module 2 overview: objectives and labs
+  README.md               Overview of the pipeline labs
 ```
 
 ---
@@ -187,8 +122,7 @@ module2/
 
 </div>
 
-Each lab uses the subset its objectives require; coverage of the full course tech
-stack grows as more labs land.
+Each lab uses the subset it needs; more of the stack appears as later labs land.
 
 ---
 
