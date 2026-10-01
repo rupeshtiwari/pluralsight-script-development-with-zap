@@ -100,7 +100,7 @@ by wiring ZAP into a CI/CD pipeline as an automated security gate.
 |:-:|-----|----------------|:----------:|:------:|
 | 1 | **[Validate injection, XSS, and CSRF with ZAP](module1/m1-demo1-validate-injection-xss-and-csrf-with-zap/README.md)** | Build a focused scan policy; prove SQL, NoSQL, and command injection; map reflected XSS to its three contexts; compare CSRF token states; record an alert disposition | `EO1a` · `EO1b` · `EO1c` | 🟢 Ready |
 | 2 | **[Write a JavaScript security script in ZAP](module1/m1-demo2-write-a-javascript-security-script-in-zap/README.md)** | Extend ZAP with an HTTP Sender script that marks every request | `EO2a` | 🟢 Ready |
-| 3 | **[Write Python scan and authentication scripts in ZAP](module1/m1-demo3-write-python-scan-and-authentication-scripts-in-zap/README.md)** | Write a custom Jython active-scan rule and a scripted login, then scan a login-only page | `EO2b` · `EO2c` | 🆕 New |
+| 3 | **[Write Python scan and authentication scripts in ZAP](module1/m1-demo3-write-python-scan-and-authentication-scripts-in-zap/README.md)** | Write a custom Jython active-scan rule and a scripted login, then scan a login-only page | `EO2b` · `EO2c` | 🟢 Ready |
 
 ### ⚙️ Module 2 — Automated ZAP security gates in DevSecOps pipelines
 
