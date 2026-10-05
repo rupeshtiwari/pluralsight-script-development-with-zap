@@ -28,6 +28,9 @@ jobs:
         run: |
           mkdir -p "${GITHUB_WORKSPACE}/wrk"
           cp module2/m2-demo1-run-authenticated-zap-scripts-in-github-actions/ci/af-plan.yaml "${GITHUB_WORKSPACE}/wrk/af-plan.yaml"
+          # ZAP runs as uid 1000 inside the container; make the bind-mounted
+          # work dir writable so the report job can write globo-ci-report.json.
+          chmod -R 0777 "${GITHUB_WORKSPACE}/wrk"
           # The context uses a Jython auth script, so the python:jython engine
           # must exist BEFORE the plan's env is set up. Install the add-ons in
           # the same container first, then autorun the plan.

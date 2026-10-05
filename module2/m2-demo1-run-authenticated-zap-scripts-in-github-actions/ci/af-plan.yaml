@@ -41,14 +41,9 @@ env:
     progressToStdout: true        # stream progress to the GitHub Actions job log
 
 jobs:
-  # 0) Headless CI starts clean, so install the add-ons the scripts need
-  #    (the Jython engine for the Python scripts; NoSQL beta rules).
-  - type: addOns
-    parameters:
-      action: "install"
-      addOns:
-        - "jython"
-        - "ascanrulesBeta"
+  # The Jython engine and beta rules are installed into ZAP before this plan
+  # runs (by the CI step, and by the compose entrypoint for the local preflight),
+  # so no addOns job is needed here.
 
   # 1) Load the custom checks built in Module 1 (the auth script is loaded by
   #    the context above). 'source' is the on-disk path key for this ZAP build.
