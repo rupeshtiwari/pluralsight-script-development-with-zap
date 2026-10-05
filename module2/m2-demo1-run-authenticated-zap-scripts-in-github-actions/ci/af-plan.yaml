@@ -81,7 +81,17 @@ jobs:
       action: "enable"
       name: "globomantics-marker"
 
-  # 2) Run the active scan AS THE AUTHENTICATED USER against the context scope.
+  # 2) Seed the login-only page INTO the sites tree AS alice, so the active scan
+  #    has an authenticated node (carrying the note parameter) to attack. The
+  #    scripted auth logs in first, so this reaches the page behind the session.
+  - type: requestor
+    parameters:
+      user: "alice"
+    requests:
+      - url: "http://app:8000/account/profile?note=seed"
+        method: "GET"
+
+  # 3) Run the active scan AS THE AUTHENTICATED USER against the context scope.
   #    The custom Python rule runs here; the JS marker stamps every request.
   - type: activeScan
     parameters:
@@ -90,7 +100,7 @@ jobs:
       maxRuleDurationInMins: 2
       maxScanDurationInMins: 5
 
-  # 3) Write the evidence the job and the author preflight read back.
+  # 4) Write the evidence the job and the author preflight read back.
   - type: report
     parameters:
       template: "traditional-json"
