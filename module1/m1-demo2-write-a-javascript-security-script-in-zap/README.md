@@ -2,24 +2,25 @@
 
 In this lab you **extend ZAP itself**: you write a small **JavaScript HTTP Sender
 script** that stamps a marker header on every request ZAP sends, and reports what
-it did — all inside ZAP's **Script Console**.
+it did.
 
-You do this in the **ZAP GUI** (open <http://localhost:8080/zap/>), not the terminal.
+You read the script in your **code editor** and run each step from your
+**terminal**. The script runs *inside ZAP* (an HTTP Sender script only runs
+there); each terminal command drives ZAP for you and shows the result, so you
+never have to click through the ZAP window.
 
 ---
 
 ## How to read this lab
 
-Each step is split into two clearly labeled parts so you always know what to do:
-
 | Label | Meaning |
 |-------|---------|
-| 🖱️ **Do this in ZAP** | Click or type these **inside the ZAP GUI**. |
-| 💻 **Run in your terminal** | Copy-paste these commands into your terminal. |
-| ✅ **You'll see** | This is a **result ZAP shows you** — read it to confirm success. **Never type it as a command.** |
+| 📄 **In your editor** | Open or read this file in your code editor. |
+| 💻 **Run in your terminal** | Copy-paste this command. |
+| ✅ **You'll see** | A **result to read** — confirm it. **Never type it as a command.** |
 
-> **Golden rule:** the only things you ever *type* are under 🖱️ or 💻. Anything
-> under ✅ is output you *read*, not a command.
+> **Golden rule:** the only thing you *type* is the line under 💻. Everything under
+> ✅ is output you *read*.
 
 ---
 
@@ -51,8 +52,8 @@ security checks.
 | Saved name | `globomantics-marker` |
 
 The full source is in
-[`zap-scripts/globomantics-marker.js`](zap-scripts/globomantics-marker.js) — you
-copy it into the Script Console in Step 1.
+[`zap-scripts/globomantics-marker.js`](zap-scripts/globomantics-marker.js) — open
+it in your editor to read it in Step 1.
 
 ---
 
@@ -60,48 +61,57 @@ copy it into the Script Console in Step 1.
 
 | Step | You will… | Objective | Proof artifact |
 |------|-----------|-----------|----------------|
-| 1 | Write the HTTP Sender script from the template and save it | EO2a | JavaScript source file |
+| 1 | Read the HTTP Sender script source and load it into ZAP | EO2a | JavaScript source file |
 | 2 | Confirm the script adds the marker header to a real request | EO2a | Modified HTTP request |
 | 3 | See the named line the script prints to the console | EO2a | Script console output |
 | 4 | Confirm the reusable script name and path | EO2a | Saved script registration |
 
 ---
 
-## Before you start
+## Run it step by step
 
-💻 **Run in your terminal** — bring the stack up and open the ZAP GUI:
+Bring the stack up once, then run each step on its own screen. Each command
+prints a header saying **what** it shows and **why**, then a green **PASS**.
 
 ```bash
-./module1/m1-demo2-write-a-javascript-security-script-in-zap/scripts/demo_reset.sh
+cd module1/m1-demo2-write-a-javascript-security-script-in-zap
+./scripts/demo_up.sh        # wait for "Up" (starts Colima + the stack if needed)
+./scripts/demo_step.sh 1    # JavaScript source file  (loads it into ZAP)
+./scripts/demo_step.sh 2    # Modified HTTP request    (marker header added)
+./scripts/demo_step.sh 3    # Script console output    (named console line)
+./scripts/demo_step.sh 4    # Saved script registration
 ```
 
-Wait until it prints **`Up`**, then open <http://localhost:8080/zap/> in your
-browser. (If the Docker engine is stopped, this starts it for you and waits — you
-do not need to start Colima yourself.)
-
-🖱️ **Do this in ZAP** — set your browser's HTTP proxy to `localhost:8090` so your
-requests pass through ZAP.
+Open [`zap-scripts/globomantics-marker.js`](zap-scripts/globomantics-marker.js)
+in your editor to read the source alongside the steps. (To validate all four at
+once, run `./scripts/preflight_check.sh`; when finished, `./scripts/demo_down.sh`.)
 
 ---
 
-## Step 1 — Create and save the HTTP Sender script
+## Step 1 — Read the script source and load it into ZAP
 
 An HTTP Sender script is the hook ZAP runs for **every** message it sends — the
 perfect place to add your own behavior.
 
-🖱️ **Do this in ZAP:**
+📄 **In your editor:** open
+[`zap-scripts/globomantics-marker.js`](zap-scripts/globomantics-marker.js) and
+read `sendingRequest()` — it adds the marker header and prints the named line.
 
-1. Open the **Scripts** tab (Tools → Scripts, or the Scripts tree).
-2. Under **HTTP Sender**, choose **New Script**.
-3. Set **Engine** to the JavaScript (GraalVM) engine, and name it
-   `globomantics-marker`.
-4. Replace the template body with the contents of
-   [`zap-scripts/globomantics-marker.js`](zap-scripts/globomantics-marker.js),
-   then click **Save**.
+💻 **Run in your terminal** to load that source into ZAP as an HTTP Sender script:
 
-✅ **You'll see** the script appear in the Scripts tree under **HTTP Sender**,
-named `globomantics-marker`. That saved file **is** your JavaScript source — the
-marker header and the console line are both defined in it.
+```bash
+./scripts/demo_step.sh 1
+```
+
+✅ **You'll see** the source validated and loaded (output — read it, don't type it):
+
+```text
+WHAT: The JavaScript HTTP Sender script
+  ★ Script name: globomantics-marker   (type: HTTP Sender · engine: ECMAScript : Graal.js)
+  ★ Marker header it adds: X-Globomantics-Marker: GLOBO-DEMO
+  ★ Named console line it prints: [globo-marker] added X-Globomantics-Marker: GLOBO-DEMO to <url>
+✔ PASS  script is a valid HTTP Sender action and loaded into ZAP
+```
 
 **Proof artifact:** *JavaScript source file.*
 
@@ -111,39 +121,44 @@ marker header and the console line are both defined in it.
 
 Loading a script is not enough — you want to *see* it change a real message.
 
-🖱️ **Do this in ZAP:**
+💻 **Run in your terminal:**
 
-1. Make sure the script is **enabled** (the checkbox next to it in the Scripts tree).
-2. From your proxied browser, open a Globomantics page, for example
-   `http://localhost:8000/greet?name=marker-check`.
-3. In ZAP's **History**, select that request and open the **Request** tab.
+```bash
+./scripts/demo_step.sh 2
+```
 
-✅ **You'll see** this header on the outbound request — added by your script (read
-it to confirm; do not type it):
+✅ **You'll see** the marker header on a real outbound request ZAP sent (output —
+read it, don't type it):
 
 ```text
-X-Globomantics-Marker: GLOBO-DEMO
+WHAT: The marker header on an outbound request
+  ★ Outbound request: GET http://app:8000/greet?name=marker-check HTTP/1.1
+  ★ Header added by the script: X-Globomantics-Marker: GLOBO-DEMO
+✔ PASS  the script added X-Globomantics-Marker to the outbound request
 ```
 
 **Proof artifact:** *Modified HTTP request.*
 
 ---
 
-## Step 3 — Read the named console output
+## Step 3 — See the named console output
 
 A script you can trust tells you what it did. Your script prints a named line
 every time it runs.
 
-🖱️ **Do this in ZAP:**
+💻 **Run in your terminal:**
 
-1. Open the **Script Console** output pane for `globomantics-marker`.
-2. Reload the page through the proxy so the script runs again.
+```bash
+./scripts/demo_step.sh 3
+```
 
-✅ **You'll see** a line like this in the Script Console each time the script runs
-(this is ZAP's output — read it, do not type it):
+✅ **You'll see** the named console line the script prints each time it runs
+(output — read it, don't type it):
 
 ```text
-[globo-marker] added X-Globomantics-Marker: GLOBO-DEMO to http://app:8000/greet?name=marker-check
+WHAT: The named console output the script prints
+  ★ Console line (seen in ZAP's Script Console): [globo-marker] added X-Globomantics-Marker: GLOBO-DEMO to <url>
+✔ PASS  the script prints a named console line each time its action runs
 ```
 
 **Proof artifact:** *Script console output.*
@@ -152,37 +167,39 @@ every time it runs.
 
 ## Step 4 — Confirm the reusable script registration
 
-A saved, named script is what an automated run can call later without opening
+A saved, named script is what an automated run can call later without editing
 ZAP. Here you confirm exactly how it is registered.
 
-🖱️ **Do this in ZAP:**
+💻 **Run in your terminal:**
 
-1. In the Scripts tree, confirm `globomantics-marker` is listed under **HTTP Sender**.
-2. Note its **name** and the file it was saved from.
+```bash
+./scripts/demo_step.sh 4
+```
 
-✅ **You'll see** these registration details (read them to confirm; do not type them):
+✅ **You'll see** the registration details (output — read it, don't type it):
 
 ```text
-Name:  globomantics-marker
-Type:  httpsender
-Path:  zap-scripts/globomantics-marker.js
+WHAT: The saved, reusable script registration
+  ★ Registered name: globomantics-marker
+  ★ Type: httpsender
+  ★ Engine: ECMAScript : Graal.js
+  ★ Enabled: true
+  ★ Path (repo): zap-scripts/globomantics-marker.js
+✔ PASS  script is registered as a reusable HTTP Sender script
 ```
 
 **Proof artifact:** *Saved script registration.*
 
 ---
 
-## Check your work (optional, automated)
+## Check your work (automated)
 
-You authored the demo in the GUI. To **prove** the script behaves correctly, run
-the checker below: it loads the script through the ZAP API, sends a request, and
-verifies the marker header, the console line, and the registration — writing a
-reviewable log to `logs/`.
+Run every step in order through the checker; it writes a reviewable plain-text
+log to `logs/` with each step's command and output in sequence.
 
 💻 **Run in your terminal:**
 
 ```bash
-cd module1/m1-demo2-write-a-javascript-security-script-in-zap
 ./scripts/preflight_check.sh
 ```
 
