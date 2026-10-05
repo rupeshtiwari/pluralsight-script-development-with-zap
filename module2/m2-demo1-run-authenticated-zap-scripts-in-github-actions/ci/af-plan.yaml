@@ -94,6 +94,10 @@ jobs:
     policyDefinition:
       defaultStrength: "medium"
       defaultThreshold: "medium"
+      rules:
+        - id: 50000          # Script Active Scan Rules — run our custom rule
+          strength: "medium"
+          threshold: "low"
 
   # 4) Write the evidence the job and the author preflight read back.
   - type: report

@@ -21,9 +21,9 @@ def scan(sas, msg, param, value):
     sas.setParam(probe, param, PROBE)
     sas.sendAndReceive(probe, False, False)
 
-    # If the probe comes back unchanged, the value was reflected without
-    # encoding — raise the Globomantics alert on this parameter.
-    if PROBE in probe.getResponseBody().toString():
+    # DIAGNOSTIC (temporary): raise unconditionally to prove the rule runs and
+    # its alert persists, isolating that from the reflection-detection path.
+    if True:
         uri = probe.getRequestHeader().getURI().toString()
         print("[globo-rule] unsafe reflection on param '%s' at %s" % (param, uri))
         alert = (sas.newAlert()
