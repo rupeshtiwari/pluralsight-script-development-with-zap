@@ -15,5 +15,5 @@ fail the build.
 | # | Lab | Objectives | Status |
 |---|-----|------------|--------|
 | 1 | [Run authenticated ZAP scripts in GitHub Actions](m2-demo1-run-authenticated-zap-scripts-in-github-actions/README.md) | EO3a | New |
-| 2 | Query the ZAP API and inspect scan evidence | EO3b | Planned |
+| 2 | [Query the ZAP API and inspect scan evidence](m2-demo2-query-the-zap-api-and-inspect-scan-evidence/README.md) | EO3b | New |
 | 3 | Enforce ZAP quality gates in GitHub Actions | EO3c | Planned |
