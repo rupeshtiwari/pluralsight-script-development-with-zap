@@ -28,13 +28,18 @@ jobs:
         run: |
           mkdir -p "${GITHUB_WORKSPACE}/wrk"
           cp module2/m2-demo1-run-authenticated-zap-scripts-in-github-actions/ci/af-plan.yaml "${GITHUB_WORKSPACE}/wrk/af-plan.yaml"
+          # The context uses a Jython auth script, so the python:jython engine
+          # must exist BEFORE the plan's env is set up. Install the add-ons in
+          # the same container first, then autorun the plan.
           docker run --rm \
             --network "${COMPOSE_PROJECT_NAME}_default" \
             -v "${GITHUB_WORKSPACE}/wrk:/zap/wrk:rw" \
             -v "${GITHUB_WORKSPACE}/module1/m1-demo2-write-a-javascript-security-script-in-zap/zap-scripts:/zap-scripts:ro" \
             -v "${GITHUB_WORKSPACE}/module1/m1-demo3-write-python-scan-and-authentication-scripts-in-zap/zap-scripts:/zap-scripts-py:ro" \
+            --entrypoint bash \
             "${ZAP_IMAGE}" \
-            zap.sh -cmd -autorun /zap/wrk/af-plan.yaml
+            -c "zap.sh -cmd -addoninstall jython -addoninstall ascanrulesBeta \
+                && zap.sh -cmd -autorun /zap/wrk/af-plan.yaml"
 
       - name: Show the authenticated custom alert from the report
         if: always()
