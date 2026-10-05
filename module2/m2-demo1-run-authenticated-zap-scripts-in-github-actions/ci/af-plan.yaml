@@ -55,7 +55,7 @@ jobs:
       type: "authentication"
       engine: "python : jython"
       name: "globomantics-auth"
-      file: "/zap-scripts-py/globomantics-auth.py"
+      script: "/zap-scripts-py/globomantics-auth.py"
 
   - type: script
     parameters:
@@ -63,7 +63,7 @@ jobs:
       type: "active"
       engine: "python : jython"
       name: "globomantics-active-rule"
-      file: "/zap-scripts-py/globomantics-active-rule.py"
+      script: "/zap-scripts-py/globomantics-active-rule.py"
   - type: script
     parameters:
       action: "enable"
@@ -75,7 +75,7 @@ jobs:
       type: "httpsender"
       engine: "ECMAScript : Graal.js"
       name: "globomantics-marker"
-      file: "/zap-scripts/globomantics-marker.js"
+      script: "/zap-scripts/globomantics-marker.js"
   - type: script
     parameters:
       action: "enable"

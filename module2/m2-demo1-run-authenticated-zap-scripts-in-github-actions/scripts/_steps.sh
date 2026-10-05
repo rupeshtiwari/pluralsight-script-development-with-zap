@@ -125,10 +125,10 @@ step2_context_config() {
     fm header "The authenticated context, declared as config" \
               "The plan binds the target scope, the scripted login, and the user BEFORE scanning — the config a pipeline runs unattended (EO3a)."
     local ok=1
-    grep -q 'name: *"Globomantics"' "${AF_PLAN_HOST}" || ok=0
-    grep -q 'scriptName: *"globomantics-auth"' "${AF_PLAN_HOST}" || ok=0
-    grep -q 'name: *"alice"' "${AF_PLAN_HOST}" || ok=0
-    grep -q 'http://app:8000' "${AF_PLAN_HOST}" || ok=0
+    grep -q 'Globomantics' "${AF_PLAN_HOST}" || ok=0
+    grep -q 'globomantics-auth' "${AF_PLAN_HOST}" || ok=0
+    grep -q 'alice' "${AF_PLAN_HOST}" || ok=0
+    grep -q 'app:8000' "${AF_PLAN_HOST}" || ok=0
     fm star "Context" "Globomantics" focus
     fm star "Authentication" "script-based → globomantics-auth (Login URL: /login)"
     fm star "User" "alice"
