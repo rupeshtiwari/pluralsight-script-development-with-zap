@@ -42,7 +42,14 @@ jobs:
             --entrypoint bash \
             "${ZAP_IMAGE}" \
             -c "zap.sh -cmd -addoninstall jython -addoninstall ascanrulesBeta \
-                && zap.sh -cmd -autorun /zap/wrk/af-plan.yaml"
+                && zap.sh -cmd -autorun /zap/wrk/af-plan.yaml" 2>&1 | tee "${GITHUB_WORKSPACE}/wrk/zap-run.log"
+
+      - name: Did the custom Python rule fire? (script console output)
+        if: always()
+        run: |
+          echo "globo-rule detection lines:"
+          grep -c 'globo-rule' wrk/zap-run.log || echo 0
+          grep 'globo-rule' wrk/zap-run.log | head -5 || true
 
       - name: Show the authenticated custom alert from the report
         if: always()
