@@ -83,12 +83,17 @@ jobs:
 
   # 3) Run the active scan AS THE AUTHENTICATED USER against the context scope.
   #    The custom Python rule runs here; the JS marker stamps every request.
+  #    The policy's default threshold enables every active rule, including the
+  #    Script Active Scan Rules plugin (50000) that runs our custom Python rule.
   - type: activeScan
     parameters:
       context: "Globomantics"
       user: "alice"
       maxRuleDurationInMins: 2
       maxScanDurationInMins: 5
+    policyDefinition:
+      defaultStrength: "medium"
+      defaultThreshold: "medium"
 
   # 4) Write the evidence the job and the author preflight read back.
   - type: report
