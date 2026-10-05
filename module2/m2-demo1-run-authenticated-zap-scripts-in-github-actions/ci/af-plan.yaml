@@ -19,7 +19,9 @@ env:
       authentication:
         method: "script"
         parameters:
-          scriptName: "globomantics-auth"
+          # Script-based auth loads the script by PATH ('script'); the context
+          # registers it, so no separate 'script add' job is needed for auth.
+          script: "/zap-scripts-py/globomantics-auth.py"
           scriptEngine: "python : jython"
           # Parameter required by the authentication script:
           "Login URL": "http://app:8000/login"
@@ -48,22 +50,15 @@ jobs:
         - "jython"
         - "ascanrulesBeta"
 
-  # 1) Load the scripts built in Module 1 (authentication + custom checks).
-  - type: script
-    parameters:
-      action: "add"
-      type: "authentication"
-      engine: "python : jython"
-      name: "globomantics-auth"
-      script: "/zap-scripts-py/globomantics-auth.py"
-
+  # 1) Load the custom checks built in Module 1 (the auth script is loaded by
+  #    the context above). 'source' is the on-disk path key for this ZAP build.
   - type: script
     parameters:
       action: "add"
       type: "active"
       engine: "python : jython"
       name: "globomantics-active-rule"
-      script: "/zap-scripts-py/globomantics-active-rule.py"
+      source: "/zap-scripts-py/globomantics-active-rule.py"
   - type: script
     parameters:
       action: "enable"
@@ -75,7 +70,7 @@ jobs:
       type: "httpsender"
       engine: "ECMAScript : Graal.js"
       name: "globomantics-marker"
-      script: "/zap-scripts/globomantics-marker.js"
+      source: "/zap-scripts/globomantics-marker.js"
   - type: script
     parameters:
       action: "enable"
