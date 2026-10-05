@@ -168,7 +168,7 @@ done
 echo
 if [ "${ready}" = "1" ]; then
     echo "${C_OK}All components are READY. You can start the demo:${C_RST}"
-    echo "    ./module1/m1-demo1-validate-injection-xss-and-csrf-with-zap/scripts/demo_up.sh"
+    echo "    ./module1/m1-c3-validate-injection-xss-and-csrf-with-zap/scripts/demo_up.sh"
     echo
     echo "${C_MUT}Full transcript: ${LOG}${C_RST}"
     exit 0

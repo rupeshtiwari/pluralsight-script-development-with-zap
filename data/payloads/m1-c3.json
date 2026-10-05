@@ -1,0 +1,45 @@
+{
+  "demo": "m1-c3-validate-injection-xss-and-csrf-with-zap",
+  "authorization": "All requests target ONLY the local Globomantics training app on the compose network. Never point these at any other host.",
+  "app_internal": "http://app:8000",
+  "zap": "http://localhost:8090",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Targeted injection scan",
+      "lo": "EO1a",
+      "artifact": "Targeted scan policy and rule list",
+      "endpoints": ["/search", "/api/account", "/admin/ping"],
+      "focus": ["40018", "40033", "90020", "90037"],
+      "expected": "one focused scan raises SQL (40018/40022), NoSQL (40033), and command (90020/90037) alerts"
+    },
+    {
+      "id": 2,
+      "title": "Reflected XSS in three contexts",
+      "lo": "EO1b",
+      "artifact": "XSS request and response body",
+      "endpoint": "/greet",
+      "param": "name",
+      "focus": ["html_body", "html_attribute", "js_string"],
+      "expected": "the marker reflects unescaped in the HTML body, an HTML attribute, and a JS string"
+    },
+    {
+      "id": 3,
+      "title": "CSRF token replay",
+      "lo": "EO1c",
+      "artifact": "CSRF token replay result",
+      "endpoint": "/account/email",
+      "focus": ["replayed_token"],
+      "expected": "valid=200, missing=403, replayed=200 on the vulnerable build (no freshness check)"
+    },
+    {
+      "id": 4,
+      "title": "Alert disposition record",
+      "lo": "EO1a, EO1b, EO1c",
+      "artifact": "Alert disposition record",
+      "endpoints": ["/search", "/api/account", "/admin/ping", "/greet"],
+      "focus": ["disposition"],
+      "expected": "each finding is reconciled with live app behavior and recorded as confirmed"
+    }
+  ]
+}

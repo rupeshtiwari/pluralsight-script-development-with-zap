@@ -72,14 +72,18 @@ by wiring ZAP into a CI/CD pipeline as an automated security gate.
 Work through them in order — each one builds on the skills before it. Every lab
 is self-contained: open its runbook and follow along.
 
-| # | Lab | What you'll learn | Status |
-|:-:|-----|-------------------|:------:|
-| 1 | **[Validate injection, XSS, and CSRF with ZAP](module1/m1-demo1-validate-injection-xss-and-csrf-with-zap/README.md)** | Build a focused scan policy; prove SQL, NoSQL, and command injection; map reflected XSS to its three contexts; replay a CSRF token; record an alert disposition | 🟢 Ready |
-| 2 | **[Write a JavaScript security script in ZAP](module1/m1-demo2-write-a-javascript-security-script-in-zap/README.md)** | Extend ZAP with an HTTP Sender script that marks every request | 🟢 Ready |
-| 3 | **[Write Python scan and authentication scripts in ZAP](module1/m1-demo3-write-python-scan-and-authentication-scripts-in-zap/README.md)** | Write a custom Python active-scan rule and a scripted login, then scan a login-only page | 🟢 Ready |
-| 4 | **[Run authenticated ZAP scripts in GitHub Actions](module2/m2-demo1-run-authenticated-zap-scripts-in-github-actions/README.md)** | Run your Module 1 scripts headless and authenticated in a GitHub Actions pipeline, via the ZAP Automation Framework | 🆕 New |
-| 5 | **[Query the ZAP API and inspect scan evidence](module2/m2-demo2-query-the-zap-api-and-inspect-scan-evidence/README.md)** | Query runtime + scan status, the finding's rule identity and disposition, the official JSON report, and ZAP 2.17.0 Insights — all over the HTTP API | 🆕 New |
-| 6 | **[Enforce ZAP quality gates in GitHub Actions](module2/m2-demo3-enforce-zap-quality-gates-in-github-actions/README.md)** | Mark a benign finding False Positive with `alertFilter`, confirm job order, then gate the build on the remaining risk via `exitStatus` exit codes | 🆕 New |
+Folders are named by their **outline clip** — `m<module>-c<clip>-<name>` — so each
+demo maps straight to the approved outline (clips 1–2 of each module are
+presentation clips; the demos are clips 3–5).
+
+| Clip | Demo (runbook) | Learning objectives | Source |
+|:----:|----------------|:-------------------:|:------:|
+| **M1 · C3** | **[Validate injection, XSS, and CSRF with ZAP](module1/m1-c3-validate-injection-xss-and-csrf-with-zap/README.md)** — build a focused scan policy; prove SQL, NoSQL, and command injection; map reflected XSS to its three contexts; replay a CSRF token | EO1a · EO1b · EO1c | [code](module1/m1-c3-validate-injection-xss-and-csrf-with-zap) |
+| **M1 · C4** | **[Write a JavaScript security script in ZAP](module1/m1-c4-write-a-javascript-security-script-in-zap/README.md)** — extend ZAP with an HTTP Sender script that marks every request | EO2a | [code](module1/m1-c4-write-a-javascript-security-script-in-zap) |
+| **M1 · C5** | **[Write Python scan and authentication scripts in ZAP](module1/m1-c5-write-python-scan-and-authentication-scripts-in-zap/README.md)** — write a custom Python active-scan rule and a scripted login, then scan a login-only page | EO2b · EO2c | [code](module1/m1-c5-write-python-scan-and-authentication-scripts-in-zap) |
+| **M2 · C3** | **[Run authenticated ZAP scripts in GitHub Actions](module2/m2-c3-run-authenticated-zap-scripts-in-github-actions/README.md)** — run your Module 1 scripts headless and authenticated in a GitHub Actions pipeline, via the ZAP Automation Framework | EO3a | [code](module2/m2-c3-run-authenticated-zap-scripts-in-github-actions) |
+| **M2 · C4** | **[Query the ZAP API and inspect scan evidence](module2/m2-c4-query-the-zap-api-and-inspect-scan-evidence/README.md)** — query runtime + scan status, the finding's rule identity and disposition, the official JSON report, and ZAP 2.17.0 Insights, all over the HTTP API | EO3b | [code](module2/m2-c4-query-the-zap-api-and-inspect-scan-evidence) |
+| **M2 · C5** | **[Enforce ZAP quality gates in GitHub Actions](module2/m2-c5-enforce-zap-quality-gates-in-github-actions/README.md)** — mark a benign finding False Positive with `alertFilter`, confirm job order, then gate the build on the remaining risk via `exitStatus` exit codes | EO3c | [code](module2/m2-c5-enforce-zap-quality-gates-in-github-actions) |
 
 ---
 
@@ -99,7 +103,7 @@ data/payloads/            Per-lab step manifests
 docs/                     Gap report, preflight report, alert-disposition template
 module1/
   README.md               Overview of the first set of labs
-  m1-demo1-.../
+  m1-c3-.../
     README.md             The lab runbook
     scripts/              demo_up · demo_down · demo_reset · capture · preflight_check
     logs/                 Validation logs (git-ignored)

@@ -12,8 +12,10 @@ fail the build.
 
 ## Labs
 
-| # | Lab | Objectives | Status |
-|---|-----|------------|--------|
-| 1 | [Run authenticated ZAP scripts in GitHub Actions](m2-demo1-run-authenticated-zap-scripts-in-github-actions/README.md) | EO3a | New |
-| 2 | [Query the ZAP API and inspect scan evidence](m2-demo2-query-the-zap-api-and-inspect-scan-evidence/README.md) | EO3b | New |
-| 3 | [Enforce ZAP quality gates in GitHub Actions](m2-demo3-enforce-zap-quality-gates-in-github-actions/README.md) | EO3c | New |
+| Clip | Demo | Objectives | Status |
+|:----:|------|------------|--------|
+| **C3** | [Run authenticated ZAP scripts in GitHub Actions](m2-c3-run-authenticated-zap-scripts-in-github-actions/README.md) | EO3a | New |
+| **C4** | [Query the ZAP API and inspect scan evidence](m2-c4-query-the-zap-api-and-inspect-scan-evidence/README.md) | EO3b | New |
+| **C5** | [Enforce ZAP quality gates in GitHub Actions](m2-c5-enforce-zap-quality-gates-in-github-actions/README.md) | EO3c | New |
+
+> Clips 1–2 are presentation clips; the demos are clips 3–5.

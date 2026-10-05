@@ -24,7 +24,7 @@ jobs:
       - name: Run the ZAP quality gate (exit code decides the build)
         run: |
           mkdir -p "${GITHUB_WORKSPACE}/wrk"
-          cp module2/m2-demo3-enforce-zap-quality-gates-in-github-actions/ci/gate-plan.yaml "${GITHUB_WORKSPACE}/wrk/gate-plan.yaml"
+          cp module2/m2-c5-enforce-zap-quality-gates-in-github-actions/ci/gate-plan.yaml "${GITHUB_WORKSPACE}/wrk/gate-plan.yaml"
           chmod -R 0777 "${GITHUB_WORKSPACE}/wrk"
           set +e
           docker run --rm \

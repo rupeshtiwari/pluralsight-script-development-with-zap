@@ -117,7 +117,7 @@ Covers TO1 (EO1a–c) and TO2 (EO2a–c).
 #### Clip 3: Demo: Validate injection, XSS, and CSRF with ZAP (6 min)
 
 Built as 4 recording steps; see the runbook at
-`module1/m1-demo1-validate-injection-xss-and-csrf-with-zap/README.md`.
+`module1/m1-c3-validate-injection-xss-and-csrf-with-zap/README.md`.
 
 - Before sending payloads, Maya maps each XSS case to HTML body, attribute, or JavaScript execution context and each CSRF case to valid, missing or invalid, or replayed token state so the request tests the intended protection — presentation table: **"XSS execution contexts and CSRF token state"**
 - (Step 1) Maya runs one preconfigured focused ZAP scan across the SQL, MongoDB NoSQL, and command-injection training endpoints — proof artifact: **"Targeted scan policy and rule list"**

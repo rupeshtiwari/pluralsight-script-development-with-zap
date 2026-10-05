@@ -7,7 +7,7 @@ on:
   workflow_dispatch: {}        # run it on demand from the Actions tab
   push:
     paths:
-      - "module2/m2-demo1-run-authenticated-zap-scripts-in-github-actions/**"
+      - "module2/m2-c3-run-authenticated-zap-scripts-in-github-actions/**"
       - ".github/workflows/zap-authenticated-scan.yml"
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
       - name: Run ZAP headless with the Automation Framework plan
         run: |
           mkdir -p "${GITHUB_WORKSPACE}/wrk"
-          cp module2/m2-demo1-run-authenticated-zap-scripts-in-github-actions/ci/af-plan.yaml "${GITHUB_WORKSPACE}/wrk/af-plan.yaml"
+          cp module2/m2-c3-run-authenticated-zap-scripts-in-github-actions/ci/af-plan.yaml "${GITHUB_WORKSPACE}/wrk/af-plan.yaml"
           # ZAP runs as uid 1000 inside the container; make the bind-mounted
           # work dir writable so the report job can write globo-ci-report.json.
           chmod -R 0777 "${GITHUB_WORKSPACE}/wrk"
@@ -37,8 +37,8 @@ jobs:
           docker run --rm \
             --network "${COMPOSE_PROJECT_NAME}_default" \
             -v "${GITHUB_WORKSPACE}/wrk:/zap/wrk:rw" \
-            -v "${GITHUB_WORKSPACE}/module1/m1-demo2-write-a-javascript-security-script-in-zap/zap-scripts:/zap-scripts:ro" \
-            -v "${GITHUB_WORKSPACE}/module1/m1-demo3-write-python-scan-and-authentication-scripts-in-zap/zap-scripts:/zap-scripts-py:ro" \
+            -v "${GITHUB_WORKSPACE}/module1/m1-c4-write-a-javascript-security-script-in-zap/zap-scripts:/zap-scripts:ro" \
+            -v "${GITHUB_WORKSPACE}/module1/m1-c5-write-python-scan-and-authentication-scripts-in-zap/zap-scripts:/zap-scripts-py:ro" \
             --entrypoint bash \
             "${ZAP_IMAGE}" \
             -c "zap.sh -cmd -addoninstall jython -addoninstall ascanrulesBeta \
