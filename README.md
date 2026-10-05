@@ -79,7 +79,7 @@ is self-contained: open its runbook and follow along.
 | 3 | **[Write Python scan and authentication scripts in ZAP](module1/m1-demo3-write-python-scan-and-authentication-scripts-in-zap/README.md)** | Write a custom Python active-scan rule and a scripted login, then scan a login-only page | 🟢 Ready |
 | 4 | **[Run authenticated ZAP scripts in GitHub Actions](module2/m2-demo1-run-authenticated-zap-scripts-in-github-actions/README.md)** | Run your Module 1 scripts headless and authenticated in a GitHub Actions pipeline, via the ZAP Automation Framework | 🆕 New |
 | 5 | **[Query the ZAP API and inspect scan evidence](module2/m2-demo2-query-the-zap-api-and-inspect-scan-evidence/README.md)** | Query runtime + scan status, the finding's rule identity and disposition, the official JSON report, and ZAP 2.17.0 Insights — all over the HTTP API | 🆕 New |
-| 6 | Enforce ZAP quality gates in GitHub Actions | Alert filters and exit-code gates | 🗓️ Planned |
+| 6 | **[Enforce ZAP quality gates in GitHub Actions](module2/m2-demo3-enforce-zap-quality-gates-in-github-actions/README.md)** | Mark a benign finding False Positive with `alertFilter`, confirm job order, then gate the build on the remaining risk via `exitStatus` exit codes | 🆕 New |
 
 ---
 

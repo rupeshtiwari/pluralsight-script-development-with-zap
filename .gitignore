@@ -1,3 +1,5 @@
 *.log
 .DS_Store
 .vscode/
+# Local gate-run artifacts (headless report + plan copy) — regenerated each run
+**/logs/.gate/

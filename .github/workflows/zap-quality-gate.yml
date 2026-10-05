@@ -1,0 +1,59 @@
+name: Globomantics ZAP quality gate
+
+# Runs the ZAP quality gate headless and lets its exit code decide the build.
+# Manual-dispatch only: this job is MEANT to fail when the gate blocks, so it is
+# not run on every push. Run it from the Actions tab to see the gate in action.
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-24.04
+    env:
+      COMPOSE_PROJECT_NAME: globo
+      APP_BUILD: vulnerable
+      ZAP_IMAGE: ghcr.io/zaproxy/zaproxy:stable
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Start the Globomantics app
+        run: docker compose up -d --build --wait app
+
+      - name: Run the ZAP quality gate (exit code decides the build)
+        run: |
+          mkdir -p "${GITHUB_WORKSPACE}/wrk"
+          cp module2/m2-demo3-enforce-zap-quality-gates-in-github-actions/ci/gate-plan.yaml "${GITHUB_WORKSPACE}/wrk/gate-plan.yaml"
+          chmod -R 0777 "${GITHUB_WORKSPACE}/wrk"
+          set +e
+          docker run --rm \
+            --network "${COMPOSE_PROJECT_NAME}_default" \
+            -v "${GITHUB_WORKSPACE}/wrk:/zap/wrk:rw" \
+            "${ZAP_IMAGE}" \
+            zap.sh -cmd -autorun /zap/wrk/gate-plan.yaml
+          GATE_EXIT=$?
+          set -e
+          echo "=============================================="
+          echo " ZAP QUALITY GATE DECISION"
+          echo "   thresholds : errorLevel=HIGH  warnLevel=MEDIUM"
+          echo "   exit code  : ${GATE_EXIT}   (0 ok · 1 error · 2 warning)"
+          if [ "${GATE_EXIT}" = "0" ]; then
+            echo "   result     : PASSED — no alert at or above the error threshold"
+          else
+            echo "   result     : BLOCKED — the gate failed the build"
+          fi
+          echo "=============================================="
+          exit "${GATE_EXIT}"
+
+      - name: Upload the gate report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: globo-gate-report
+          path: wrk/globo-gate-report.json
+          if-no-files-found: ignore
+
+      - name: Tear the app down
+        if: always()
+        run: docker compose down -v --remove-orphans
