@@ -66,9 +66,10 @@ jobs:
           for a in alerts:
               if "Reflected" in (a.get("alert") or a.get("name") or ""):
                   inst = (a.get("instances") or [{}])[0]
+                  base = (inst.get("uri", "") or "").split("?")[0]
                   print("\nAuthenticated finding (Step 4 proof):")
                   print("  Finding:   %s" % (a.get("alert") or a.get("name")))
-                  print("  URL:       %s  (reached while logged in as alice)" % inst.get("uri", ""))
+                  print("  URL:       %s  (reached while logged in as alice)" % base)
                   print("  Parameter: %s" % inst.get("param", ""))
                   break
           PY
