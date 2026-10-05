@@ -71,6 +71,26 @@ for a in al: print("      - %s | param=%s | risk=%s" % (a.get("alert") or a.get(
 
 echo
 echo "============================================================"
+echo "3b. CUSTOM ALERT present in ZAP's store? (what the GUI shows)"
+echo "    Unfiltered, matched by name across ALL urls."
+echo "============================================================"
+curl -s "${ZAP}/JSON/core/view/alerts/?apikey=${K}" | python3 -c '
+import json,sys
+try: al=json.load(sys.stdin).get("alerts",[])
+except Exception: al=[]
+names=[(a.get("alert") or a.get("name") or "") for a in al]
+print("  total alerts in store:", len(names))
+hits=[(a.get("alert") or a.get("name"), a.get("url"), a.get("param")) for a in al if "Globomantics" in ((a.get("alert") or a.get("name")) or "")]
+if hits:
+    print("  CUSTOM ALERT FOUND (GUI Alerts tab will show it):")
+    for n,u,p in hits: print("      >> %s | url=%s | param=%s" % (n,u,p))
+else:
+    print("  CUSTOM ALERT: NOT in the store (GUI Alerts tab would be empty for it).")
+    print("  distinct alert names present:")
+    for n in sorted(set(names)): print("      -", n)'
+
+echo
+echo "============================================================"
 echo "4. DIRECT AUTH TEST (host -> app, bypassing ZAP) — does"
 echo "   login + note reflect? Confirms the app itself is fine."
 echo "============================================================"
