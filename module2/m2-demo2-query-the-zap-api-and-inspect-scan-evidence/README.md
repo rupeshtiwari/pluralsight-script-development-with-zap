@@ -180,10 +180,18 @@ read it, don't type it):
 
 ```text
 WHAT: ZAP 2.17.0 Insights assess scan effectiveness, not just findings
-  ★ Insight  (level · key): Info · stats.auth.state.success
-  ★ Statistic · meaning: 1 · Successful authentications during the scan
+  ★ Insight  (level · key): Low · insight.log.error
+  ★ Statistic · meaning: 17 · ZAP errors logged — see the zap.log file for details
+  ★ Insight  (level · key): Low · insight.log.warn
+  ★ Statistic · meaning: 3 · ZAP warnings logged — see the zap.log file for details
+  ★ Insight  (level · key): Info · insight.network.failure
+  ★ Statistic · meaning: 1 · Percentage of network failures
 ✔ PASS  the report's Insights section reports scan effectiveness
 ```
+
+Insights are **operational signals, not vulnerabilities** — here they flag logged
+errors/warnings and network reliability, so you know whether to trust the scan's
+coverage before acting on its findings.
 
 **Proof artifact:** *ZAP Insights evidence.*
 
