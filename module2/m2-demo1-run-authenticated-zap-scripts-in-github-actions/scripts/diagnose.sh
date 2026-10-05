@@ -14,9 +14,25 @@ enc() { python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]
 j() { python3 -m json.tool 2>/dev/null || cat; }
 
 echo "============================================================"
-echo "1. PLAN PROGRESS (info / warn / error from the AF run)"
+echo "1. PLAN PROGRESS (info / warn / error from a FRESH AF run)"
 echo "============================================================"
-curl -s "${ZAP}/JSON/automation/view/planProgress/?apikey=${K}&planId=0" | python3 -c '
+# Run a fresh plan and capture ITS id. ZAP increments the plan id per run,
+# so we must read back the id runPlan returns, not a hardcoded one.
+PID="$(curl -s "${ZAP}/JSON/automation/action/runPlan/?apikey=${K}&filePath=$(enc "/af/af-plan.yaml")" \
+  | python3 -c 'import json,sys
+try: print(json.load(sys.stdin).get("planId",""))
+except Exception: print("")')"
+echo "  planId: ${PID:-<none>}"
+# Wait for it to finish (up to ~4 min).
+for _ in $(seq 1 80); do
+  done="$(curl -s "${ZAP}/JSON/automation/view/planProgress/?apikey=${K}&planId=${PID}" \
+    | python3 -c 'import json,sys
+try: print(1 if (json.load(sys.stdin).get("finished") or "").strip() else 0)
+except Exception: print(0)')"
+  [ "${done}" = "1" ] && break
+  sleep 3
+done
+curl -s "${ZAP}/JSON/automation/view/planProgress/?apikey=${K}&planId=${PID}" | python3 -c '
 import json,sys
 try: d=json.load(sys.stdin)
 except Exception as e: print("  (no plan progress:", e, ")"); raise SystemExit
