@@ -24,6 +24,8 @@ def scan(sas, msg, param, value):
     # If the probe comes back unchanged, the value was reflected without
     # encoding — raise the Globomantics alert on this parameter.
     if PROBE in probe.getResponseBody().toString():
+        uri = probe.getRequestHeader().getURI().toString()
+        print("[globo-rule] unsafe reflection on param '%s' at %s" % (param, uri))
         alert = (sas.newAlert()
                  .setRisk(2)          # 0 info, 1 low, 2 medium, 3 high
                  .setConfidence(2)    # 0 fp, 1 low, 2 medium, 3 high
@@ -33,6 +35,10 @@ def scan(sas, msg, param, value):
                  .setParam(param)
                  .setAttack(PROBE)
                  .setEvidence(PROBE)
+                 # Bind the alert to the scanned URL so it attaches to the site
+                 # node and persists to the report / Alerts tab even though the
+                 # probe message has no saved history reference.
+                 .setUri(uri)
                  .setMessage(probe))
         # 'raise' is a Python keyword, so call the builder's raise() via getattr.
         getattr(alert, "raise")()
