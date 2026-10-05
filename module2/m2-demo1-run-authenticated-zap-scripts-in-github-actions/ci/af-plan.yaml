@@ -1,0 +1,99 @@
+# ZAP Automation Framework plan — Globomantics authenticated script scan.
+#
+# This single file is the "Authenticated context configuration": it declares the
+# target scope, the scripted login, the user to scan as, and the custom scripts
+# to run — everything a headless, unattended CI run needs, with no GUI.
+#
+# It is executed headless by ghcr.io/zaproxy/zaproxy:stable in GitHub Actions
+# (and locally by the author preflight) with:
+#   zap.sh -cmd -autorun /zap/wrk/af-plan.yaml
+---
+env:
+  contexts:
+    - name: Globomantics
+      urls:
+        - "http://app:8000"
+      includePaths:
+        - "http://app:8000/account/profile.*"
+        - "http://app:8000/greet.*"
+      authentication:
+        method: "script"
+        parameters:
+          scriptName: "globomantics-auth"
+          scriptEngine: "python : jython"
+          # Parameter required by the authentication script:
+          "Login URL": "http://app:8000/login"
+        verification:
+          method: "response"
+          loggedInRegex: "Signed in as"
+          loggedOutRegex: "Please log in first"
+      sessionManagement:
+        method: "cookie"
+      users:
+        - name: "alice"
+          credentials:
+            username: "alice"
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    progressToStdout: true        # stream progress to the GitHub Actions job log
+
+jobs:
+  # 0) Headless CI starts clean, so install the add-ons the scripts need
+  #    (the Jython engine for the Python scripts; NoSQL beta rules).
+  - type: addOns
+    parameters:
+      action: "install"
+      addOns:
+        - "jython"
+        - "ascanrulesBeta"
+
+  # 1) Load the scripts built in Module 1 (authentication + custom checks).
+  - type: script
+    parameters:
+      action: "add"
+      type: "authentication"
+      engine: "python : jython"
+      name: "globomantics-auth"
+      file: "/zap-scripts-py/globomantics-auth.py"
+
+  - type: script
+    parameters:
+      action: "add"
+      type: "active"
+      engine: "python : jython"
+      name: "globomantics-active-rule"
+      file: "/zap-scripts-py/globomantics-active-rule.py"
+  - type: script
+    parameters:
+      action: "enable"
+      name: "globomantics-active-rule"
+
+  - type: script
+    parameters:
+      action: "add"
+      type: "httpsender"
+      engine: "ECMAScript : Graal.js"
+      name: "globomantics-marker"
+      file: "/zap-scripts/globomantics-marker.js"
+  - type: script
+    parameters:
+      action: "enable"
+      name: "globomantics-marker"
+
+  # 2) Run the active scan AS THE AUTHENTICATED USER against the context scope.
+  #    The custom Python rule runs here; the JS marker stamps every request.
+  - type: activeScan
+    parameters:
+      context: "Globomantics"
+      user: "alice"
+      maxRuleDurationInMins: 2
+      maxScanDurationInMins: 5
+
+  # 3) Write the evidence the job and the author preflight read back.
+  - type: report
+    parameters:
+      template: "traditional-json"
+      reportDir: "/zap/wrk"
+      reportFile: "globo-ci-report.json"
+      reportTitle: "Globomantics authenticated script scan"

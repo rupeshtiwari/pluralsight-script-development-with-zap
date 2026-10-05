@@ -60,6 +60,8 @@ services:
       - ./module1/m1-demo2-write-a-javascript-security-script-in-zap/zap-scripts:/zap-scripts:ro
       # Clip 5 Python (Jython) scripts: custom active rule + authentication.
       - ./module1/m1-demo3-write-python-scan-and-authentication-scripts-in-zap/zap-scripts:/zap-scripts-py:ro
+      # Module 2 Automation Framework plan (mounted so the author preflight can run it).
+      - ./module2/m2-demo1-run-authenticated-zap-scripts-in-github-actions/ci:/af:ro
     ports:
       - "127.0.0.1:8080:8080"   # Webswing GUI
       - "127.0.0.1:8090:8090"   # ZAP proxy + API

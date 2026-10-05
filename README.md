@@ -77,7 +77,7 @@ is self-contained: open its runbook and follow along.
 | 1 | **[Validate injection, XSS, and CSRF with ZAP](module1/m1-demo1-validate-injection-xss-and-csrf-with-zap/README.md)** | Build a focused scan policy; prove SQL, NoSQL, and command injection; map reflected XSS to its three contexts; replay a CSRF token; record an alert disposition | 🟢 Ready |
 | 2 | **[Write a JavaScript security script in ZAP](module1/m1-demo2-write-a-javascript-security-script-in-zap/README.md)** | Extend ZAP with an HTTP Sender script that marks every request | 🟢 Ready |
 | 3 | **[Write Python scan and authentication scripts in ZAP](module1/m1-demo3-write-python-scan-and-authentication-scripts-in-zap/README.md)** | Write a custom Python active-scan rule and a scripted login, then scan a login-only page | 🟢 Ready |
-| 4 | Run authenticated ZAP scripts in GitHub Actions | Headless ZAP running your scripts in a pipeline | 🗓️ Planned |
+| 4 | **[Run authenticated ZAP scripts in GitHub Actions](module2/m2-demo1-run-authenticated-zap-scripts-in-github-actions/README.md)** | Run your Module 1 scripts headless and authenticated in a GitHub Actions pipeline, via the ZAP Automation Framework | 🆕 New |
 | 5 | Query the ZAP API and inspect scan evidence | Programmatic scan status, alerts, and reports | 🗓️ Planned |
 | 6 | Enforce ZAP quality gates in GitHub Actions | Alert filters and exit-code gates | 🗓️ Planned |
 

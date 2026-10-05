@@ -154,6 +154,21 @@ if [ -z "${JYTHON_OK}" ]; then
 fi
 echo "[zap-entrypoint] Python Scripting (jython) installed; Jython engine available."
 
+# Ensure the Automation Framework add-on is present so the author preflight can
+# run the Module 2 AF plan via the ZAP API (it ships by default, but install to
+# be safe).
+if api autoupdate/view/installedAddons | grep -q '"automation"'; then
+    echo "[zap-entrypoint] Automation Framework already installed."
+else
+    echo "[zap-entrypoint] installing Automation Framework from the marketplace..."
+    api autoupdate/action/installAddon "id=automation" >/dev/null
+    for _ in $(seq 1 30); do
+        api autoupdate/view/installedAddons | grep -q '"automation"' && break
+        sleep 2
+    done
+fi
+echo "[zap-entrypoint] Automation Framework available."
+
 touch /tmp/zap-ready
 echo "[zap-entrypoint] READY. GUI: http://localhost:${GUI_PORT}/zap/  API/proxy: :${API_PORT}"
 
