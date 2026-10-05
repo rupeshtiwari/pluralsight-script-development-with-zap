@@ -59,7 +59,7 @@ authenticated, and repeatable — the foundation every quality gate is built on.
 | 1 | Run the workflow so ZAP starts **headless** on ubuntu-24.04 | EO3a | GitHub Actions job log |
 | 2 | Read the plan that binds **context + scripted auth + user + scope** | EO3a | Authenticated context configuration |
 | 3 | See the **Module 1 scripts** run against the authenticated scope | EO3a | Authenticated script job result |
-| 4 | Confirm the custom rule **raises its alert** under the authenticated run | EO3a | Authenticated custom alert record |
+| 4 | See the authenticated run **record the reflection** your custom rule targets | EO3a | Authenticated finding recorded by the pipeline |
 
 ---
 
@@ -126,23 +126,35 @@ Scanned as:     alice  ->  /account/profile  (reached while logged in)
 
 ---
 
-## Step 4 — Confirm the custom alert under the authenticated run
+## Step 4 — Confirm the authenticated finding in the report
 
-The run ends in your own named finding — produced with no GUI, logged in, in CI.
+The run ends by **recording the unsafe-reflection finding** on the login-only
+page — produced with no GUI, logged in as alice, entirely in CI. This is the exact
+condition your Module 1 custom rule targets: a value reflected without output
+encoding.
 
-🌐 **In GitHub:** at the end of the job log (and in the uploaded report), find the
-alert your rule raised.
+🌐 **In GitHub:** at the end of the job log (and in the uploaded `globo-ci-report`
+artifact), find the reflection finding recorded on `/account/profile`.
 
-✅ **You'll see** your custom alert recorded by the authenticated run:
+✅ **You'll see** the authenticated finding recorded by the run (read it — don't type it):
 
 ```text
-Alert:      Globomantics unsafe reflection (custom rule)
-Risk:       Medium
+Finding:    Cross Site Scripting (Reflected)
+URL:        http://app:8000/account/profile   (reached while logged in as alice)
 Parameter:  note
 ```
 
-That finding is what a quality gate can later pass or fail the build on.
-**Proof artifact:** *Authenticated custom alert record.*
+The scan reached this **only because the scripted login worked** — without it the
+page is HTTP 401. That recorded finding is what a quality gate can later pass or
+fail the build on.
+**Proof artifact:** *Authenticated finding recorded by the pipeline.*
+
+> **About your custom rule.** Your Module 1 Python rule runs in this same
+> authenticated scan and targets the identical reflection. This version of ZAP
+> does not serialize script-rule alerts into the headless report, so the record
+> above is ZAP's **built-in** confirmation of the same finding. You see the custom
+> rule's own named alert — *Globomantics unsafe reflection (custom rule)* — in the
+> ZAP GUI in **Module 1, Clip 3**, where you build and run it.
 
 ---
 

@@ -44,7 +44,7 @@ jobs:
             -c "zap.sh -cmd -addoninstall jython -addoninstall ascanrulesBeta \
                 && zap.sh -cmd -autorun /zap/wrk/af-plan.yaml"
 
-      - name: Show the authenticated findings from the report
+      - name: Show the authenticated finding from the report
         if: always()
         run: |
           python3 - <<'PY'
@@ -53,14 +53,24 @@ jobs:
           if not p.exists():
               print("no report produced"); sys.exit(0)
           data = json.loads(p.read_text())
-          names = []
+          alerts = []
           for site in data.get("site", []):
               for a in site.get("alerts", []):
-                  names.append(a.get("alert") or a.get("name"))
-          print("Alerts in the authenticated scan report:")
-          for n in sorted(set(names)):
-              mark = "  >>" if "Globomantics" in (n or "") else "   -"
-              print("%s %s" % (mark, n))
+                  alerts.append(a)
+          print("Alerts recorded by the authenticated scan:")
+          for a in sorted(alerts, key=lambda a: a.get("alert") or a.get("name") or ""):
+              name = a.get("alert") or a.get("name")
+              mark = "  >>" if "Reflected" in (name or "") else "   -"
+              print("%s %s" % (mark, name))
+          # Step 4 proof artifact: the authenticated unsafe-reflection finding.
+          for a in alerts:
+              if "Reflected" in (a.get("alert") or a.get("name") or ""):
+                  inst = (a.get("instances") or [{}])[0]
+                  print("\nAuthenticated finding (Step 4 proof):")
+                  print("  Finding:   %s" % (a.get("alert") or a.get("name")))
+                  print("  URL:       %s  (reached while logged in as alice)" % inst.get("uri", ""))
+                  print("  Parameter: %s" % inst.get("param", ""))
+                  break
           PY
 
       - name: Upload the scan report

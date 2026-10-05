@@ -166,8 +166,8 @@ step3_script_job() {
 # STEP 4 — Authenticated custom alert record (EO3a) → "Authenticated custom alert record"
 # ===========================================================================
 step4_custom_alert() {
-    fm header "The custom alert raised under the authenticated workflow" \
-              "The scripted rule flags the finding during the headless run — the result a pipeline can later gate on (EO3a)."
+    fm header "The authenticated finding recorded by the pipeline" \
+              "The headless run records the unsafe reflection the custom rule targets, logged in as alice — the result a quality gate can later gate on (EO3a)."
     local rec; rec="$(custom_alert)"
     if [ -n "${rec}" ]; then
         IFS='|' read -r n r p <<<"${rec}"
@@ -183,8 +183,8 @@ step4_custom_alert() {
     local refl; refl="$(reflection_reached)"
     fm star "Reflection reached while authenticated" "${refl:-not found}" focus
     if [ -n "${refl}" ]; then
-        pass "the authenticated run reaches the reflection the custom rule detects"
-        fm note "On-screen proof artifact: the 'Globomantics unsafe reflection (custom rule)' entry in the GitHub Actions job log / report. (ZAP's API does not expose script-rule alerts headlessly in this build, so the preflight confirms the authenticated run reaches the finding.)"
+        pass "the authenticated run records the reflection the custom rule targets"
+        fm note "On-screen proof artifact: the 'Cross Site Scripting (Reflected)' finding on /account/profile (param note) in the GitHub Actions job log and the uploaded report — the authenticated run's recorded finding. This ZAP version does not serialize script-rule alerts into the headless report, so this built-in finding is ZAP's confirmation of the same reflection; the custom rule still runs here authenticated, and its own named alert is shown in Module 1 Clip 3's GUI run."
     else
         fail "could not confirm the authenticated custom finding" \
              "the AF run did not reach the reflection on the authenticated page" \
