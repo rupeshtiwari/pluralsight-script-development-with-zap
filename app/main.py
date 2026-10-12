@@ -347,6 +347,16 @@ def change_email(
     return JSONResponse({"status": "email updated", "email": email})
 
 
+@app.get("/account/email/current")
+def current_email(request: Request) -> JSONResponse:
+    # Read back the email on file for THIS session, so a test can prove whether a
+    # state-changing request actually took effect. Present in both builds.
+    sid = request.cookies.get("session", "")
+    if sid not in SESSIONS:
+        return JSONResponse({"error": "not authenticated"}, status_code=401)
+    return JSONResponse({"email": SESSIONS.get(sid + ":email", "")})
+
+
 # ---------------------------------------------------------------------------
 # 6. Authenticated profile page — the target for Clip 5's custom Python
 #    active-scan rule. It is SESSION-GATED (401 without a valid login cookie),

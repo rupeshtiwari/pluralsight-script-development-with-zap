@@ -20,6 +20,8 @@ PROXY="http://localhost:8090"
 K="${ZAP_API_KEY:-}"   # lazy: the reference panel needs no key; ensure_ready checks it
 POLICY="m1demo1"
 POLICY_IDS="40018 40019 40020 40021 40022 40027 40033 90020 90037"
+XSS_POLICY="m1xss"
+XSS_IDS="40012 40014 40016 40017"   # reflected / persistent XSS active rules
 
 PASS=0; FAIL=0; STEP_RC=0
 pass() { fm ok "$1"; PASS=$((PASS+1)); STEP_RC=0; }
@@ -90,6 +92,42 @@ for a in json.load(sys.stdin)["alerts"]:
 ' "${wanted}"
 }
 
+build_xss_policy_quiet() {
+    zap ascan/action/removeScanPolicy "scanPolicyName=${XSS_POLICY}" >/dev/null 2>&1 || true
+    zap ascan/action/addScanPolicy "scanPolicyName=${XSS_POLICY}" >/dev/null 2>&1 || true
+    zap ascan/action/disableAllScanners "scanPolicyName=${XSS_POLICY}" >/dev/null 2>&1 || true
+    local id
+    for id in ${XSS_IDS}; do
+        zap ascan/action/enableScanners "ids=${id}&scanPolicyName=${XSS_POLICY}" >/dev/null 2>&1 || true
+    done
+}
+
+scan_xss_quiet() { # <url> -- active-scan one endpoint with the XSS policy, wait
+    local url="$1" eu sid st waited=0
+    eu="$(enc "${url}")"
+    zap core/action/accessUrl "url=${eu}&followRedirects=false" >/dev/null 2>&1 || return 1
+    sid="$(zap ascan/action/scan "url=${eu}&recurse=false&scanPolicyName=${XSS_POLICY}" | jget scan 2>/dev/null)"
+    [[ "${sid}" =~ ^[0-9]+$ ]] || return 1
+    while :; do
+        st="$(zap ascan/view/status "scanId=${sid}" | jget status 2>/dev/null)"
+        [ "${st}" = "100" ] && break
+        sleep 3; waited=$((waited+3)); [ "${waited}" -gt 180 ] && break
+    done
+}
+
+# ZAP's reflected-XSS alert on a URL -> "param|attack|evidence" (empty if none).
+xss_alert() { # <url>
+    local base; base="$(enc "${1%%\?*}")"
+    zap core/view/alerts "baseurl=${base}" | python3 -c '
+import json,sys
+for a in json.load(sys.stdin)["alerts"]:
+    nm = a.get("alert") or a.get("name") or ""
+    if a.get("pluginId")=="40012" or "Cross Site Scripting (Reflected)" in nm:
+        print("%s|%s|%s" % (a.get("param",""), a.get("attack",""), a.get("evidence","")))
+        break
+'
+}
+
 # ---- reference panel (not a step) -----------------------------------------
 print_reference() {
     fm header "Before you test: map each case to its context / state" \
@@ -99,9 +137,9 @@ print_reference() {
     fm item "HTML attribute — input lands inside a quoted attribute value"
     fm item "JavaScript string — input lands inside a quoted JS string"
     fm section "CSRF token states"
-    fm item "valid — the request should succeed"
+    fm item "valid for this session — the request should succeed"
     fm item "missing or invalid — the request should be rejected"
-    fm item "replayed — a token already used once should be rejected"
+    fm item "a valid token reused with a DIFFERENT session's cookie — the request should be rejected: a token must be tied to the session it was issued to (same-session reuse is only a concern when the app requires single-use tokens)"
 }
 
 # ===========================================================================
@@ -145,29 +183,49 @@ step1_injection() {
 # STEP 2 — XSS request and response body (EO1b)
 # ===========================================================================
 step2_xss() {
-    fm header "Reflected XSS — one input, three output contexts" \
-              "The output context decides the payload, so you match context before testing (EO1b)."
+    fm header "Reflected XSS — match the context, then let ZAP confirm it" \
+              "The output context decides the payload; ZAP's active scanner then proves an executable reflected XSS, not just a reflection (EO1b)."
+
+    # Part A — the single 'name' input lands in three output contexts, so a real
+    # test needs a context-specific payload for each. This is where you choose
+    # the payload; it is NOT by itself proof of executable XSS.
     local marker='zzMARKzz' body b1 b2 b3
     body="$(curl -s -x "${PROXY}" "${APP_INTERNAL}/greet?name=$(enc "${marker}")")"
-    fm star "Request" "GET /greet?name=${marker}"
-    fm section "Response body — reflected unescaped"
+    fm section "Output contexts for the 'name' parameter (choose a payload per context)"
     b1="$(echo "${body}" | grep -o '<p>Hello[^<]*' | head -1)"
-    # Anchor to the greeting input so a future header 'value=' can never be
-    # picked up as the attribute context; strip the type= prefix for display.
     b2="$(echo "${body}" | grep -oE 'type="text" value="[^"]*"' | head -1 | sed 's/^type="text" //')"
     b3="$(echo "${body}" | grep -o 'var greeting = "[^;]*' | head -1)"
-    fm star "HTML body context" "${b1}" focus
-    fm star "HTML attribute context" "${b2}" focus
-    fm star "JavaScript string context" "${b3}" focus
+    fm star "HTML body — use <script>…</script>" "${b1}"
+    fm star "HTML attribute — break out with \">…" "${b2}"
+    fm star "JS string — break out with \";…" "${b3}"
     local n=0
     echo "${body}" | grep -q "<p>Hello ${marker}"     && n=$((n+1))
     echo "${body}" | grep -q "value=\"${marker}\""     && n=$((n+1))
     echo "${body}" | grep -q "greeting = \"${marker}\"" && n=$((n+1))
-    [ "${n}" = 3 ] \
-        && pass "input reflects unescaped in all three contexts" \
-        || fail "input reflected in only ${n}/3 contexts" \
-                "one context may already be encoding output" \
-                "ask: 'the /greet endpoint is not reflecting in all three contexts on the vulnerable build'"
+
+    # Part B — ZAP actively scans 'name' with the reflected-XSS rules; it injects
+    # real payloads and raises "Cross Site Scripting (Reflected)" only when the
+    # reflection is actually exploitable in its context.
+    build_xss_policy_quiet
+    fm note "running ZAP's reflected-XSS scanner against /greet (name)..."
+    scan_xss_quiet "${APP_INTERNAL}/greet?name=${marker}"
+    local rec param attack evidence
+    rec="$(xss_alert "${APP_INTERNAL}/greet")"
+    IFS='|' read -r param attack evidence <<<"${rec}"
+
+    fm section "ZAP's confirmed finding"
+    fm star "Alert" "Cross Site Scripting (Reflected)" focus
+    fm star "Affected parameter" "${param:-<none>}"
+    fm star "Payload ZAP injected" "${attack:-<none>}" focus
+    fm star "Evidence (reflected in the response)" "${evidence:-<none>}"
+
+    if [ "${n}" = 3 ] && [ -n "${param}" ] && [ -n "${attack}" ]; then
+        pass "ZAP confirmed reflected XSS on '${param}' with a context-specific payload (and the input lands in all three contexts)"
+    else
+        fail "reflected XSS was not confirmed (contexts ${n}/3; ZAP param='${param:-}')" \
+             "the vulnerable build should reflect in 3 contexts and ZAP should raise Cross Site Scripting (Reflected) on name" \
+             "ask: 'on the vulnerable build, /greet did not yield ZAP a Cross Site Scripting (Reflected) alert on name; check the XSS rules and the endpoint'"
+    fi
     return "${STEP_RC}"
 }
 
@@ -175,24 +233,47 @@ step2_xss() {
 # STEP 3 — CSRF token replay result (EO1c)
 # ===========================================================================
 step3_csrf() {
-    fm header "CSRF — token replay" \
-              "A token checked for presence but not freshness can be replayed (EO1c)."
-    local ca=/tmp/.c_a t v m r
-    rm -f "${ca}"
-    _post() { curl -s -x "${PROXY}" -o /dev/null -w '%{http_code}' -b "${ca}" -X POST --data "$1" "${APP_INTERNAL}/account/email"; }
-    curl -s -x "${PROXY}" -o /dev/null -c "${ca}" -X POST --data 'username=alice' "${APP_INTERNAL}/login" >/dev/null
-    t="$(curl -s -x "${PROXY}" -b "${ca}" "${APP_INTERNAL}/account/email" | grep -o '[a-f0-9]\{32\}' | head -1)"
-    v="$(_post "email=a@globomantics.example&csrf_token=${t}")"   # valid token
-    m="$(_post "email=a@globomantics.example")"                   # no token
-    r="$(_post "email=b@globomantics.example&csrf_token=${t}")"   # replay the used token
-    fm star "valid token" "${v}"
+    fm header "CSRF — a token reused across sessions" \
+              "A CSRF token must be tied to the session it was issued to. Here a token minted in one session is reused with a second session's cookie, and the protected email change still runs (EO1c)."
+    local A=/tmp/.c_a B=/tmp/.c_b
+    local legit="alice@globomantics.example" attack="attacker@evil.example"
+    local tokenA tokenB v m before_x x after_x
+    rm -f "${A}" "${B}"
+
+    _post() { # <cookiejar> <data> -> HTTP code
+        curl -s -x "${PROXY}" -o /dev/null -w '%{http_code}' -b "$1" -X POST --data "$2" "${APP_INTERNAL}/account/email"
+    }
+    _email() { # <cookiejar> -> stored email for that session
+        curl -s -x "${PROXY}" -b "$1" "${APP_INTERNAL}/account/email/current" \
+            | python3 -c 'import json,sys;print(json.load(sys.stdin).get("email",""))' 2>/dev/null
+    }
+
+    # Two independent authenticated sessions. A is where a valid token is minted;
+    # B is the second session whose cookie rides the forged request.
+    curl -s -x "${PROXY}" -o /dev/null -c "${A}" -X POST --data 'username=mallory' "${APP_INTERNAL}/login" >/dev/null
+    curl -s -x "${PROXY}" -o /dev/null -c "${B}" -X POST --data 'username=alice'   "${APP_INTERNAL}/login" >/dev/null
+    tokenA="$(curl -s -x "${PROXY}" -b "${A}" "${APP_INTERNAL}/account/email" | grep -o '[a-f0-9]\{32\}' | head -1)"
+    tokenB="$(curl -s -x "${PROXY}" -b "${B}" "${APP_INTERNAL}/account/email" | grep -o '[a-f0-9]\{32\}' | head -1)"
+
+    v="$(_post "${B}" "email=${legit}&csrf_token=${tokenB}")"   # control: B's own token
+    m="$(_post "${B}" "email=${attack}")"                       # control: no token
+    before_x="$(_email "${B}")"                                 # state after the valid control
+    x="$(_post "${B}" "email=${attack}&csrf_token=${tokenA}")"  # A's token with B's cookie
+    after_x="$(_email "${B}")"                                  # state after the cross-session request
+
+    fm star "valid token (session B's own)" "${v}"
     fm star "missing token" "${m}"
-    fm star "replayed token (already used once)" "${r}" focus
-    [ "${v} ${m} ${r}" = "200 403 200" ] \
-        && pass "replayed token is accepted (200) — the CSRF protection has no freshness check" \
-        || fail "CSRF codes are ${v}/${m}/${r}, expected 200/403/200" \
-                "token freshness or presence behaves unexpectedly" \
-                "ask: 'the CSRF replay result is not 200/403/200 on the vulnerable build; inspect the email-change handler'"
+    fm star "session B's email before the cross-session request" "${before_x}"
+    fm star "token from session A, submitted with session B's cookie" "${x}  (should be rejected)" focus
+    fm star "session B's email after the cross-session request" "${after_x}" focus
+
+    if [ "${v} ${m} ${x}" = "200 403 200" ] && [ "${before_x}" = "${legit}" ] && [ "${after_x}" = "${attack}" ]; then
+        pass "session A's token was accepted with session B's cookie (200) and changed session B's email to ${attack} — the token is not tied to its session"
+    else
+        fail "cross-session CSRF result was ${v}/${m}/${x}, email ${before_x:-<empty>} -> ${after_x:-<empty>} (expected 200/403/200 and ${legit} -> ${attack})" \
+             "the vulnerable build should accept session A's token with session B's cookie and change state" \
+             "ask: 'on the vulnerable build, the email-change handler is not accepting a cross-session token; inspect the CSRF check and /account/email/current'"
+    fi
     return "${STEP_RC}"
 }
 
