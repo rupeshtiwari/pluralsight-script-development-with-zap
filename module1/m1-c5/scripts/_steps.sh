@@ -35,6 +35,7 @@ ALERT_NAME="Globomantics unsafe reflection (custom rule)"
 LOGIN_USER="alice"
 PROFILE_URL="${APP_INTERNAL}/account/profile?note=seed"
 SCRIPT_RULES_ID="50000"   # ZAP "Script Active Scan Rules" plugin
+RULE_TRACE_ZAP="/tmp/globo-rule-trace.log"   # author diagnostics the rule writes
 
 PASS=0; FAIL=0; STEP_RC=0
 pass() { fm ok "$1"; PASS=$((PASS+1)); STEP_RC=0; }
@@ -93,6 +94,35 @@ status_with_cookie() { # <url> <cookie> -> HTTP code (through the ZAP proxy)
 }
 status_no_cookie() {  # <url> -> HTTP code (through the ZAP proxy)
     curl -s -x "${PROXY}" -o /dev/null -w '%{http_code}' "$1"
+}
+
+# --- container diagnostics (author-only) ------------------------------------
+# Resolve the running ZAP container id the same way demo_up.sh brought it up:
+# docker compose from the repo root, so the project name matches.
+zap_container() {
+    ( cd "${REPO_ROOT}" && docker compose ps -q zap 2>/dev/null ) | head -1
+}
+# Reset the rule's trace file so a run's trace reflects only this scan.
+reset_rule_trace() {
+    local c; c="$(zap_container)"
+    [ -n "${c}" ] && docker exec "${c}" sh -c ": > ${RULE_TRACE_ZAP}" >/dev/null 2>&1 || true
+}
+# The lines the custom rule wrote during the scan (empty if it never ran).
+rule_trace() {
+    local c; c="$(zap_container)"
+    [ -n "${c}" ] && docker exec "${c}" sh -c "cat ${RULE_TRACE_ZAP} 2>/dev/null" || true
+}
+# Is the Script Active Scan Rules plugin (50000) actually enabled in the policy
+# the scan used? If not, our script rule is never invoked at all.
+script_rules_enabled() { # -> "true"/"false"/""
+    zap ascan/view/scanners | python3 -c '
+import json,sys
+try: data=json.load(sys.stdin)
+except Exception: print(""); raise SystemExit
+for s in data.get("scanners", []):
+    if str(s.get("id"))=="50000":
+        print(s.get("enabled","")); raise SystemExit
+print("")'
 }
 
 # --- active scan helpers ----------------------------------------------------
@@ -247,6 +277,7 @@ step3_authenticated_scan() {
     #     Inject the session cookie into all scan traffic, and re-seed the
     #     authenticated request so the scanned node carries the cookie + note.
     enable_all_scanners
+    reset_rule_trace
     add_auth_cookie_header "${cookie}"
     curl -s -x "${PROXY}" -o /dev/null -b "session=${cookie}" "${PROFILE_URL}"
     local sid; sid="$(start_scan "${PROFILE_URL}")"
@@ -309,8 +340,30 @@ step4_custom_alert() {
         pass "the custom rule RAISED its named alert (verified via the ZAP API)"
     else
         fail "the custom rule did not raise its named alert" \
-             "core/view/alerts has no '${ALERT_NAME}' after the scan — the rule ran but produced no alert" \
-             "ask: 'the globomantics custom rule ran but raised no alert; check raiseAlert() in globomantics-active-rule.py and that the Script Active Scan Rules plugin is enabled'"
+             "core/view/alerts has no '${ALERT_NAME}' after the scan" \
+             "see the diagnosis below, then fix accordingly (never weaken the check)"
+        # --- self-diagnosis: pinpoint WHICH of three things went wrong --------
+        local se tr
+        se="$(script_rules_enabled)"
+        tr="$(rule_trace)"
+        fm section "Why no alert — diagnosis"
+        fm star "Script Active Scan Rules (50000) enabled" "${se:-unknown}"
+        if [ -z "${tr}" ]; then
+            fm note "The rule's scan() left NO trace — it was never invoked by the scanner."
+            fm item "Fix: ensure plugin 50000 is enabled in the policy AND the script is loaded (type=active) and enabled, so the Script Active Scan Rules plugin runs it."
+        elif echo "${tr}" | grep -q '^ERROR'; then
+            fm note "The rule ran and DETECTED the reflection, but the raise call threw:"
+            echo "${tr}" | sed 's/^/      /'
+            fm item "Fix: adjust the raise call in globomantics-active-rule.py to the API this ZAP build accepts."
+        elif echo "${tr}" | grep -q '^raised:'; then
+            fm note "The rule ran, detected, AND raised successfully — yet the alert is absent from the store/API/GUI (they share one store)."
+            echo "${tr}" | sed 's/^/      /'
+            fm item "This is a ZAP 2.17.0 platform behavior for Jython script-rule alerts, not a script bug. Decide the course-design handling with the owner before weakening the check."
+        else
+            fm note "The rule ran but did not detect a reflection on the scanned param:"
+            echo "${tr}" | sed 's/^/      /'
+            fm item "Fix: confirm the scan hit /account/profile?note=... and that note is reflected while authenticated."
+        fi
     fi
     return "${STEP_RC}"
 }

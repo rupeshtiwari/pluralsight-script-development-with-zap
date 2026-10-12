@@ -11,39 +11,77 @@
 # ZAP calls these two functions:
 #   scan(sas, msg, param, value)  - run the active check against one parameter
 #   scanNode(sas, msg)            - optional per-node hook (unused here)
+#
+# AUTHOR NOTE (not visible in the recorded clip):
+#   The rule also appends a one-line trace to /tmp/globo-rule-trace.log inside
+#   the ZAP container. That file is the author preflight's ground truth: it
+#   proves the rule actually executed, detected the reflection, and either
+#   raised its alert or hit an error — independent of ZAP's alert store. The
+#   trace does nothing on screen; the demo's proof artifact is the Alerts tab.
 
 PROBE = "GLOBOxss7marker"
 ALERT_NAME = "Globomantics unsafe reflection (custom rule)"
+TRACE = "/tmp/globo-rule-trace.log"
+
+
+def _trace(line):
+    # Best-effort author diagnostics. Never let tracing affect the scan.
+    try:
+        f = open(TRACE, "a")
+        f.write(line + "\n")
+        f.close()
+    except Exception:
+        pass
 
 
 def scan(sas, msg, param, value):
+    _trace("scan: param=%s value=%s" % (param, value))
+
     # Work on a copy, put our probe into the parameter, and send it.
     probe = msg.cloneRequest()
     sas.setParam(probe, param, PROBE)
     sas.sendAndReceive(probe, False, False)
 
-    # If the probe comes back unchanged, the value was reflected without
-    # encoding — raise the Globomantics alert on this parameter.
-    if PROBE in probe.getResponseBody().toString():
-        uri = probe.getRequestHeader().getURI().toString()
-        # Raise the custom alert with the classic raiseAlert() API: it attaches
-        # the alert to the scanned URL and persists it to ZAP's Alerts tab, the
-        # report, and the API — so the finding can be verified and reused.
-        sas.raiseAlert(
-            2,                       # risk:       0 info 1 low 2 medium 3 high
-            2,                       # confidence: 0 fp 1 low 2 medium 3 high
-            ALERT_NAME,              # name
-            "The parameter value is reflected in the HTML response without "
-            "output encoding, so an attacker-supplied script would execute.",
-            uri,                     # url the alert is raised against
-            param,                   # the vulnerable parameter
-            PROBE,                   # attack (the probe we sent)
-            "",                      # otherInfo
-            "HTML-encode the value before writing it into the response.",
-            PROBE,                   # evidence (what we matched in the response)
-            79,                      # CWE-79  (Cross-site Scripting)
-            20,                      # WASC-20 (Improper Input Handling)
-            probe)                   # the message the finding was found on
+    body = probe.getResponseBody().toString()
+    if PROBE not in body:
+        _trace("scan: param=%s not reflected" % param)
+        return
+
+    # Reflected without encoding -> raise the Globomantics alert on this param.
+    uri = probe.getRequestHeader().getURI().toString()
+    _trace("reflected: param=%s uri=%s" % (param, uri))
+
+    # Raise on the probe we actually sent: it carries the request/response that
+    # demonstrates the finding, and in an active scan its history reference is
+    # what ZAP attaches the alert to.
+    try:
+        alert = (sas.newAlert()
+                 .setRisk(2)          # 0 info 1 low 2 medium 3 high
+                 .setConfidence(2)    # 0 fp 1 low 2 medium 3 high
+                 .setName(ALERT_NAME)
+                 .setDescription("The parameter value is reflected in the HTML "
+                                 "response without output encoding, so an "
+                                 "attacker-supplied script would execute.")
+                 .setParam(param)
+                 .setAttack(PROBE)
+                 .setEvidence(PROBE)
+                 .setCweId(79)        # Cross-site Scripting
+                 .setWascId(20)       # Improper Input Handling
+                 .setMessage(probe))
+        # 'raise' is a Python keyword, so call the builder's raise() via getattr.
+        getattr(alert, "raise")()
+        _trace("raised: builder newAlert().raise() for param=%s" % param)
+    except Exception as e:
+        _trace("ERROR builder raise: %s" % repr(e))
+        # Fall back to the classic many-arg raiseAlert in case this build still
+        # supports it, so the alert is not lost if the builder path is rejected.
+        try:
+            sas.raiseAlert(2, 2, ALERT_NAME,
+                           "Reflected without output encoding.",
+                           uri, param, PROBE, "", "", PROBE, 79, 20, probe)
+            _trace("raised: classic sas.raiseAlert() for param=%s" % param)
+        except Exception as e2:
+            _trace("ERROR classic raiseAlert: %s" % repr(e2))
 
 
 def scanNode(sas, msg):
