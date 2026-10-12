@@ -11,7 +11,7 @@ screen at a time, and read the evidence that each finding is real.
 A default scan hands you a long list of alerts, but a list is not a decision.
 Which findings are real? Can you reproduce each one against the app's actual
 behavior? Here you confirm SQL, NoSQL, and command injection, capture reflected
-XSS across its output contexts, replay a CSRF token, and record a disposition
+XSS across its output contexts, reuse a CSRF token across sessions, and record a disposition
 for every alert — the difference between "I ran a scanner" and "I validated the
 risk."
 
@@ -56,7 +56,7 @@ cd module1/m1-c3
 ```bash
 ./scripts/demo_step.sh 1     # targeted injection scan        (~30–60s)
 ./scripts/demo_step.sh 2     # reflected XSS in three contexts
-./scripts/demo_step.sh 3     # CSRF token replay
+./scripts/demo_step.sh 3     # CSRF token reused across sessions
 ./scripts/demo_step.sh 4     # alert disposition record
 ```
 
@@ -77,9 +77,9 @@ cd module1/m1-c3
 
 | CSRF token state | Expected result |
 |------------------|-----------------|
-| valid | the request should succeed |
+| valid for this session | the request should succeed |
 | missing / invalid | the request should be rejected |
-| replayed (already used once) | the request should be rejected |
+| a valid token reused with a **different** session's cookie | the request should be rejected — a token must be tied to the session it was issued to (same-session reuse only matters when the app requires single-use tokens) |
 
 ---
 
@@ -88,8 +88,8 @@ cd module1/m1-c3
 | Step | You will… | Objective | Proof artifact |
 |------|-----------|-----------|----------------|
 | 1 | Run one targeted scan and confirm SQL, NoSQL, and command injection | EO1a | Targeted scan policy and rule list |
-| 2 | Capture reflected XSS across its three output contexts | EO1b | XSS request and response body |
-| 3 | Replay a CSRF token and show it is accepted | EO1c | CSRF token replay result |
+| 2 | Match the output context, then confirm reflected XSS with ZAP's own alert | EO1b | XSS request and response body |
+| 3 | Reuse a token across sessions and show the protected action still runs | EO1c | CSRF token replay result |
 | 4 | Reconcile every alert with app behavior and record it | EO1a · EO1b · EO1c | Alert disposition record |
 
 ---
@@ -123,11 +123,13 @@ alert IDs (`40018`, `40033`, `90020`), each tied to a specific parameter.
 
 ---
 
-## Step 2 — Reflected XSS in three contexts
+## Step 2 — Match the context, then confirm reflected XSS
 
 **Why you run this / what you learn:** the payload that works depends on *where*
-your input lands in the page, so you identify the output context first — it
-decides the payload you would use.
+your input lands, so you first map the output context for the `name` parameter —
+then ZAP's active scanner injects a real payload and raises
+**Cross Site Scripting (Reflected)** only when the reflection is actually
+exploitable. Reflection alone is not the proof; ZAP's alert is.
 
 **Do this:**
 ```bash
@@ -136,26 +138,37 @@ decides the payload you would use.
 
 ✅ **You'll see** (output — read it, don't type it):
 ```text
-WHAT: Reflected XSS — one input, three output contexts
-  ★ Request: GET /greet?name=zzMARKzz
-  ★ HTML body context: <p>Hello zzMARKzz
-  ★ HTML attribute context: value="zzMARKzz"
-  ★ JavaScript string context: var greeting = "zzMARKzz"
-✔ PASS  input reflects unescaped in all three contexts
+WHAT: Reflected XSS — match the context, then let ZAP confirm it
+Output contexts for the 'name' parameter (choose a payload per context):
+  ★ HTML body — use <script>…</script>: <p>Hello zzMARKzz
+  ★ HTML attribute — break out with ">…: value="zzMARKzz"
+  ★ JS string — break out with ";…: var greeting = "zzMARKzz"
+ZAP's confirmed finding:
+  ★ Alert: Cross Site Scripting (Reflected)
+  ★ Affected parameter: name
+  ★ Payload ZAP injected: </p><scrIpt>alert(1);</scRipt><p>
+  ★ Evidence (reflected in the response): </p><scrIpt>alert(1);</scRipt><p>
+✔ PASS  ZAP confirmed reflected XSS on 'name' with a context-specific payload (and the input lands in all three contexts)
 ```
 
-**What to highlight:** one input (`zzMARKzz`) reflected **unescaped** in all
-three contexts — each context would need a different payload to exploit.
+**What to highlight:** ZAP's **Cross Site Scripting (Reflected)** alert on
+parameter `name` — the payload it injected (`</p><scrIpt>…</scRipt><p>`) breaks
+out of the HTML body context and is reflected verbatim as evidence. That alert,
+not the plain reflection, is what confirms executable XSS.
 
 **Proof artifact:** *XSS request and response body.*
 
 ---
 
-## Step 3 — CSRF token replay
+## Step 3 — CSRF token reused across sessions
 
-**Why you run this / what you learn:** a CSRF token is only as good as its rules.
-A token checked for *presence* but not *freshness* can be replayed — you test the
-protection by reusing a token that was already used once.
+**Why you run this / what you learn:** a CSRF token must be **tied to the session
+it was issued to**. You open two independent logins, mint a token in session A,
+and submit it with session B's cookie. On the vulnerable build the protected
+email change is accepted and session B's stored email actually changes — proof
+the token is not bound to its session. (This is token reuse *across sessions*;
+rejecting a token *reused in the same session* only matters if the app requires
+single-use tokens.) Valid-token and missing-token cases are the controls.
 
 **Do this:**
 ```bash
@@ -164,16 +177,19 @@ protection by reusing a token that was already used once.
 
 ✅ **You'll see** (output — read it, don't type it):
 ```text
-WHAT: CSRF — token replay
-  ★ valid token: 200
+WHAT: CSRF — a token reused across sessions
+  ★ valid token (session B's own): 200
   ★ missing token: 403
-  ★ replayed token (already used once): 200
-✔ PASS  replayed token is accepted (200) — the CSRF protection has no freshness check
+  ★ session B's email before the cross-session request: alice@globomantics.example
+  ★ token from session A, submitted with session B's cookie: 200  (should be rejected)
+  ★ session B's email after the cross-session request: attacker@evil.example
+✔ PASS  session A's token was accepted with session B's cookie (200) and changed session B's email to attacker@evil.example — the token is not tied to its session
 ```
 
-**What to highlight:** presence *is* checked (missing = `403`), but the
-highlighted `200` on replay shows the token is **not single-use** — it can be
-replayed.
+**What to highlight:** the controls behave (valid `200`, missing `403`), but the
+highlighted cross-session `200` — session A's token accepted under session B's
+cookie — **changes session B's email** from `alice@globomantics.example` to
+`attacker@evil.example`. The state actually changed: that is the bypass.
 
 **Proof artifact:** *CSRF token replay result.*
 
@@ -248,6 +264,7 @@ single-use, session-bound CSRF tokens:
 APP_BUILD=remediated docker compose up -d --build app
 ```
 
-Re-run the steps: the injection alerts disappear, the XSS output becomes encoded,
-and the replayed CSRF token is rejected with `403`. Switch back with
-`./scripts/demo_reset.sh`.
+Re-run the steps: the injection alerts disappear, the XSS output becomes encoded
+(no `Cross Site Scripting (Reflected)` alert), and the cross-session CSRF request
+is rejected with `403` because the token is now bound to its session. Switch back
+with `./scripts/demo_reset.sh`.
