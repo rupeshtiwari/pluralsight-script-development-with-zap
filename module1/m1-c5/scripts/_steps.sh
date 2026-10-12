@@ -103,9 +103,25 @@ zap_container() {
     ( cd "${REPO_ROOT}" && docker compose ps -q zap 2>/dev/null ) | head -1
 }
 # Reset the rule's trace file so a run's trace reflects only this scan.
+# Remove (don't truncate) it: the rule runs as uid 1000 and must be able to
+# create the file itself, so we never leave a root-owned file it cannot append
+# to — otherwise "no trace" could be a write-permission false negative.
 reset_rule_trace() {
     local c; c="$(zap_container)"
-    [ -n "${c}" ] && docker exec "${c}" sh -c ": > ${RULE_TRACE_ZAP}" >/dev/null 2>&1 || true
+    [ -n "${c}" ] && docker exec "${c}" sh -c "rm -f ${RULE_TRACE_ZAP}" >/dev/null 2>&1 || true
+}
+# ZAP's own record of whether the script errored at load/invocation time.
+script_error_json() { # -> compact JSON for our rule (empty if absent)
+    zap script/view/listScripts | python3 -c '
+import json,sys
+name=sys.argv[1]
+try: d=json.load(sys.stdin)
+except Exception: print(""); raise SystemExit
+for s in d.get("listScripts",[]):
+    if s.get("name")==name:
+        keep={k:s.get(k) for k in ("type","engine","enabled","error","errorDetails","lastErrorDetails") if k in s}
+        print(json.dumps(keep)); raise SystemExit
+print("")' "${RULE_NAME}"
 }
 # The lines the custom rule wrote during the scan (empty if it never ran).
 rule_trace() {
@@ -349,8 +365,9 @@ step4_custom_alert() {
         fm section "Why no alert — diagnosis"
         fm star "Script Active Scan Rules (50000) enabled" "${se:-unknown}"
         if [ -z "${tr}" ]; then
-            fm note "The rule's scan() left NO trace — it was never invoked by the scanner."
-            fm item "Fix: ensure plugin 50000 is enabled in the policy AND the script is loaded (type=active) and enabled, so the Script Active Scan Rules plugin runs it."
+            fm note "The rule left NO trace (neither scan() nor scanNode()) — the scanner never entered our script."
+            fm star "ZAP's record for this script" "$(script_error_json)"
+            fm item "If error=true above, the script failed its interface/compile and ZAP skipped it — fix the body for Jython 2.7. If error=false, the Script Active Scan Rules plugin did not route this node/param to our script."
         elif echo "${tr}" | grep -q '^ERROR'; then
             fm note "The rule ran and DETECTED the reflection, but the raise call threw:"
             echo "${tr}" | sed 's/^/      /'

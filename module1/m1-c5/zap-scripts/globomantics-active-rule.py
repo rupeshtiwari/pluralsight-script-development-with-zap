@@ -85,4 +85,9 @@ def scan(sas, msg, param, value):
 
 
 def scanNode(sas, msg):
-    pass
+    # Author trace only: proves the scanner bound our script's interface and
+    # entered it at the node level, even before per-parameter scanning.
+    try:
+        _trace("scanNode: %s" % msg.getRequestHeader().getURI().toString())
+    except Exception:
+        _trace("scanNode: entered")
