@@ -28,6 +28,8 @@
 #   succeeded — independent of ZAP's alert store. The trace does nothing on
 #   screen; the demo's proof artifact is the named alert in ZAP's Alerts tab.
 
+import sys
+
 PROBE = "GLOBOxss7marker"
 ALERT_NAME = "Globomantics unsafe reflection (custom rule)"
 DESCRIPTION = ("The parameter value is reflected in the HTML response without "
@@ -73,16 +75,56 @@ def _raise(sas, probe, param):
             _trace("ERROR classic raiseAlert: %s" % repr(e2))
 
 
+def _err(where, param):
+    # Trace the current exception. In Jython a Java Throwable may not be a
+    # Python Exception, so callers use a bare except and we read exc_info here.
+    try:
+        _trace("ERROR %s param=%s: %s" % (where, param, repr(sys.exc_info()[1])))
+    except Exception:
+        _trace("ERROR %s param=%s: <unprintable>" % (where, param))
+
+
+def _send(sas, probe):
+    # Try the known sendAndReceive signatures; builds differ.
+    try:
+        sas.sendAndReceive(probe, False, False)
+        return
+    except:  # noqa: E722  (may be a Java Throwable)
+        pass
+    try:
+        sas.sendAndReceive(probe, False)
+        return
+    except:  # noqa: E722
+        pass
+    sas.sendAndReceive(probe)
+
+
 def _check(sas, msg, param):
     # Send our probe in this parameter and raise if it reflects unencoded.
-    probe = msg.cloneRequest()
-    sas.setParam(probe, param, PROBE)
-    sas.sendAndReceive(probe, False, False)
-    if PROBE in probe.getResponseBody().toString():
-        _trace("reflected: param=%s" % param)
+    # Every step is traced and no throwable may escape, so the author preflight
+    # can see exactly how far the rule got.
+    try:
+        probe = msg.cloneRequest()
+    except:  # noqa: E722
+        _err("clone", param); return
+    try:
+        sas.setParam(probe, param, PROBE)
+    except:  # noqa: E722
+        _err("setParam", param); return
+    try:
+        _send(sas, probe)
+    except:  # noqa: E722
+        _err("send", param); return
+    try:
+        code = probe.getResponseHeader().getStatusCode()
+        body = probe.getResponseBody().toString()
+    except:  # noqa: E722
+        _err("readResponse", param); return
+    if PROBE in body:
+        _trace("reflected: param=%s http=%s" % (param, code))
         _raise(sas, probe, param)
     else:
-        _trace("not-reflected: param=%s" % param)
+        _trace("not-reflected: param=%s http=%s len=%d" % (param, code, len(body)))
 
 
 def scan(sas, msg, param, value):
@@ -95,13 +137,13 @@ def scanNode(sas, msg):
     _trace("scanNode: %s" % uri)
     try:
         params = msg.getUrlParams()
-    except Exception as e:
-        _trace("ERROR getUrlParams: %s" % repr(e))
+    except:  # noqa: E722
+        _err("getUrlParams", "-")
         return
     for p in params:
-        name = p.getName()
-        _trace("scanNode-check: param=%s" % name)
         try:
-            _check(sas, msg, name)
-        except Exception as e:
-            _trace("ERROR check param=%s: %s" % (name, repr(e)))
+            name = p.getName()
+        except:  # noqa: E722
+            _err("paramName", "-"); continue
+        _trace("scanNode-check: param=%s" % name)
+        _check(sas, msg, name)
