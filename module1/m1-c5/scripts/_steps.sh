@@ -5,8 +5,10 @@
 # Sourced by preflight_check.sh (author tooling). The demo itself is authored in
 # ZAP's Script Console (GUI); this library proves, through the ZAP API, that the
 # two Jython scripts behave as the runbook describes:
-#   1. Python active-rule source        2. Authentication script source
-#   3. Authenticated custom-scan result 4. Custom alert record
+#   1. Python active-rule source
+#   2. Authentication script source
+#   3. ZAP runs the authentication script and holds the session (EO2c)
+#   4. The custom rule raises a FRESH named alert on that scan (EO2b)
 #
 # Every request targets ONLY the local Globomantics app on the compose network.
 
@@ -33,9 +35,16 @@ AUTH_FILE_ZAP="/zap-scripts-py/globomantics-auth.py"
 
 ALERT_NAME="Globomantics unsafe reflection (custom rule)"
 LOGIN_USER="alice"
+LOGIN_URL="${APP_INTERNAL}/login"
 PROFILE_URL="${APP_INTERNAL}/account/profile?note=seed"
 SCRIPT_RULES_ID="50000"   # ZAP "Script Active Scan Rules" plugin
 RULE_TRACE_ZAP="/tmp/globo-rule-trace.log"   # author diagnostics the rule writes
+AUTH_TRACE_ZAP="/tmp/globo-auth-trace.log"   # author diagnostics the auth script writes
+CTX_NAME="globo-m1c5"                        # context the preflight configures
+
+# Set by step 3 and reused by step 4.
+CTX_ID=""
+USER_ID=""
 
 PASS=0; FAIL=0; STEP_RC=0
 pass() { fm ok "$1"; PASS=$((PASS+1)); STEP_RC=0; }
@@ -48,6 +57,12 @@ zap() { # <path> <query> -> body (asserts HTTP 200)
     [ "${code}" = "200" ] || { echo "  (ZAP API ${path} -> HTTP ${code})" >&2; return 1; }
     cat /tmp/.z3body
 }
+
+# Pull a single key out of a flat ZAP JSON response.
+json_get() { python3 -c 'import json,sys
+key=sys.argv[1]
+try: print(json.load(sys.stdin).get(key,""))
+except Exception: print("")' "$1"; }
 
 detect_jython_engine() {
     zap script/view/listEngines | python3 -c '
@@ -82,18 +97,8 @@ for s in data.get("listScripts", []):
 print("")' "$1"
 }
 
-# --- authentication helpers (host-side proof of EO2c behavior) --------------
-login_cookie() { # -> the session cookie value (empty on failure)
-    curl -s -x "${PROXY}" -D - -o /dev/null -X POST "${APP_INTERNAL}/login" \
-        --data "username=${LOGIN_USER}" \
-        | grep -i '^set-cookie:' | sed -E 's/.*session=([^;]+).*/\1/I' | head -1 | tr -d '\r'
-}
-
-status_with_cookie() { # <url> <cookie> -> HTTP code (through the ZAP proxy)
-    curl -s -x "${PROXY}" -o /tmp/.z3profile -w '%{http_code}' -b "session=$2" "$1"
-}
 status_no_cookie() {  # <url> -> HTTP code (through the ZAP proxy)
-    curl -s -x "${PROXY}" -o /dev/null -w '%{http_code}' "$1"
+    curl -s -x "${PROXY}" -o /tmp/.z3profile -w '%{http_code}' "$1"
 }
 
 # --- container diagnostics (author-only) ------------------------------------
@@ -102,16 +107,24 @@ status_no_cookie() {  # <url> -> HTTP code (through the ZAP proxy)
 zap_container() {
     ( cd "${REPO_ROOT}" && docker compose ps -q zap 2>/dev/null ) | head -1
 }
-# Reset the rule's trace file so a run's trace reflects only this scan.
-# Remove (don't truncate) it: the rule runs as uid 1000 and must be able to
-# create the file itself, so we never leave a root-owned file it cannot append
-# to — otherwise "no trace" could be a write-permission false negative.
-reset_rule_trace() {
+# Reset a trace file so a run's trace reflects only this scan. Remove (don't
+# truncate) it: the scripts run as uid 1000 and must be able to create the file
+# themselves, so we never leave a root-owned file they cannot append to.
+reset_trace() { # <path-in-container>
     local c; c="$(zap_container)"
-    [ -n "${c}" ] && docker exec "${c}" sh -c "rm -f ${RULE_TRACE_ZAP}" >/dev/null 2>&1 || true
+    [ -n "${c}" ] && docker exec "${c}" sh -c "rm -f $1" >/dev/null 2>&1 || true
 }
+read_trace() { # <path-in-container>
+    local c; c="$(zap_container)"
+    [ -n "${c}" ] && docker exec "${c}" sh -c "cat $1 2>/dev/null" || true
+}
+reset_rule_trace() { reset_trace "${RULE_TRACE_ZAP}"; }
+rule_trace()       { read_trace  "${RULE_TRACE_ZAP}"; }
+reset_auth_trace() { reset_trace "${AUTH_TRACE_ZAP}"; }
+auth_trace()       { read_trace  "${AUTH_TRACE_ZAP}"; }
+
 # ZAP's own record of whether the script errored at load/invocation time.
-script_error_json() { # -> compact JSON for our rule (empty if absent)
+script_error_json() { # <name> -> compact JSON (empty if absent)
     zap script/view/listScripts | python3 -c '
 import json,sys
 name=sys.argv[1]
@@ -121,16 +134,9 @@ for s in d.get("listScripts",[]):
     if s.get("name")==name:
         keep={k:s.get(k) for k in ("type","engine","enabled","error","errorDetails","lastErrorDetails") if k in s}
         print(json.dumps(keep)); raise SystemExit
-print("")' "${RULE_NAME}"
+print("")' "$1"
 }
-# The lines the custom rule wrote during the scan (empty if it never ran).
-rule_trace() {
-    local c; c="$(zap_container)"
-    [ -n "${c}" ] && docker exec "${c}" sh -c "cat ${RULE_TRACE_ZAP} 2>/dev/null" || true
-}
-# Is the Script Active Scan Rules plugin (50000) actually enabled in the policy
-# the scan used? If not, our script rule is never invoked at all.
-script_rules_enabled() { # -> "true"/"false"/""
+script_rules_enabled() { # -> "true"/"false"/""  (plugin 50000 in the policy)
     zap ascan/view/scanners | python3 -c '
 import json,sys
 try: data=json.load(sys.stdin)
@@ -141,46 +147,88 @@ for s in data.get("scanners", []):
 print("")'
 }
 
+# --- ZAP script-based authentication setup (EO2c) ---------------------------
+# Configure a context so ZAP ITSELF logs in by running the authentication
+# script, instead of the preflight logging in and injecting a cookie.
+get_or_create_context() { # <name> -> contextId
+    local id
+    id="$(zap context/action/newContext "contextName=$(enc "$1")" 2>/dev/null | json_get contextId)"
+    if [ -z "${id}" ]; then
+        id="$(zap context/view/context "contextName=$(enc "$1")" | python3 -c 'import json,sys
+try: print(json.load(sys.stdin).get("context",{}).get("id",""))
+except Exception: print("")')"
+    fi
+    echo "${id}"
+}
+forced_user_mode() { # <true|false>
+    zap forcedUser/action/setForcedUserModeEnabled "boolean=$1" >/dev/null 2>&1 || true
+}
+# Run the full context + user setup. Appends any failed call to SETUP_ERRS.
+SETUP_ERRS=""
+setup_script_auth() { # sets CTX_ID and USER_ID
+    SETUP_ERRS=""
+    CTX_ID="$(get_or_create_context "${CTX_NAME}")"
+    [ -n "${CTX_ID}" ] || { SETUP_ERRS="${SETUP_ERRS} newContext"; return 1; }
+
+    zap context/action/includeInContext \
+        "contextName=$(enc "${CTX_NAME}")&regex=$(enc 'http://app:8000.*')" >/dev/null 2>&1 \
+        || SETUP_ERRS="${SETUP_ERRS} includeInContext"
+
+    zap sessionManagement/action/setSessionManagementMethod \
+        "contextId=${CTX_ID}&methodName=cookieBasedSessionManagement&methodconfigparams=" >/dev/null 2>&1 \
+        || SETUP_ERRS="${SETUP_ERRS} sessionManagement"
+
+    # scriptBasedAuthentication: the whole inner config is one URL-encoded value.
+    local inner="scriptName=${AUTH_NAME}&Login URL=${LOGIN_URL}"
+    zap authentication/action/setAuthenticationMethod \
+        "contextId=${CTX_ID}&authMethodName=scriptBasedAuthentication&authMethodConfigParams=$(enc "${inner}")" >/dev/null 2>&1 \
+        || SETUP_ERRS="${SETUP_ERRS} setAuthenticationMethod"
+
+    # The gated page says "Please log in first" when not authenticated, so ZAP
+    # can tell when it must (re-)run the login script.
+    zap authentication/action/setLoggedOutIndicator \
+        "contextId=${CTX_ID}&loggedOutIndicatorRegex=$(enc 'Please log in first')" >/dev/null 2>&1 \
+        || SETUP_ERRS="${SETUP_ERRS} loggedOutIndicator"
+
+    USER_ID="$(zap users/action/newUser "contextId=${CTX_ID}&name=$(enc "${LOGIN_USER}")" 2>/dev/null | json_get userId)"
+    [ -n "${USER_ID}" ] || { SETUP_ERRS="${SETUP_ERRS} newUser"; return 1; }
+
+    zap users/action/setAuthenticationCredentials \
+        "contextId=${CTX_ID}&userId=${USER_ID}&authCredentialsConfigParams=$(enc "username=${LOGIN_USER}")" >/dev/null 2>&1 \
+        || SETUP_ERRS="${SETUP_ERRS} setCredentials"
+    zap users/action/setUserEnabled \
+        "contextId=${CTX_ID}&userId=${USER_ID}&enabled=true" >/dev/null 2>&1 \
+        || SETUP_ERRS="${SETUP_ERRS} enableUser"
+    zap forcedUser/action/setForcedUser \
+        "contextId=${CTX_ID}&userId=${USER_ID}" >/dev/null 2>&1 \
+        || SETUP_ERRS="${SETUP_ERRS} setForcedUser"
+    return 0
+}
+
 # --- active scan helpers ----------------------------------------------------
-# Use the full default policy so ZAP discovers the parameter and runs every
-# enabled active rule (our script rule included). Re-enable all scanners in case
-# an earlier run left the policy stripped down.
 enable_all_scanners() {
     zap ascan/action/enableAllScanners >/dev/null 2>&1 || true
     zap ascan/action/enableScanners "ids=${SCRIPT_RULES_ID}" >/dev/null 2>&1 || true
 }
+del_all_alerts() { zap core/action/deleteAllAlerts >/dev/null 2>&1 || true; }
 scan_messages_count() { # <scanId> -> number of probe requests the scan sent
     zap ascan/view/messagesIds "scanId=$1" | python3 -c 'import json,sys
 try: print(len(json.load(sys.stdin).get("messagesIds",[])))
 except Exception: print("0")'
 }
-# Force every scanner request to carry the session cookie, so the active scan
-# runs authenticated regardless of ZAP's session management (best-effort: needs
-# the Replacer add-on, which ships with ZAP).
-add_auth_cookie_header() { # <cookie>
-    zap replacer/action/addRule \
-        "description=globo-auth-cookie&enabled=true&matchType=REQ_HEADER&matchString=Cookie&matchRegex=false&replacement=$(enc "session=$1")&initiators=" \
-        >/dev/null 2>&1 || true
-}
-remove_auth_cookie_header() {
-    zap replacer/action/removeRule "description=$(enc 'globo-auth-cookie')" >/dev/null 2>&1 || true
-}
-start_scan() { # <url> -> scanId (empty on failure)
-    zap ascan/action/scan "url=$(enc "$1")&recurse=false&inScopeOnly=false" \
-        | python3 -c 'import json,sys
-try: print(json.load(sys.stdin).get("scan",""))
+start_scan_as_user() { # <url> <contextId> <userId> -> scanId (empty on failure)
+    zap ascan/action/scanAsUser \
+        "url=$(enc "$1")&contextId=$2&userId=$3&recurse=false&scanPolicyName=" | python3 -c 'import json,sys
+try:
+    d=json.load(sys.stdin); print(d.get("scanAsUser") or d.get("scan") or "")
 except Exception: print("")'
 }
 scan_done() { # <scanId> -> 0 when status is 100
     local pct
-    pct="$(zap ascan/view/status "scanId=$1" | python3 -c 'import json,sys
-try: print(json.load(sys.stdin).get("status",""))
-except Exception: print("")')"
+    pct="$(zap ascan/view/status "scanId=$1" | json_get status)"
     [ "${pct}" = "100" ]
 }
 custom_alert() { # -> name|risk|param|evidence  (empty if not raised)
-    # Search ALL alerts by name (unfiltered) so a URL-filter mismatch cannot hide
-    # a raised alert — the check must reflect whether the rule actually fired.
     zap core/view/alerts | python3 -c '
 import json,sys
 name = sys.argv[1]
@@ -243,7 +291,6 @@ step2_auth_script_source() {
     local ok=1
     grep -q 'def authenticate(' "${AUTH_FILE_HOST}" || ok=0
     grep -q 'getCredentialsParamsNames' "${AUTH_FILE_HOST}" || ok=0
-    grep -q '/login' <(grep -i 'login' "${AUTH_FILE_HOST}") || true
     fm star "Script name" "${AUTH_NAME}   (type: authentication · engine: ${JYTHON_ENGINE:-Jython})"
     fm star "It submits" "username=${LOGIN_USER} to POST /login, then ZAP reuses the session cookie" focus
     if [ "${ok}" = 1 ] && load_script "${AUTH_NAME}" "authentication" "${JYTHON_ENGINE}" "${AUTH_FILE_ZAP}"; then
@@ -263,123 +310,129 @@ step2_auth_script_source() {
 }
 
 # ===========================================================================
-# STEP 3 — Authenticated custom-scan result (EO2b · EO2c)
+# STEP 3 — ZAP runs the authentication script and holds the session (EO2c)
 # ===========================================================================
-step3_authenticated_scan() {
-    fm header "The custom rule running against the authenticated endpoint" \
-              "Scripted authentication logs in; the custom rule then scans a page that only exists when logged in (EO2b · EO2c)."
+# Prove that ZAP ITSELF authenticates by running the script: with a context
+# configured for script-based authentication and a forced user, a request that
+# carries NO cookie comes back 200, and the script's authenticate() leaves its
+# trace. Nothing here supplies a cookie — the session comes from the script.
+step3_auth_executes() {
+    fm header "ZAP runs your authentication script" \
+              "ZAP executes the login script to get a session, then reaches a page that only exists when logged in — no cookie supplied by us (EO2c)."
 
-    # 3a. Prove the endpoint is truly session-gated, then log in.
-    local no_cookie; no_cookie="$(status_no_cookie "${PROFILE_URL}")"
-    local cookie; cookie="$(login_cookie)"
-    if [ -z "${cookie}" ]; then
-        fail "login did not return a session cookie" "POST /login via the proxy produced no session" \
-             "ask: 'the Globomantics login did not set a session cookie; check POST /login'"
-        return "${STEP_RC}"
-    fi
-    local with_cookie; with_cookie="$(status_with_cookie "${PROFILE_URL}" "${cookie}")"
-    fm star "Without login" "/account/profile -> HTTP ${no_cookie}  (gated)"
-    fm star "After scripted login" "/account/profile -> HTTP ${with_cookie}  (reachable)" focus
+    # Clean auth state so the gating probe is honest (a prior run may have left
+    # forced-user mode on).
+    forced_user_mode false
+    local gated; gated="$(status_no_cookie "${PROFILE_URL}")"
 
-    if [ "${no_cookie}" != "401" ] || [ "${with_cookie}" != "200" ]; then
-        fail "the authenticated endpoint did not behave as expected" \
-             "expected 401 without login and 200 with the session cookie" \
-             "ask: 'check /account/profile is 401 without a session and 200 with one'"
-        return "${STEP_RC}"
-    fi
+    setup_script_auth
+    reset_auth_trace
+    forced_user_mode true
 
-    # 3b. Run an active scan with the full default policy (so ZAP discovers the
-    #     note parameter and runs every enabled active rule, ours included).
-    #     Inject the session cookie into all scan traffic, and re-seed the
-    #     authenticated request so the scanned node carries the cookie + note.
-    enable_all_scanners
-    reset_rule_trace
-    add_auth_cookie_header "${cookie}"
-    curl -s -x "${PROXY}" -o /dev/null -b "session=${cookie}" "${PROFILE_URL}"
-    local sid; sid="$(start_scan "${PROFILE_URL}")"
-    if [ -z "${sid}" ]; then
-        remove_auth_cookie_header
-        fail "could not start the active scan" "ascan/action/scan returned no scan id" \
-             "ask: 'the active scan did not start against the authenticated profile URL'"
-        return "${STEP_RC}"
-    fi
-    local i
-    for i in $(seq 1 90); do
-        scan_done "${sid}" && break
-        sleep 2
-    done
-    remove_auth_cookie_header
-    local sent; sent="$(scan_messages_count "${sid}")"
-    if scan_done "${sid}"; then
-        fm star "Scan target" "${PROFILE_URL} (param: note)"
-        fm star "Probe requests the scan sent" "${sent}"
-        pass "the custom rule ran an authenticated active scan to completion"
+    # Through the proxy, with NO cookie: forced-user mode makes ZAP authenticate
+    # via the script before sending, so this should come back 200.
+    local authed; authed="$(status_no_cookie "${APP_INTERNAL}/account/profile?note=authprobe")"
+    local tr; tr="$(auth_trace)"
+
+    fm star "Without login" "/account/profile -> HTTP ${gated}  (gated)"
+    fm star "ZAP forced-user (script auth)" "/account/profile -> HTTP ${authed}  (reachable)" focus
+
+    if [ "${gated}" = "401" ] && [ "${authed}" = "200" ] && echo "${tr}" | grep -q 'authenticate:'; then
+        fm star "Auth script ran" "$(echo "${tr}" | tr '\n' ' ')"
+        pass "ZAP executed the authentication script and holds the session (no cookie supplied by the preflight)"
     else
-        fail "the active scan did not finish in time" "it is still running after ~2 minutes" \
-             "ask: 're-run; if it persists, check the ZAP active scan status'"
+        fail "ZAP did not authenticate by running the script" \
+             "expected gated=401 and authed=200 with an authenticate() trace; got gated=${gated} authed=${authed}" \
+             "see the diagnosis below, then fix the context/auth setup (never weaken the check)"
+        fm section "Why auth did not work — diagnosis"
+        fm star "Context id" "${CTX_ID:-<none>}"
+        fm star "User id" "${USER_ID:-<none>}"
+        fm star "Setup calls that failed" "${SETUP_ERRS:- none}"
+        fm note "Auth-script trace (empty = ZAP never called authenticate()):"
+        echo "${tr:-<empty>}" | sed 's/^/      /'
     fi
     return "${STEP_RC}"
 }
 
 # ===========================================================================
-# STEP 4 — Custom alert record (EO2b)
+# STEP 4 — The custom rule raises a FRESH named alert on that scan (EO2b)
 # ===========================================================================
-# Did the authenticated scan reflect the probe on note? ZAP's own reflected-XSS
-# rule firing on /account/profile proves the exact unencoded-reflection condition
-# the custom rule detects is present AND reachable while logged in.
-reflection_reached() {
-    zap core/view/alerts "baseurl=$(enc "${APP_INTERNAL}/account/profile")" | python3 -c '
-import json,sys
-try: data=json.load(sys.stdin)
-except Exception: print(""); raise SystemExit
-for a in data.get("alerts", []):
-    nm=(a.get("alert") or a.get("name") or "")
-    if "Cross Site Scripting (Reflected)" in nm:
-        print("%s | param=%s" % (nm, a.get("param"))); raise SystemExit
-print("")'
-}
+# Clear the alert store first and confirm the named alert is ABSENT, then scan
+# the gated page AS THE AUTHENTICATED USER (ZAP's script provides the session)
+# and confirm the alert is now PRESENT. Absent-before + present-after proves the
+# alert is from this scan, not a leftover from an earlier run.
+step4_fresh_alert() {
+    fm header "The custom alert the rule raises" \
+              "A rule you can trust raises a clear, named alert (EO2b). On screen it appears in ZAP's Alerts tab — the clip's proof artifact. We clear the store first so the alert is provably from this scan."
 
-step4_custom_alert() {
-    fm header "The custom alert the rule raised" \
-              "A rule you can trust raises a clear, named alert (EO2b). On screen, that alert appears in ZAP's Alerts tab — the clip's proof artifact."
+    del_all_alerts
+    local before; before="$(custom_alert)"
+    fm star "Before scan (store cleared)" "$([ -z "${before}" ] && echo 'absent' || echo "${before}")"
 
-    # The learning objective is a rule that RAISES a named alert, so this step
-    # verifies the alert itself — not merely that the rule loaded or that the
-    # reflection was reached.
-    local rec; rec="$(custom_alert)"
-    if [ -n "${rec}" ]; then
-        IFS='|' read -r n r p e <<<"${rec}"
+    enable_all_scanners
+    reset_rule_trace
+    # Seed the node as the forced user (no cookie), then scan it as that user.
+    status_no_cookie "${PROFILE_URL}" >/dev/null
+    local sid=""
+    if [ -n "${CTX_ID}" ] && [ -n "${USER_ID}" ]; then
+        sid="$(start_scan_as_user "${PROFILE_URL}" "${CTX_ID}" "${USER_ID}")"
+    fi
+    if [ -z "${sid}" ]; then
+        fail "could not start the authenticated active scan" \
+             "ascan/action/scanAsUser returned no scan id (context/user from step 3: ctx=${CTX_ID:-none} user=${USER_ID:-none})" \
+             "re-run after step 3 passes; the scan reuses the script-authenticated user"
+        forced_user_mode false
+        return "${STEP_RC}"
+    fi
+    local i
+    for i in $(seq 1 90); do scan_done "${sid}" && break; sleep 2; done
+    local sent; sent="$(scan_messages_count "${sid}")"
+    fm star "Scan target" "${PROFILE_URL} (param: note, as user ${LOGIN_USER})"
+    fm star "Probe requests the scan sent" "${sent}"
+
+    local after; after="$(custom_alert)"
+    forced_user_mode false   # leave ZAP as we found it
+
+    if [ -z "${before}" ] && [ -n "${after}" ]; then
+        IFS='|' read -r n r p e <<<"${after}"
         fm star "Alert" "${n}" focus
         fm star "Risk" "${r}"
         fm star "Parameter" "${p}"
         fm star "Evidence" "${e}"
-        pass "the custom rule RAISED its named alert (verified via the ZAP API)"
+        pass "the custom rule RAISED its named alert on this scan — absent before, present after (verified via the ZAP API)"
+    elif [ -n "${before}" ]; then
+        fail "could not guarantee a fresh alert" \
+             "the named alert was already present BEFORE the scan despite clearing the store" \
+             "ask: 'core/action/deleteAllAlerts did not clear the store; check the ZAP API key and version'"
     else
         fail "the custom rule did not raise its named alert" \
-             "core/view/alerts has no '${ALERT_NAME}' after the scan" \
+             "core/view/alerts has no '${ALERT_NAME}' after the authenticated scan" \
              "see the diagnosis below, then fix accordingly (never weaken the check)"
-        # --- self-diagnosis: pinpoint WHICH of three things went wrong --------
         local se tr
         se="$(script_rules_enabled)"
         tr="$(rule_trace)"
         fm section "Why no alert — diagnosis"
         fm star "Script Active Scan Rules (50000) enabled" "${se:-unknown}"
         if [ -z "${tr}" ]; then
-            fm note "The rule left NO trace (neither scan() nor scanNode()) — the scanner never entered our script."
-            fm star "ZAP's record for this script" "$(script_error_json)"
-            fm item "If error=true above, the script failed its interface/compile and ZAP skipped it — fix the body for Jython 2.7. If error=false, the Script Active Scan Rules plugin did not route this node/param to our script."
+            fm note "The rule left NO trace — the scanner never entered our script."
+            fm star "ZAP's record for this script" "$(script_error_json "${RULE_NAME}")"
+            fm item "If error=true, the script failed to compile for Jython 2.7. If error=false, plugin 50000 did not route this scan to our script."
         elif echo "${tr}" | grep -q '^ERROR'; then
-            fm note "The rule ran and DETECTED the reflection, but the raise call threw:"
+            fm note "The rule ran but a probe step threw:"
             echo "${tr}" | sed 's/^/      /'
-            fm item "Fix: adjust the raise call in globomantics-active-rule.py to the API this ZAP build accepts."
+            fm item "Fix the named call in globomantics-active-rule.py."
+        elif echo "${tr}" | grep -q 'http=401'; then
+            fm note "The rule ran but its probe was NOT authenticated (HTTP 401) — the scan is not carrying the script session:"
+            echo "${tr}" | sed 's/^/      /'
+            fm item "Fix: ensure the scan runs as the context user so ZAP applies the script-obtained session to probe requests."
         elif echo "${tr}" | grep -q '^raised:'; then
-            fm note "The rule ran, detected, AND raised successfully — yet the alert is absent from the store/API/GUI (they share one store)."
+            fm note "The rule detected and raised, yet the alert is absent from the store:"
             echo "${tr}" | sed 's/^/      /'
-            fm item "This is a ZAP 2.17.0 platform behavior for Jython script-rule alerts, not a script bug. Decide the course-design handling with the owner before weakening the check."
+            fm item "Investigate alert persistence for this build before weakening the check."
         else
-            fm note "The rule ran but did not detect a reflection on the scanned param:"
+            fm note "The rule ran but did not detect a reflection:"
             echo "${tr}" | sed 's/^/      /'
-            fm item "Fix: confirm the scan hit /account/profile?note=... and that note is reflected while authenticated."
+            fm item "Confirm note is reflected on /account/profile while authenticated."
         fi
     fi
     return "${STEP_RC}"

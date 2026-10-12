@@ -3,9 +3,12 @@
 # WHAT IT DOES
 #   During an active scan, for each query parameter on a page it sends a
 #   distinctive probe and checks whether the response reflects it verbatim.
-#   On /account/profile the note value is written straight into the HTML body,
-#   so an unencoded reflection there would EXECUTE as script — the rule raises
-#   a named alert. This is the targeted, house-specific check you write when a
+#   On /account/profile the note value is written into the HTML body without
+#   output encoding, so the probe comes back unescaped — a strong indicator of
+#   reflected XSS (the value is returned in a way that could let an attacker's
+#   markup or script run). Confirming it actually executes is a separate,
+#   context-specific step; this rule flags the unencoded reflection and raises
+#   a named alert. It is the targeted, house-specific check you write when a
 #   built-in rule does not cover your app's exact concern (EO2b).
 #
 # ZAP calls two functions on an active-scan script:
@@ -28,7 +31,10 @@ import sys
 PROBE = "GLOBOxss7marker"
 ALERT_NAME = "Globomantics unsafe reflection (custom rule)"
 DESCRIPTION = ("The parameter value is reflected in the HTML response without "
-               "output encoding, so an attacker-supplied script would execute.")
+               "output encoding. Returning attacker-controlled input unescaped "
+               "is a strong indicator of reflected XSS; whether injected script "
+               "executes depends on the exact output context and should be "
+               "confirmed with a context-specific payload.")
 TRACE = "/tmp/globo-rule-trace.log"
 
 

@@ -20,10 +20,26 @@ from java.net import URLEncoder
 from java.lang import String
 from jarray import array
 
+# AUTHOR NOTE (invisible in the recorded clip): authenticate() appends a short
+# trace to /tmp/globo-auth-trace.log in the ZAP container so the author
+# preflight can prove ZAP actually invoked this script to log in. It has no
+# effect on screen; on screen you see the [globo-auth] console lines below.
+TRACE = "/tmp/globo-auth-trace.log"
+
+
+def _trace(line):
+    try:
+        f = open(TRACE, "a")
+        f.write(line + "\n")
+        f.close()
+    except Exception:
+        pass
+
 
 def authenticate(helper, paramsValues, credentials):
     login_url = paramsValues.get("Login URL")
     username = credentials.getParam("username")
+    _trace("authenticate: user=%s login_url=%s" % (username, login_url))
     print("[globo-auth] logging in as '%s' via %s" % (username, login_url))
 
     # Build the same form POST the Globomantics login form sends.
@@ -40,6 +56,7 @@ def authenticate(helper, paramsValues, credentials):
 
     # Send it; ZAP captures the Set-Cookie session for later requests.
     helper.sendAndReceive(msg)
+    _trace("authenticate: response=%s" % msg.getResponseHeader().getStatusCode())
     print("[globo-auth] login response: %s" % msg.getResponseHeader().getStatusCode())
     return msg
 

@@ -35,10 +35,10 @@ main() {
         summary; return 1
     fi
 
-    banner 1 "Python active-rule source (EO2b)";        step1_active_rule_source
-    banner 2 "Authentication script source (EO2c)";     step2_auth_script_source
-    banner 3 "Authenticated custom-scan result (EO2b·EO2c)"; step3_authenticated_scan
-    banner 4 "Custom alert record (EO2b)";              step4_custom_alert
+    banner 1 "Python active-rule source (EO2b)";          step1_active_rule_source
+    banner 2 "Authentication script source (EO2c)";       step2_auth_script_source
+    banner 3 "ZAP runs the authentication script (EO2c)"; step3_auth_executes
+    banner 4 "Fresh custom alert on the scan (EO2b)";     step4_fresh_alert
 
     summary
     [ "${FAIL}" -eq 0 ]
