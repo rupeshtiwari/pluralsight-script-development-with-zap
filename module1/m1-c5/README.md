@@ -3,23 +3,31 @@
 Extend ZAP with two Jython scripts — a custom active-scan rule and an
 authentication script — then run the rule against a login-only Globomantics page
 and confirm it raises your alert. You author both scripts in ZAP's Script Console;
-each `./scripts/demo_step.sh N` command verifies one beat.
+each Terminal command verifies one beat.
 
 > **Authorization and scope.** These scripts run only against the local
 > Globomantics application.
 
+## Applications and locations used
+
+| Application | Where | Used for |
+|-------------|-------|----------|
+| ZAP GUI (Webswing) | `http://localhost:8080/zap/` → **Scripts**, **Sites** (Context dialog), **Alerts** tabs | authoring the scripts, configuring script-based authentication, viewing the alert |
+| macOS Terminal | working directory `module1/m1-c5` | running each `./scripts/demo_step.sh N` |
+| Local Globomantics app | `http://localhost:8000/account/profile?note=seed` | the login-only target (401 before login, 200 after) |
+| Reference sources | `module1/m1-c5/zap-scripts/globomantics-active-rule.py`, `…/globomantics-auth.py` | the Jython you paste into the Script Console |
+
+The Terminal commands drive the same ZAP instance the GUI shows (GUI on `:8080`,
+API on `:8090`).
+
 ## Setup
 
-From `module1/m1-c5`, start the stack and open the ZAP GUI:
-
 ```bash
+cd module1/m1-c5
 ./scripts/demo_reset.sh          # prints "Up"; then open http://localhost:8080/zap/
 ```
 
 The Python Scripting (jython) add-on installs in the ZAP container at startup.
-Reference sources:
-[`zap-scripts/globomantics-active-rule.py`](zap-scripts/globomantics-active-rule.py)
-and [`zap-scripts/globomantics-auth.py`](zap-scripts/globomantics-auth.py).
 
 ## Learning-objective coverage
 
@@ -36,12 +44,12 @@ Goal: Create a Globomantics-specific active-scan rule that a built-in rule does 
 cover — it probes a parameter and raises a named alert when the response reflects
 the probe without encoding.
 
-In ZAP: Scripts → Active Rules → new script on the Python (jython) engine, named
-`globomantics-active-rule`; paste the source, save, and enable it.
-
-```bash
-./scripts/demo_step.sh 1
-```
+Application: ZAP GUI, then macOS Terminal.
+Open / Navigate: ZAP GUI (`http://localhost:8080/zap/`) → **Scripts** tab →
+**Active Rules** → new script on the Python (jython) engine, named
+`globomantics-active-rule`.
+Execute: paste the source (`zap-scripts/globomantics-active-rule.py`), save, and
+enable it. Then run `./scripts/demo_step.sh 1` in the Terminal to validate the load.
 
 Expected output: the rule validated and loaded as an active rule on the
 `python : jython` engine, declaring the alert `Globomantics unsafe reflection
@@ -57,13 +65,12 @@ Proof artifact: Python active-rule source.
 
 Goal: Teach ZAP how to log in, so a scan can reach pages that require a session.
 
-In ZAP: Scripts → Authentication → new script on the Python (jython) engine, named
-`globomantics-auth`; paste the source (it submits `username` to `POST /login`) and
-save.
-
-```bash
-./scripts/demo_step.sh 2
-```
+Application: ZAP GUI, then macOS Terminal.
+Open / Navigate: ZAP GUI → **Scripts** tab → **Authentication** → new script on the
+Python (jython) engine, named `globomantics-auth`.
+Execute: paste the source (`zap-scripts/globomantics-auth.py`; it submits `username`
+to `POST /login`) and save. Then run `./scripts/demo_step.sh 2` to validate the
+registration.
 
 Expected output: the script validated and registered as an authentication script on
 the `python : jython` engine, submitting `username=alice` to `POST /login`.
@@ -78,14 +85,19 @@ Proof artifact: Authentication script source.
 Goal: Have ZAP run the authentication script to obtain a session and reach a page
 gated behind login — with no cookie supplied by hand.
 
-In ZAP: add `http://localhost:8000` to a new Context; set Authentication to
-Script-based using `globomantics-auth` (Login URL `http://localhost:8000/login`,
-logged-in indicator `Signed in as`); add user `alice`; enable Forced User Mode; then
-Active Scan `/account/profile?note=seed`.
+Application: ZAP GUI (Context + Forced User Mode), then macOS Terminal.
+Open / Navigate: ZAP GUI → **Sites** tree → right-click `http://localhost:8000` →
+**Include in Context → New Context**.
+Execute: in the Context dialog —
+- **Authentication** → **Script-based Authentication** → select `globomantics-auth`;
+  set **Login URL** `http://localhost:8000/login` and **Logged-in indicator (regex)**
+  `Signed in as`.
+- **Users** → **Add** user `alice` (username `alice`).
+- Enable **Forced User Mode** (toolbar) and select `alice`, then right-click
+  `/account/profile?note=seed` → **Attack → Active Scan**.
 
-```bash
-./scripts/demo_step.sh 3
-```
+Then run `./scripts/demo_step.sh 3` in the Terminal to reproduce and verify the same
+scripted login.
 
 Expected output: `/account/profile` returns 401 without login and 200 once ZAP
 authenticates via the script, with the authentication script's trace confirming it
@@ -102,11 +114,10 @@ Proof artifact: Authenticated custom-scan result.
 Goal: Verify the custom rule raises its named alert on the authenticated scan,
 freshly produced by this run.
 
-In ZAP: open the Alerts tab and find the alert raised on `/account/profile`.
-
-```bash
-./scripts/demo_step.sh 4
-```
+Application: ZAP GUI (Alerts tab), then macOS Terminal.
+Open / Navigate: ZAP GUI → **Alerts** tab → the alert raised on `/account/profile`.
+Execute: `./scripts/demo_step.sh 4` in the Terminal (it clears the alert store,
+scans as `alice`, and reads the alert back).
 
 Expected output: with the alert store cleared first (named alert absent), the
 authenticated scan of `/account/profile` (parameter `note`, as user `alice`) raises

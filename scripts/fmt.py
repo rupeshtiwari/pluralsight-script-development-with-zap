@@ -7,39 +7,59 @@ shares one look: boxed headers that say *what* you are seeing and *why*, the
 PASS / FAIL / FIX styling.
 
 ------------------------------------------------------------------------------
-COLOR PALETTE  --  swap these six values for the official palette.
+COLOR PALETTE  --  official Pluralsight brand colors (24-bit true color).
 ------------------------------------------------------------------------------
-The values below are neutral placeholders. When the official color guide is
-available, change ONLY the hex-to-ANSI numbers in PALETTE; nothing else in any
-script needs to change.
+macOS Terminal supports 24-bit (true) color, so each role is rendered with the
+exact brand hex rather than an approximate 256-color code. Change a role's color
+by re-pointing it in PALETTE to a BRAND key; nothing else in any script changes.
+
+Hex values are the official Pluralsight palette verified against Keynote Template
+2026.07.b. Stop red is reserved strictly for a failed check (never decorative).
 """
 import json
 import os
 import sys
 
-# --- Palette (placeholder values; replace with the official palette) --------
-# Each entry is a standard 256-color ANSI code.
+# --- Official Pluralsight brand palette (R, G, B), verified against the ------
+#     Keynote Template 2026.07.b style guide.
+BRAND = {
+    "pink":        (255, 22, 117),   # #FF1675 Transform Pink (primary)
+    "inky":        (19, 15, 37),     # #130F25 Inky Blue (primary dark)
+    "blue":        (0, 163, 255),    # #00A3FF Blue
+    "purple":      (119, 14, 247),   # #770EF7 Purple
+    "yellow":      (255, 201, 66),   # #FFC942 Yellow
+    "orange":      (255, 123, 1),    # #FF7B01 Orange
+    "green":       (2, 224, 136),    # #02E088 Green
+    "gray_dark":   (27, 24, 52),     # #1B1834 Gray (dark)
+    "gray_medium": (88, 95, 162),    # #585FA2 Gray (medium)
+    "gray_light":  (235, 239, 245),  # #EBEFF5 Gray (light)
+    "red":         (185, 0, 75),     # #B9004B Stop Red (failed check only)
+}
+
+# --- Role -> brand color (None = default terminal text) ---------------------
 PALETTE = {
-    "header":    45,   # cyan  - box borders / titles
-    "label":    247,   # grey  - the label part of a star line
-    "value":    231,   # white - the value part of a star line
-    "focus":    226,   # yellow- the ONE field we want the audience to read
-    "pass":      42,   # green - a check that passed
-    "fail":     196,   # red   - a check that failed
-    "fix":      214,   # orange- the suggested fix / prompt
-    "muted":    240,   # dim   - secondary text
+    "header":   "blue",         # box borders + WHAT title
+    "label":    "purple",       # the label part of a star line (names / identifiers)
+    "value":    None,           # the value part of a star line (default text, high contrast)
+    "focus":    "yellow",       # the ONE field we want the audience to read
+    "pass":     "green",        # a check that passed
+    "fail":     "red",          # a check that failed (stop red; never decorative)
+    "fix":      "orange",       # the suggested fix / prompt
+    "muted":    "gray_medium",  # secondary text (the WHY line, notes, reasons)
+    "emphasis": "pink",         # reserved for important emphasis (used sparingly)
 }
 _USE_COLOR = sys.stdout.isatty() or os.environ.get("FORCE_COLOR") == "1"
 
 
-def _c(code: int, text: str) -> str:
+def _w(name: str, text: str) -> str:
+    """Render text in the brand color bound to a role (true color)."""
     if not _USE_COLOR:
         return text
-    return f"\033[38;5;{code}m{text}\033[0m"
-
-
-def _w(name: str, text: str) -> str:
-    return _c(PALETTE[name], text)
+    key = PALETTE.get(name)
+    if key is None:
+        return text
+    r, g, b = BRAND[key]
+    return f"\033[38;2;{r};{g};{b}m{text}\033[0m"
 
 
 # --- Public helpers ---------------------------------------------------------

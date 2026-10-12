@@ -7,17 +7,30 @@ behavior.
 > **Authorization and scope.** Every request targets only the local Globomantics
 > Store. Never run these techniques against systems you are not authorized to test.
 
+## Applications and locations used
+
+| Application | Where | Used for |
+|-------------|-------|----------|
+| macOS Terminal | working directory `module1/m1-c3` | running each `./scripts/demo_step.sh N` |
+| ZAP GUI (Webswing) | `http://localhost:8080/zap/` → **Alerts** tab | showing the raised alerts and the reflected-XSS request/response |
+| Local Globomantics app | `http://localhost:8000/` | the target under test |
+
+The Terminal commands drive the same ZAP instance the GUI shows (one container,
+API on `:8090`, GUI on `:8080`), so alerts raised by a step appear in the Alerts
+tab. This clip needs no code editor.
+
 ## Setup
 
-Install the tooling once from the repo root with `./env-setup/setup-macos.sh`
-(wait for the readiness table). Then, from `module1/m1-c3`, start the vulnerable
-build and run each step on its own screen:
+Install once from the repo root: `./env-setup/setup-macos.sh` (wait for the
+readiness table). Then start the vulnerable build and open the ZAP GUI:
 
 ```bash
+cd module1/m1-c3
 ./scripts/demo_reset.sh          # vulnerable build; prints "Up" when healthy
 ```
 
-Exact alert IDs, risk, and confidence are the live values from your run.
+Open `http://localhost:8080/zap/` for the Alerts tab. Exact alert IDs, risk, and
+confidence are the live values from your run.
 
 ## Learning-objective coverage
 
@@ -31,32 +44,36 @@ Exact alert IDs, risk, and confidence are the live values from your run.
 ## Step 1: Run one targeted injection scan (EO1a)
 
 Goal: Prove that a single focused scan policy confirms SQL, NoSQL, and command
-injection from the application's own responses, instead of returning a broad,
-unfiltered alert list.
+injection from the application's own responses, instead of a broad, unfiltered
+alert list.
 
-```bash
-./scripts/demo_step.sh 1
-```
+Application: macOS Terminal, then ZAP GUI.
+Open / Navigate: Terminal in `module1/m1-c3`. Then switch to the ZAP GUI
+(`http://localhost:8080/zap/`) → **Alerts** tab.
+Execute: `./scripts/demo_step.sh 1`, then in the Alerts tab expand the three
+injection alerts.
 
 Expected output: three injection alerts, one per endpoint — SQL injection (alert
 40018) on `/search` `q`, MongoDB NoSQL injection (alert 40033) on `/api/account`
 `username`, and command injection (alert 90020) on `/admin/ping` `host`.
 
 What the learner should notice: each endpoint raises a distinct rule tied to a
-specific parameter, so the policy exercises three different injection classes in
-one pass — the targeted scan, not the default rule set.
+specific parameter, so one focused policy exercises three injection classes — the
+targeted scan, not the default rule set.
 
 Proof artifact: Targeted scan policy and rule list.
 
 ## Step 2: Confirm reflected XSS in its output context (EO1b)
 
-Goal: Show that the `name` parameter is reflected into three output contexts, then
-let ZAP's active scanner prove an exploitable reflected XSS with a context-specific
+Goal: Show the `name` parameter reflected into three output contexts, then let
+ZAP's active scanner confirm an exploitable reflected XSS with a context-specific
 payload — not merely that input appears in the page.
 
-```bash
-./scripts/demo_step.sh 2
-```
+Application: macOS Terminal, then ZAP GUI.
+Open / Navigate: Terminal in `module1/m1-c3`. Then switch to the ZAP GUI → **Alerts**
+tab → the **Cross Site Scripting (Reflected)** alert; the lower pane shows its
+Request and Response.
+Execute: `./scripts/demo_step.sh 2`, then select that alert in the Alerts tab.
 
 Expected output: the `name` value reflected in the HTML body, an HTML attribute,
 and a JavaScript string; then ZAP's **Cross Site Scripting (Reflected)** alert on
@@ -65,8 +82,8 @@ reflected verbatim in the response as the supporting evidence.
 
 What the learner should notice: the context mapping decides where a payload must
 break out; ZAP's alert is what confirms the reflection is executable. The payload
-closes the `<p>` element and injects a script tag, which the response returns
-unescaped — reflection alone is not that proof.
+closes the `<p>` element and injects a script tag, returned unescaped — reflection
+alone is not that proof.
 
 Proof artifact: XSS request and response body.
 
@@ -76,9 +93,9 @@ Goal: Demonstrate that the anti-CSRF token is not bound to its session, so a tok
 issued to one session is accepted with a second session's cookie and changes that
 session's state.
 
-```bash
-./scripts/demo_step.sh 3
-```
+Application: macOS Terminal (this step is terminal-driven; no GUI needed).
+Open / Navigate: Terminal in `module1/m1-c3`.
+Execute: `./scripts/demo_step.sh 3`.
 
 Expected output: the valid control (session B's own token) returns 200; the
 missing-token control returns 403; and session A's token submitted with session B's
@@ -98,9 +115,10 @@ Proof artifact: CSRF token replay result.
 Goal: Reconcile each finding with concrete application behavior and record it as
 confirmed — the decision a validated scan produces.
 
-```bash
-./scripts/demo_step.sh 4
-```
+Application: macOS Terminal (record into the disposition template with any editor).
+Open / Navigate: Terminal in `module1/m1-c3`; the record template is
+`docs/alert-disposition-template.md`.
+Execute: `./scripts/demo_step.sh 4`.
 
 Expected output: each finding confirmed against live behavior — the SQL error
 ("unterminated quoted string"), the NoSQL account count rising from 1 to 4 under
@@ -108,8 +126,8 @@ operator injection, the command-injection ping output ("bytes from 127.0.0.1"),
 and the unescaped XSS reflection.
 
 What the learner should notice: every alert is tied to an observed application
-behavior, turning raw scanner output into a defensible disposition. Record the full
-table in [`docs/alert-disposition-template.md`](../../docs/alert-disposition-template.md).
+behavior, turning raw scanner output into a defensible disposition recorded in
+[`docs/alert-disposition-template.md`](../../docs/alert-disposition-template.md).
 
 Proof artifact: Alert disposition record.
 

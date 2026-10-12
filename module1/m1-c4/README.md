@@ -7,17 +7,25 @@ repeatable checks.
 > **Authorization and scope.** This script runs only against the local
 > Globomantics application.
 
+## Applications and locations used
+
+| Application | Where | Used for |
+|-------------|-------|----------|
+| ZAP GUI (Webswing) | `http://localhost:8080/zap/` → **Scripts** tab (HTTP Sender) and the Script Console output pane | authoring the script and showing its console output |
+| macOS Terminal | working directory `module1/m1-c4` | running each `./scripts/demo_step.sh N` |
+| Reference source | `module1/m1-c4/zap-scripts/globomantics-marker.js` | the JavaScript you paste into the Script Console |
+
+You author the script in ZAP's Script Console; each Terminal command verifies one
+beat against the same running ZAP instance (GUI on `:8080`, API on `:8090`).
+
 ## Setup
 
-From `module1/m1-c4`, start the stack:
-
 ```bash
+cd module1/m1-c4
 ./scripts/demo_up.sh             # prints "Up" when healthy
 ```
 
-You author the script in ZAP's Script Console; the reference source is in
-[`zap-scripts/globomantics-marker.js`](zap-scripts/globomantics-marker.js). Each
-`./scripts/demo_step.sh N` command verifies one beat against the running ZAP.
+Open `http://localhost:8080/zap/` for the Script Console.
 
 ## Learning-objective coverage
 
@@ -33,13 +41,13 @@ You author the script in ZAP's Script Console; the reference source is in
 Goal: Create a request-marker action from ZAP's HTTP Sender template so your own
 code runs on every message ZAP sends.
 
-In ZAP: Scripts → HTTP Sender → new script on the GraalVM JavaScript engine, named
-`globomantics-marker`; in `sendingRequest()` set the `X-Globomantics-Marker` header
-and print the named console line; save.
-
-```bash
-./scripts/demo_step.sh 1
-```
+Application: ZAP GUI, then macOS Terminal.
+Open / Navigate: ZAP GUI (`http://localhost:8080/zap/`) → **Scripts** tab →
+**HTTP Sender** → new script on the GraalVM JavaScript engine, named
+`globomantics-marker`.
+Execute: in `sendingRequest()` set the `X-Globomantics-Marker` header and print the
+named console line (source: `zap-scripts/globomantics-marker.js`); save. Then, in
+the Terminal, run `./scripts/demo_step.sh 1` to validate and load it.
 
 Expected output: the script validated and loaded as an HTTP Sender action on the
 `ECMAScript : Graal.js` engine, adding header `X-Globomantics-Marker: GLOBO-DEMO`.
@@ -54,9 +62,9 @@ Proof artifact: JavaScript source file.
 Goal: Verify the script modifies an actual outbound message, not just that it
 loaded.
 
-```bash
-./scripts/demo_step.sh 2
-```
+Application: macOS Terminal.
+Open / Navigate: Terminal in `module1/m1-c4`.
+Execute: `./scripts/demo_step.sh 2`.
 
 Expected output: an outbound `GET http://app:8000/greet?...` request carrying
 `X-Globomantics-Marker: GLOBO-DEMO`.
@@ -72,12 +80,13 @@ Proof artifact: Modified HTTP request.
 Goal: Show the script reports what it did, so its behavior is observable and
 auditable.
 
-```bash
-./scripts/demo_step.sh 3
-```
+Application: macOS Terminal, with the same line visible in the ZAP Script Console.
+Open / Navigate: Terminal in `module1/m1-c4`; the same output appears in the ZAP GUI
+Script Console output pane (Scripts tab, `globomantics-marker` selected).
+Execute: `./scripts/demo_step.sh 3`.
 
 Expected output: the console line `[globo-marker] added X-Globomantics-Marker:
-GLOBO-DEMO to <url>`, as printed in ZAP's Script Console.
+GLOBO-DEMO to <url>`.
 
 What the learner should notice: a fixed, named output line makes the script's action
 verifiable on each run — the basis for trusting it in automation.
@@ -89,9 +98,9 @@ Proof artifact: Script console output.
 Goal: Confirm the saved name, type, and path that the Automation Framework will call
 later.
 
-```bash
-./scripts/demo_step.sh 4
-```
+Application: macOS Terminal.
+Open / Navigate: Terminal in `module1/m1-c4`.
+Execute: `./scripts/demo_step.sh 4`.
 
 Expected output: registration showing name `globomantics-marker`, type `httpsender`,
 engine `Graal.js`, enabled `true`, path `zap-scripts/globomantics-marker.js`.
