@@ -173,7 +173,7 @@ step1_active_rule_source() {
               "A Jython active rule runs your own check during an active scan — the house-specific test a built-in rule does not cover (EO2b)."
     local ok=1
     grep -q 'def scan(' "${RULE_FILE_HOST}" || ok=0
-    grep -q 'newAlert(' "${RULE_FILE_HOST}" || ok=0
+    grep -qE 'raiseAlert\(|newAlert\(' "${RULE_FILE_HOST}" || ok=0
     grep -q 'Globomantics unsafe reflection' "${RULE_FILE_HOST}" || ok=0
     fm star "Script name" "${RULE_NAME}   (type: active · engine: ${JYTHON_ENGINE:-Jython})"
     fm star "Alert it raises" "${ALERT_NAME}" focus
