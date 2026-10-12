@@ -1,216 +1,110 @@
-# Write a JavaScript Security Script in ZAP
+# Write a JavaScript security script in ZAP
 
-**Extend ZAP itself:** you write a small **JavaScript HTTP Sender script** that
-stamps a marker header on every request ZAP sends and reports what it did. You
-read the script in your **code editor** and run each step from your **terminal**;
-the script runs *inside ZAP*, and each command drives ZAP for you and shows the
-result, so you never click through the ZAP window.
+Extend ZAP with a JavaScript HTTP Sender script that stamps a marker header on
+every request it sends and logs what it did — the foundation for custom,
+repeatable checks.
 
----
+> **Authorization and scope.** This script runs only against the local
+> Globomantics application.
 
-## The problem you are solving
+## Setup
 
-Default scanning applies the same behavior to every target. Real testing often
-needs *your* behavior on every request — a marker header, a tenant tag, a custom
-signature. ZAP's scripting lets you add exactly that. Here you write an HTTP
-Sender script that stamps a marker header on each outbound request and reports
-what it did, then save it so it can be reused later without editing ZAP.
-
-**What you gain:** you extend ZAP with your own JavaScript instead of being
-limited to its built-in behavior — the first step toward custom, repeatable
-security checks.
-
-> **Authorization and scope.** This script runs **only** against the local
-> Globomantics app. Never point it at any system you are not authorized to test.
-
----
-
-## How to read this lab
-
-| Label | Meaning |
-|-------|---------|
-| 📄 **In your editor** | Open or read this file in your code editor. |
-| 💻 **Run in your terminal** | Copy-paste this command. It is the only thing you type. |
-| ✅ **You'll see** | Output to **read** and confirm. **Never type it as a command.** |
-
-> **Golden rule:** the only thing you *type* is the line under 💻. Everything
-> under ✅ is output you *read*.
-
----
-
-## What this script does (reference)
-
-| Piece | Value |
-|-------|-------|
-| Script type | HTTP Sender (runs for every message ZAP sends) |
-| Language / engine | JavaScript (GraalVM) |
-| Marker header it adds | `X-Globomantics-Marker: GLOBO-DEMO` |
-| Named console line it prints | `[globo-marker] added X-Globomantics-Marker: GLOBO-DEMO to <url>` |
-| Saved name | `globomantics-marker` |
-
-The full source is in
-[`zap-scripts/globomantics-marker.js`](zap-scripts/globomantics-marker.js) — open
-it in your editor to read it in Step 1.
-
----
-
-## Set up and run
-
-Bring the stack up once, then run each step on its own screen:
+From `module1/m1-c4`, start the stack:
 
 ```bash
-cd module1/m1-c4
-./scripts/demo_up.sh        # wait for "Up" (starts Colima + the stack if needed)
-./scripts/demo_step.sh 1    # JavaScript source file      (loads it into ZAP)
-./scripts/demo_step.sh 2    # Modified HTTP request        (marker header added)
-./scripts/demo_step.sh 3    # Script console output        (named console line)
-./scripts/demo_step.sh 4    # Saved script registration
+./scripts/demo_up.sh             # prints "Up" when healthy
 ```
 
-Open [`zap-scripts/globomantics-marker.js`](zap-scripts/globomantics-marker.js)
-in your editor to read the source alongside the steps.
+You author the script in ZAP's Script Console; the reference source is in
+[`zap-scripts/globomantics-marker.js`](zap-scripts/globomantics-marker.js). Each
+`./scripts/demo_step.sh N` command verifies one beat against the running ZAP.
 
----
+## Learning-objective coverage
 
-## What each step teaches (learning-objective coverage)
+| Step | Objective | Proof artifact |
+|------|-----------|----------------|
+| 1 | EO2a | JavaScript source file |
+| 2 | EO2a | Modified HTTP request |
+| 3 | EO2a | Script console output |
+| 4 | EO2a | Saved script registration |
 
-| Step | You will… | Objective | Proof artifact |
-|------|-----------|-----------|----------------|
-| 1 | Read the HTTP Sender script source and load it into ZAP | EO2a | JavaScript source file |
-| 2 | Confirm the script adds the marker header to a real request | EO2a | Modified HTTP request |
-| 3 | See the named line the script prints to the console | EO2a | Script console output |
-| 4 | Confirm the reusable script name and path | EO2a | Saved script registration |
+## Step 1: Write the HTTP Sender script (EO2a)
 
----
+Goal: Create a request-marker action from ZAP's HTTP Sender template so your own
+code runs on every message ZAP sends.
 
-## Step 1 — Read the script source and load it into ZAP
+In ZAP: Scripts → HTTP Sender → new script on the GraalVM JavaScript engine, named
+`globomantics-marker`; in `sendingRequest()` set the `X-Globomantics-Marker` header
+and print the named console line; save.
 
-**Why you run this / what you learn:** an HTTP Sender script is the hook ZAP runs
-for **every** message it sends — the perfect place to add your own behavior. You
-read the source, then load it into ZAP as an HTTP Sender script.
-
-**Do this:**
-
-📄 **In your editor:** open
-[`zap-scripts/globomantics-marker.js`](zap-scripts/globomantics-marker.js) and
-read `sendingRequest()` — it adds the marker header and prints the named line.
-
-💻 **In your terminal:**
 ```bash
 ./scripts/demo_step.sh 1
 ```
 
-✅ **You'll see** (output — read it, don't type it):
-```text
-WHAT: The JavaScript HTTP Sender script
-  ★ Script name: globomantics-marker   (type: HTTP Sender · engine: ECMAScript : Graal.js)
-  ★ Marker header it adds: X-Globomantics-Marker: GLOBO-DEMO
-  ★ Named console line it prints: [globo-marker] added X-Globomantics-Marker: GLOBO-DEMO to <url>
-✔ PASS  script is a valid HTTP Sender action and loaded into ZAP
-```
+Expected output: the script validated and loaded as an HTTP Sender action on the
+`ECMAScript : Graal.js` engine, adding header `X-Globomantics-Marker: GLOBO-DEMO`.
 
-**What to highlight:** the script is registered as an **HTTP Sender** action on
-the **Graal.js** engine — the hook type that runs on every message.
+What the learner should notice: the HTTP Sender type is the hook that runs for every
+outbound message, which is why a marker set here applies to all ZAP traffic.
 
-**Proof artifact:** *JavaScript source file.*
+Proof artifact: JavaScript source file.
 
----
+## Step 2: Confirm the marker on a real request (EO2a)
 
-## Step 2 — Confirm the marker header is added to a real request
+Goal: Verify the script modifies an actual outbound message, not just that it
+loaded.
 
-**Why you run this / what you learn:** loading a script is not enough — you want
-to *see* it change a real message ZAP sends.
-
-**Do this:**
 ```bash
 ./scripts/demo_step.sh 2
 ```
 
-✅ **You'll see** (output — read it, don't type it):
-```text
-WHAT: The marker header on an outbound request
-  ★ Outbound request: GET http://app:8000/greet?name=marker-check HTTP/1.1
-  ★ Header added by the script: X-Globomantics-Marker: GLOBO-DEMO
-✔ PASS  the script added X-Globomantics-Marker to the outbound request
-```
+Expected output: an outbound `GET http://app:8000/greet?...` request carrying
+`X-Globomantics-Marker: GLOBO-DEMO`.
 
-**What to highlight:** the `X-Globomantics-Marker: GLOBO-DEMO` header on a real
-outbound request — proof the script changed the message, not just loaded.
+What the learner should notice: the header appears on a request ZAP actually sent,
+confirming the script executes in the sending path rather than only existing in the
+editor.
 
-**Proof artifact:** *Modified HTTP request.*
+Proof artifact: Modified HTTP request.
 
----
+## Step 3: Produce named console output (EO2a)
 
-## Step 3 — See the named console output
+Goal: Show the script reports what it did, so its behavior is observable and
+auditable.
 
-**Why you run this / what you learn:** a script you can trust tells you what it
-did. Yours prints a named line every time it runs.
-
-**Do this:**
 ```bash
 ./scripts/demo_step.sh 3
 ```
 
-✅ **You'll see** (output — read it, don't type it):
-```text
-WHAT: The named console output the script prints
-  ★ Console line (seen in ZAP's Script Console): [globo-marker] added X-Globomantics-Marker: GLOBO-DEMO to <url>
-✔ PASS  the script prints a named console line each time its action runs
-```
+Expected output: the console line `[globo-marker] added X-Globomantics-Marker:
+GLOBO-DEMO to <url>`, as printed in ZAP's Script Console.
 
-**What to highlight:** the `[globo-marker]` console line — the same line you see
-in ZAP's Script Console output pane each time the script runs.
+What the learner should notice: a fixed, named output line makes the script's action
+verifiable on each run — the basis for trusting it in automation.
 
-**Proof artifact:** *Script console output.*
+Proof artifact: Script console output.
 
----
+## Step 4: Save the reusable script registration (EO2a)
 
-## Step 4 — Confirm the reusable script registration
+Goal: Confirm the saved name, type, and path that the Automation Framework will call
+later.
 
-**Why you run this / what you learn:** a saved, named script is what an automated
-run can call later without editing ZAP. Here you confirm exactly how it is
-registered.
-
-**Do this:**
 ```bash
 ./scripts/demo_step.sh 4
 ```
 
-✅ **You'll see** (output — read it, don't type it):
-```text
-WHAT: The saved, reusable script registration
-  ★ Registered name: globomantics-marker
-  ★ Type: httpsender
-  ★ Engine: Graal.js
-  ★ Enabled: true
-  ★ Path (repo): zap-scripts/globomantics-marker.js
-✔ PASS  script is registered as a reusable HTTP Sender script
-```
+Expected output: registration showing name `globomantics-marker`, type `httpsender`,
+engine `Graal.js`, enabled `true`, path `zap-scripts/globomantics-marker.js`.
 
-**What to highlight:** the saved name `globomantics-marker`, type `httpsender`,
-and `Enabled: true` — the exact identity the Automation Framework calls later.
+What the learner should notice: this saved identity is exactly what Module 2's
+Automation Framework references, so the script is reusable without editing ZAP.
 
-**Proof artifact:** *Saved script registration.*
+Proof artifact: Saved script registration.
 
----
+## Validate and reset
 
-## Check your work
-
-Run every step in order through the checker; it writes a reviewable plain-text
-log to `logs/` with each step's command and output in sequence:
-
-```bash
-./scripts/preflight_check.sh
-```
-
-Each step reports **PASS**, ending with `5 checks passed, 0 failed`. (On a
-failure it prints the exact reason and how to fix it.) When you are finished:
-
-```bash
-./scripts/demo_down.sh
-```
-
----
+`./scripts/preflight_check.sh` runs all four steps, ending with
+`5 checks passed, 0 failed`. Tear down with `./scripts/demo_down.sh`.
 
 ## The script
 
