@@ -40,8 +40,28 @@ zap() { # <path> <query> -> body (asserts HTTP 200)
     cat /tmp/.m2body
 }
 
+zap_container() { ( cd "${REPO_ROOT}" && docker compose ps -q zap 2>/dev/null ) | head -1; }
+
+# The AF env registers the context's auth script by its FILE NAME
+# (globomantics-auth.py) every time it creates the context. ZAP rejects a
+# duplicate script name, so re-running the plan against the long-lived local ZAP
+# aborts context creation ("A script with the same name already exists:
+# globomantics-auth.py") before any job runs. Remove the demo scripts first so
+# each run registers them cleanly, and make sure the report output dir exists and
+# is writable. CI is unaffected — it runs a fresh ZAP per run — so the plan file
+# itself is unchanged; this only makes the local re-runnable preflight reliable.
+reset_plan_state() {
+    local c; c="$(zap_container)"
+    [ -n "${c}" ] && docker exec "${c}" sh -c 'mkdir -p /zap/wrk && chmod 0777 /zap/wrk' >/dev/null 2>&1 || true
+    local s
+    for s in "globomantics-auth.py" "globomantics-auth" "globomantics-active-rule" "globomantics-marker"; do
+        zap script/action/remove "scriptName=$(enc "${s}")" >/dev/null 2>&1 || true
+    done
+}
+
 PLAN_ID=""
 run_plan() { # -> sets PLAN_ID
+    reset_plan_state
     PLAN_ID="$(zap automation/action/runPlan "filePath=$(enc "${AF_PLAN_ZAP}")" | python3 -c 'import json,sys
 try: print(json.load(sys.stdin).get("planId",""))
 except Exception: print("")')"
@@ -54,6 +74,21 @@ try: print(len(json.load(sys.stdin).get(sys.argv[1],[])))
 except Exception: print("0")' "$1"
 }
 plan_finished() { plan_progress | grep -q '"finished"[^,]*[0-9T:-]'; }
+
+# Poll a no-arg producer function until it prints something, or a timeout
+# elapses. The AF plan can report "finished" a moment before the active scan's
+# alerts are queryable, so Steps 3/4 wait for the evidence instead of checking
+# once. Never weakens the check — it still requires the real alert.
+wait_nonempty() { # <seconds> <fn> -> prints fn's first non-empty output
+    local secs="$1" fn="$2" out i=0
+    while [ "${i}" -lt "${secs}" ]; do
+        out="$(${fn})"
+        [ -n "${out}" ] && { printf '%s' "${out}"; return 0; }
+        sleep 5; i=$((i+5))
+    done
+    printf ''
+    return 1
+}
 
 reflection_reached() {
     zap core/view/alerts "baseurl=$(enc "${APP_INTERNAL}/account/profile")" | python3 -c '
@@ -150,7 +185,7 @@ step3_script_job() {
     fm header "The Module 1 scripts running under the authenticated scope" \
               "The same JavaScript and Python checks you wrote in Module 1 now run unattended, logged in as alice (EO3a)."
     fm star "Loaded by the plan" "globomantics-marker (JS) · globomantics-active-rule (Py) · globomantics-auth (Py)" focus
-    local refl; refl="$(reflection_reached)"
+    local refl; refl="$(wait_nonempty 180 reflection_reached)"
     if [ -n "${refl}" ]; then
         fm star "Ran authenticated against" "/account/profile — reflection reached while logged in"
         pass "the scripts executed against the authenticated scope"
@@ -167,28 +202,28 @@ step3_script_job() {
 # ===========================================================================
 step4_custom_alert() {
     fm header "The authenticated finding recorded by the pipeline" \
-              "The headless run records the unsafe reflection the custom rule targets, logged in as alice — the result a quality gate can later gate on (EO3a)."
-    local rec; rec="$(custom_alert)"
+              "The headless run records the custom rule's named alert on the login-only page, logged in as alice — the result a quality gate can later gate on (EO3a)."
+    local rec; rec="$(wait_nonempty 180 custom_alert)"
     if [ -n "${rec}" ]; then
         IFS='|' read -r n r p <<<"${rec}"
         fm star "Alert" "${n}" focus
         fm star "Risk" "${r}"
         fm star "Parameter" "${p}"
-        pass "the custom rule raised its alert under the authenticated AF run"
+        pass "the custom rule raised its named alert under the authenticated AF run (serialized in the headless report)"
         return "${STEP_RC}"
     fi
-    # Headless fallback (same as Clip 5): ZAP does not expose script-active-rule
-    # alerts via the API in every build. Prove the demo-equivalent facts — the
-    # authenticated run reached the unencoded reflection the rule detects.
+    # Safety net: if the custom alert is somehow absent, the built-in reflected
+    # XSS on the same page confirms the authenticated run reached the reflection
+    # the rule targets. (Not expected — the custom alert now serializes headless.)
     local refl; refl="$(reflection_reached)"
-    fm star "Reflection reached while authenticated" "${refl:-not found}" focus
+    fm star "Custom alert" "not found — showing the built-in reflection instead" focus
     if [ -n "${refl}" ]; then
+        fm star "Reflection reached while authenticated" "${refl}"
         pass "the authenticated run records the reflection the custom rule targets"
-        fm note "On-screen proof artifact: the 'Cross Site Scripting (Reflected)' finding on /account/profile (param note) in the GitHub Actions job log and the uploaded report — the authenticated run's recorded finding. This ZAP version does not serialize script-rule alerts into the headless report, so this built-in finding is ZAP's confirmation of the same reflection; the custom rule still runs here authenticated, and its own named alert is shown in Module 1 Clip 3's GUI run."
     else
         fail "could not confirm the authenticated custom finding" \
-             "the AF run did not reach the reflection on the authenticated page" \
-             "ask: 'the authenticated AF scan did not reach /account/profile as alice; check the context auth'"
+             "the AF run did not record the custom alert or the reflection on the authenticated page" \
+             "ask: 'the authenticated AF scan did not reach /account/profile as alice; check the context auth and the custom rule'"
     fi
     return "${STEP_RC}"
 }

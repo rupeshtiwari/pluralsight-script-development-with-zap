@@ -42,7 +42,19 @@ zap() { # <path> <query> -> body (asserts HTTP 200)
 zap_container() { docker ps --format '{{.Names}}' 2>/dev/null | grep -E 'zap' | head -1; }
 
 # --- priming: make sure a finished scan exists to inspect --------------------
-run_plan() { PLAN_ID="$(zap automation/action/runPlan "filePath=$(enc "${AF_PLAN_ZAP}")" | jq_py 'import json,sys
+# The AF env re-registers the context auth script by its file name every run;
+# ZAP rejects the duplicate, aborting context creation on a re-run against the
+# long-lived local ZAP. Remove the demo scripts first and ensure the report dir
+# exists so the plan runs cleanly. (CI uses a fresh ZAP, so the plan is unchanged.)
+reset_plan_state() {
+    local c; c="$(zap_container)"
+    [ -n "${c}" ] && docker exec "${c}" sh -c 'mkdir -p /zap/wrk && chmod 0777 /zap/wrk' >/dev/null 2>&1 || true
+    local s
+    for s in "globomantics-auth.py" "globomantics-auth" "globomantics-active-rule" "globomantics-marker"; do
+        zap script/action/remove "scriptName=$(enc "${s}")" >/dev/null 2>&1 || true
+    done
+}
+run_plan() { reset_plan_state; PLAN_ID="$(zap automation/action/runPlan "filePath=$(enc "${AF_PLAN_ZAP}")" | jq_py 'import json,sys
 try: print(json.load(sys.stdin).get("planId",""))
 except Exception: print("")')"; [ -n "${PLAN_ID:-}" ]; }
 plan_finished() { zap automation/view/planProgress "planId=${PLAN_ID}" | grep -q '"finished"[^,]*[0-9T:-]'; }
@@ -61,7 +73,10 @@ ensure_scan() { # prime once if there is no evidence yet in this ZAP session
     fm note "Priming: this ZAP session has no finished scan yet — running the authenticated plan once so there is evidence to inspect."
     run_plan || { fail "could not start the plan to generate evidence" "automation/action/runPlan returned no plan id" "ask: 'the AF plan did not run; check the automation add-on and /af/af-plan.yaml'"; return 1; }
     local i; for i in $(seq 1 120); do plan_finished && break; sleep 3; done
-    [ -n "$(reflection_present)" ]
+    # The plan can report "finished" a moment before the scan's alerts are
+    # queryable, so wait for the evidence rather than checking once.
+    local j; for j in $(seq 1 36); do [ -n "$(reflection_present)" ] && return 0; sleep 5; done
+    return 1
 }
 
 ensure_ready() {
