@@ -133,7 +133,9 @@ except Exception: print("")')"
     [ "${pct}" = "100" ]
 }
 custom_alert() { # -> name|risk|param|evidence  (empty if not raised)
-    zap core/view/alerts "baseurl=$(enc "${APP_INTERNAL}/account/profile")" | python3 -c '
+    # Search ALL alerts by name (unfiltered) so a URL-filter mismatch cannot hide
+    # a raised alert — the check must reflect whether the rule actually fired.
+    zap core/view/alerts | python3 -c '
 import json,sys
 name = sys.argv[1]
 try:
@@ -294,7 +296,9 @@ step4_custom_alert() {
     fm header "The custom alert the rule raised" \
               "A rule you can trust raises a clear, named alert (EO2b). On screen, that alert appears in ZAP's Alerts tab — the clip's proof artifact."
 
-    # Best case: this ZAP build surfaces the script-rule alert through the API.
+    # The learning objective is a rule that RAISES a named alert, so this step
+    # verifies the alert itself — not merely that the rule loaded or that the
+    # reflection was reached.
     local rec; rec="$(custom_alert)"
     if [ -n "${rec}" ]; then
         IFS='|' read -r n r p e <<<"${rec}"
@@ -302,31 +306,11 @@ step4_custom_alert() {
         fm star "Risk" "${r}"
         fm star "Parameter" "${p}"
         fm star "Evidence" "${e}"
-        pass "the custom rule raised its intended alert on the authenticated endpoint"
-        return "${STEP_RC}"
-    fi
-
-    # Headless fallback: ZAP does not expose script-active-rule alerts via the
-    # API in every build. Prove the demo-equivalent facts instead — the rule is
-    # active, and its reflection target is reachable AUTHENTICATED (ZAP's own
-    # reflected-XSS rule confirms the unencoded reflection on note).
-    local info; info="$(script_info "${RULE_NAME}")"
-    local rule_ok=0 n t e en
-    if [ -n "${info}" ]; then
-        IFS='|' read -r n t e en <<<"${info}"
-        [ "${t}" = "active" ] && [ "${en}" = "true" ] && rule_ok=1
-        fm star "Custom rule" "${n}  (type: ${t} · enabled: ${en})" focus
-    fi
-    local refl; refl="$(reflection_reached)"
-    [ -n "${refl}" ] && fm star "Reflection reached while authenticated" "${refl}" focus
-
-    if [ "${rule_ok}" = 1 ] && [ -n "${refl}" ]; then
-        pass "custom rule is active and its reflection target fires under scripted auth"
-        fm note "On-screen proof artifact: the alert 'Globomantics unsafe reflection (custom rule)' in ZAP's Alerts tab. (ZAP's API does not expose script-rule alerts headlessly in this build, so the preflight confirms the rule's active state and that the authenticated scan reaches the reflection it detects.)"
+        pass "the custom rule RAISED its named alert (verified via the ZAP API)"
     else
-        fail "could not confirm the rule and its authenticated reflection target" \
-             "the rule is not enabled/active, or the authenticated scan did not reflect on note" \
-             "ask: 'confirm globomantics-active-rule is enabled (type active) and the authenticated scan reflects the note parameter'"
+        fail "the custom rule did not raise its named alert" \
+             "core/view/alerts has no '${ALERT_NAME}' after the scan — the rule ran but produced no alert" \
+             "ask: 'the globomantics custom rule ran but raised no alert; check raiseAlert() in globomantics-active-rule.py and that the Script Active Scan Rules plugin is enabled'"
     fi
     return "${STEP_RC}"
 }
