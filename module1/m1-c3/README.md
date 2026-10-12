@@ -46,10 +46,10 @@ cd module1/m1-c3
 
 **4. Run the four steps, one at a time.** Read each screen, then run the next:
 ```bash
-./scripts/run_step.sh 1     # targeted injection scan
-./scripts/run_step.sh 2     # reflected XSS in three contexts
-./scripts/run_step.sh 3     # CSRF token replay
-./scripts/run_step.sh 4     # alert disposition
+./scripts/demo_step.sh 1     # targeted injection scan
+./scripts/demo_step.sh 2     # reflected XSS in three contexts
+./scripts/demo_step.sh 3     # CSRF token replay
+./scripts/demo_step.sh 4     # alert disposition
 ```
 Each step is self-contained and prints one clean screen. Step 1 runs a real scan
 (~30–60s); Steps 2–4 are instant.
@@ -85,7 +85,7 @@ Each step is self-contained and prints one clean screen. Step 1 runs a real scan
 | missing / invalid | the request should be rejected |
 | replayed (already used once) | the request should be rejected |
 
-Print this same reference in the terminal any time with `./scripts/run_step.sh ref`.
+Print this same reference in the terminal any time with `./scripts/demo_step.sh ref`.
 
 ---
 
@@ -108,7 +108,7 @@ specific weaknesses.
 app's own responses — three injection types in one focused scan.
 
 ```bash
-./scripts/run_step.sh 1
+./scripts/demo_step.sh 1
 ```
 
 ✅ **You'll see** this terminal output — read it, don't type it:
@@ -144,7 +144,7 @@ in the page.
 payload you would use.
 
 ```bash
-./scripts/run_step.sh 2
+./scripts/demo_step.sh 2
 ```
 
 ✅ **You'll see** this terminal output — read it, don't type it:
@@ -180,7 +180,7 @@ for *presence* but not *freshness* can be replayed.
 used once.
 
 ```bash
-./scripts/run_step.sh 3
+./scripts/demo_step.sh 3
 ```
 
 ✅ **You'll see** this terminal output — read it, don't type it:
@@ -213,7 +213,7 @@ hand to a developer or keep for the record.
 mark it confirmed.
 
 ```bash
-./scripts/run_step.sh 4
+./scripts/demo_step.sh 4
 ```
 
 ✅ **You'll see** this terminal output — read it, don't type it:

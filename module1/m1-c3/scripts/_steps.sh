@@ -2,7 +2,7 @@
 # Shared step library for m1-c3 "Validate injection, XSS, and CSRF with ZAP".
 #
 # Sourced by both preflight_check.sh (runs all 4 steps for the log) and
-# run_step.sh (runs one step for recording). Defining the steps in ONE place
+# demo_step.sh (runs one step at a time). Defining the steps in ONE place
 # means the runbook, the single-step runner, and the preflight can never drift.
 #
 # Every request targets ONLY the local Globomantics app on the compose network.

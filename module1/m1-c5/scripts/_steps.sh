@@ -184,11 +184,12 @@ setup_script_auth() { # sets CTX_ID and USER_ID
         "contextId=${CTX_ID}&authMethodName=scriptBasedAuthentication&authMethodConfigParams=$(enc "${inner}")" >/dev/null 2>&1 \
         || SETUP_ERRS="${SETUP_ERRS} setAuthenticationMethod"
 
-    # The gated page says "Please log in first" when not authenticated, so ZAP
-    # can tell when it must (re-)run the login script.
-    zap authentication/action/setLoggedOutIndicator \
-        "contextId=${CTX_ID}&loggedOutIndicatorRegex=$(enc 'Please log in first')" >/dev/null 2>&1 \
-        || SETUP_ERRS="${SETUP_ERRS} loggedOutIndicator"
+    # The profile page shows "Signed in as <user>" only when authenticated, so
+    # this logged-in indicator tells ZAP when the login script has succeeded.
+    # (Same indicator the runbook configures in the Context dialog.)
+    zap authentication/action/setLoggedInIndicator \
+        "contextId=${CTX_ID}&loggedInIndicatorRegex=$(enc 'Signed in as')" >/dev/null 2>&1 \
+        || SETUP_ERRS="${SETUP_ERRS} loggedInIndicator"
 
     USER_ID="$(zap users/action/newUser "contextId=${CTX_ID}&name=$(enc "${LOGIN_USER}")" 2>/dev/null | json_get userId)"
     [ -n "${USER_ID}" ] || { SETUP_ERRS="${SETUP_ERRS} newUser"; return 1; }
