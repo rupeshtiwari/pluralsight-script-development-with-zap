@@ -33,7 +33,7 @@ Wait until the readiness table shows every component **READY**.
 
 **2. Start the lab.** From the repo root:
 ```bash
-./module1/m1-c3-validate-injection-xss-and-csrf-with-zap/scripts/demo_reset.sh
+./module1/m1-c3/scripts/demo_reset.sh
 ```
 This brings up the Globomantics Store on the **vulnerable** build and prints
 **Up** when everything is healthy (ZAP takes ~90 seconds the first time). Open
@@ -41,7 +41,7 @@ the store at <http://localhost:8000/> to see what you are testing.
 
 **3. Move into the lab folder** (every command below is relative to it):
 ```bash
-cd module1/m1-c3-validate-injection-xss-and-csrf-with-zap
+cd module1/m1-c3
 ```
 
 **4. Run the four steps, one at a time.** Read each screen, then run the next:

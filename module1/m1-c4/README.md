@@ -74,7 +74,7 @@ Bring the stack up once, then run each step on its own screen. Each command
 prints a header saying **what** it shows and **why**, then a green **PASS**.
 
 ```bash
-cd module1/m1-c4-write-a-javascript-security-script-in-zap
+cd module1/m1-c4
 ./scripts/demo_up.sh        # wait for "Up" (starts Colima + the stack if needed)
 ./scripts/demo_step.sh 1    # JavaScript source file  (loads it into ZAP)
 ./scripts/demo_step.sh 2    # Modified HTTP request    (marker header added)

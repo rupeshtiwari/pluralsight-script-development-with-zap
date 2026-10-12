@@ -67,7 +67,7 @@ Bring the stack up once, then run each step on its own screen. Each command
 prints a header saying **what** it shows and **why**, then a green **PASS**.
 
 ```bash
-cd module2/m2-c5-enforce-zap-quality-gates-in-github-actions
+cd module2/m2-c5
 ./scripts/demo_up.sh        # wait for "Up" (starts Colima + the stack if needed)
 ./scripts/demo_step.sh 1    # False Positive alert filter
 ./scripts/demo_step.sh 2    # Automation Framework job order

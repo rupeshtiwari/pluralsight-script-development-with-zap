@@ -1,12 +1,12 @@
 #!/bin/bash
 # =============================================================================
-# Preflight / demo-step validator — m2-c4
-# "Query the ZAP API and inspect scan evidence"  (TO3, EO3b)
+# Preflight / demo-step validator — m2-c5
+# "Enforce ZAP quality gates in GitHub Actions"  (TO3, EO3c)
 # =============================================================================
 # AUTHOR tooling. Runs every demo step in the SAME ORDER as the README, printing
 # the command a learner runs for each step followed by that step's output, so the
-# plain-text log in logs/ can be checked against the learning objective before
-# you record. Exits non-zero if any step fails.
+# plain-text log in logs/ can be checked against the learning objective before you
+# record. Exits non-zero if any step fails.
 # =============================================================================
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,7 +21,6 @@ LOG="${LOG_DIR}/preflight-${STAMP}.log"
 source "${HERE}/_steps.sh"
 export FORCE_COLOR=1
 
-# Print the exact command the learner runs for this step, then run it.
 runstep() { # <n> <title> <fn>
     echo; echo
     fm section "STEP $1 — $2"
@@ -31,21 +30,21 @@ runstep() { # <n> <title> <fn>
 }
 
 main() {
-    fm header "Preflight — Query the ZAP API and inspect scan evidence" \
-              "Proves each step inspects a finished authenticated scan THROUGH the ZAP API: runtime/scan status, the alert's rule identity and disposition, the official JSON report, and ZAP 2.17.0 Insights (EO3b)."
+    fm header "Preflight — Enforce ZAP quality gates in GitHub Actions" \
+              "Proves the gate works end to end: a benign finding is filtered to False Positive before scanning, the job order applies it, and exitStatus turns the remaining High-risk alert into a non-zero process exit code that blocks the build (EO3c)."
     fm star "Scope" "local Globomantics training app only (compose network)" focus
 
     echo; echo
     if ensure_ready; then
-        pass "ZAP is up, a finished authenticated scan exists, and the API is reachable"
+        pass "the stack is up and the headless gate run produced a report and an exit code"
     else
         summary; return 1
     fi
 
-    runstep 1 "ZAP API status response (EO3b)" step1_api_status
-    runstep 2 "ZAP API alert response (EO3b)"  step2_api_alert
-    runstep 3 "ZAP JSON report (EO3b)"         step3_json_report
-    runstep 4 "ZAP Insights evidence (EO3b)"   step4_insights
+    runstep 1 "False Positive alert filter (EO3c)"    step1_fp_filter
+    runstep 2 "Automation Framework job order (EO3c)" step2_job_order
+    runstep 3 "Gate JSON report and exit code (EO3c)" step3_gate_exit
+    runstep 4 "Filtered alert report (EO3c)"          step4_filtered_report
 
     summary
     [ "${FAIL}" -eq 0 ]
@@ -53,15 +52,15 @@ main() {
 
 summary() {
     echo; echo
-    fm header "Preflight summary" "Green means every step inspects the scan evidence through the API as the runbook describes."
+    fm header "Preflight summary" "Green means the gate filters, orders, reports, and decides exactly as the runbook describes."
     if [ "${FAIL}" -eq 0 ]; then
         fm star "Result" "${PASS} checks passed, 0 failed" focus
-        fm note "Aligned with EO3b (TO3). Ready to record."
+        fm note "Aligned with EO3c (TO3). Ready to record."
     else
         fm star "Result" "${PASS} passed, ${FAIL} FAILED" focus
         echo
         fm section "Prompt to fix this demo"
-        fm item "\"Read the latest log in module2/m2-c4-query-the-zap-api-and-inspect-scan-evidence/logs/, find every FAIL, fix the step's ZAP API query in scripts/_steps.sh (never weaken the check), then re-run scripts/preflight_check.sh until all four steps pass.\""
+        fm item "\"Read the latest log in module2/m2-c5/logs/, find every FAIL, fix ci/gate-plan.yaml or the step query in scripts/_steps.sh (never weaken the check), then re-run scripts/preflight_check.sh until all four steps pass.\""
     fi
 }
 

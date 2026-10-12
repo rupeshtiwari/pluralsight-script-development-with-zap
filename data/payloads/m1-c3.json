@@ -1,5 +1,5 @@
 {
-  "demo": "m1-c3-validate-injection-xss-and-csrf-with-zap",
+  "demo": "m1-c3",
   "authorization": "All requests target ONLY the local Globomantics training app on the compose network. Never point these at any other host.",
   "app_internal": "http://app:8000",
   "zap": "http://localhost:8090",

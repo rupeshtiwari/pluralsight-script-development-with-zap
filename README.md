@@ -78,12 +78,12 @@ presentation clips; the demos are clips 3–5).
 
 | Clip | Demo (runbook) | Learning objectives | Source |
 |:----:|----------------|:-------------------:|:------:|
-| **M1 · C3** | **[Validate injection, XSS, and CSRF with ZAP](module1/m1-c3-validate-injection-xss-and-csrf-with-zap/README.md)** — build a focused scan policy; prove SQL, NoSQL, and command injection; map reflected XSS to its three contexts; replay a CSRF token | EO1a · EO1b · EO1c | [code](module1/m1-c3-validate-injection-xss-and-csrf-with-zap) |
-| **M1 · C4** | **[Write a JavaScript security script in ZAP](module1/m1-c4-write-a-javascript-security-script-in-zap/README.md)** — extend ZAP with an HTTP Sender script that marks every request | EO2a | [code](module1/m1-c4-write-a-javascript-security-script-in-zap) |
-| **M1 · C5** | **[Write Python scan and authentication scripts in ZAP](module1/m1-c5-write-python-scan-and-authentication-scripts-in-zap/README.md)** — write a custom Python active-scan rule and a scripted login, then scan a login-only page | EO2b · EO2c | [code](module1/m1-c5-write-python-scan-and-authentication-scripts-in-zap) |
-| **M2 · C3** | **[Run authenticated ZAP scripts in GitHub Actions](module2/m2-c3-run-authenticated-zap-scripts-in-github-actions/README.md)** — run your Module 1 scripts headless and authenticated in a GitHub Actions pipeline, via the ZAP Automation Framework | EO3a | [code](module2/m2-c3-run-authenticated-zap-scripts-in-github-actions) |
-| **M2 · C4** | **[Query the ZAP API and inspect scan evidence](module2/m2-c4-query-the-zap-api-and-inspect-scan-evidence/README.md)** — query runtime + scan status, the finding's rule identity and disposition, the official JSON report, and ZAP 2.17.0 Insights, all over the HTTP API | EO3b | [code](module2/m2-c4-query-the-zap-api-and-inspect-scan-evidence) |
-| **M2 · C5** | **[Enforce ZAP quality gates in GitHub Actions](module2/m2-c5-enforce-zap-quality-gates-in-github-actions/README.md)** — mark a benign finding False Positive with `alertFilter`, confirm job order, then gate the build on the remaining risk via `exitStatus` exit codes | EO3c | [code](module2/m2-c5-enforce-zap-quality-gates-in-github-actions) |
+| **M1 · C3** | **[Validate injection, XSS, and CSRF with ZAP](module1/m1-c3/README.md)** — build a focused scan policy; prove SQL, NoSQL, and command injection; map reflected XSS to its three contexts; replay a CSRF token | EO1a · EO1b · EO1c | [code](module1/m1-c3) |
+| **M1 · C4** | **[Write a JavaScript security script in ZAP](module1/m1-c4/README.md)** — extend ZAP with an HTTP Sender script that marks every request | EO2a | [code](module1/m1-c4) |
+| **M1 · C5** | **[Write Python scan and authentication scripts in ZAP](module1/m1-c5/README.md)** — write a custom Python active-scan rule and a scripted login, then scan a login-only page | EO2b · EO2c | [code](module1/m1-c5) |
+| **M2 · C3** | **[Run authenticated ZAP scripts in GitHub Actions](module2/m2-c3/README.md)** — run your Module 1 scripts headless and authenticated in a GitHub Actions pipeline, via the ZAP Automation Framework | EO3a | [code](module2/m2-c3) |
+| **M2 · C4** | **[Query the ZAP API and inspect scan evidence](module2/m2-c4/README.md)** — query runtime + scan status, the finding's rule identity and disposition, the official JSON report, and ZAP 2.17.0 Insights, all over the HTTP API | EO3b | [code](module2/m2-c4) |
+| **M2 · C5** | **[Enforce ZAP quality gates in GitHub Actions](module2/m2-c5/README.md)** — mark a benign finding False Positive with `alertFilter`, confirm job order, then gate the build on the remaining risk via `exitStatus` exit codes | EO3c | [code](module2/m2-c5) |
 
 ---
 

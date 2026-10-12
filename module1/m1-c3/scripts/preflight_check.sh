@@ -60,7 +60,7 @@ summary() {
         fm star "Result" "${PASS} passed, ${FAIL} FAILED" focus
         echo
         fm section "Prompt to fix this demo"
-        fm item "\"Read the latest log in module1/m1-c3-validate-injection-xss-and-csrf-with-zap/logs/, find every FAIL, fix the app or the scan policy (never weaken the check), then re-run scripts/preflight_check.sh until all four steps pass on the vulnerable build.\""
+        fm item "\"Read the latest log in module1/m1-c3/logs/, find every FAIL, fix the app or the scan policy (never weaken the check), then re-run scripts/preflight_check.sh until all four steps pass on the vulnerable build.\""
     fi
 }
 

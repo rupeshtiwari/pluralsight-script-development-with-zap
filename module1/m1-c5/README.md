@@ -77,7 +77,7 @@ copy each into the Script Console.
 💻 **Run in your terminal** — bring the stack up and open the ZAP GUI:
 
 ```bash
-./module1/m1-c5-write-python-scan-and-authentication-scripts-in-zap/scripts/demo_reset.sh
+./module1/m1-c5/scripts/demo_reset.sh
 ```
 
 Wait until it prints **`Up`**, then open <http://localhost:8080/zap/>. (If the
@@ -217,7 +217,7 @@ log to `logs/`.
 💻 **Run in your terminal:**
 
 ```bash
-cd module1/m1-c5-write-python-scan-and-authentication-scripts-in-zap
+cd module1/m1-c5
 ./scripts/preflight_check.sh
 ```
 

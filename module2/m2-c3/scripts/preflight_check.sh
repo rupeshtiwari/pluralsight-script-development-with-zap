@@ -55,7 +55,7 @@ summary() {
         fm star "Result" "${PASS} passed, ${FAIL} FAILED" focus
         echo
         fm section "Prompt to fix this demo"
-        fm item "\"Read the latest log in module2/m2-c3-run-authenticated-zap-scripts-in-github-actions/logs/, find every FAIL, fix the Automation Framework plan (ci/af-plan.yaml) or the workflow (never weaken the check), then re-run scripts/preflight_check.sh until all four steps pass.\""
+        fm item "\"Read the latest log in module2/m2-c3/logs/, find every FAIL, fix the Automation Framework plan (ci/af-plan.yaml) or the workflow (never weaken the check), then re-run scripts/preflight_check.sh until all four steps pass.\""
     fi
 }
 

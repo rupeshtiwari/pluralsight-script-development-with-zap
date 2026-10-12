@@ -69,7 +69,7 @@ Bring the stack up once, then record each step as its own terminal segment. Each
 command prints its own header and a green **PASS** — one clean screen per step.
 
 ```bash
-cd module2/m2-c3-run-authenticated-zap-scripts-in-github-actions
+cd module2/m2-c3
 ./scripts/demo_up.sh        # wait for "Up" (starts Colima + the stack if needed)
 ./scripts/demo_step.sh 1    # ZAP runs headless from the Automation plan
 ./scripts/demo_step.sh 2    # the authenticated context, declared as config
@@ -220,7 +220,7 @@ authenticated, and confirms the finding — writing a reviewable log to `logs/`.
 
 ```bash
 ./scripts/demo_up.sh                       # from the repo root; wait for "Up"
-./module2/m2-c3-run-authenticated-zap-scripts-in-github-actions/scripts/preflight_check.sh
+./module2/m2-c3/scripts/preflight_check.sh
 ```
 
 ✅ **You'll see** each step report **PASS**, ending with

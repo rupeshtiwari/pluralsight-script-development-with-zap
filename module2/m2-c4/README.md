@@ -67,7 +67,7 @@ Bring the stack up once, then run each step on its own screen. Each command
 prints a header saying **what** it shows and **why**, then a green **PASS**.
 
 ```bash
-cd module2/m2-c4-query-the-zap-api-and-inspect-scan-evidence
+cd module2/m2-c4
 ./scripts/demo_up.sh        # wait for "Up" (starts Colima + the stack if needed)
 ./scripts/demo_step.sh 1    # ZAP API status response
 ./scripts/demo_step.sh 2    # ZAP API alert response
