@@ -1,10 +1,8 @@
 # Validate Injection, XSS, and CSRF with ZAP
 
-A hands-on lab where you turn a broad ZAP scan into **four proven security
-checks** against a deliberately vulnerable web app — the **Globomantics Store**.
-
-You will run each step yourself, one screen at a time, and see the evidence that
-each finding is real.
+Turn a broad ZAP scan into **four proven security checks** against a deliberately
+vulnerable web app — the **Globomantics Store**. You run each step yourself, one
+screen at a time, and read the evidence that each finding is real.
 
 ---
 
@@ -12,10 +10,10 @@ each finding is real.
 
 A default scan hands you a long list of alerts, but a list is not a decision.
 Which findings are real? Can you reproduce each one against the app's actual
-behavior? In this lab you confirm SQL, NoSQL, and command injection, capture
-reflected XSS across its output contexts, replay a CSRF token, and record a
-disposition for every alert — the difference between "I ran a scanner" and "I
-validated the risk."
+behavior? Here you confirm SQL, NoSQL, and command injection, capture reflected
+XSS across its output contexts, replay a CSRF token, and record a disposition
+for every alert — the difference between "I ran a scanner" and "I validated the
+risk."
 
 > **Authorization and scope.** Every request here targets **only** the local
 > Globomantics Store. Never point these techniques at any system you are not
@@ -23,58 +21,56 @@ validated the risk."
 
 ---
 
-## How to follow along
+## How to read this lab
 
-**1. Install the tools (once).** From the repo root:
+| Label | Meaning |
+|-------|---------|
+| 💻 **Run in your terminal** | Copy-paste this command. It is the only thing you type. |
+| ✅ **You'll see** | Output to **read** and confirm. **Never type it as a command.** |
+
+> **Golden rule:** the only things you ever *type* are the 💻 commands. Anything
+> under ✅ is output you *read*.
+
+---
+
+## Set up and run
+
+**1. Install the tools once**, from the repo root:
 ```bash
 ./env-setup/setup-macos.sh
 ```
 Wait until the readiness table shows every component **READY**.
 
-**2. Start the lab.** From the repo root:
+**2. Start the lab** (vulnerable build, prints **Up** when healthy; ZAP takes
+~90s the first time):
 ```bash
 ./module1/m1-c3/scripts/demo_reset.sh
 ```
-This brings up the Globomantics Store on the **vulnerable** build and prints
-**Up** when everything is healthy (ZAP takes ~90 seconds the first time). Open
-the store at <http://localhost:8000/> to see what you are testing.
 
 **3. Move into the lab folder** (every command below is relative to it):
 ```bash
 cd module1/m1-c3
 ```
 
-**4. Run the four steps, one at a time.** Read each screen, then run the next:
+**4. Run the four steps, one at a time** — read each screen, then run the next:
 ```bash
-./scripts/demo_step.sh 1     # targeted injection scan
+./scripts/demo_step.sh 1     # targeted injection scan        (~30–60s)
 ./scripts/demo_step.sh 2     # reflected XSS in three contexts
 ./scripts/demo_step.sh 3     # CSRF token replay
-./scripts/demo_step.sh 4     # alert disposition
+./scripts/demo_step.sh 4     # alert disposition record
 ```
-Each step is self-contained and prints one clean screen. Step 1 runs a real scan
-(~30–60s); Steps 2–4 are instant.
 
-> **Tip:** the exact alert IDs, risk, and confidence you see are the live values
-> from your run. The samples below are from one run and may differ slightly.
-
----
-
-## How to read this lab
-
-| Label | Meaning |
-|-------|---------|
-| 💻 **Run in your terminal** | Copy-paste these commands into your terminal. |
-| ✅ **You'll see** | This is the **output the command prints** — read it to confirm success. **Never type it as a command.** |
-
-> **Golden rule:** the only things you ever *type* are the 💻 commands. Anything
-> under ✅ is output you *read*, not a command.
+> **Tip:** the exact alert IDs, risk, and confidence are the live values from
+> your run; the samples below are from one real run and may differ slightly.
+> Print the context / token-state reference any time with
+> `./scripts/demo_step.sh ref`.
 
 ---
 
-## Before you test: map each case to its context / state
+## Reference — map each case to its context / state
 
-| XSS execution context | Where the input lands |
-|-----------------------|-----------------------|
+| XSS output context | Where the input lands |
+|--------------------|-----------------------|
 | HTML body | between tags |
 | HTML attribute | inside a quoted attribute value |
 | JavaScript string | inside a quoted JS string |
@@ -84,8 +80,6 @@ Each step is self-contained and prints one clean screen. Step 1 runs a real scan
 | valid | the request should succeed |
 | missing / invalid | the request should be rejected |
 | replayed (already used once) | the request should be rejected |
-
-Print this same reference in the terminal any time with `./scripts/demo_step.sh ref`.
 
 ---
 
@@ -102,35 +96,28 @@ Print this same reference in the terminal any time with `./scripts/demo_step.sh 
 
 ## Step 1 — Targeted injection scan
 
-**Why you run this:** a scoped policy turns a broad scan into a targeted test of
-specific weaknesses.
-**What you learn:** how ZAP confirms SQL, NoSQL, and command injection from the
-app's own responses — three injection types in one focused scan.
+**Why you run this / what you learn:** a scoped policy turns a broad scan into a
+targeted test of specific weaknesses — here, how ZAP confirms SQL, NoSQL, and
+command injection from the app's own responses, three injection types in one
+focused scan.
 
+**Do this:**
 ```bash
 ./scripts/demo_step.sh 1
 ```
 
-✅ **You'll see** this terminal output — read it, don't type it:
-
+✅ **You'll see** (output — read it, don't type it):
 ```text
-┌──────────────────────────────────────────────────────────────────────┐
-│ WHAT:  Targeted injection scan — one policy, three endpoints           │
-│ WHY:   Proves SQL, NoSQL, and command injection are real findings      │
-└──────────────────────────────────────────────────────────────────────┘
-
+WHAT: Targeted injection scan — one policy, three endpoints
   ★ Policy rules enabled: SQL-injection family + NoSQL 40033 + command 90020/90037
-
-Findings — alert raised per endpoint:
-
   ★ SQL injection · /search (q): alert 40018 · High/Medium
-
-  ★ NoSQL injection · /api/account (username): alert 40033 · Medium/Medium
-
-  ★ Command injection · /admin/ping (host): alert 90020 (or 90037)
+  ★ NoSQL injection · /api/account (username): alert 40033 · High/High
+  ★ Command injection · /admin/ping (host): alert 90020 · High/Medium
+✔ PASS  targeted scan raised all three injection alerts
 ```
 
-Read the highlighted alert IDs — one real finding per endpoint.
+**What to highlight:** one real finding per endpoint — the three highlighted
+alert IDs (`40018`, `40033`, `90020`), each tied to a specific parameter.
 
 **Proof artifact:** *Targeted scan policy and rule list.*
 
@@ -138,35 +125,27 @@ Read the highlighted alert IDs — one real finding per endpoint.
 
 ## Step 2 — Reflected XSS in three contexts
 
-**Why you run this:** the payload that works depends on *where* your input lands
-in the page.
-**What you learn:** to identify the output context first, because it decides the
-payload you would use.
+**Why you run this / what you learn:** the payload that works depends on *where*
+your input lands in the page, so you identify the output context first — it
+decides the payload you would use.
 
+**Do this:**
 ```bash
 ./scripts/demo_step.sh 2
 ```
 
-✅ **You'll see** this terminal output — read it, don't type it:
-
+✅ **You'll see** (output — read it, don't type it):
 ```text
-┌──────────────────────────────────────────────────────────────────────┐
-│ WHAT:  Reflected XSS — one input, three output contexts                │
-│ WHY:   The output context decides the payload (EO1b)                    │
-└──────────────────────────────────────────────────────────────────────┘
-
+WHAT: Reflected XSS — one input, three output contexts
   ★ Request: GET /greet?name=zzMARKzz
-
-Response body — reflected unescaped:
-
   ★ HTML body context: <p>Hello zzMARKzz
-
   ★ HTML attribute context: value="zzMARKzz"
-
   ★ JavaScript string context: var greeting = "zzMARKzz"
+✔ PASS  input reflects unescaped in all three contexts
 ```
 
-One input, reflected unescaped in all three contexts.
+**What to highlight:** one input (`zzMARKzz`) reflected **unescaped** in all
+three contexts — each context would need a different payload to exploit.
 
 **Proof artifact:** *XSS request and response body.*
 
@@ -174,32 +153,27 @@ One input, reflected unescaped in all three contexts.
 
 ## Step 3 — CSRF token replay
 
-**Why you run this:** a CSRF token is only as good as its rules. A token checked
-for *presence* but not *freshness* can be replayed.
-**What you learn:** to test a protection by replaying a token that was already
-used once.
+**Why you run this / what you learn:** a CSRF token is only as good as its rules.
+A token checked for *presence* but not *freshness* can be replayed — you test the
+protection by reusing a token that was already used once.
 
+**Do this:**
 ```bash
 ./scripts/demo_step.sh 3
 ```
 
-✅ **You'll see** this terminal output — read it, don't type it:
-
+✅ **You'll see** (output — read it, don't type it):
 ```text
-┌──────────────────────────────────────────────────────────────────────┐
-│ WHAT:  CSRF — token replay                                             │
-│ WHY:   A token with no freshness check can be replayed (EO1c)          │
-└──────────────────────────────────────────────────────────────────────┘
-
+WHAT: CSRF — token replay
   ★ valid token: 200
-
   ★ missing token: 403
-
   ★ replayed token (already used once): 200
+✔ PASS  replayed token is accepted (200) — the CSRF protection has no freshness check
 ```
 
-Presence is checked (missing = `403`), but the highlighted `200` shows the token
-is **not single-use** — it can be replayed.
+**What to highlight:** presence *is* checked (missing = `403`), but the
+highlighted `200` on replay shows the token is **not single-use** — it can be
+replayed.
 
 **Proof artifact:** *CSRF token replay result.*
 
@@ -207,49 +181,30 @@ is **not single-use** — it can be replayed.
 
 ## Step 4 — Alert disposition record
 
-**Why you run this:** validation ends in a decision. A disposition is what you
+**Why you run this / what you learn:** validation ends in a decision. A
+disposition reconciles each alert with what the app actually did and is what you
 hand to a developer or keep for the record.
-**What you learn:** to reconcile each alert with what the app actually did and
-mark it confirmed.
 
+**Do this:**
 ```bash
 ./scripts/demo_step.sh 4
 ```
 
-✅ **You'll see** this terminal output — read it, don't type it:
-
+✅ **You'll see** (output — read it, don't type it):
 ```text
-┌──────────────────────────────────────────────────────────────────────┐
-│ WHAT:  Alert disposition — reconcile each alert with app behavior      │
-│ WHY:   Turns raw alerts into decisions you can defend (EO1a/b/c)       │
-└──────────────────────────────────────────────────────────────────────┘
-
+WHAT: Alert disposition — reconcile each alert with app behavior
   ★ 40018 SQL injection · /search: confirmed — DB error: unterminated quoted string at or near "'"
-
   ★ 40033 NoSQL injection · /api/account: confirmed — accounts 1 → 4 under operator injection
-
   ★ 90020/90037 Command injection · /admin/ping: confirmed — OS command ran: bytes from 127.0.0.1
-
   ★ XSS reflected · /greet: confirmed — reflected unescaped
+✔ PASS  all four findings reconciled with app behavior and recorded as confirmed
 ```
 
-Record the full table in [`docs/alert-disposition-template.md`](../../docs/alert-disposition-template.md).
+**What to highlight:** every alert is marked **confirmed** with the concrete app
+behavior that proves it — not just "the scanner said so." Record the full table
+in [`docs/alert-disposition-template.md`](../../docs/alert-disposition-template.md).
 
 **Proof artifact:** *Alert disposition record.*
-
----
-
-## Optional — see why a finding is exploitable (the vulnerable code)
-
-Any time you want the "why," print the exact vulnerable line(s) from the app:
-
-```bash
-./scripts/show_code.sh sqli    # or: nosql · cmd · xss · csrf
-```
-
-It shows the line numbers, so in your editor you can jump straight to them
-(VS Code: `Cmd+P` → `main.py`, then `Ctrl+G` → the line). This is a reference
-aid, not one of the four steps.
 
 ---
 
@@ -261,8 +216,8 @@ Run all four steps in order and write a reviewable log to `logs/`:
 ./scripts/preflight_check.sh
 ```
 
-Every step prints **PASS** or **FAIL**; on a failure it prints the reason and a
-prompt to fix it. When you are done:
+Each step prints **PASS** or **FAIL**; a failure prints the reason and a prompt
+to fix it. It ends with `5 checks passed, 0 failed`. When you are done:
 
 ```bash
 ./scripts/demo_down.sh
@@ -270,7 +225,20 @@ prompt to fix it. When you are done:
 
 ---
 
-## See the fixes hold (optional exploration)
+## Optional — see the vulnerable code behind a finding
+
+Print the exact vulnerable line(s) from the app any time:
+
+```bash
+./scripts/show_code.sh sqli    # or: nosql · cmd · xss · csrf
+```
+
+It shows line numbers so you can jump straight to them in your editor. This is a
+reference aid, not one of the four steps.
+
+---
+
+## Optional — see the fixes hold
 
 The same app ships a **remediated** build — parameterized SQL, type-checked Mongo
 input, a validated command with no shell, context-encoded XSS output, and

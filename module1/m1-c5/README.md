@@ -1,14 +1,32 @@
 # Write Python Scan and Authentication Scripts in ZAP
 
-In this lab you extend ZAP with **two Python (Jython) scripts**:
+Extend ZAP with **two Python (Jython) scripts**:
 
 1. a **custom active-scan rule** that runs your own check during a scan, and
 2. an **authentication script** that logs in for you, so the scan runs as a real
    user.
 
-You then run the rule against a **login-only** Globomantics page and confirm it
-raises your alert. You do this in the **ZAP GUI** (open
-<http://localhost:8080/zap/>), not the terminal.
+You **write both scripts in the ZAP GUI** (open <http://localhost:8080/zap/>),
+then run the rule against a **login-only** Globomantics page and confirm it
+raises your alert. Each step also has an exact terminal command that reproduces
+the same beat through the ZAP API, so you can verify your work the same way every
+time.
+
+---
+
+## The problem you are solving
+
+Built-in rules cover common issues, but every app has checks specific to *it* —
+and the pages that matter most are usually **behind a login**. Here you write
+your own active-scan rule in Python, write an authentication script so ZAP can
+reach a logged-in page, and prove the rule fires there. That is the pattern for
+real, repeatable, house-specific security testing.
+
+**What you gain:** you add your own Python checks *and* test authenticated areas
+— the two things a default, unauthenticated scan cannot do for you.
+
+> **Authorization and scope.** These scripts run **only** against the local
+> Globomantics app. Never point them at any system you are not authorized to test.
 
 ---
 
@@ -16,28 +34,13 @@ raises your alert. You do this in the **ZAP GUI** (open
 
 | Label | Meaning |
 |-------|---------|
+| 📄 **In your editor** | Open this source file to copy its contents. |
 | 🖱️ **Do this in ZAP** | Click or type these **inside the ZAP GUI**. |
-| 💻 **Run in your terminal** | Copy-paste these commands into your terminal. |
-| ✅ **You'll see** | This is a **result ZAP shows you** — read it to confirm success. **Never type it as a command.** |
+| 💻 **Run in your terminal** | Copy-paste this command. It reproduces/verifies the step. |
+| ✅ **You'll see** | Output to **read** and confirm. **Never type it as a command.** |
 
 > **Golden rule:** the only things you ever *type* are under 🖱️ or 💻. Anything
-> under ✅ is output you *read*, not a command.
-
----
-
-## The problem you are solving
-
-Built-in rules cover common issues, but every app has checks that are specific to
-*it* — and the pages that matter most are usually **behind a login**. Here you
-write your own active-scan rule in Python, write an authentication script so ZAP
-can reach a logged-in page, and prove the rule fires there. That is the pattern
-for real, repeatable, house-specific security testing.
-
-**What you gain:** you can add your own Python checks *and* test authenticated
-areas — the two things a default, unauthenticated scan cannot do for you.
-
-> **Authorization and scope.** These scripts run **only** against the local
-> Globomantics app. Never point them at any system you are not authorized to test.
+> under ✅ is output you *read*.
 
 ---
 
@@ -61,14 +64,14 @@ copy each into the Script Console.
 
 ---
 
-## What each step produces
+## What each step teaches (learning-objective coverage)
 
-| Step | You will… | What you produce |
-|------|-----------|------------------|
-| 1 | Install Python scripting, write the custom active-scan rule, save it | Python active-rule source |
-| 2 | Write the authentication script and save it separately | Authentication script source |
-| 3 | Run scripted login + the custom rule against the login-only page | Authenticated custom-scan result |
-| 4 | Confirm the rule raises its named alert and read it | Custom alert record |
+| Step | You will… | Objective | Proof artifact |
+|------|-----------|-----------|----------------|
+| 1 | Write the custom Python active-scan rule and load it | EO2b | Python active-rule source |
+| 2 | Write the authentication script and register it | EO2c | Authentication script source |
+| 3 | Have ZAP run the auth script to reach the login-only page | EO2c | Authenticated custom-scan result |
+| 4 | Confirm the rule raises its named alert, fresh from this scan | EO2b | Custom alert record |
 
 ---
 
@@ -77,32 +80,49 @@ copy each into the Script Console.
 💻 **Run in your terminal** — bring the stack up and open the ZAP GUI:
 
 ```bash
-./module1/m1-c5/scripts/demo_reset.sh
+cd module1/m1-c5
+./scripts/demo_reset.sh
 ```
 
 Wait until it prints **`Up`**, then open <http://localhost:8080/zap/>. (If the
-Docker engine is stopped, this starts it for you and waits — you do not need to
-start Colima yourself. The **Python Scripting (jython)** add-on is installed in
-the ZAP container automatically at startup.)
+Docker engine is stopped, this starts it for you. The **Python Scripting
+(jython)** add-on is installed in the ZAP container automatically at startup.)
 
 ---
 
 ## Step 1 — Write the custom Python active-scan rule
 
-An **active-scan rule** runs *your* check while ZAP scans a parameter. This one
-sends a probe and flags the parameter if the response reflects it without
-encoding — a Globomantics-specific check.
+**Why you run this / what you learn:** an **active-scan rule** runs *your* check
+while ZAP scans a parameter. This one sends a probe and flags the parameter if
+the response reflects it without encoding — a Globomantics-specific check a
+built-in rule does not cover.
 
-🖱️ **Do this in ZAP:**
+**Do this:**
 
-1. Open the **Scripts** tab. Under **Active Rules**, choose **New Script**.
-2. Set **Engine** to **Python (jython)** and name it `globomantics-active-rule`.
-3. Paste the contents of
-   [`zap-scripts/globomantics-active-rule.py`](zap-scripts/globomantics-active-rule.py),
-   click **Save**, then **enable** it (the checkbox in the Scripts tree).
+📄 **In your editor:** open
+[`zap-scripts/globomantics-active-rule.py`](zap-scripts/globomantics-active-rule.py)
+to copy its contents.
 
-✅ **You'll see** `globomantics-active-rule` listed under **Active Rules**, in the
-Python (jython) engine. That saved file **is** your Python active-rule source.
+🖱️ **In ZAP:** open the **Scripts** tab → under **Active Rules** choose **New
+Script** → set **Engine** to **Python (jython)**, name it
+`globomantics-active-rule`, paste the source, **Save**, then **enable** it (the
+checkbox in the Scripts tree). It now appears under **Active Rules**.
+
+💻 **In your terminal** (reproduces and verifies the load):
+```bash
+./scripts/demo_step.sh 1
+```
+
+✅ **You'll see** (output — read it, don't type it):
+```text
+WHAT: The custom Python active-scan rule
+  ★ Script name: globomantics-active-rule   (type: active · engine: python : jython)
+  ★ Alert it raises: Globomantics unsafe reflection (custom rule)
+✔ PASS  active-rule script is valid and loaded into ZAP as an active rule
+```
+
+**What to highlight:** the rule is registered as an **active** rule on the
+**jython** engine, and names the exact alert it will raise.
 
 **Proof artifact:** *Python active-rule source.*
 
@@ -110,122 +130,136 @@ Python (jython) engine. That saved file **is** your Python active-rule source.
 
 ## Step 2 — Write the authentication script
 
-An **authentication script** tells ZAP how to log in, so it can reach pages that
-require a session.
+**Why you run this / what you learn:** an **authentication script** tells ZAP how
+to log in, so it can reach pages that require a session.
 
-🖱️ **Do this in ZAP:**
+**Do this:**
 
-1. In the **Scripts** tab, under **Authentication**, choose **New Script**.
-2. Set **Engine** to **Python (jython)** and name it `globomantics-auth`.
-3. Paste the contents of
-   [`zap-scripts/globomantics-auth.py`](zap-scripts/globomantics-auth.py) and
-   click **Save**.
+📄 **In your editor:** open
+[`zap-scripts/globomantics-auth.py`](zap-scripts/globomantics-auth.py) to copy
+its contents.
 
-✅ **You'll see** `globomantics-auth` listed under **Authentication**, saved
-separately from the rule. That is your authentication script source.
+🖱️ **In ZAP:** in the **Scripts** tab → under **Authentication** choose **New
+Script** → set **Engine** to **Python (jython)**, name it `globomantics-auth`,
+paste the source, and **Save**. It now appears under **Authentication**, saved
+separately from the rule.
+
+💻 **In your terminal** (reproduces and verifies the registration):
+```bash
+./scripts/demo_step.sh 2
+```
+
+✅ **You'll see** (output — read it, don't type it):
+```text
+WHAT: The scripted authentication
+  ★ Script name: globomantics-auth   (type: authentication · engine: python : jython)
+  ★ It submits: username=alice to POST /login, then ZAP reuses the session cookie
+✔ PASS  authentication script is valid and registered in ZAP
+```
+
+**What to highlight:** the script is registered as an **authentication** script —
+a different type from the rule — ready to attach to a Context.
 
 **Proof artifact:** *Authentication script source.*
 
 ---
 
-## Step 3 — Run scripted authentication and the custom rule together
+## Step 3 — Have ZAP run the auth script to reach the login-only page
 
-Now prove the two scripts work as a pair: ZAP logs in with your **auth script**,
-then your **custom rule** scans a page that only exists **when you are logged in**.
+**Why you run this / what you learn:** ZAP runs your authentication script to get
+a session, then reaches a page that only exists when logged in — the session
+comes from the **script**, not from a cookie you supply.
 
-> **What is a Context?** In ZAP a *Context* is simply "this website **plus** how
-> to log into it." You attach your authentication script to a Context, add a
-> user, and ZAP then logs that user in automatically before it scans.
+**Do this:**
 
-First, visit the page once so ZAP knows about it:
+🖱️ **In ZAP** — attach the script to a Context and turn on the user:
+1. Visit `http://localhost:8000/account/profile?note=seed` in your proxied
+   browser (you'll get *"Please log in first"* / 401 — that proves the page is
+   login-only, and it now appears in the **Sites** tree).
+2. In the **Sites** tree, right-click `http://localhost:8000` → **Include in
+   Context → New Context**, name it `Globomantics`.
+3. In the Context dialog → **Authentication** → **Script-based Authentication** →
+   select `globomantics-auth`; set **Login URL** to
+   `http://localhost:8000/login` and **Logged-in indicator (regex)** to
+   `Signed in as`.
+4. **Users → Add**: name `alice`, username `alice`. Then click **Forced User
+   Mode** on the toolbar and select `alice`.
+5. Right-click `…/account/profile?note=seed` → **Attack → Active Scan → Start**.
 
-🖱️ **Do this in ZAP:** in your proxied browser, open
-`http://localhost:8000/account/profile?note=seed`. You'll get a *"Please log in
-first"* page (HTTP 401) — that's expected; it proves the page is login-only. The
-URL now appears in ZAP's **Sites** tree on the left.
-
-**A. Create a Context and attach your auth script**
-
-🖱️ **Do this in ZAP:**
-
-1. In the **Sites** tree, right-click `http://localhost:8000` →
-   **Include in Context → New Context**. Name it `Globomantics`.
-2. In the Context dialog, click **Authentication** → choose
-   **Script-based Authentication**.
-3. Select the **`globomantics-auth`** script. In **Login URL**, enter
-   `http://localhost:8000/login`.
-4. In **Logged in indicator (regex)**, enter `Signed in as`. Click **OK**.
-
-**B. Add the user to log in as**
-
-🖱️ **Do this in ZAP:**
-
-5. In the Context dialog, click **Users → Add**. Name the user `alice`, set the
-   **username** field to `alice`, and **Save**.
-
-**C. Turn on the user and scan the page**
-
-🖱️ **Do this in ZAP:**
-
-6. On the toolbar, click the **Forced User Mode** button (the little person icon)
-   and select `alice`. Now every request ZAP sends is logged in as `alice`.
-7. In the **Sites** tree, right-click
-   `http://localhost:8000/account/profile?note=seed` →
-   **Attack → Active Scan** → **Start Scan**.
-
-✅ **You'll see** the page behave like this (read it — don't type it): locked out
-before login, reachable after the script logs in, so the scan runs as `alice` and
-your custom rule reaches the authenticated content:
-
-```text
-Without login:        /account/profile -> 401 (gated)
-After scripted login: /account/profile -> 200 (reachable)
+💻 **In your terminal** (reproduces the same context script-auth + forced user and
+verifies ZAP logs itself in):
+```bash
+./scripts/demo_step.sh 3
 ```
+
+✅ **You'll see** (output — read it, don't type it):
+```text
+WHAT: ZAP runs your authentication script
+  ★ Without login: /account/profile -> HTTP 401  (gated)
+  ★ ZAP forced-user (script auth): /account/profile -> HTTP 200  (reachable)
+  ★ Auth script ran: authenticate: user=alice login_url=http://app:8000/login  authenticate: response=200
+✔ PASS  ZAP executed the authentication script and holds the session (no cookie supplied by the preflight)
+```
+
+**What to highlight:** the same page is **401 before** and **200 after** — and the
+`authenticate:` trace proves ZAP got there by **running your script**, with no
+cookie supplied by hand.
 
 **Proof artifact:** *Authenticated custom-scan result.*
 
 ---
 
-## Step 4 — Confirm the custom alert
+## Step 4 — Confirm the custom alert, fresh from this scan
 
-A rule you can trust ends in a clear, named alert.
+**Why you run this / what you learn:** a rule you can trust ends in a clear,
+named alert. The check clears the alert store first, so the alert you see is
+provably from **this** scan — not a leftover from an earlier run.
 
-🖱️ **Do this in ZAP:**
+**Do this:**
 
-1. Open the **Alerts** tab.
-2. Find the alert your rule raised on `/account/profile`.
+🖱️ **In ZAP:** open the **Alerts** tab and find the alert your rule raised on
+`/account/profile`.
 
-✅ **You'll see** your custom alert recorded (read it — do not type it):
-
-```text
-Alert:      Globomantics unsafe reflection (custom rule)
-Risk:       Medium
-Parameter:  note
+💻 **In your terminal** (clears the store, scans the page as `alice`, then reads
+the alert back):
+```bash
+./scripts/demo_step.sh 4
 ```
 
-That alert is what a pipeline can later gate on. **Proof artifact:** *Custom alert record.*
+✅ **You'll see** (output — read it, don't type it):
+```text
+WHAT: The custom alert the rule raises
+  ★ Before scan (store cleared): absent
+  ★ Scan target: http://app:8000/account/profile?note=seed (param: note, as user alice)
+  ★ Probe requests the scan sent: 135
+  ★ Alert: Globomantics unsafe reflection (custom rule)
+  ★ Risk: Medium
+  ★ Parameter: note
+  ★ Evidence: GLOBOxss7marker
+✔ PASS  the custom rule RAISED its named alert on this scan — absent before, present after (verified via the ZAP API)
+```
+
+**What to highlight:** **absent before, present after** — the named alert, on
+parameter `note`, with evidence `GLOBOxss7marker`, raised by *your* rule on a
+scan ZAP authenticated itself. That alert is what a pipeline can later gate on.
+
+**Proof artifact:** *Custom alert record.*
 
 ---
 
-## Check your work (optional, automated)
+## Check your work
 
-You authored the demo in the GUI. To **prove** both scripts behave correctly, run
-the checker: it loads both scripts through the ZAP API, logs in, runs the custom
-rule against the authenticated page, and confirms the alert — writing a reviewable
-log to `logs/`.
-
-💻 **Run in your terminal:**
+You authored the scripts in the GUI. To prove both behave correctly in one pass,
+run the checker — it loads both scripts through the ZAP API, has ZAP log in with
+your auth script, scans the authenticated page with your rule, and confirms a
+fresh alert, writing a reviewable log to `logs/`:
 
 ```bash
-cd module1/m1-c5
 ./scripts/preflight_check.sh
 ```
 
-✅ **You'll see** each step report **PASS**, ending with
-`5 checks passed, 0 failed`. (On a failure it prints the exact reason and how to
-fix it.)
-
-💻 When you are finished, tear the stack down:
+Each step reports **PASS**, ending with `5 checks passed, 0 failed`. (On a
+failure it prints the exact reason and how to fix it.) When you are finished:
 
 ```bash
 ./scripts/demo_down.sh
@@ -235,26 +269,36 @@ fix it.)
 
 ## The scripts
 
-**Custom active-scan rule — `globomantics-active-rule.py`** (Jython 2.7.2):
+**Custom active-scan rule — `globomantics-active-rule.py`** (Jython 2.7.2). It
+checks each query parameter by cloning the request (keeping the logged-in
+session), putting a probe in the parameter, and raising the named alert if the
+probe reflects unencoded. It runs from `scanNode()` so it does not depend on how
+ZAP enumerates parameters:
 
 ```python
 PROBE = "GLOBOxss7marker"
 ALERT_NAME = "Globomantics unsafe reflection (custom rule)"
 
-def scan(sas, msg, param, value):
-    probe = msg.cloneRequest()
-    sas.setParam(probe, param, PROBE)
+def _check(sas, msg, param):
+    probe = msg.cloneRequest()                      # keeps the logged-in cookie
+    pairs = ["%s=%s" % (p.getName(), PROBE if p.getName() == param else p.getValue())
+             for p in msg.getUrlParams()]
+    uri = probe.getRequestHeader().getURI()
+    uri.setQuery("&".join(pairs))                   # put the probe in this parameter
+    probe.getRequestHeader().setURI(uri)
     sas.sendAndReceive(probe, False, False)
     if PROBE in probe.getResponseBody().toString():
-        alert = (sas.newAlert()
-                 .setRisk(2).setConfidence(2).setName(ALERT_NAME)
+        alert = (sas.newAlert().setRisk(2).setConfidence(2).setName(ALERT_NAME)
                  .setDescription("Reflected without output encoding.")
-                 .setParam(param).setAttack(PROBE).setEvidence(PROBE)
-                 .setMessage(probe))
-        getattr(alert, "raise")()   # 'raise' is a keyword in Jython
+                 .setParam(param).setAttack(PROBE).setEvidence(PROBE).setMessage(probe))
+        getattr(alert, "raise")()                   # 'raise' is a keyword in Python
+
+def scan(sas, msg, param, value):
+    _check(sas, msg, param)
 
 def scanNode(sas, msg):
-    pass
+    for p in msg.getUrlParams():
+        _check(sas, msg, p.getName())
 ```
 
 **Authentication script — `globomantics-auth.py`** (Jython 2.7.2):
@@ -288,3 +332,6 @@ def getOptionalParamsNames():
 def getCredentialsParamsNames():
     return array(["username"], String)
 ```
+
+> The source files in `zap-scripts/` also write a short diagnostic trace that the
+> checker reads to prove exactly what ran; it has no effect on screen.
