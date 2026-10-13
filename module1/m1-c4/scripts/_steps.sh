@@ -210,7 +210,7 @@ print("")' "${SCRIPT_NAME}")"
             pass "script registered and enabled as HTTP Sender"
         else
             fail "script registration is incomplete" "type=${t} enabled=${en} engine=${e}" "run step 1"
-        fi"
+        fi
     else
         fail "script is not registered in ZAP" "the load step did not complete" \
              "ask: 're-run step 1 to load and enable the globomantics-marker script'"
