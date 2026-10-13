@@ -1,8 +1,8 @@
 #!/bin/bash
 # Shared step library for m1-c4 "Write a JavaScript security script in ZAP".
 #
-# Sourced by preflight_check.sh (author tooling). The demo itself is authored in
-# ZAP's Script Console (GUI); this library proves, through the ZAP API, that the
+# Sourced by preflight_check.sh (author tooling). The committed JavaScript is loaded by API;
+# live output is inspected in ZAP's Script Console (GUI). this library proves, through the ZAP API, that the
 # JavaScript HTTP Sender script behaves as the runbook describes:
 #   1. JavaScript source file   2. Modified HTTP request
 #   3. Script console output    4. Saved script registration
@@ -57,24 +57,44 @@ load_and_enable() { # <engine>
     zap script/action/load \
         "scriptName=$(enc "${SCRIPT_NAME}")&scriptType=httpsender&scriptEngine=$(enc "$1")&fileName=$(enc "${SCRIPT_FILE_ZAP}")&scriptDescription=$(enc 'Globomantics HTTP Sender marker (course demo)')" \
         >/dev/null 2>&1 || return 1
-    zap script/action/enable "scriptName=$(enc "${SCRIPT_NAME}")" >/dev/null 2>&1 || true
-    return 0
+    zap script/action/enable "scriptName=$(enc "${SCRIPT_NAME}")" >/dev/null 2>&1 || return 1
+    script_registration_valid
 }
 
-send_probe() { curl -s -x "${PROXY}" -o /dev/null "${APP_INTERNAL}/greet?name=marker-check"; }
+script_registration_valid() {
+    zap script/view/listScripts | python3 -c '
+import json,sys
+try: rows=json.load(sys.stdin).get("listScripts",[])
+except Exception: sys.exit(1)
+for r in rows:
+    if r.get("name")==sys.argv[1]:
+        sys.exit(0 if r.get("type")=="httpsender" and str(r.get("enabled")).lower()=="true" else 1)
+sys.exit(1)' "${SCRIPT_NAME}"
+}
+
+send_probe() {
+    PROBE_NAME="marker-$(date +%s)-$-$RANDOM"
+    PROBE_URL="${APP_INTERNAL}/greet?name=${PROBE_NAME}"
+    local status
+    status="$(curl --noproxy '' --proxy "${PROXY}" --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 20 "${PROBE_URL}")" || return 1
+    [ "${status}" = "200" ] || { echo "probe HTTP ${status}, expected 200" >&2; return 1; }
+}
+
 
 marker_request_line() {
-    zap core/view/messages "baseurl=${APP_INTERNAL}&count=25" | python3 -c '
+    zap core/view/messages "baseurl=$(enc "${APP_INTERNAL}")&count=100" | python3 -c '
 import json,sys
-ms = json.load(sys.stdin).get("messages", [])
+want=sys.argv[1]
+try: ms=json.load(sys.stdin).get("messages",[])
+except Exception: sys.exit(1)
 for m in reversed(ms):
-    rh = m.get("requestHeader", "")
-    if "X-Globomantics-Marker" in rh:
-        lines = rh.splitlines()
-        req = lines[0].strip() if lines else ""
-        hdr = next((l.strip() for l in lines if l.lower().startswith("x-globomantics-marker")), "")
-        print(req + " || " + hdr); raise SystemExit
-print("")'
+    lines=m.get("requestHeader","").splitlines()
+    if not lines or want not in lines[0]: continue
+    hdr=next((line.strip() for line in lines if line.lower().startswith("x-globomantics-marker:")), "")
+    if hdr=="X-Globomantics-Marker: GLOBO-DEMO":
+        print(lines[0].strip()+" || "+hdr)
+        sys.exit(0)
+sys.exit(1)' "${PROBE_NAME}"
 }
 
 ensure_ready() {
@@ -120,7 +140,9 @@ step1_source() {
 step2_modified_request() {
     fm header "The marker header on an outbound request" \
               "Confirms the script actually changes messages ZAP sends — not just that it loaded (EO2a)."
-    send_probe
+    if ! send_probe; then
+        fail "fresh proxied request failed" "expected HTTP 200 through ZAP" "check local stack and proxy"; return 1
+    fi
     local rec; rec="$(marker_request_line)"
     if [ -n "${rec}" ]; then
         fm star "Outbound request" "${rec%% || *}"
@@ -144,13 +166,15 @@ step3_console_output() {
     # The live console line appears in ZAP's Script Console. Here we confirm the
     # named line exists in the source and that the action runs (a fresh marked
     # request), which is what produces that console line.
-    send_probe
+    if ! send_probe; then
+        fail "fresh proxied request failed" "expected HTTP 200 through ZAP" "check local stack and proxy"; return 1
+    fi
     local rec; rec="$(marker_request_line)"
-    fm star "Console line (seen in ZAP's Script Console)" "${CONSOLE_TAG} added ${MARKER_HEADER}: ${MARKER_VALUE} to <url>" focus
+    fm star "Expected format (verify live ZAP Script Console)" "${CONSOLE_TAG} added ${MARKER_HEADER}: ${MARKER_VALUE} to <url>" focus
     if grep -q "print(CONSOLE_TAG" "${SCRIPT_FILE_HOST}" && [ -n "${rec}" ]; then
-        pass "the script prints a named console line each time its action runs"
+        pass "fresh marked request confirmed; verify emitted line in live ZAP Script Console"
     else
-        fail "the named console output was not produced" \
+        fail "fresh marked request or print hook not confirmed" \
              "the print() line is missing or the action did not run" \
              "ask: 'the globomantics-marker script is not producing its named console line; check the print statement'"
     fi
@@ -182,10 +206,11 @@ print("")' "${SCRIPT_NAME}")"
         fm star "Engine" "${e}"
         fm star "Enabled" "${en}"
         fm star "Path (repo)" "zap-scripts/globomantics-marker.js"
-        [ "${t}" = "httpsender" ] \
-            && pass "script is registered as a reusable HTTP Sender script" \
-            || fail "script registered with the wrong type (${t})" "expected httpsender" \
-                    "ask: 're-load globomantics-marker with scriptType=httpsender'"
+        if [ "${t}" = "httpsender" ] && [ "${en}" = "true" ] && [ -n "${e}" ]; then
+            pass "script registered and enabled as HTTP Sender"
+        else
+            fail "script registration is incomplete" "type=${t} enabled=${en} engine=${e}" "run step 1"
+        fi"
     else
         fail "script is not registered in ZAP" "the load step did not complete" \
              "ask: 're-run step 1 to load and enable the globomantics-marker script'"
