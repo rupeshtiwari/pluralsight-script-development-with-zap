@@ -38,6 +38,7 @@ LOGIN_USER="alice"
 LOGIN_URL="${APP_INTERNAL}/login"
 PROFILE_URL="${APP_INTERNAL}/account/profile?note=seed"
 SCRIPT_RULES_ID="50000"   # ZAP "Script Active Scan Rules" plugin
+SCRIPT_POLICY="m1c5-script"   # policy that runs the custom rule at LOW threshold
 RULE_TRACE_ZAP="/tmp/globo-rule-trace.log"   # author diagnostics the rule writes
 AUTH_TRACE_ZAP="/tmp/globo-auth-trace.log"   # author diagnostics the auth script writes
 CTX_NAME="globo-m1c5"                        # context the preflight configures
@@ -211,6 +212,18 @@ enable_all_scanners() {
     zap ascan/action/enableAllScanners >/dev/null 2>&1 || true
     zap ascan/action/enableScanners "ids=${SCRIPT_RULES_ID}" >/dev/null 2>&1 || true
 }
+# Build a focused policy that runs ONLY the Script Active Scan Rules plugin
+# (50000) at LOW threshold / MEDIUM strength — the same configuration the
+# Module 2 AF plan uses, which reliably routes the scan into the custom rule.
+# The default policy does not always invoke the script rule on a single node.
+build_script_policy() {
+    zap ascan/action/removeScanPolicy "scanPolicyName=$(enc "${SCRIPT_POLICY}")" >/dev/null 2>&1 || true
+    zap ascan/action/addScanPolicy "scanPolicyName=$(enc "${SCRIPT_POLICY}")" >/dev/null 2>&1 || true
+    zap ascan/action/disableAllScanners "scanPolicyName=$(enc "${SCRIPT_POLICY}")" >/dev/null 2>&1 || true
+    zap ascan/action/enableScanners "ids=${SCRIPT_RULES_ID}&scanPolicyName=$(enc "${SCRIPT_POLICY}")" >/dev/null 2>&1 || true
+    zap ascan/action/setScannerAttackStrength "id=${SCRIPT_RULES_ID}&attackStrength=MEDIUM&scanPolicyName=$(enc "${SCRIPT_POLICY}")" >/dev/null 2>&1 || true
+    zap ascan/action/setScannerAlertThreshold "id=${SCRIPT_RULES_ID}&alertThreshold=LOW&scanPolicyName=$(enc "${SCRIPT_POLICY}")" >/dev/null 2>&1 || true
+}
 del_all_alerts() { zap core/action/deleteAllAlerts >/dev/null 2>&1 || true; }
 scan_messages_count() { # <scanId> -> number of probe requests the scan sent
     zap ascan/view/messagesIds "scanId=$1" | python3 -c 'import json,sys
@@ -219,7 +232,7 @@ except Exception: print("0")'
 }
 start_scan_as_user() { # <url> <contextId> <userId> -> scanId (empty on failure)
     zap ascan/action/scanAsUser \
-        "url=$(enc "$1")&contextId=$2&userId=$3&recurse=false&scanPolicyName=" | python3 -c 'import json,sys
+        "url=$(enc "$1")&contextId=$2&userId=$3&recurse=false&scanPolicyName=$(enc "${SCRIPT_POLICY}")" | python3 -c 'import json,sys
 try:
     d=json.load(sys.stdin); print(d.get("scanAsUser") or d.get("scan") or "")
 except Exception: print("")'
@@ -370,7 +383,7 @@ step4_fresh_alert() {
     local before; before="$(custom_alert)"
     fm star "Before scan (store cleared)" "$([ -z "${before}" ] && echo 'absent' || echo "${before}")"
 
-    enable_all_scanners
+    build_script_policy
     reset_rule_trace
     # Seed the node as the forced user (no cookie), then scan it as that user.
     status_no_cookie "${PROFILE_URL}" >/dev/null

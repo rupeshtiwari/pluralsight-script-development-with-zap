@@ -73,7 +73,7 @@ sys.exit(1)' "${SCRIPT_NAME}"
 }
 
 send_probe() {
-    PROBE_NAME="marker-$(date +%s)-${BASHPID}-${RANDOM}"
+    PROBE_NAME="marker-$(date +%s)-${BASHPID:-$$}-${RANDOM}"
     PROBE_URL="${APP_INTERNAL}/greet?name=${PROBE_NAME}"
     local status
     status="$(curl --noproxy '' --proxy "${PROXY}" --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 20 "${PROBE_URL}")" || return 1

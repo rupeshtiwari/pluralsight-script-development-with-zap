@@ -60,6 +60,12 @@ run_plan() { reset_plan_state; PLAN_ID="$(zap automation/action/runPlan "filePat
 try: print(json.load(sys.stdin).get("planId",""))
 except Exception: print("")')"; [ -n "${PLAN_ID:-}" ]; }
 plan_finished() { zap automation/view/planProgress "planId=${PLAN_ID}" | grep -q '"finished"[^,]*[0-9T:-]'; }
+scan_finished() { # "yes" when the most recent active scan has reached 100%
+    zap ascan/view/scans | python3 -c 'import json,sys
+try: s=json.load(sys.stdin).get("scans",[])
+except Exception: raise SystemExit
+if s and str(s[-1].get("progress",""))=="100": print("yes")'
+}
 
 custom_present() {
     zap core/view/alerts "baseurl=$(enc "${PROFILE}")" | python3 -c 'import json,sys
@@ -71,14 +77,28 @@ for a in d.get("alerts",[]):
         print("yes"); break' "${CUSTOM_NAME}"
 }
 
-ensure_scan() { # prime once if the script-generated alert is not yet present
-    [ -n "$(custom_present)" ] && return 0
+ensure_scan() { # prime once if there is no finished authenticated scan + alert yet
+    { [ -n "$(custom_present)" ] && [ -n "$(scan_finished)" ]; } && return 0
     fm note "Priming: this ZAP session has no finished authenticated scan yet — running the authenticated plan once so there is evidence to inspect."
     run_plan || { fail "could not start the plan to generate evidence" "automation/action/runPlan returned no plan id" "ask: 'the AF plan did not run; check the automation add-on and /af/af-plan.yaml'"; return 1; }
-    local i; for i in $(seq 1 120); do plan_finished && break; sleep 3; done
-    # The plan can report "finished" a moment before the scan's alerts are
-    # queryable, so wait for the script-generated alert rather than checking once.
+    local i; for i in $(seq 1 160); do plan_finished && break; sleep 3; done
+    # Bounded wait for the active scan to fully complete so Step 1 observes
+    # progress=100 and the JSON report in Steps 3-4 is generated from a finished
+    # scan. If it never reaches 100% within the timeout, fail with a nonzero exit.
+    local k; for k in $(seq 1 80); do [ -n "$(scan_finished)" ] && break; sleep 3; done
+    if [ -z "$(scan_finished)" ]; then
+        fail "the authenticated scan did not complete" \
+             "ascan/view/scans never reported progress=100 within the timeout" \
+             "ask: 'the AF plan scan did not finish; check ZAP and the plan maxScanDurationInMins'"
+        return 1
+    fi
+    # The scan can finish a moment before its alerts are queryable, so wait for
+    # the script-generated alert rather than checking once. The named custom
+    # alert is REQUIRED — a missing alert fails with a nonzero exit.
     local j; for j in $(seq 1 36); do [ -n "$(custom_present)" ] && return 0; sleep 5; done
+    fail "the script-generated custom alert did not appear after the scan" \
+         "core/view/alerts has no '${CUSTOM_NAME}' on ${PROFILE} after a completed scan" \
+         "ask: 'the authenticated scan finished but did not raise the custom rule alert; check the custom rule and the context user'"
     return 1
 }
 
