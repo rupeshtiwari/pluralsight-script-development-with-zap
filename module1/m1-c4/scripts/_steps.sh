@@ -97,6 +97,24 @@ for m in reversed(ms):
 sys.exit(1)' "${PROBE_NAME}"
 }
 
+# Send a fresh probe and look for its marked request, retrying briefly. Right
+# after Step 1 enables the HTTP Sender script via the API, ZAP can take a moment
+# to activate it on the sending path, so a single immediate probe may miss it.
+# Each attempt sends a NEW uniquely-named probe. This never weakens the check —
+# it still requires a real proxied request carrying the exact marker header.
+probe_until_marked() { # -> prints "request-line || header" on success; empty on failure
+    local i rec
+    for i in 1 2 3 4 5 6; do
+        if send_probe; then
+            rec="$(marker_request_line)"
+            [ -n "${rec}" ] && { printf '%s' "${rec}"; return 0; }
+        fi
+        sleep 2
+    done
+    printf ''
+    return 1
+}
+
 ensure_ready() {
     [ -n "${K}" ] || { fail "ZAP_API_KEY is not set" "the .env file is missing or not loaded" "run from the repo so .env loads"; return 1; }
     zap core/view/version | grep -q '"version"' || {
@@ -140,10 +158,7 @@ step1_source() {
 step2_modified_request() {
     fm header "The marker header on an outbound request" \
               "Confirms the script actually changes messages ZAP sends — not just that it loaded (EO2a)."
-    if ! send_probe; then
-        fail "fresh proxied request failed" "expected HTTP 200 through ZAP" "check local stack and proxy"; return 1
-    fi
-    local rec; rec="$(marker_request_line)"
+    local rec; rec="$(probe_until_marked)"
     if [ -n "${rec}" ]; then
         fm star "Outbound request" "${rec%% || *}"
         fm star "Header added by the script" "${rec##* || }" focus
@@ -166,10 +181,7 @@ step3_console_output() {
     # The live console line appears in ZAP's Script Console. Here we confirm the
     # named line exists in the source and that the action runs (a fresh marked
     # request), which is what produces that console line.
-    if ! send_probe; then
-        fail "fresh proxied request failed" "expected HTTP 200 through ZAP" "check local stack and proxy"; return 1
-    fi
-    local rec; rec="$(marker_request_line)"
+    local rec; rec="$(probe_until_marked)"
     fm star "Expected format (verify live ZAP Script Console)" "${CONSOLE_TAG} added ${MARKER_HEADER}: ${MARKER_VALUE} to <url>" focus
     if grep -q "print(CONSOLE_TAG" "${SCRIPT_FILE_HOST}" && [ -n "${rec}" ]; then
         pass "fresh marked request confirmed; verify emitted line in live ZAP Script Console"

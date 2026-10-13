@@ -41,7 +41,12 @@ zap() { # <path> <query> -> body (asserts HTTP 200)
     cat /tmp/.m2d2body
 }
 
-zap_container() { docker ps --format '{{.Names}}' 2>/dev/null | grep -E 'zap' | head -1; }
+# Select the ZAP SERVICE container specifically. The compose project name
+# contains "zap", so a plain `grep zap` matches every service (app, mongo,
+# postgres, zap) and can return the wrong container — which made the report
+# read happen in the app container's /tmp. `docker compose ps -q zap` resolves
+# the zap service only (same approach as m2-c3).
+zap_container() { ( cd "${REPO_ROOT}" && docker compose ps -q zap 2>/dev/null ) | head -1; }
 
 # --- priming: make sure a finished scan exists to inspect --------------------
 # The AF env re-registers the context auth script by its file name every run;
