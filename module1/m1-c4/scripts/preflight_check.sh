@@ -2,8 +2,8 @@
 # =============================================================================
 # Preflight / demo-step validator — m1-c4 "Write a JavaScript security script"
 # =============================================================================
-# AUTHOR tooling. The demo is authored in ZAP's Script Console (GUI); this runs
-# the same four beats through the ZAP API and proves each one, then writes a
+# AUTHOR tooling. The committed script is loaded through ZAP's API; this runs
+# the same four beats through the ZAP API and checks each one, then writes a
 # readable log to logs/ so you can check the demo against the objective before
 # you use it. Exits non-zero if any step fails.
 # =============================================================================
@@ -24,7 +24,7 @@ banner() { echo; echo; fm section "STEP $1 — $2"; }
 
 main() {
     fm header "Preflight — Write a JavaScript security script in ZAP" \
-              "Proves the JavaScript HTTP Sender script loads, marks requests, prints its named line, and is saved for reuse."
+              "Checks script load, fresh modified request, print hook, and enabled registration. Verify live console output in ZAP."
     fm star "Scope" "local Globomantics training app only (compose network)" focus
 
     echo; echo
@@ -48,7 +48,7 @@ summary() {
     fm header "Preflight summary" "Green means the script behaves as the runbook describes."
     if [ "${FAIL}" -eq 0 ]; then
         fm star "Result" "${PASS} checks passed, 0 failed" focus
-        fm note "Aligned with EO2a (TO2). Ready to record."
+        fm note "CLI checks passed. Verify the live [globo-marker] line in ZAP Script Console before recording."
     else
         fm star "Result" "${PASS} passed, ${FAIL} FAILED" focus
         echo
