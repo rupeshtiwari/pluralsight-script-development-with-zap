@@ -32,7 +32,7 @@ cd module1/m1-c4
 
 **Wait** for the healthy `Up` result. Open [ZAP GUI](http://localhost:8080/zap/) in a full-screen browser view and locate its **Scripts** area; keep a Terminal window ready at `module1/m1-c4`. Make Terminal text large and readable. Each command block below is run **in this directory**, not from the repository root. Use a clean full-screen recording; hide browser tabs and unnecessary UI.
 
-> **Important choreography:** The committed JavaScript already exists on disk, and Step 1's helper **loads and enables that file via the ZAP API**. The demonstrator does not need to create a second copy in the GUI or type code live. Show the loaded script in the ZAP Scripts tree/editor. Do not claim the GUI was used to author the file when the API loaded it. The ZAP script engine name is detected at runtime and can differ from the display string shown in examples.
+> **Important choreography:** The committed JavaScript already exists on disk, and Step 1's helper **loads and enables that file via the ZAP API**. Steps 2–4 require that same enabled registration and do not silently reload it. The demonstrator does not need to create a second copy in the GUI or type code live. Show the loaded script in the ZAP Scripts tree/editor. Do not claim the GUI was used to author the file when the API loaded it. The ZAP script engine name is detected at runtime and can differ from the display string shown in examples.
 
 ## Learning-objective and proof map
 
@@ -94,13 +94,13 @@ function responseReceived(msg, initiator, helper) {
 ./scripts/demo_step.sh 2
 ```
 
-**Expected Terminal evidence:** A GET request to `http://app:8000/greet?name=marker-check` and a captured request header:
+**Expected Terminal evidence:** A GET request to a unique `http://app:8000/greet?name=marker-...` URL and a captured request header:
 
 ```text
 X-Globomantics-Marker: GLOBO-DEMO
 ```
 
-**Switch to ZAP GUI:** Find the recent `/greet?name=marker-check` request in **History**. Select it, open the **Request** message details, and show the `X-Globomantics-Marker` header. If the GUI history is crowded, locate the exact request by URL rather than selecting an unrelated message.
+**Switch to ZAP GUI:** Find the recent `/greet?name=marker-<unique-id>` request in **History**. Select it, open the **Request** message details, and show the `X-Globomantics-Marker` header. If the GUI history is crowded, locate the exact request by URL rather than selecting an unrelated message.
 
 **Explain to learners:** The header in the outgoing HTTP message demonstrates execution of the script on real proxied traffic. Merely seeing the source file or script registration does not establish that it ran.
 
@@ -122,10 +122,10 @@ X-Globomantics-Marker: GLOBO-DEMO
 ./scripts/demo_step.sh 3
 ```
 
-**Expected behavior:** The command sends another probe through ZAP. The script's `print` statement should emit a line like:
+**Expected behavior:** The command sends a fresh, uniquely identified probe through ZAP. The script's `print` statement should emit a line like:
 
 ```text
-[globo-marker] added X-Globomantics-Marker: GLOBO-DEMO to http://app:8000/greet?name=marker-check
+[globo-marker] added X-Globomantics-Marker: GLOBO-DEMO to http://app:8000/greet?name=marker-<unique-id>
 ```
 
 **Switch back to ZAP GUI:** Inspect the **actual** Script Console output and highlight the fresh `[globo-marker]` line. The exact URL in the line is determined by the request ZAP processed.
@@ -177,7 +177,7 @@ From `module1/m1-c4`, run:
 ./scripts/preflight_check.sh
 ```
 
-**Expected result:** `5 checks passed, 0 failed`. A plain-text log is saved under `module1/m1-c4/logs/preflight-*.log`. The five checks include readiness and the four scripted checks. **This does not replace visually confirming the Script Console output in Step 3.**
+**Expected result:** `5 checks passed, 0 failed`. A plain-text log is saved under `module1/m1-c4/logs/preflight-*.log`. The five checks include readiness and the four scripted checks. Steps 2 and 3 each use a fresh request ID; stale history entries cannot satisfy their header check. **This does not replace visually confirming the Script Console output in Step 3.**
 
 After recording, stop the demo stack:
 
