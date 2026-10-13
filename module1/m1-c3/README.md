@@ -21,13 +21,25 @@ tab. This clip needs no code editor.
 
 ## Setup
 
-Install once from the repo root: `./env-setup/setup-macos.sh` (wait for the
-readiness table). Then start the vulnerable build and open the ZAP GUI:
+Install once from the repository root (wait for the readiness table):
+
+```bash
+./env-setup/setup-macos.sh
+```
+
+Then navigate to this clip's directory from the repository root:
 
 ```bash
 cd module1/m1-c3
-./scripts/demo_reset.sh          # vulnerable build; prints "Up" when healthy
 ```
+
+Start the vulnerable build and wait for the healthy `Up` output:
+
+```bash
+./scripts/demo_reset.sh
+```
+
+**Run each command below from `module1/m1-c3`.** Copy one command block at a time into Terminal, wait for its output, and then inspect the specified GUI view when applicable.
 
 Open `http://localhost:8080/zap/` for the Alerts tab. Exact alert IDs, risk, and
 confidence are the live values from your run.
@@ -50,8 +62,13 @@ alert list.
 Application: macOS Terminal, then ZAP GUI.
 Open / Navigate: Terminal in `module1/m1-c3`. Then switch to the ZAP GUI
 (`http://localhost:8080/zap/`) → **Alerts** tab.
-Execute: `./scripts/demo_step.sh 1`, then in the Alerts tab expand the three
-injection alerts.
+Execute in Terminal:
+
+```bash
+./scripts/demo_step.sh 1
+```
+
+Then in the ZAP Alerts tab expand the three injection alerts.
 
 Expected output: three injection alerts, one per endpoint — SQL injection (alert
 40018) on `/search` `q`, MongoDB NoSQL injection (alert 40033) on `/api/account`
@@ -73,7 +90,13 @@ Application: macOS Terminal, then ZAP GUI.
 Open / Navigate: Terminal in `module1/m1-c3`. Then switch to the ZAP GUI → **Alerts**
 tab → the **Cross Site Scripting (Reflected)** alert; the lower pane shows its
 Request and Response.
-Execute: `./scripts/demo_step.sh 2`, then select that alert in the Alerts tab.
+Execute in Terminal:
+
+```bash
+./scripts/demo_step.sh 2
+```
+
+Then select that alert in the ZAP Alerts tab.
 
 Expected output: the `name` value reflected in the HTML body, an HTML attribute,
 and a JavaScript string; then ZAP's **Cross Site Scripting (Reflected)** alert on
@@ -95,7 +118,11 @@ session's state.
 
 Application: macOS Terminal (this step is terminal-driven; no GUI needed).
 Open / Navigate: Terminal in `module1/m1-c3`.
-Execute: `./scripts/demo_step.sh 3`.
+Execute in Terminal:
+
+```bash
+./scripts/demo_step.sh 3
+```
 
 Expected output: the valid control (session B's own token) returns 200; the
 missing-token control returns 403; and session A's token submitted with session B's
@@ -118,7 +145,11 @@ confirmed — the decision a validated scan produces.
 Application: macOS Terminal (record into the disposition template with any editor).
 Open / Navigate: Terminal in `module1/m1-c3`; the record template is
 `docs/alert-disposition-template.md`.
-Execute: `./scripts/demo_step.sh 4`.
+Execute in Terminal:
+
+```bash
+./scripts/demo_step.sh 4
+```
 
 Expected output: each finding confirmed against live behavior — the SQL error
 ("unterminated quoted string"), the NoSQL account count rising from 1 to 4 under
@@ -133,9 +164,19 @@ Proof artifact: Alert disposition record.
 
 ## Validate and reset
 
-`./scripts/preflight_check.sh` runs all four steps and writes a reviewable log to
-`logs/`, ending with `5 checks passed, 0 failed`. Tear down with
-`./scripts/demo_down.sh`.
+To validate all four steps and save a reviewable log in `logs/`, run:
+
+```bash
+./scripts/preflight_check.sh
+```
+
+Expected final line: `5 checks passed, 0 failed`.
+
+After recording, stop the local demo stack with:
+
+```bash
+./scripts/demo_down.sh
+```
 
 Optional: `./scripts/show_code.sh {sqli|nosql|cmd|xss|csrf}` prints the exact
 vulnerable line(s) from `app/main.py`. The remediated build
