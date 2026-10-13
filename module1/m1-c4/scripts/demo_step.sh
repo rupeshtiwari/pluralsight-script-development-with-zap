@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
 # Per-step runner for m1-c4 "Write a JavaScript security script in ZAP".
-# Run each step on its own screen (show the source in VS Code, the proof here):
+# Run each step on its own screen (show the source in ZAP and the evidence in Terminal / ZAP):
 #
 #   ./scripts/demo_step.sh 1   # JavaScript source file  (loads it into ZAP)
 #   ./scripts/demo_step.sh 2   # Modified HTTP request    (marker header added)
@@ -9,8 +9,7 @@
 #   ./scripts/demo_step.sh 4   # Saved script registration
 #
 # The HTTP Sender script runs INSIDE ZAP; these commands drive ZAP through its
-# API so each beat shows in the terminal. Each step is self-contained — the
-# script is loaded first so steps 2-4 work in any order.
+# API. Steps 2-4 require step 1; do not silently reload between GUI views.
 # =============================================================================
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -22,8 +21,11 @@ usage() { echo "usage: ./scripts/demo_step.sh <1|2|3|4>"; exit 2; }
 N="${1:-}"; case "${N}" in 1|2|3|4) ;; *) usage ;; esac
 
 ensure_ready || exit 1
-# Steps 2-4 need the script already loaded and enabled; step 1 shows that happen.
-[ "${N}" = "1" ] || load_and_enable "${JS_ENGINE}" >/dev/null 2>&1 || true
+# Steps 2-4 must preserve the registration demonstrated in step 1.
+if [ "${N}" != "1" ] && ! script_registration_valid; then
+    fail "script not enabled or registered" "run step 1 first" "execute ./scripts/demo_step.sh 1"
+    exit 1
+fi
 echo
 
 case "${N}" in
