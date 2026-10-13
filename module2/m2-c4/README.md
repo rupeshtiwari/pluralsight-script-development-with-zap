@@ -62,18 +62,19 @@ Proof artifact: ZAP API status response.
 
 ## Step 2: Ask the API for the finding's rule identity and disposition (EO3b)
 
-Goal: Read the two things a gate cares about — which rule found the issue, and how
-it is rated.
+Goal: Read the two things a gate cares about for the script-generated finding —
+which rule found the issue, and how it is rated.
 
 Application: macOS Terminal querying the ZAP API.
 Open / Navigate: Terminal in `module2/m2-c4`; API `GET core/view/alerts`.
 Execute: `./scripts/demo_step.sh 2`.
 
-Expected output: rule identity `40012 · Cross Site Scripting (Reflected)`,
-disposition `High · Medium` (risk · confidence), on parameter `note`.
+Expected output: the script-generated alert `Globomantics unsafe reflection (custom
+rule)` (raised by the Script Active Scan Rules plugin, id `50000`), disposition
+`Medium · Medium` (risk · confidence), on parameter `note`.
 
-What the learner should notice: the finding carries a stable rule id and a
-risk/confidence rating — the fields a quality gate later thresholds on.
+What the learner should notice: your Module 1 Python rule's finding carries a rule
+identity and a risk/confidence rating — the fields a quality gate later thresholds on.
 
 Proof artifact: ZAP API alert response.
 
@@ -88,9 +89,9 @@ with template `traditional-json`. (In CI, the equivalent report is the downloada
 `globo-ci-report` artifact from the authenticated-scan run.)
 Execute: `./scripts/demo_step.sh 3`.
 
-Expected output: the `traditional-json` report containing pluginid `40012` ·
-`Cross Site Scripting (Reflected)`, `riskdesc` `High (Medium)` — the same rule id and
-risk as the Step 2 API response.
+Expected output: the `traditional-json` report containing the script-generated alert
+`Globomantics unsafe reflection (custom rule)`, `riskdesc` `Medium (Medium)` — the
+same script-generated alert and rating as the Step 2 API response.
 
 What the learner should notice: the report is a point-in-time record that reconciles
 with the live API, so the archived evidence is trustworthy.
@@ -100,17 +101,17 @@ Proof artifact: ZAP JSON report.
 ## Step 4: Read ZAP 2.17.0 Insights (EO3b)
 
 Goal: Judge how well the scan ran, not just what it found — Insights are operational
-signals drawn from ZAP's statistics and included in the report.
+signals that ZAP 2.17.0 includes in its report.
 
 Application: macOS Terminal querying the ZAP API.
-Open / Navigate: Terminal in `module2/m2-c4`; the report's `insights[]` section, with
-`GET stats/view/allSitesStats` as the backing statistics.
+Open / Navigate: Terminal in `module2/m2-c4`; the report's `insights[]` section.
 Execute: `./scripts/demo_step.sh 4`.
 
-Expected output: an Insights section reporting scan-effectiveness signals — for
-example logged ZAP errors (`insight.log.error`), logged warnings
+Expected output: the report's Insights section reporting scan-effectiveness signals —
+for example logged ZAP errors (`insight.log.error`), logged warnings
 (`insight.log.warn`), and a network-failure percentage (`insight.network.failure`);
-the counts are live values.
+the counts are live values. If the report carries no Insights section, the step fails
+(generic statistics are not accepted as a substitute).
 
 What the learner should notice: Insights are operational signals, not
 vulnerabilities — they tell you whether to trust the scan's coverage before acting
@@ -121,5 +122,5 @@ Proof artifact: ZAP Insights evidence.
 ## Validate and reset
 
 `./scripts/preflight_check.sh` runs all four steps and writes a reviewable log to
-`logs/`, ending with `4 checks passed, 0 failed`. Tear down with
+`logs/`, ending with `5 checks passed, 0 failed`. Tear down with
 `./scripts/demo_down.sh`.

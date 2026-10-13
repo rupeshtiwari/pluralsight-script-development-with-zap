@@ -43,13 +43,28 @@ cd module1/m1-c4
 | 3 | EO2a | Fresh proxied request triggers the script | Actual `[globo-marker]` line in Script Console output |
 | 4 | EO2a | Script registration type and enabled state | Registered script remains visible under HTTP Sender |
 
+**Source reference (VS Code, Step 1):** `zap-scripts/globomantics-marker.js` — `sendingRequest()` lines 16–20, `responseReceived()` lines 24–25.
+
+## Five-minute timing allocation
+
+Recording budget: **5:00**.
+
+| Segment | Duration | Running total |
+|---------|----------|---------------|
+| Setup and problem | 0:25 | 0:25 |
+| Step 1 — read the source, load, show in ZAP | 1:40 | 2:05 |
+| Step 2 — marker on a real request | 0:55 | 3:00 |
+| Step 3 — live Script Console output | 0:50 | 3:50 |
+| Step 4 — saved registration | 0:50 | 4:40 |
+| Wrap-up | 0:20 | 5:00 |
+
 ## Step 1: Load and inspect the HTTP Sender script (EO2a)
 
 **Goal:** Explain what the JavaScript hook does, then demonstrate that ZAP has loaded the exact script file.
 
 **Application and location:** Start in **ZAP GUI** at [http://localhost:8080/zap/](http://localhost:8080/zap/) → **Scripts** → **HTTP Sender**. Then switch focus to **Terminal** in `module1/m1-c4`.
 
-**Show before running:** In the script file or ZAP's editor, focus on `sendingRequest(msg, initiator, helper)`, the call to `setHeader`, and the `print` statement. This is the code to explain:
+**Show before running (VS Code, source only):** Open [`zap-scripts/globomantics-marker.js`](zap-scripts/globomantics-marker.js) and focus on `sendingRequest(msg, initiator, helper)` (lines 16–20) — the `setHeader` call and the `print` statement — and the empty `responseReceived` (lines 24–25). This is the code to explain:
 
 ```javascript
 var MARKER_HEADER = "X-Globomantics-Marker";

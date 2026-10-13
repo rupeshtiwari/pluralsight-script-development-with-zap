@@ -1,8 +1,10 @@
 # Validate injection, XSS, and CSRF with ZAP
 
 Turn a broad ZAP scan into four validated findings against the deliberately
-vulnerable Globomantics Store, confirming each against the application's actual
-behavior.
+vulnerable Globomantics Store. For each finding you first read the exact
+application code that creates the flaw, then prove the behavior with ZAP and the
+app's own response — the way a security engineer connects a scanner alert to a
+real defect.
 
 > **Authorization and scope.** Every request targets only the local Globomantics
 > Store. Never run these techniques against systems you are not authorized to test.
@@ -11,172 +13,232 @@ behavior.
 
 | Application | Where | Used for |
 |-------------|-------|----------|
-| macOS Terminal | working directory `module1/m1-c3` | running each `./scripts/demo_step.sh N` |
-| ZAP GUI (Webswing) | `http://localhost:8080/zap/` → **Alerts** tab | showing the raised alerts and the reflected-XSS request/response |
+| VS Code | `app/main.py` + the integrated terminal in `module1/m1-c3` | reading each vulnerable sink, then running `./scripts/demo_step.sh N` in the same window |
+| ZAP (one container) | API/proxy on `:8090` | the same instance the terminal drives; alerts a step raises are ZAP's own findings, printed back by the command |
 | Local Globomantics app | `http://localhost:8000/` | the target under test |
 
-The Terminal commands drive the same ZAP instance the GUI shows (one container,
-API on `:8090`, GUI on `:8080`), so alerts raised by a step appear in the Alerts
-tab. This clip needs no code editor.
+This clip shows source code, so record it in **VS Code** with the integrated
+terminal: read the sink in the editor pane, then run the step in the terminal
+pane. The terminal output is the authoritative on-screen evidence;
+`./scripts/show_code.sh` prints the live vulnerable lines straight from
+`app/main.py`, so they never drift.
 
 ## Setup
 
-Install once from the repository root (wait for the readiness table):
-
-```bash
-./env-setup/setup-macos.sh
-```
-
-Then navigate to this clip's directory from the repository root:
+Install once from the repo root: `./env-setup/setup-macos.sh` (wait for the
+readiness table). Then start the vulnerable build:
 
 ```bash
 cd module1/m1-c3
+./scripts/demo_reset.sh          # vulnerable build; prints "Up" when healthy
 ```
 
-Start the vulnerable build and wait for the healthy `Up` output:
+Exact alert IDs, risk, and confidence are the live values from your run.
 
-```bash
-./scripts/demo_reset.sh
-```
+## Step-by-step LO traceability
 
-**Run each command below from `module1/m1-c3`.** Copy one command block at a time into Terminal, wait for its output, and then inspect the specified GUI view when applicable.
+| Step | LO | Code inspected (`app/main.py`) | Commands | Observed result | Proof artifact |
+|------|----|--------------------------------|----------|-----------------|----------------|
+| 1 | EO1a | `search` 149–153 · `account` 196–204 (regex 180) · `admin_ping` 227–231 | `show_code.sh sqli\|nosql\|cmd` · `demo_step.sh 1` | alerts `40018` / `40033` / `90020`, one per parameter | Targeted scan policy and rule list |
+| 2 | EO1b | `greet` 257–277 | `show_code.sh xss` · `demo_step.sh 2` | *Cross Site Scripting (Reflected)* on `name` with injected payload + reflected evidence | XSS request and response body |
+| 3 | EO1c | `change_email` 332–337 (token issued `284–287`) | `show_code.sh csrf` · `demo_step.sh 3` | `200` / `403` / `200`; email `alice@globomantics.example` → `attacker@evil.example` | CSRF token replay result |
+| 4 | EO1a · EO1b · EO1c | — (reconciles Steps 1–3 findings) | `demo_step.sh 4` | SQL error · NoSQL count `1→4` · ping bytes · XSS reflected unescaped | Alert disposition record |
 
-Open `http://localhost:8080/zap/` for the Alerts tab. Exact alert IDs, risk, and
-confidence are the live values from your run.
+## Six-minute timing allocation
 
-## Learning-objective coverage
+Recording budget: **6:00**. Active-scan wait time is edited out in post (standard
+for demo clips); the proof evidence each command prints is retained in full.
 
-| Step | Objective | Proof artifact |
-|------|-----------|----------------|
-| 1 | EO1a | Targeted scan policy and rule list |
-| 2 | EO1b | XSS request and response body |
-| 3 | EO1c | CSRF token replay result |
-| 4 | EO1a · EO1b · EO1c | Alert disposition record |
+| Segment | Duration | Running total |
+|---------|----------|---------------|
+| Setup recap and scope | 0:20 | 0:20 |
+| Step 1 — three injection classes | 1:50 | 2:10 |
+| Step 2 — context-specific XSS | 1:20 | 3:30 |
+| Step 3 — cross-session CSRF | 1:15 | 4:45 |
+| Step 4 — alert disposition | 0:55 | 5:40 |
+| Wrap-up | 0:20 | 6:00 |
+
+---
 
 ## Step 1: Run one targeted injection scan (EO1a)
 
-Goal: Prove that a single focused scan policy confirms SQL, NoSQL, and command
-injection from the application's own responses, instead of a broad, unfiltered
-alert list.
+**The problem.** A default scan floods you with alerts. Maya wants the opposite:
+one focused policy that confirms three *different* injection classes — SQL, NoSQL,
+and command — each from the application's own response, on three endpoints.
 
-Application: macOS Terminal, then ZAP GUI.
-Open / Navigate: Terminal in `module1/m1-c3`. Then switch to the ZAP GUI
-(`http://localhost:8080/zap/`) → **Alerts** tab.
-Execute in Terminal:
+**Inspect the vulnerable code in VS Code.** Read the three sinks before scanning —
+they fail in three distinct ways. In the integrated terminal:
+
+```bash
+./scripts/show_code.sh sqli     # app/main.py  search()      lines 149–153
+./scripts/show_code.sh nosql    # app/main.py  account()     lines 196–204 (regex at 180)
+./scripts/show_code.sh cmd      # app/main.py  admin_ping()  lines 227–231
+```
+
+**Why each is vulnerable — the distinct mechanism:**
+
+- **SQL injection (`search`).** The `q` value is concatenated straight into the
+  SQL string (`"… ILIKE '%" + q + "%'"`), so input containing a quote escapes the
+  string literal and becomes SQL.
+- **NoSQL injection (`account`).** The query string is parsed qs-style, so the
+  *parameter name* `username[$ne]=` smuggles a MongoDB operator into the filter
+  object — an equality lookup silently becomes an operator query.
+- **Command injection (`admin_ping`).** The `host` value is concatenated into a
+  shell string run with `shell=True`, so shell metacharacters run arbitrary OS
+  commands.
+
+**Run the ZAP test.**
 
 ```bash
 ./scripts/demo_step.sh 1
 ```
 
-Then in the ZAP Alerts tab expand the three injection alerts.
+**Inspect the actual evidence.** The step builds the `m1demo1` policy (only the
+injection rules enabled), scans the three endpoints, and prints one alert per
+endpoint, each tied to a specific parameter:
 
-Expected output: three injection alerts, one per endpoint — SQL injection (alert
-40018) on `/search` `q`, MongoDB NoSQL injection (alert 40033) on `/api/account`
-`username`, and command injection (alert 90020) on `/admin/ping` `host`.
+- SQL injection — alert `40018` on `/search`, parameter `q`
+- MongoDB NoSQL injection — alert `40033` on `/api/account`, parameter `username`
+- Command injection — alert `90020` on `/admin/ping`, parameter `host`
 
-What the learner should notice: each endpoint raises a distinct rule tied to a
-specific parameter, so one focused policy exercises three injection classes — the
-targeted scan, not the default rule set.
+Each line shows the live risk/confidence from your run. These are ZAP's own
+findings, returned from the scan the command just ran.
+
+**The engineer's decision.** Three code sinks, three distinct mechanisms, three
+parameter-specific alerts from one focused policy — not a broad rule dump. That is
+a targeted scan Maya can defend.
 
 Proof artifact: Targeted scan policy and rule list.
 
+---
+
 ## Step 2: Confirm reflected XSS in its output context (EO1b)
 
-Goal: Show the `name` parameter reflected into three output contexts, then let
-ZAP's active scanner confirm an exploitable reflected XSS with a context-specific
-payload — not merely that input appears in the page.
+**The problem.** Input appearing in a page is not proof of XSS. The single `name`
+value lands in three output contexts, and a payload that executes in one is inert
+in another. Maya must prove the reflection is *executable*, not merely present.
 
-Application: macOS Terminal, then ZAP GUI.
-Open / Navigate: Terminal in `module1/m1-c3`. Then switch to the ZAP GUI → **Alerts**
-tab → the **Cross Site Scripting (Reflected)** alert; the lower pane shows its
-Request and Response.
-Execute in Terminal:
+**Inspect the vulnerable code in VS Code.**
+
+```bash
+./scripts/show_code.sh xss       # app/main.py  greet()  lines 257–277
+```
+
+**Why it's vulnerable.** The vulnerable build assigns the raw `name` to all three
+sinks with no encoding (lines 257–261), then writes them into three contexts
+(lines 271–277):
+
+- **HTML body** — `<p>Hello {name}</p>` → a `<script>` tag executes directly.
+- **HTML attribute** — `value="{name}"` → a payload must first break out with `">`.
+- **JavaScript string** — `var greeting = "{name}"` → a payload must break out with `";`.
+
+The context decides the payload. The remediated build encodes each sink
+differently (`html.escape`, attribute-quoting, JS-string escaping), which is why
+one fix does not cover all three.
+
+**Run the ZAP test.**
 
 ```bash
 ./scripts/demo_step.sh 2
 ```
 
-Then select that alert in the ZAP Alerts tab.
+**Inspect the actual evidence.** The step first shows `name` reflected in all three
+contexts, then runs ZAP's reflected-XSS rules and raises **Cross Site Scripting
+(Reflected)** on parameter `name`, printing the payload ZAP injected (for example
+`</p><scrIpt>alert(1);</scRipt><p>`) and the evidence string reflected verbatim in
+the response — the request and response that confirm execution, not just reflection.
 
-Expected output: the `name` value reflected in the HTML body, an HTML attribute,
-and a JavaScript string; then ZAP's **Cross Site Scripting (Reflected)** alert on
-parameter `name`, with the injected payload `</p><scrIpt>alert(1);</scRipt><p>`
-reflected verbatim in the response as the supporting evidence.
-
-What the learner should notice: the context mapping decides where a payload must
-break out; ZAP's alert is what confirms the reflection is executable. The payload
-closes the `<p>` element and injects a script tag, returned unescaped — reflection
-alone is not that proof.
+**The engineer's decision.** The context mapping chose where the payload must break
+out; ZAP's alert is what confirms the reflection is executable there. Reflection
+alone is not that proof — the active-scanner alert is.
 
 Proof artifact: XSS request and response body.
 
+---
+
 ## Step 3: Reuse a CSRF token across sessions (EO1c)
 
-Goal: Demonstrate that the anti-CSRF token is not bound to its session, so a token
-issued to one session is accepted with a second session's cookie and changes that
-session's state.
+**The problem.** An anti-CSRF token defends a state change only if it is bound to
+the session it was issued to. If the server checks only that *a* token exists, a
+token minted in one session can be replayed with a different session's cookie.
 
-Application: macOS Terminal (this step is terminal-driven; no GUI needed).
-Open / Navigate: Terminal in `module1/m1-c3`.
-Execute in Terminal:
+**Inspect the vulnerable code in VS Code.**
+
+```bash
+./scripts/show_code.sh csrf      # app/main.py  change_email()  lines 332–336
+```
+
+**Why it's vulnerable.** `change_email()` looks the token up and rejects a missing
+one (lines 326–330), so a token check *is* present. But in the vulnerable build the
+branch that should enforce ownership is a bare `pass` (lines 332–337): it never
+compares `record["session"]` to the submitting session's cookie, and never marks
+the token used, before applying the change. The token is minted *with* its session
+in `_issue_csrf()` (lines 284–287), yet that binding is never checked. The
+remediated build adds exactly that check (`record["session"] != sid → 403`).
+
+**Run the ZAP test.**
 
 ```bash
 ./scripts/demo_step.sh 3
 ```
 
-Expected output: the valid control (session B's own token) returns 200; the
-missing-token control returns 403; and session A's token submitted with session B's
-cookie returns 200, changing session B's stored email from
-`alice@globomantics.example` to `attacker@evil.example`.
+**Inspect the actual evidence.** The step opens two independent authenticated
+sessions (A = `mallory`, B = `alice`) and sends three requests to `/account/email`:
 
-What the learner should notice: the controls show the token check is active, yet the
-cross-session request still succeeds and mutates state. The flaw is that the server
-validates the token's existence but not that it belongs to the submitting session.
-This is token reuse across sessions; rejecting same-session reuse matters only when
-the application requires single-use tokens.
+- valid control — session B's own token → `200`
+- missing-token control → `403`
+- **cross-session** — session A's token submitted with session B's cookie → `200`,
+  and session B's stored email changes from `alice@globomantics.example` to
+  `attacker@evil.example`
+
+**The engineer's decision.** The two controls prove the token check is active, yet
+the cross-session request still succeeds and mutates state — exactly what the empty
+`pass` branch allows. This is token reuse *across sessions*, caused by validating a
+token's existence but not its session ownership; it is not a claim that same-session
+replay is inherently vulnerable (that matters only when the app requires single-use
+tokens).
 
 Proof artifact: CSRF token replay result.
 
+---
+
 ## Step 4: Record an alert disposition (EO1a · EO1b · EO1c)
 
-Goal: Reconcile each finding with concrete application behavior and record it as
-confirmed — the decision a validated scan produces.
+**The problem.** Raw scanner output is not a decision. Each finding must be
+reconciled with observed application behavior before it is recorded as confirmed.
 
-Application: macOS Terminal (record into the disposition template with any editor).
-Open / Navigate: Terminal in `module1/m1-c3`; the record template is
-`docs/alert-disposition-template.md`.
-Execute in Terminal:
+**Open the record template.** The disposition template is
+[`docs/alert-disposition-template.md`](../../docs/alert-disposition-template.md) —
+one row per finding, pairing the alert with the behavior that confirms it.
+
+**Run the reconciliation.**
 
 ```bash
 ./scripts/demo_step.sh 4
 ```
 
-Expected output: each finding confirmed against live behavior — the SQL error
-("unterminated quoted string"), the NoSQL account count rising from 1 to 4 under
-operator injection, the command-injection ping output ("bytes from 127.0.0.1"),
-and the unescaped XSS reflection.
+**Inspect the actual evidence.** The step re-confirms each finding directly from the
+live app:
 
-What the learner should notice: every alert is tied to an observed application
-behavior, turning raw scanner output into a defensible disposition recorded in
-[`docs/alert-disposition-template.md`](../../docs/alert-disposition-template.md).
+- SQL injection — the database error `unterminated quoted string` from `/search`
+- NoSQL injection — the account count rising (1 → 4) under an operator-injection
+  query on `/api/account`
+- Command injection — the ping output `bytes from 127.0.0.1` from `/admin/ping`
+- Reflected XSS — the marker reflected unescaped from `/greet`
+
+**The engineer's decision.** Every alert is now tied to an observed application
+behavior, turning raw scanner output into a defensible disposition recorded in the
+template.
 
 Proof artifact: Alert disposition record.
 
+---
+
 ## Validate and reset
 
-To validate all four steps and save a reviewable log in `logs/`, run:
-
-```bash
-./scripts/preflight_check.sh
-```
-
-Expected final line: `5 checks passed, 0 failed`.
-
-After recording, stop the local demo stack with:
-
-```bash
-./scripts/demo_down.sh
-```
+`./scripts/preflight_check.sh` runs all four steps and writes a reviewable log to
+`logs/`, ending with `5 checks passed, 0 failed`. Tear down with
+`./scripts/demo_down.sh`.
 
 Optional: `./scripts/show_code.sh {sqli|nosql|cmd|xss|csrf}` prints the exact
 vulnerable line(s) from `app/main.py`. The remediated build

@@ -24,7 +24,9 @@ K="${ZAP_API_KEY:-}"
 # The authenticated plan from the previous lab generates the evidence this lab
 # inspects; we reuse the same plan mounted into the ZAP container at /af.
 AF_PLAN_ZAP="/af/af-plan.yaml"
-XSS_NAME="Cross Site Scripting (Reflected)"
+# The script-generated alert this lab inspects (the Module 1 custom Python rule).
+# The outline's "script-generated alert" is this named alert, NOT a built-in rule.
+CUSTOM_NAME="Globomantics unsafe reflection (custom rule)"
 
 PASS=0; FAIL=0; STEP_RC=0
 pass() { fm ok "$1"; PASS=$((PASS+1)); STEP_RC=0; }
@@ -59,23 +61,24 @@ try: print(json.load(sys.stdin).get("planId",""))
 except Exception: print("")')"; [ -n "${PLAN_ID:-}" ]; }
 plan_finished() { zap automation/view/planProgress "planId=${PLAN_ID}" | grep -q '"finished"[^,]*[0-9T:-]'; }
 
-reflection_present() {
-    zap core/view/alerts "baseurl=$(enc "${PROFILE}")" | jq_py 'import json,sys
+custom_present() {
+    zap core/view/alerts "baseurl=$(enc "${PROFILE}")" | python3 -c 'import json,sys
+name=sys.argv[1]
 try: d=json.load(sys.stdin)
 except Exception: raise SystemExit
 for a in d.get("alerts",[]):
-    if "Cross Site Scripting (Reflected)" in (a.get("alert") or a.get("name") or ""):
-        print("yes"); break'
+    if (a.get("alert") or a.get("name"))==name:
+        print("yes"); break' "${CUSTOM_NAME}"
 }
 
-ensure_scan() { # prime once if there is no evidence yet in this ZAP session
-    [ -n "$(reflection_present)" ] && return 0
-    fm note "Priming: this ZAP session has no finished scan yet — running the authenticated plan once so there is evidence to inspect."
+ensure_scan() { # prime once if the script-generated alert is not yet present
+    [ -n "$(custom_present)" ] && return 0
+    fm note "Priming: this ZAP session has no finished authenticated scan yet — running the authenticated plan once so there is evidence to inspect."
     run_plan || { fail "could not start the plan to generate evidence" "automation/action/runPlan returned no plan id" "ask: 'the AF plan did not run; check the automation add-on and /af/af-plan.yaml'"; return 1; }
     local i; for i in $(seq 1 120); do plan_finished && break; sleep 3; done
     # The plan can report "finished" a moment before the scan's alerts are
-    # queryable, so wait for the evidence rather than checking once.
-    local j; for j in $(seq 1 36); do [ -n "$(reflection_present)" ] && return 0; sleep 5; done
+    # queryable, so wait for the script-generated alert rather than checking once.
+    local j; for j in $(seq 1 36); do [ -n "$(custom_present)" ] && return 0; sleep 5; done
     return 1
 }
 
@@ -131,27 +134,28 @@ print("%s|%s|%s|%s" % (a.get("id",""), a.get("progress",""), a.get("state",""), 
 # STEP 2 — ZAP API alert response (EO3b)  -> "ZAP API alert response"
 # ===========================================================================
 step2_api_alert() {
-    fm header "The ZAP API answers: what did the scan find, and how is it rated?" \
-              "Ask the API for the alert the authenticated scan generated — its rule identity and its disposition (risk + confidence) — the data a pipeline reads to decide (EO3b)."
-    local rec; rec="$(zap core/view/alerts "baseurl=$(enc "${PROFILE}")" | jq_py 'import json,sys
+    fm header "The ZAP API answers: what did your script find, and how is it rated?" \
+              "Ask the API for the script-generated custom alert — its rule identity and its disposition (risk + confidence) — the data a pipeline reads to decide (EO3b)."
+    local rec; rec="$(zap core/view/alerts "baseurl=$(enc "${PROFILE}")" | python3 -c 'import json,sys
+name=sys.argv[1]
 try: d=json.load(sys.stdin)
 except Exception: print("||||"); raise SystemExit
 for a in d.get("alerts",[]):
-    if "Cross Site Scripting (Reflected)" in (a.get("alert") or a.get("name") or ""):
+    if (a.get("alert") or a.get("name"))==name:
         print("%s|%s|%s|%s|%s" % (a.get("pluginId",""), a.get("alert") or a.get("name"), a.get("risk",""), a.get("confidence",""), a.get("param","")))
         break
 else:
-    print("||||")')"
+    print("||||")' "${CUSTOM_NAME}")"
     IFS='|' read -r pid name risk conf param <<<"${rec}"
     if [ -n "${name}" ]; then
         fm star "Rule identity  (pluginId · alert)" "${pid} · ${name}" focus
         fm star "Disposition  (risk · confidence)" "${risk} · ${conf}"
         fm star "Parameter" "${param}"
-        pass "the API returns the finding's rule identity and disposition"
+        pass "the API returns the script-generated alert's rule identity and disposition"
     else
-        fail "the API returned no alert for the authenticated page" \
-             "core/view/alerts had no reflected-XSS entry on /account/profile" \
-             "ask: 'the ZAP API alert response is empty; confirm the authenticated scan reached /account/profile'"
+        fail "the API returned no script-generated custom alert for the authenticated page" \
+             "core/view/alerts had no '${CUSTOM_NAME}' entry on /account/profile" \
+             "ask: 'the ZAP API alert response is missing the custom rule alert; confirm the authenticated scan ran the Module 1 Python rule against /account/profile'"
     fi
     return "${STEP_RC}"
 }
@@ -161,7 +165,7 @@ else:
 # ===========================================================================
 step3_json_report() {
     fm header "The official JSON report reconciles with the API" \
-              "Generate ZAP's own JSON report through the API and confirm its alert data matches the API response — one source of truth a pipeline can archive (EO3b)."
+              "Generate ZAP's own JSON report through the API and confirm it carries the SAME script-generated alert as the API response — one source of truth a pipeline can archive (EO3b)."
     local rep; rep="$(generate_report)"
     if [ -z "${rep}" ]; then
         fail "could not read the generated JSON report" \
@@ -169,27 +173,28 @@ step3_json_report() {
              "ask: 'the JSON report was not produced; confirm the reports add-on and docker access to the ZAP container'"
         return "${STEP_RC}"
     fi
-    local line; line="$(printf '%s' "${rep}" | jq_py 'import json,sys
+    local line; line="$(printf '%s' "${rep}" | python3 -c 'import json,sys
+name=sys.argv[1]
 try: d=json.load(sys.stdin)
 except Exception: print("|||"); raise SystemExit
 for site in d.get("site",[]):
     for a in site.get("alerts",[]):
-        if "Cross Site Scripting (Reflected)" in (a.get("alert") or a.get("name") or ""):
+        if (a.get("alert") or a.get("name"))==name:
             inst=(a.get("instances") or [{}])[0]
             print("%s|%s|%s|%s" % (a.get("pluginid",""), a.get("alert") or a.get("name"), a.get("riskdesc",""), inst.get("param","")))
             raise SystemExit
-print("|||")')"
+print("|||")' "${CUSTOM_NAME}")"
     IFS='|' read -r pid name riskdesc param <<<"${line}"
     if [ -n "${name}" ]; then
         fm star "Report template" "traditional-json  (reports/action/generate)" focus
         fm star "Report alert  (pluginid · name)" "${pid} · ${name}"
         fm star "Report rating  (riskdesc)" "${riskdesc}"
-        fm star "Reconciled with the API" "same rule id and risk as the Step 2 alert response"
-        pass "the official JSON report carries the same finding as the API"
+        fm star "Reconciled with the API" "same script-generated alert as the Step 2 alert response"
+        pass "the official JSON report carries the same script-generated alert as the API"
     else
-        fail "the JSON report did not contain the expected finding" \
-             "no reflected-XSS alert in the report's site[].alerts[]" \
-             "ask: 'the JSON report is missing the authenticated finding; confirm the scan and the report template'"
+        fail "the JSON report did not contain the script-generated custom alert" \
+             "no '${CUSTOM_NAME}' entry in the report's site[].alerts[]" \
+             "ask: 'the JSON report is missing the custom rule alert; confirm the authenticated scan ran the Module 1 Python rule and the report template'"
     fi
     return "${STEP_RC}"
 }
@@ -201,56 +206,37 @@ step4_insights() {
     fm header "ZAP 2.17.0 Insights assess scan effectiveness, not just findings" \
               "Read the report's Insights — signals about how well the scan ran and any operational issues — so you trust the result, not just the alert list (EO3b)."
     local rep; rep="$(generate_report)"
-    local shown=0
-    if [ -n "${rep}" ]; then
-        local ins; ins="$(printf '%s' "${rep}" | jq_py 'import json,sys
+    if [ -z "${rep}" ]; then
+        fail "could not read the generated JSON report for Insights" \
+             "reports/action/generate or reading ${REPORT_CONTAINER_PATH} failed" \
+             "ask: 'the JSON report was not produced; confirm the reports add-on and docker access to the ZAP container'"
+        return "${STEP_RC}"
+    fi
+    # Require the report's OWN Insights section. Generic statistics are NOT a
+    # substitute for ZAP 2.17.0 Insights evidence, so a missing insights section
+    # is a hard failure (fail closed) rather than a silent fallback to stats.
+    local ins; ins="$(printf '%s' "${rep}" | jq_py 'import json,sys
 try: d=json.load(sys.stdin)
 except Exception: raise SystemExit
 items=d.get("insights") or []
 for it in items[:3]:
     print("%s\t%s\t%s\t%s" % (it.get("level",""), it.get("key",""), it.get("statistic",""), (it.get("description") or it.get("reason") or "")))')"
-        if [ -n "${ins}" ]; then
-            shown=1
-            local first=1
-            while IFS=$'\t' read -r lvl key stat desc; do
-                [ -z "${lvl}${key}${stat}${desc}" ] && continue
-                if [ "${first}" = 1 ]; then
-                    fm star "Insight  (level · key)" "${lvl} · ${key}" focus; first=0
-                else
-                    fm star "Insight  (level · key)" "${lvl} · ${key}"
-                fi
-                fm star "Statistic · meaning" "${stat} · ${desc}"
-            done <<<"${ins}"
-            pass "the report's Insights section reports scan effectiveness"
-        fi
+    if [ -z "${ins}" ]; then
+        fail "the report contained no ZAP Insights section" \
+             "ZAP 2.17.0 Insights evidence is required here; generic ZAP statistics do not substitute for it" \
+             "ask: 'the traditional-json report has no insights[] section on this ZAP build; confirm ZAP 2.17.0 emits Insights in the report before recording'"
+        return "${STEP_RC}"
     fi
-    if [ "${shown}" = 0 ]; then
-        # Fallback: the Insights add-on draws from ZAP statistics; show them directly.
-        local stats; stats="$(zap stats/view/allSitesStats "keyPrefix=" | jq_py 'import json,sys
-try: d=json.load(sys.stdin)
-except Exception: raise SystemExit
-s=d.get("statistics") or d.get("allSitesStats") or []
-def pick(items):
-    out=[]
-    for it in items:
-        if isinstance(it,dict):
-            for k,v in it.items(): out.append((k,v))
-    return out
-rows=pick(s) if isinstance(s,list) else list(s.items()) if isinstance(s,dict) else []
-for k,v in rows[:4]:
-    print("%s\t%s" % (k,v))')"
-        if [ -n "${stats}" ]; then
-            fm star "Source" "stats/view/allSitesStats  (Insights draw from these)" focus
-            while IFS=$'\t' read -r k v; do
-                [ -z "${k}" ] && continue
-                fm star "${k}" "${v}"
-            done <<<"${stats}"
-            pass "ZAP statistics (the basis of Insights) report scan effectiveness"
+    local first=1
+    while IFS=$'\t' read -r lvl key stat desc; do
+        [ -z "${lvl}${key}${stat}${desc}" ] && continue
+        if [ "${first}" = 1 ]; then
+            fm star "Insight  (level · key)" "${lvl} · ${key}" focus; first=0
         else
-            fail "no Insights or statistics were returned" \
-                 "the report had no insights section and stats/view/allSitesStats was empty" \
-                 "ask: 'ZAP Insights evidence is unavailable; confirm the insights add-on is installed in ZAP 2.17.0 and a scan has run'"
+            fm star "Insight  (level · key)" "${lvl} · ${key}"
         fi
-    fi
+        fm star "Statistic · meaning" "${stat} · ${desc}"
+    done <<<"${ins}"
+    pass "the report's own Insights section reports scan effectiveness"
     return "${STEP_RC}"
 }

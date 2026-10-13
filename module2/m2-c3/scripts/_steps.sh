@@ -210,20 +210,14 @@ step4_custom_alert() {
         fm star "Risk" "${r}"
         fm star "Parameter" "${p}"
         pass "the custom rule raised its named alert under the authenticated AF run (serialized in the headless report)"
-        return "${STEP_RC}"
-    fi
-    # Safety net: if the custom alert is somehow absent, the built-in reflected
-    # XSS on the same page confirms the authenticated run reached the reflection
-    # the rule targets. (Not expected — the custom alert now serializes headless.)
-    local refl; refl="$(reflection_reached)"
-    fm star "Custom alert" "not found — showing the built-in reflection instead" focus
-    if [ -n "${refl}" ]; then
-        fm star "Reflection reached while authenticated" "${refl}"
-        pass "the authenticated run records the reflection the custom rule targets"
     else
-        fail "could not confirm the authenticated custom finding" \
-             "the AF run did not record the custom alert or the reflection on the authenticated page" \
-             "ask: 'the authenticated AF scan did not reach /account/profile as alice; check the context auth and the custom rule'"
+        # The required proof is the NAMED custom alert. A built-in reflected-XSS
+        # finding is NOT an acceptable substitute, so a missing custom alert is a
+        # hard failure. Any reflection found is shown only as a diagnostic.
+        local refl; refl="$(reflection_reached)"
+        fail "the authenticated AF run did not record the custom alert '${ALERT_NAME}'" \
+             "the named custom alert is required here; a built-in reflected-XSS finding${refl:+ (present: ${refl})} does not substitute for it" \
+             "ask: 'the authenticated AF scan did not raise ${ALERT_NAME} on /account/profile as alice; check the context auth and the custom rule'"
     fi
     return "${STEP_RC}"
 }
