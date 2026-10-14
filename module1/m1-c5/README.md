@@ -59,147 +59,154 @@ evidence each command prints is retained in full.
 
 ## Step 1: Write the Jython active-scan rule (EO2b)
 
-**The problem.** The Globomantics profile page reflects its `note` value without
-output encoding — a house-specific concern no built-in rule targets exactly. Maya
-writes a custom active-scan rule that probes a parameter and raises a named alert
-when the response returns the probe unencoded.
+**Goal:** Write a custom active-scan rule that probes a parameter and raises a named
+alert when the Globomantics profile page returns the probe unencoded — a
+house-specific reflection no built-in rule targets exactly.
 
-**Inspect the source in VS Code.** Open
-`module1/m1-c5/zap-scripts/globomantics-active-rule.py`:
+**Application:** VS Code, then the ZAP Script Console, then macOS Terminal.
 
-- **`_probe_request(msg, target)` (lines 50–61)** — clones the request (keeping the
-  logged-in session cookie) and rewrites the query string to put the probe in the
-  target parameter. It edits the URI directly rather than calling `sas.setParam()`,
-  which needs per-parameter scanner state only set up inside `scan()` — so the rule
-  works from `scanNode()` too.
-- **`_check(sas, msg, param)` (lines 82–94)** — sends the probe and tests whether it
-  reflects verbatim in the response body.
-- **`_raise(sas, probe, param)` (lines 64–79)** — builds the alert with
-  `sas.newAlert().setRisk(2)…setName(ALERT_NAME)…setMessage(probe)` and fires it via
-  `getattr(alert, "raise")()` (because `raise` is a reserved word in Python).
-- **`scan` / `scanNode` (lines 97–103)** — ZAP's two active-scan entry points; both
-  call `_check`, and ZAP de-duplicates identical alerts.
+**Open / Navigate:**
 
-Then open `app/main.py` → `profile()` (lines 375–377): in the vulnerable build the
-`note` value is assigned straight into the page (`note_ctx = note`) with no
-encoding. That unencoded reflection is exactly what the rule detects.
+- **VS Code — rule source:** open
+  `module1/m1-c5/zap-scripts/globomantics-active-rule.py` and read the functions that
+  make the rule work:
+  - **`_probe_request(msg, target)` (lines 50–61)** — clones the request (keeping the
+    logged-in session cookie) and rewrites the query string to put the probe in the
+    target parameter. It edits the URI directly rather than calling `sas.setParam()`,
+    which needs per-parameter scanner state only set up inside `scan()` — so the rule
+    works from `scanNode()` too.
+  - **`_check(sas, msg, param)` (lines 82–94)** — sends the probe and tests whether it
+    reflects verbatim in the response body.
+  - **`_raise(sas, probe, param)` (lines 64–79)** — builds the alert with
+    `sas.newAlert().setRisk(2)…setName(ALERT_NAME)…setMessage(probe)` and fires it via
+    `getattr(alert, "raise")()` (because `raise` is a reserved word in Python).
+  - **`scan` / `scanNode` (lines 97–103)** — ZAP's two active-scan entry points; both
+    call `_check`, and ZAP de-duplicates identical alerts.
+- **VS Code — app sink:** open `app/main.py` → `profile()` (lines 375–377). In the
+  vulnerable build the `note` value is assigned straight into the page
+  (`note_ctx = note`) with no encoding. That unencoded reflection is exactly what the
+  rule detects.
+- **ZAP Script Console:** ZAP GUI (`http://localhost:8080/zap/`) → **Scripts** tab →
+  **Active Rules** → new script on the Python (jython) engine named
+  `globomantics-active-rule`; paste the source, save, and enable it.
 
-**Author it in the ZAP Script Console.** ZAP GUI → **Scripts** tab → **Active Rules**
-→ new script on the Python (jython) engine named `globomantics-active-rule`; paste
-the source, save, and enable it.
-
-**Execute to validate the load.**
+**Execute in Terminal:**
 
 ```bash
 ./scripts/demo_step.sh 1
 ```
 
-**Inspect the actual evidence.** The rule validated and loaded as an active rule on
-the `python : jython` engine, declaring the alert `Globomantics unsafe reflection
-(custom rule)`.
+**Expected output:** The rule validates and loads as an active rule on the
+`python : jython` engine, declaring the alert `Globomantics unsafe reflection (custom
+rule)`.
 
-**The engineer's decision.** The rule is registered as an Active Rules script, so
-ZAP invokes it during an active scan alongside the built-in rules — the house-specific
-check is now part of the scan.
+**What the learner should notice:** The rule is registered as an Active Rules script,
+so ZAP invokes it during an active scan alongside the built-in rules — the
+house-specific check is now part of the scan.
 
-Proof artifact: Python active-rule source.
+**Proof artifact:** Python active-rule source.
 
 ---
 
 ## Step 2: Write the authentication script (EO2c)
 
-**The problem.** The profile page is session-gated (401 without a login cookie), so
-a scan cannot reach it unless ZAP can log in. Maya teaches ZAP how to authenticate.
+**Goal:** Teach ZAP to log in to the session-gated profile page (401 without a login
+cookie) by writing an authentication script, so a scan can reach it.
 
-**Inspect the source in VS Code.** Open
-`module1/m1-c5/zap-scripts/globomantics-auth.py`:
+**Application:** VS Code, then the ZAP Script Console, then macOS Terminal.
 
-- **`authenticate(helper, paramsValues, credentials)` (lines 39–61)** — builds the
-  same form POST the login page sends (`username=…` to the `Login URL`), sends it
-  with `helper.sendAndReceive(msg)`, and returns the message. ZAP captures the
-  `Set-Cookie` session from that response and replays it on later requests.
-- **`getRequiredParamsNames()` (lines 64–65)** — declares the `Login URL` context
-  parameter ZAP must supply.
-- **`getCredentialsParamsNames()` (lines 72–73)** — declares the per-user `username`
-  credential field.
+**Open / Navigate:**
 
-**Author it in the ZAP Script Console.** ZAP GUI → **Scripts** tab →
-**Authentication** → new script on the Python (jython) engine named
-`globomantics-auth`; paste the source and save.
+- **VS Code — auth source:** open `module1/m1-c5/zap-scripts/globomantics-auth.py`
+  and read:
+  - **`authenticate(helper, paramsValues, credentials)` (lines 39–61)** — builds the
+    same form POST the login page sends (`username=…` to the `Login URL`), sends it
+    with `helper.sendAndReceive(msg)`, and returns the message. ZAP captures the
+    `Set-Cookie` session from that response and replays it on later requests.
+  - **`getRequiredParamsNames()` (lines 64–65)** — declares the `Login URL` context
+    parameter ZAP must supply.
+  - **`getCredentialsParamsNames()` (lines 72–73)** — declares the per-user `username`
+    credential field.
+- **ZAP Script Console:** ZAP GUI → **Scripts** tab → **Authentication** → new script
+  on the Python (jython) engine named `globomantics-auth`; paste the source and save.
 
-**Execute to validate the registration.**
+**Execute in Terminal:**
 
 ```bash
 ./scripts/demo_step.sh 2
 ```
 
-**Inspect the actual evidence.** The script validated and registered as an
-authentication script on the `python : jython` engine, submitting `username=alice`
-to `POST /login`.
+**Expected output:** The script validates and registers as an authentication script
+on the `python : jython` engine, submitting `username=alice` to `POST /login`.
 
-**The engineer's decision.** Authentication is a separate script type from the
+**What the learner should notice:** Authentication is a separate script type from the
 active rule; ZAP uses it to obtain and reuse a session so scans run as a real user.
 
-Proof artifact: Authentication script source.
+**Proof artifact:** Authentication script source.
 
 ---
 
 ## Step 3: Run scripted authentication against the login-only page (EO2c)
 
-**The problem.** Writing the login script is not proof it works. Maya must show ZAP
-*itself* obtains a session by running the script — with no cookie supplied by hand —
-and reaches a page gated behind login.
+**Goal:** Show ZAP itself obtains a session by running the login script — with no
+cookie supplied by hand — and reaches a page gated behind login.
 
-**Configure the context in the ZAP GUI.** ZAP GUI → **Sites** tree → right-click
-`http://localhost:8000` → **Include in Context → New Context**. In the Context
-dialog:
+**Application:** ZAP GUI, then macOS Terminal.
+
+**Open / Navigate:** ZAP GUI → **Sites** tree → right-click `http://localhost:8000` →
+**Include in Context → New Context**. In the Context dialog:
+
 - **Authentication → Script-based Authentication** → select `globomantics-auth`; set
   **Login URL** `http://localhost:8000/login` and **Logged-in indicator (regex)**
   `Signed in as`.
 - **Users → Add** user `alice` (username `alice`).
 - Enable **Forced User Mode** (toolbar) and select `alice`.
 
-**Execute.**
+**Execute in Terminal:**
 
 ```bash
 ./scripts/demo_step.sh 3
 ```
 
-**Inspect the actual evidence.** `/account/profile` returns 401 without login and
-200 once ZAP authenticates via the script, and the authentication script's trace
-confirms it logged in as `alice` (`authenticate: response=200`). No cookie was
-supplied by hand — the session came from the script.
+**Expected output:** `/account/profile` returns 401 without login and 200 once ZAP
+authenticates via the script, and the authentication script's trace confirms it
+logged in as `alice` (`authenticate: response=200`). No cookie was supplied by hand —
+the session came from the script.
 
-**The engineer's decision.** The same URL moves from 401 to 200 only because ZAP ran
-the authentication script, demonstrating scripted authentication end to end.
+**What the learner should notice:** The same URL moves from 401 to 200 only because
+ZAP ran the authentication script, demonstrating scripted authentication end to end.
 
-Proof artifact: Authenticated custom-scan result.
+**Proof artifact:** Authenticated custom-scan result.
 
 ---
 
 ## Step 4: Confirm the custom alert (EO2b)
 
-**The problem.** The rule and the login both exist; Maya must confirm the rule raises
-its named alert on the authenticated scan, and that the alert is freshly produced by
-this run rather than left over from an earlier one.
+**Goal:** Confirm the rule raises its named alert on the authenticated scan, and that
+the alert is freshly produced by this run rather than left over from an earlier one.
 
-**Execute.**
+**Application:** macOS Terminal, then ZAP GUI.
+
+**Open / Navigate:** keep the ZAP GUI → **Alerts** tab in view to confirm the alert
+the command reports also appears in the GUI.
+
+**Execute in Terminal:**
 
 ```bash
 ./scripts/demo_step.sh 4
 ```
 
-**Inspect the actual evidence.** The step clears the alert store (named alert absent),
-scans `/account/profile` as user `alice`, and reads the alert back: with the store
-cleared first, the authenticated scan raises `Globomantics unsafe reflection (custom
-rule)` — Medium risk, parameter `note`, evidence `GLOBOxss7marker`. The same alert
-appears in the ZAP GUI **Alerts** tab.
+**Expected output:** The step clears the alert store (named alert absent), scans
+`/account/profile` as user `alice`, and reads the alert back: with the store cleared
+first, the authenticated scan raises `Globomantics unsafe reflection (custom rule)` —
+Medium risk, parameter `note`, evidence `GLOBOxss7marker`. The same alert appears in
+the ZAP GUI **Alerts** tab.
 
-**The engineer's decision.** Absent-before and present-after proves the alert is from
-this scan, produced by Maya's rule on a session ZAP authenticated itself — the alert
-a pipeline can later gate on.
+**What the learner should notice:** Absent-before and present-after proves the alert is
+from this scan, produced by Maya's rule on a session ZAP authenticated itself — the
+alert a pipeline can later gate on.
 
-Proof artifact: Custom alert record.
+**Proof artifact:** Custom alert record.
 
 ## Validate and reset
 
