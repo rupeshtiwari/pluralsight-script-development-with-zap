@@ -87,6 +87,29 @@ presentation clips; the demos are clips 3–5).
 
 ---
 
+## 🌿 Branches — what lives where
+
+The six demos are **folders inside one branch**, not separate branches. By course
+convention there are **no per-demo branches**: each demo maps to a folder (see the
+Labs table above), e.g. `module1/m1-c3` … `module2/m2-c5`. So "which branch for
+which demo" is really "which folder for which demo" — the table above answers that.
+
+Only two branches exist:
+
+| Branch | Role | What's on it |
+|--------|------|--------------|
+| `main` | Published baseline | The last promoted state of the course repo. Moves forward only when a reviewed set is promoted into it. |
+| `claude/stoic-cannon-nbupjt` | **Active working / validation branch** | All six demos **plus the latest validation and CI fixes** (digest-pinned ZAP image, hardened evidence checks). Review and validate here first. |
+
+> [!IMPORTANT]
+> Review the demos on the **active working branch** above — that is where the
+> current, validated versions of all six clips live. `main` is intentionally kept
+> a step behind and is only fast-forwarded when a reviewed set is approved for
+> promotion. If a validator reports a fix "missing," confirm it is checking the
+> active working branch, not `main`.
+
+---
+
 ## 🗂️ Repository layout
 
 ```text
