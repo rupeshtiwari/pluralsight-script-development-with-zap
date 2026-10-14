@@ -109,8 +109,8 @@ Execute: `./scripts/demo_step.sh 4`.
 
 Expected output: the report's Insights section reporting scan-effectiveness signals —
 for example logged ZAP errors (`insight.log.error`), logged warnings
-(`insight.log.warn`), and a network-failure percentage (`insight.network.failure`);
-the counts are live values. If the report carries no Insights section, the step fails
+(`insight.log.warn`), and an authentication-failure percentage (`insight.auth.failure`);
+the counts are live values and the exact Insight keys vary per run. If the report carries no Insights section, the step fails
 (generic statistics are not accepted as a substitute).
 
 What the learner should notice: Insights are operational signals, not

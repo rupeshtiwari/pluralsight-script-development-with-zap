@@ -7,6 +7,18 @@
 # It is executed headless by ghcr.io/zaproxy/zaproxy:stable in GitHub Actions
 # (and locally by the author preflight) with:
 #   zap.sh -cmd -autorun /zap/wrk/af-plan.yaml
+#
+# Scope note (M2 Clip 1 vs M2 Clip 3): the full canonical Automation Framework
+# job sequence — passiveScan-config -> alertFilter -> script -> spider ->
+# passiveScan-wait -> activeScan-policy -> activeScan -> passiveScan-wait ->
+# report -> exitStatus — is TAUGHT in the M2 Clip 1 architecture presentation.
+# THIS file is the focused M2 Clip 3 DEMO plan (EO3a: authenticated, headless
+# script reuse), whose four proof artifacts are the job log, the authenticated
+# context config, the script-job result, and the custom-alert record. It
+# deliberately omits the gate job (exitStatus) and alertFilter, which belong to
+# the M2 Clip 5 gate plan (ci/gate-plan.yaml, EO3c): adding exitStatus here
+# would fail this authenticated-scan run by design and contradict Clip 3's
+# "job log = success" artifact.
 ---
 env:
   contexts:

@@ -16,7 +16,10 @@ jobs:
     env:
       COMPOSE_PROJECT_NAME: globo
       APP_BUILD: vulnerable
-      ZAP_IMAGE: ghcr.io/zaproxy/zaproxy:stable
+      # Pinned to the same immutable multi-arch digest as .env (ZAP 2.17.0),
+      # so the hosted amd64 runner and the local arm64 stack run the identical
+      # image. Re-verify the digest at recording time per the course outline.
+      ZAP_IMAGE: ghcr.io/zaproxy/zaproxy:stable@sha256:781a2bdaea47324e7bab583e2263f21d257b0aee61ed51521a5be45f5f5081ef
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
