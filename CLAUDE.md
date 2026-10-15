@@ -33,7 +33,7 @@ Key constraints from the outline:
 - Keep demos **simple enough to follow** but **complex enough to prove the LO**.
 - **Vulnerable code is a teaching aid, kept as OPTIONAL repo reference** — pair each
   finding with the exact vulnerable line via `show_code.sh <finding>` (snippets are
-  read live from `app/main.py` so they never drift). It is NOT a recorded demo step
+  read live from `runtime/app/main.py` so they never drift). It is NOT a recorded demo step
   and must not pad a clip beyond its outline artifacts.
 - The training app is the **Globomantics Store** (real-world e-commerce), so it
   resonates with business audiences and students can apply it to their own projects.
@@ -57,3 +57,10 @@ Key constraints from the outline:
 - Use `./steps/01-*.sh` through `./steps/04-*.sh` as the learner commands; internal engine scripts preserve approved behavior.
 - Never commit Recorder/Narrator/Editor production material to the public repository.
 - Keep all six branch pairs; `main` remains a generic starter without completed learner solutions.
+
+## Directory naming and temporary production pack
+- Canonical folders: `setup/`, `demos/`, `runtime/`, `docs/`; do not reintroduce clip-number-only folder names.
+- Root files `README.md`, `CLAUDE.md`, `.gitignore`, `.env`, `docker-compose.yaml` are tool entry points and remain at root.
+- Student documentation is readable and visual, with real evidence locations, GitHub-safe HTML, diagrams and semantic step executable filenames.
+- The author-only pack under `docs/.author-instructions/` is temporarily committed at the owner's express direction; it is PUBLIC until moved to a private repo and removed from public history. Never imply dotfolders or gitignore provide privacy.
+- Edit the course-approved source only for demonstrated technical defects. Keep before/after branch distinctions and CI path validation.

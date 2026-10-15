@@ -1,7 +1,7 @@
 #!/bin/bash
 # OPTIONAL reference — NOT a recorded demo step.
 #
-# Shows the exact vulnerable line(s) in app/main.py behind a finding, so a
+# Shows the exact vulnerable line(s) in runtime/app/main.py behind a finding, so a
 # beginner can see *why* it is exploitable. Snippets are read live from the
 # source, so they can never drift from the running app.
 #
@@ -13,8 +13,8 @@
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${HERE}/../../../.." && pwd)"
-SRC="${REPO_ROOT}/app/main.py"
-FMT="${REPO_ROOT}/scripts/fmt.py"
+SRC="${REPO_ROOT}/runtime/app/main.py"
+FMT="${REPO_ROOT}/runtime/scripts/fmt.py"
 fm() { python3 "${FMT}" "$@"; }
 
 case "${1:-}" in
@@ -35,5 +35,5 @@ awk -v a="${ANCHOR}" -v n="${N}" '
                    c = n; while (c-- > 0) { if (getline <= 0) break; printf "  %4d  %s\n", NR, $0 } exit }
 ' "${SRC}"
 echo
-fm note "Source: app/main.py  ·  in VS Code: Cmd+P -> main.py, then Ctrl+G -> the line above."
+fm note "Source: runtime/app/main.py  ·  in VS Code: Cmd+P -> main.py, then Ctrl+G -> the line above."
 fm note "The remediated build fixes exactly these lines."

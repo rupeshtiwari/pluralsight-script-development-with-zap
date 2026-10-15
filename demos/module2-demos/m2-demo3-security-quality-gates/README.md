@@ -1,5 +1,26 @@
 # Enforce ZAP quality gates in GitHub Actions
 
+<div align="center">
+
+<img src="../../../docs/learner-diagrams/m2-demo3-architecture.svg" alt="Architecture and evidence flow for m2-demo3" width="100%"/>
+
+<sub>Illustrative architecture, not live scan output · Generated using ChatGPT</sub>
+
+</div>
+
+<details><summary><b>View The Four Executable Steps</b></summary>
+
+```bash
+./steps/01-inspect-false-positive-filter.sh
+./steps/02-check-automation-job-order.sh
+./steps/03-run-security-quality-gate.sh
+./steps/04-verify-filtered-alert-report.sh
+```
+
+Run these commands in order from this demo's folder, then execute `./scripts/preflight_check.sh`. Inspect actual ZAP GUI or GitHub Actions evidence where indicated.
+</details>
+
+
 Turn a ZAP scan into a build decision. Mark a known benign finding as a False
 Positive, prove the plan applies that decision before scanning, then let ZAP's
 `exitStatus` job convert the remaining alert risk into a process exit code — the
