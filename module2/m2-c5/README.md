@@ -37,20 +37,6 @@ cd module2/m2-c5
 | 3 | EO3c | `exitStatus` 61–64 (`errorLevel HIGH`, `warnLevel MEDIUM`) | `demo_step.sh 3` | High-risk alert remains after filtering; process exit code `1`; build blocked | Gate JSON report and exit code |
 | 4 | EO3c | `report` 51–56 output | `demo_step.sh 4` | `10021` disposed False Positive; `40012` kept High | Filtered alert report |
 
-## Six-minute timing allocation
-
-Recording budget: **6:00**. Active-scan wait time is edited out in post; the proof
-evidence each command prints is retained in full.
-
-| Segment | Duration | Running total |
-|---------|----------|---------------|
-| Setup and problem | 0:25 | 0:25 |
-| Step 1 — read the alertFilter | 1:10 | 1:35 |
-| Step 2 — read the job order | 1:05 | 2:40 |
-| Step 3 — read exitStatus, run the gate | 1:35 | 4:15 |
-| Step 4 — filtered report | 1:20 | 5:35 |
-| Wrap-up | 0:25 | 6:00 |
-
 ---
 
 ## Step 1: Mark a benign finding as a False Positive (EO3c)
