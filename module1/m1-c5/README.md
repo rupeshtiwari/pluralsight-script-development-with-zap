@@ -1,5 +1,46 @@
 # Write Python scan and authentication scripts in ZAP
 
+<div align="center">
+
+![Demo](https://img.shields.io/badge/Globomantics-ZAP%20Security-130F25?style=for-the-badge) ![Module](https://img.shields.io/badge/M1-Demo%203-FF1675?style=for-the-badge) ![Practice](https://img.shields.io/badge/Practice-Starter-00A3FF?style=for-the-badge)
+
+### Python Scanning and Authentication
+
+<img src="https://raw.githubusercontent.com/rupeshtiwari/pluralsight-script-development-with-zap/main/docs/learner-diagrams/m1-demo3.svg" width="100%" alt="Illustrative four-step workflow for Python Scanning and Authentication; not actual ZAP scan evidence"/>
+
+<sub>Learning path illustration; real findings and API values come from your local run.</sub>
+
+</div>
+
+> [!IMPORTANT]
+> **Authorized practice only:** Run scans against the Globomantics training application supplied with this repository. Do not target unrelated systems.
+
+## Start This Demo Independently
+
+Use a separate checkout for this exercise; no previous demo or another student's runtime is required.
+
+```bash
+git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
+cd pluralsight-script-development-with-zap
+git switch m1-demo3-before
+./env-setup/setup-macos.sh
+cd module1/m1-c5
+./scripts/demo_reset.sh
+```
+
+**Environment:** ZAP GUI and Terminal. Use the numbered commands below in the displayed sequence. Wait for each actual result before advancing. Scan duration and request counts may vary.
+
+**Starter branch:** `m1-demo3-before` contains the exercise's prerequisites without its completed solution artifact. Follow the steps to produce your own result.
+
+**Check your result:** `./scripts/preflight_check.sh` saves a timestamped log under `logs/`. Some GUI observations, particularly Script Console output, must also be checked in the live ZAP GUI.
+
+**Clean up:** `./scripts/demo_down.sh`
+
+**Compare safely:** First commit or copy your own work, then compare this branch with `m1-demo3-after` using `git diff m1-demo3-before..m1-demo3-after -- module1/m1-c5`. This does not change your working tree.
+
+---
+
+
 Extend ZAP with two Jython scripts — a custom active-scan rule and an
 authentication script. You read each implementation in VS Code to understand the
 mechanism, author both in ZAP's Script Console, then run the rule against a
