@@ -1,5 +1,46 @@
 # Query the ZAP API and inspect scan evidence
 
+<div align="center">
+
+![Demo](https://img.shields.io/badge/Globomantics-ZAP%20Security-130F25?style=for-the-badge) ![Module](https://img.shields.io/badge/M2-Demo%202-FF1675?style=for-the-badge) ![Practice](https://img.shields.io/badge/Practice-Starter-00A3FF?style=for-the-badge)
+
+### ZAP API and Insights
+
+<img src="https://raw.githubusercontent.com/rupeshtiwari/pluralsight-script-development-with-zap/main/docs/learner-diagrams/m2-demo2.svg" width="100%" alt="Illustrative four-step workflow for ZAP API and Insights; not actual ZAP scan evidence"/>
+
+<sub>Learning path illustration; real findings and API values come from your local run.</sub>
+
+</div>
+
+> [!IMPORTANT]
+> **Authorized practice only:** Run scans against the Globomantics training application supplied with this repository. Do not target unrelated systems.
+
+## Start This Demo Independently
+
+Use a separate checkout for this exercise; no previous demo or another student's runtime is required.
+
+```bash
+git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
+cd pluralsight-script-development-with-zap
+git switch m2-demo2-before
+./env-setup/setup-macos.sh
+cd module2/m2-c4
+./scripts/demo_up.sh
+```
+
+**Environment:** Terminal and ZAP API. Use the numbered commands below in the displayed sequence. Wait for each actual result before advancing. Scan duration and request counts may vary.
+
+**Starter branch:** `m2-demo2-before` contains the exercise's prerequisites without its completed runtime evidence. Follow the steps to produce your own result.
+
+**Check your result:** `./scripts/preflight_check.sh` saves a timestamped log under `logs/`. Some GUI observations, particularly Script Console output, must also be checked in the live ZAP GUI.
+
+**Clean up:** `./scripts/demo_down.sh`
+
+**Compare safely:** First commit or copy your own work, then compare this branch with `m2-demo2-after` using `git diff m2-demo2-before..m2-demo2-after -- module2/m2-c4`. This does not change your working tree.
+
+---
+
+
 Inspect a finished authenticated scan entirely through ZAP's HTTP API — no GUI.
 Ask the engine for its status, pull the finding with its rule identity and rating,
 generate ZAP's official JSON report, and read ZAP 2.17.0 Insights to judge how well
