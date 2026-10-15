@@ -17,7 +17,7 @@ authentication and scope, then prove the same plan runs headless and authenticat
 | GitHub Actions | `https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/actions/workflows/zap-authenticated-scan.yml` → latest run → job **authenticated-scan** | the same plan run headless on the hosted runner |
 | CI artifact | run page → **Artifacts** → `globo-ci-report` | the archived report from the hosted run |
 
-The local run and the GitHub Actions run execute the **same** plan; show VS Code for
+The local run and the GitHub Actions run execute the **same** plan: use VS Code for
 the config and mechanics, and the Actions run for the hosted-runner proof.
 
 ## Setup
@@ -39,20 +39,6 @@ of *Globomantics authenticated ZAP scan*.
 | 2 | EO3a | `authentication` 29–40 · `users` 44–47 · `includePaths` 26–28 | `demo_step.sh 2` | plan binds context `Globomantics`, scripted auth, user `alice`, scope `http://app:8000` | Authenticated context configuration |
 | 3 | EO3a | `passiveScan-config` 60–62 · script `add`/`enable` 67–91 · `spider` 93–99 · `requestor` 109–119 · `activeScan` + rule `50000` 121–134 | `demo_step.sh 3` | Module 1 scripts load and run against `/account/profile` while logged in | Authenticated script job result |
 | 4 | EO3a | `report` 141–146 | `demo_step.sh 4` | custom alert `Globomantics unsafe reflection (custom rule)` on `/account/profile`, param `note` | Authenticated custom alert record |
-
-## Five-minute timing allocation
-
-Recording budget: **5:00**. Active-scan wait time is edited out in post; the proof
-evidence each command and the job log print is retained in full.
-
-| Segment | Duration | Running total |
-|---------|----------|---------------|
-| Setup and problem | 0:25 | 0:25 |
-| Step 1 — headless run | 0:55 | 1:20 |
-| Step 2 — read the authenticated context in VS Code | 1:30 | 2:50 |
-| Step 3 — Module 1 scripts run authenticated | 0:55 | 3:45 |
-| Step 4 — authenticated custom alert | 0:55 | 4:40 |
-| Wrap-up | 0:20 | 5:00 |
 
 ---
 
