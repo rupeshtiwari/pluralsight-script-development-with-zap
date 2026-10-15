@@ -1,5 +1,46 @@
 # Run authenticated ZAP scripts in GitHub Actions
 
+<div align="center">
+
+![Demo](https://img.shields.io/badge/Globomantics-ZAP%20Security-130F25?style=for-the-badge) ![Module](https://img.shields.io/badge/M2-Demo%201-FF1675?style=for-the-badge) ![Practice](https://img.shields.io/badge/Practice-Completed-00A3FF?style=for-the-badge)
+
+### Authenticated GitHub Actions
+
+<img src="https://raw.githubusercontent.com/rupeshtiwari/pluralsight-script-development-with-zap/main/docs/learner-diagrams/m2-demo1.svg" width="100%" alt="Illustrative four-step workflow for Authenticated GitHub Actions; not actual ZAP scan evidence"/>
+
+<sub>Learning path illustration; real findings and API values come from your local run.</sub>
+
+</div>
+
+> [!IMPORTANT]
+> **Authorized practice only:** Run scans against the Globomantics training application supplied with this repository. Do not target unrelated systems.
+
+## Start This Demo Independently
+
+Use a separate checkout for this exercise; no previous demo or another student's runtime is required.
+
+```bash
+git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
+cd pluralsight-script-development-with-zap
+git switch m2-demo1-after
+./env-setup/setup-macos.sh
+cd module2/m2-c3
+./scripts/demo_up.sh
+```
+
+**Environment:** VS Code and GitHub Actions. Use the numbered commands below in the displayed sequence. Wait for each actual result before advancing. Scan duration and request counts may vary.
+
+**Completed reference:** `m2-demo1-after` contains the final implementation assets. Use it to compare your results; do not assume a previous session's alerts are present.
+
+**Check your result:** `./scripts/preflight_check.sh` saves a timestamped log under `logs/`. Some GUI observations, particularly Script Console output, must also be checked in the live ZAP GUI.
+
+**Clean up:** `./scripts/demo_down.sh`
+
+**Compare safely:** First commit or copy your own work, then compare this branch with `m2-demo1-before` using `git diff m2-demo1-before..m2-demo1-after -- module2/m2-c3`. This does not change your working tree.
+
+---
+
+
 Run the ZAP scripts you built in Module 1 automatically and headless inside a
 GitHub Actions pipeline — logged in as a real user, driven entirely by one ZAP
 Automation Framework plan. You read the plan in VS Code to understand how it binds
