@@ -1,12 +1,76 @@
-# Run authenticated ZAP scripts in GitHub Actions
+# Run Authenticated ZAP in GitHub Actions
 
 <div align="center">
 
-<img src="../../../docs/learner-diagrams/m2-demo1-architecture.svg" alt="Architecture and evidence flow for m2-demo1" width="100%"/>
+![ZAP](https://img.shields.io/badge/OWASP_ZAP-Headless_CI-0284c7?style=for-the-badge)
+![Lab](https://img.shields.io/badge/Practice-m2-demo1-d946ef?style=for-the-badge)
 
-<sub>Illustrative architecture, not live scan output · Generated using ChatGPT</sub>
+<img src="../../../docs/learner-diagrams/m2-demo1-architecture.svg" width="100%" alt="Run Authenticated ZAP in GitHub Actions architecture"/>
+
+<sub>Illustrative architecture · Generated using ChatGPT · Verify the actual API, report or CI results</sub>
 
 </div>
+
+## What Problem Are You Solving?
+
+A local scan can look convincing but fail on a hosted runner because scripts, scope, and login state are missing. Maya needs an Automation Framework plan that can authenticate as a Globomantics user, reuse the JavaScript and Jython scripts, and archive a named custom finding on GitHub Actions.
+
+**Your outcome:** Understand how the system behaves, run four meaningful commands, inspect the real output and explain the engineering decision. No external course outline is required.
+
+## Learning Objective Covered
+
+<table><thead><tr><th>Objective</th><th>What You Will Learn</th></tr></thead><tbody>
+<tr><td><code>EO3a</code></td><td>Configure ZAP for headless execution in CI/CD environments</td></tr>
+</tbody></table>
+
+## Your Four-Step Learning Path
+
+```mermaid
+flowchart LR
+  N0["GitHub Actions"]
+  N1["Headless plan"]
+  N2["Authenticated scripts"]
+  N3["Custom alert + report"]
+  N0 --> N1 --> N2 --> N3
+```
+
+<table>
+<thead><tr><th>Step</th><th>Exact Command</th><th>What You Do</th><th>What To Verify</th><th>Why It Matters</th></tr></thead>
+<tbody><tr><td><b>1</b></td><td><code>./steps/01-run-headless-automation-plan.sh</code></td><td>Execute the Automation Framework plan without a GUI</td><td>Successful plan execution and GitHub Actions job log</td><td>CI cannot depend on manual desktop actions</td></tr>
+<tr><td><b>2</b></td><td><code>./steps/02-inspect-authenticated-scan-context.sh</code></td><td>Inspect context, login script, user and target scope</td><td>Context Globomantics, user alice and scoped profile</td><td>An authenticated scan requires explicit identity and boundaries</td></tr>
+<tr><td><b>3</b></td><td><code>./steps/03-verify-reused-security-scripts.sh</code></td><td>Run the original custom scripts against the protected page</td><td>Script job results plus authenticated request evidence</td><td>Reuse tested scripts instead of rewriting them in CI</td></tr>
+<tr><td><b>4</b></td><td><code>./steps/04-confirm-authenticated-custom-alert.sh</code></td><td>Inspect the custom finding in the headless result</td><td>Named alert on /account/profile, parameter note</td><td>A pipeline needs a fail-closed assertion on the intended finding</td></tr></tbody></table>
+
+## Start This Exercise
+
+From the repository root:
+
+```bash
+git fetch origin
+git switch m2-demo1-before
+./setup/setup-macos.sh
+cd demos/module2-demos/m2-demo1-authenticated-zap-github-actions
+./scripts/demo_up.sh
+```
+
+If the one-time Mac setup has already completed, you can skip that setup command. Execute Steps 1–4 above from this demo directory. Then run:
+
+```bash
+./scripts/preflight_check.sh
+./scripts/demo_down.sh
+```
+
+The preflight saves a timestamped log in `logs/`. For hosted evidence, use the GitHub Actions link in the detailed steps and inspect the actual workflow's **run SHA**, status, job log and report. Never assume a successful report from an earlier session satisfies this exercise.
+
+**Compare with the completed version:** `git diff m2-demo1-before..m2-demo1-after -- demos/module2-demos/m2-demo1-authenticated-zap-github-actions`. This comparison does not overwrite your work. Both the starter and completed branches include their required prerequisites; authored solution files or plans are added by the exercise when applicable.
+
+**Technical evidence note:** The hosted job's source SHA matters: an older successful workflow cannot prove a newer plan. A built-in XSS alert does not substitute for the named custom Python alert. On the starter branch the finished Automation Framework plan must be created before its execution succeeds.
+
+All scanning stays within the supplied, authorized Globomantics training environment.
+
+---
+
+## Detailed Instructions And Expected Evidence
 
 <details><summary><b>View The Four Executable Steps</b></summary>
 
