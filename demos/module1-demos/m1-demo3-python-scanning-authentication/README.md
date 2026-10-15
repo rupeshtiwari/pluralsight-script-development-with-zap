@@ -1,12 +1,77 @@
-# Write Python scan and authentication scripts in ZAP
+# Create Python Scan and Authentication Scripts
 
 <div align="center">
 
-<img src="../../../docs/learner-diagrams/m1-demo3-architecture.svg" alt="Architecture and evidence flow for m1-demo3" width="100%"/>
+![ZAP](https://img.shields.io/badge/OWASP_ZAP-Jython_+_Authentication-0284c7?style=for-the-badge)
+![Lab](https://img.shields.io/badge/Practice-m1-demo3-d946ef?style=for-the-badge)
 
-<sub>Illustrative architecture, not live scan output · Generated using ChatGPT</sub>
+<img src="../../../docs/learner-diagrams/m1-demo3-architecture.svg" width="100%" alt="Create Python Scan and Authentication Scripts: application, tool and evidence architecture"/>
+
+<sub>Illustrative architecture · Generated using ChatGPT · Verify real results in your own lab</sub>
 
 </div>
+
+## What Problem Are You Solving?
+
+The Globomantics profile page is accessible only after login, and a generic scan may never reach its unsafe reflection. Maya must automate authentication and register a custom Jython active rule so that ZAP tests the protected parameter as an authenticated user.
+
+**Your outcome:** Complete four practical checks and be able to explain both the actual evidence and the engineering decision it supports. This page is self-contained; you do not need access to a separate course outline.
+
+## Learning Objectives Covered
+
+<table><thead><tr><th>Objective</th><th>What You Will Learn</th></tr></thead><tbody>
+<tr><td><code>EO2b</code></td><td>Implement Python scripts for custom scanning rules</td></tr>
+<tr><td><code>EO2c</code></td><td>Apply scripting for authentication sequence automation</td></tr>
+</tbody></table>
+
+## Your Four-Step Learning Path
+
+```mermaid
+flowchart LR
+  N0["Jython scan rule"]
+  N1["Authentication script"]
+  N2["Protected profile"]
+  N3["Named custom alert"]
+  N0 --> N1 --> N2 --> N3
+```
+
+<table>
+<thead><tr><th>Step</th><th>Exact Command</th><th>What You Do</th><th>What To Verify</th><th>Why It Matters</th></tr></thead>
+<tbody><tr><td><b>1</b></td><td><code>./steps/01-load-python-active-scan-rule.sh</code></td><td>Register a Jython custom Active Rules script</td><td>Python source and actual active-rule registration</td><td>A custom rule can target application-specific behavior</td></tr>
+<tr><td><b>2</b></td><td><code>./steps/02-register-scripted-authentication.sh</code></td><td>Register the authentication script</td><td>Credential and login parameter declarations</td><td>ZAP uses a separate script type to create a session</td></tr>
+<tr><td><b>3</b></td><td><code>./steps/03-confirm-authenticated-profile-access.sh</code></td><td>Reach the protected profile through the scripted user</td><td>HTTP 401 without login and HTTP 200 with ZAP login</td><td>Prove authentication succeeded before trusting the scan</td></tr>
+<tr><td><b>4</b></td><td><code>./steps/04-confirm-custom-scan-alert.sh</code></td><td>Scan authenticated parameter note with the custom rule</td><td>Fresh Globomantics unsafe reflection custom alert</td><td>Named custom findings, not built-in substitutes, prove the rule ran</td></tr></tbody></table>
+
+## Start This Exercise
+
+From the repository root:
+
+```bash
+git fetch origin
+git switch m1-demo3-before
+./setup/setup-macos.sh
+cd demos/module1-demos/m1-demo3-python-scanning-authentication
+./scripts/demo_reset.sh
+```
+
+If you already prepared your Mac, the one-time setup script can be skipped. Run **Steps 1–4 above** from this demo directory, in order. Then validate and stop:
+
+```bash
+./scripts/preflight_check.sh
+./scripts/demo_down.sh
+```
+
+The preflight writes a timestamped log to `logs/`; GUI-only evidence must also be verified in the real ZAP interface at <http://localhost:8080/zap/>. The app runs at <http://localhost:8000/> and ZAP's local API/proxy at <http://localhost:8090/>.
+
+**Compare with the completed version:** `git diff m1-demo3-before..m1-demo3-after -- demos/module1-demos/m1-demo3-python-scanning-authentication`. This command does not overwrite your files. The `before` branch starts the exercise; the `after` branch provides its completed reference, where applicable.
+
+**Technical evidence note:** The training login is intentionally simplified; it is not a production-ready credential-handling design. Jython code uses Python 2.7 syntax inside ZAP; Python 3 is used by the Mac-side helpers.
+
+All testing must stay within the authorized Globomantics training application.
+
+---
+
+## Detailed Instructions And Expected Evidence
 
 <details><summary><b>View The Four Executable Steps</b></summary>
 
