@@ -17,11 +17,10 @@ real defect.
 | ZAP (one container) | API/proxy on `:8090` | the same instance the terminal drives; alerts a step raises are ZAP's own findings, printed back by the command |
 | Local Globomantics app | `http://localhost:8000/` | the target under test |
 
-This clip shows source code, so record it in **VS Code** with the integrated
-terminal: read the sink in the editor pane, then run the step in the terminal
-pane. The terminal output is the authoritative on-screen evidence;
-`./scripts/show_code.sh` prints the live vulnerable lines straight from
-`app/main.py`, so they never drift.
+Work in **VS Code** with the integrated terminal: read the sink in the editor
+pane, then run the step in the terminal pane. The terminal output is the
+authoritative evidence; `./scripts/show_code.sh` prints the live vulnerable lines
+straight from `app/main.py`, so they never drift.
 
 ## Setup
 
@@ -43,20 +42,6 @@ Exact alert IDs, risk, and confidence are the live values from your run.
 | 2 | EO1b | `greet` 257–277 | `show_code.sh xss` · `demo_step.sh 2` | *Cross Site Scripting (Reflected)* on `name` with injected payload + reflected evidence | XSS request and response body |
 | 3 | EO1c | `change_email` 332–337 (token issued `284–287`) | `show_code.sh csrf` · `demo_step.sh 3` | `200` / `403` / `200`; email `alice@globomantics.example` → `attacker@evil.example` | CSRF token replay result |
 | 4 | EO1a · EO1b · EO1c | — (reconciles Steps 1–3 findings) | `demo_step.sh 4` | SQL error · NoSQL count `1→4` · ping bytes · XSS reflected unescaped | Alert disposition record |
-
-## Six-minute timing allocation
-
-Recording budget: **6:00**. Active-scan wait time is edited out in post (standard
-for demo clips); the proof evidence each command prints is retained in full.
-
-| Segment | Duration | Running total |
-|---------|----------|---------------|
-| Setup recap and scope | 0:20 | 0:20 |
-| Step 1 — three injection classes | 1:50 | 2:10 |
-| Step 2 — context-specific XSS | 1:20 | 3:30 |
-| Step 3 — cross-session CSRF | 1:15 | 4:45 |
-| Step 4 — alert disposition | 0:55 | 5:40 |
-| Wrap-up | 0:20 | 6:00 |
 
 ---
 
