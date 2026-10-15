@@ -41,20 +41,6 @@ The Python Scripting (jython) add-on installs in the ZAP container at startup.
 | 3 | EO2c | ZAP context: script-based auth + forced user | `demo_step.sh 3` | `/account/profile` 401 without login, 200 once ZAP runs the script; trace `authenticate: response=200` | Authenticated custom-scan result |
 | 4 | EO2b | the custom rule on the authenticated scan | `demo_step.sh 4` | named alert absent before, present after: Medium risk, parameter `note`, evidence `GLOBOxss7marker` | Custom alert record |
 
-## Six-minute timing allocation
-
-Recording budget: **6:00**. Active-scan wait time is edited out in post; the proof
-evidence each command prints is retained in full.
-
-| Segment | Duration | Running total |
-|---------|----------|---------------|
-| Setup and problem | 0:20 | 0:20 |
-| Step 1 — read the rule + app sink, author in the Console | 1:40 | 2:00 |
-| Step 2 — read the auth script, author in the Console | 1:10 | 3:10 |
-| Step 3 — ZAP runs the login script (401 → 200) | 1:05 | 4:15 |
-| Step 4 — fresh custom alert | 1:25 | 5:40 |
-| Wrap-up | 0:20 | 6:00 |
-
 ---
 
 ## Step 1: Write the Jython active-scan rule (EO2b)
