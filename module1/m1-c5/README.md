@@ -2,6 +2,36 @@
 
 <div align="center">
 
+![ZAP](https://img.shields.io/badge/Globomantics-ZAP-130F25?style=for-the-badge) ![Demo](https://img.shields.io/badge/m1%20demo3-before-FF1675?style=for-the-badge)
+
+<img width="100%" alt="Illustrative four-step Python scan and authentication workflow" src="https://raw.githubusercontent.com/rupeshtiwari/pluralsight-script-development-with-zap/main/docs/learner-diagrams/m1-demo3.svg"/>
+
+<sub>Illustrative learning workflow — verify actual evidence in the running environment.</sub>
+</div>
+
+## Start This Demo Independently
+
+```bash
+git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
+cd pluralsight-script-development-with-zap
+git switch m1-demo3-before
+./env-setup/setup-macos.sh
+cd module1/m1-c5
+./scripts/demo_reset.sh
+```
+
+**Branch role:** Learner starting point; create or add the exercise script as instructed before verifying the result. Follow the four numbered steps below. `./scripts/preflight_check.sh` stores a timestamped log in `logs/`; verify any separate ZAP GUI/Script Console evidence directly. When finished, run `./scripts/demo_down.sh`.
+
+**Compare without overwriting work:** `git diff m1-demo3-before..m1-demo3-after -- module1/m1-c5`.
+
+> [!IMPORTANT]
+> Restrict all vulnerability testing to the supplied authorized Globomantics application.
+
+---
+
+
+<div align="center">
+
 ![Demo](https://img.shields.io/badge/Globomantics-ZAP%20Security-130F25?style=for-the-badge) ![Module](https://img.shields.io/badge/M1-Demo%203-FF1675?style=for-the-badge) ![Practice](https://img.shields.io/badge/Practice-Starter-00A3FF?style=for-the-badge)
 
 ### Python Scanning and Authentication
