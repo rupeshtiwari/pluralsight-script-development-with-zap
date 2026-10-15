@@ -1,5 +1,26 @@
 # Query the ZAP API and inspect scan evidence
 
+<div align="center">
+
+<img src="../../../docs/learner-diagrams/m2-demo2-architecture.svg" alt="Architecture and evidence flow for m2-demo2" width="100%"/>
+
+<sub>Illustrative architecture, not live scan output · Generated using ChatGPT</sub>
+
+</div>
+
+<details><summary><b>View The Four Executable Steps</b></summary>
+
+```bash
+./steps/01-check-zap-scan-status.sh
+./steps/02-query-custom-rule-alert.sh
+./steps/03-reconcile-json-report.sh
+./steps/04-read-zap-insights.sh
+```
+
+Run these commands in order from this demo's folder, then execute `./scripts/preflight_check.sh`. Inspect actual ZAP GUI or GitHub Actions evidence where indicated.
+</details>
+
+
 Inspect a finished authenticated scan entirely through ZAP's HTTP API — no GUI.
 Ask the engine for its status, pull the finding with its rule identity and rating,
 generate ZAP's official JSON report, and read ZAP 2.17.0 Insights to judge how well
