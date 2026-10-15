@@ -61,7 +61,7 @@ def main() -> int:
     proof.mkdir(exist_ok=True)
     stem = "step-%02d" % int(step)
     reference = logs / ("preflight-" + stem + ".log")
-    display_file = logs / (("preflight-" if phase == "reference" else "recorded-") + stem + ".log")
+    display_file = (proof / ("reference-" + stem + "-candidate.log")) if phase == "reference" else (logs / ("recorded-" + stem + ".log"))
     raw_file = proof / (("reference-" if phase == "reference" else "recorded-") + stem + ".raw.log")
     if phase == "compare" and not reference.is_file():
         print("SYNC HOLD: no preflight baseline at %s" % reference, file=sys.stderr)
@@ -93,6 +93,8 @@ def main() -> int:
         print("SYNC HOLD: underlying step failed or did not prove PASS; raw output: %s" % raw_file, file=sys.stderr)
         return status or 1
     if phase == "reference":
+        # A narration reference exists only after actual successful execution.
+        reference.write_text(data, encoding="utf-8")
         return 0
 
     expected = reference.read_text(encoding="utf-8")
