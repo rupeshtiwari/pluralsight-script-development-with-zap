@@ -1,77 +1,95 @@
-# Query the ZAP API and inspect scan evidence
+# Query ZAP Results Through Its API and Reports
 
-<div align="center"><img src="../../../docs/learner-diagrams/m2-demo2-architecture.svg" width="100%" alt="ZAP API report and Insights evidence architecture"/><sub>Generated using ChatGPT · illustrative, not an actual API response</sub></div>
+<details><summary><b>Branch: m2-demo2-before — Ready-To-Run API Starter</b></summary>
+
+This is an operational lab, not a new source-file exercise. Its prerequisites include the authenticated scan plan and scripts; your task is to run fresh API queries and inspect their evidence.
+
+</details>
 
 
 <div align="center">
 
-![Security](https://img.shields.io/badge/Globomantics-ZAP-130F25?style=for-the-badge) ![Demo](https://img.shields.io/badge/m2-demo2-FF1675?style=for-the-badge) ![State](https://img.shields.io/badge/before-00A3FF?style=for-the-badge)
+![ZAP](https://img.shields.io/badge/OWASP_ZAP-API_Evidence-0284c7?style=for-the-badge)
+![Lab](https://img.shields.io/badge/Practice-m2-demo2-d946ef?style=for-the-badge)
 
-<img width="100%" alt="Illustrative four-step ZAP API and Insights workflow" src="https://raw.githubusercontent.com/rupeshtiwari/pluralsight-script-development-with-zap/main/docs/learner-diagrams/m2-demo2.svg"/>
+<img src="../../../docs/learner-diagrams/m2-demo2-architecture.svg" width="100%" alt="Query ZAP Results Through Its API and Reports architecture"/>
 
-<sub>Learning workflow illustration — generate actual scan results using the commands below.</sub>
+<sub>Illustrative architecture · Generated using ChatGPT · Verify the actual API, report or CI results</sub>
+
 </div>
 
-## Start This Demo Independently
+## What Problem Are You Solving?
+
+A team cannot automate release checks by reading a GUI manually. Maya needs machine-readable evidence that ZAP finished scanning, that the exact script-generated alert has the expected identity and rating, and that the official JSON report and scan-effectiveness Insights agree.
+
+**Your outcome:** Understand how the system behaves, run four meaningful commands, inspect the real output and explain the engineering decision. No external course outline is required.
+
+## Learning Objective Covered
+
+<table><thead><tr><th>Objective</th><th>What You Will Learn</th></tr></thead><tbody>
+<tr><td><code>EO3b</code></td><td>Implement ZAP API for programmatic security testing</td></tr>
+</tbody></table>
+
+## Your Four-Step Learning Path
+
+```mermaid
+flowchart LR
+  N0["Completed scan"]
+  N1["HTTP API status + alert"]
+  N2["Official JSON report"]
+  N3["Real Insights"]
+  N0 --> N1 --> N2 --> N3
+```
+
+<table>
+<thead><tr><th>Step</th><th>Exact Command</th><th>What You Do</th><th>What To Verify</th><th>Why It Matters</th></tr></thead>
+<tbody><tr><td><b>1</b></td><td><code>./steps/01-check-zap-scan-status.sh</code></td><td>Query the ZAP engine and completed scan</td><td>Version, scan status/progress, actual request count</td><td>Wait for finished results before processing findings</td></tr>
+<tr><td><b>2</b></td><td><code>./steps/02-query-custom-rule-alert.sh</code></td><td>Query the specific script-generated finding</td><td>Named custom rule, plugin identity, risk and confidence</td><td>A gate must identify which check raised the alert</td></tr>
+<tr><td><b>3</b></td><td><code>./steps/03-reconcile-json-report.sh</code></td><td>Generate the official traditional-json report</td><td>Same custom alert and riskdesc as API output</td><td>Archived evidence must reconcile with the live API</td></tr>
+<tr><td><b>4</b></td><td><code>./steps/04-read-zap-insights.sh</code></td><td>Inspect the report's scan-quality Insights</td><td>Actual nonempty insights[] entries and meanings</td><td>Scanner health and coverage differ from vulnerability severity</td></tr></tbody></table>
+
+## Start This Exercise
+
+From the repository root:
 
 ```bash
-git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
-cd pluralsight-script-development-with-zap
+git fetch origin
 git switch m2-demo2-before
 ./setup/setup-macos.sh
 cd demos/module2-demos/m2-demo2-zap-api-scan-evidence
 ./scripts/demo_up.sh
 ```
 
-**Branch role:** Independent learner starter with declared prerequisites. Complete this exercise without first running another demo. Follow steps 1–4 below, then run `./scripts/preflight_check.sh` and inspect `logs/`. If a step uses GitHub Actions, also inspect its actual job log and report artifact. Clean up with `./scripts/demo_down.sh`.
-
-**Compare without overwriting changes:** `git diff m2-demo2-before..m2-demo2-after -- demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
-
-> [!IMPORTANT]
-> All vulnerability testing must remain inside the authorized Globomantics training environment.
-
----
-
-
-<div align="center">
-
-![Demo](https://img.shields.io/badge/Globomantics-ZAP%20Security-130F25?style=for-the-badge) ![Module](https://img.shields.io/badge/M2-Demo%202-FF1675?style=for-the-badge) ![Practice](https://img.shields.io/badge/Practice-Starter-00A3FF?style=for-the-badge)
-
-### ZAP API and Insights
-
-<img src="https://raw.githubusercontent.com/rupeshtiwari/pluralsight-script-development-with-zap/main/docs/learner-diagrams/m2-demo2.svg" width="100%" alt="Illustrative four-step workflow for ZAP API and Insights; not actual ZAP scan evidence"/>
-
-<sub>Learning path illustration; real findings and API values come from your local run.</sub>
-
-</div>
-
-> [!IMPORTANT]
-> **Authorized practice only:** Run scans against the Globomantics training application supplied with this repository. Do not target unrelated systems.
-
-## Start This Demo Independently
-
-Use a separate checkout for this exercise; no previous demo or another student's runtime is required.
+If the one-time Mac setup has already completed, you can skip that setup command. Execute Steps 1–4 above from this demo directory. Then run:
 
 ```bash
-git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
-cd pluralsight-script-development-with-zap
-git switch m2-demo2-before
-./setup/setup-macos.sh
-cd demos/module2-demos/m2-demo2-zap-api-scan-evidence
-./scripts/demo_up.sh
+./scripts/preflight_check.sh
+./scripts/demo_down.sh
 ```
 
-**Environment:** Terminal and ZAP API. Use the numbered commands below in the displayed sequence. Wait for each actual result before advancing. Scan duration and request counts may vary.
+The preflight saves a timestamped log in `logs/`. For hosted evidence, use the GitHub Actions link in the detailed steps and inspect the actual workflow's **run SHA**, status, job log and report. Never assume a successful report from an earlier session satisfies this exercise.
 
-**Starter branch:** `m2-demo2-before` contains the exercise's prerequisites without its completed runtime evidence. Follow the steps to produce your own result.
+**Compare with the completed version:** `git diff m2-demo2-before..m2-demo2-after -- demos/module2-demos/m2-demo2-zap-api-scan-evidence`. This comparison does not overwrite your work. Both the starter and completed branches include their required prerequisites; authored solution files or plans are added by the exercise when applicable.
 
-**Check your result:** `./scripts/preflight_check.sh` saves a timestamped log under `logs/`. Some GUI observations, particularly Script Console output, must also be checked in the live ZAP GUI.
+**Technical evidence note:** Live request counts can vary. Missing or empty report Insights are not replaced by unrelated ZAP statistics. This demo provisions its own required scan state, so another demo does not need to run first.
 
-**Clean up:** `./scripts/demo_down.sh`
-
-**Compare safely:** First commit or copy your own work, then compare this branch with `m2-demo2-after` using `git diff m2-demo2-before..m2-demo2-after -- demos/module2-demos/m2-demo2-zap-api-scan-evidence`. This does not change your working tree.
+All scanning stays within the supplied, authorized Globomantics training environment.
 
 ---
+
+## Detailed Instructions And Expected Evidence
+
+<details><summary><b>View The Four Executable Steps</b></summary>
+
+```bash
+./steps/01-check-zap-scan-status.sh
+./steps/02-query-custom-rule-alert.sh
+./steps/03-reconcile-json-report.sh
+./steps/04-read-zap-insights.sh
+```
+
+Run these commands in order from this demo's folder, then execute `./scripts/preflight_check.sh`. Inspect actual ZAP GUI or GitHub Actions evidence where indicated.
+</details>
 
 
 Inspect a finished authenticated scan entirely through ZAP's HTTP API — no GUI.
