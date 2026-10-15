@@ -1,77 +1,95 @@
-# Run authenticated ZAP scripts in GitHub Actions
+# Run Authenticated ZAP in GitHub Actions
 
-<div align="center"><img src="../../../docs/learner-diagrams/m2-demo1-architecture.svg" width="100%" alt="Headless ZAP authenticated CI scanning architecture"/><sub>Generated using ChatGPT · diagram is illustrative</sub></div>
+<details><summary><b>Branch: m2-demo1-before — CI Exercise Starter</b></summary>
+
+The original JavaScript and Python prerequisites are supplied, but `ci/af-plan.yaml` is intentionally omitted. Add the plan during the exercise.
+
+</details>
 
 
 <div align="center">
 
-![Security](https://img.shields.io/badge/Globomantics-ZAP-130F25?style=for-the-badge) ![Demo](https://img.shields.io/badge/m2-demo1-FF1675?style=for-the-badge) ![State](https://img.shields.io/badge/before-00A3FF?style=for-the-badge)
+![ZAP](https://img.shields.io/badge/OWASP_ZAP-Headless_CI-0284c7?style=for-the-badge)
+![Lab](https://img.shields.io/badge/Practice-m2-demo1-d946ef?style=for-the-badge)
 
-<img width="100%" alt="Illustrative four-step Authenticated GitHub Actions workflow" src="https://raw.githubusercontent.com/rupeshtiwari/pluralsight-script-development-with-zap/main/docs/learner-diagrams/m2-demo1.svg"/>
+<img src="../../../docs/learner-diagrams/m2-demo1-architecture.svg" width="100%" alt="Run Authenticated ZAP in GitHub Actions architecture"/>
 
-<sub>Learning workflow illustration — generate actual scan results using the commands below.</sub>
+<sub>Illustrative architecture · Generated using ChatGPT · Verify the actual API, report or CI results</sub>
+
 </div>
 
-## Start This Demo Independently
+## What Problem Are You Solving?
+
+A local scan can look convincing but fail on a hosted runner because scripts, scope, and login state are missing. Maya needs an Automation Framework plan that can authenticate as a Globomantics user, reuse the JavaScript and Jython scripts, and archive a named custom finding on GitHub Actions.
+
+**Your outcome:** Understand how the system behaves, run four meaningful commands, inspect the real output and explain the engineering decision. No external course outline is required.
+
+## Learning Objective Covered
+
+<table><thead><tr><th>Objective</th><th>What You Will Learn</th></tr></thead><tbody>
+<tr><td><code>EO3a</code></td><td>Configure ZAP for headless execution in CI/CD environments</td></tr>
+</tbody></table>
+
+## Your Four-Step Learning Path
+
+```mermaid
+flowchart LR
+  N0["GitHub Actions"]
+  N1["Headless plan"]
+  N2["Authenticated scripts"]
+  N3["Custom alert + report"]
+  N0 --> N1 --> N2 --> N3
+```
+
+<table>
+<thead><tr><th>Step</th><th>Exact Command</th><th>What You Do</th><th>What To Verify</th><th>Why It Matters</th></tr></thead>
+<tbody><tr><td><b>1</b></td><td><code>./steps/01-run-headless-automation-plan.sh</code></td><td>Execute the Automation Framework plan without a GUI</td><td>Successful plan execution and GitHub Actions job log</td><td>CI cannot depend on manual desktop actions</td></tr>
+<tr><td><b>2</b></td><td><code>./steps/02-inspect-authenticated-scan-context.sh</code></td><td>Inspect context, login script, user and target scope</td><td>Context Globomantics, user alice and scoped profile</td><td>An authenticated scan requires explicit identity and boundaries</td></tr>
+<tr><td><b>3</b></td><td><code>./steps/03-verify-reused-security-scripts.sh</code></td><td>Run the original custom scripts against the protected page</td><td>Script job results plus authenticated request evidence</td><td>Reuse tested scripts instead of rewriting them in CI</td></tr>
+<tr><td><b>4</b></td><td><code>./steps/04-confirm-authenticated-custom-alert.sh</code></td><td>Inspect the custom finding in the headless result</td><td>Named alert on /account/profile, parameter note</td><td>A pipeline needs a fail-closed assertion on the intended finding</td></tr></tbody></table>
+
+## Start This Exercise
+
+From the repository root:
 
 ```bash
-git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
-cd pluralsight-script-development-with-zap
+git fetch origin
 git switch m2-demo1-before
 ./setup/setup-macos.sh
 cd demos/module2-demos/m2-demo1-authenticated-zap-github-actions
 ./scripts/demo_up.sh
 ```
 
-**Branch role:** Independent learner starter with declared prerequisites. Complete this exercise without first running another demo. Follow steps 1–4 below, then run `./scripts/preflight_check.sh` and inspect `logs/`. If a step uses GitHub Actions, also inspect its actual job log and report artifact. Clean up with `./scripts/demo_down.sh`.
-
-**Compare without overwriting changes:** `git diff m2-demo1-before..m2-demo1-after -- demos/module2-demos/m2-demo1-authenticated-zap-github-actions`.
-
-> [!IMPORTANT]
-> All vulnerability testing must remain inside the authorized Globomantics training environment.
-
----
-
-
-<div align="center">
-
-![Demo](https://img.shields.io/badge/Globomantics-ZAP%20Security-130F25?style=for-the-badge) ![Module](https://img.shields.io/badge/M2-Demo%201-FF1675?style=for-the-badge) ![Practice](https://img.shields.io/badge/Practice-Starter-00A3FF?style=for-the-badge)
-
-### Authenticated GitHub Actions
-
-<img src="https://raw.githubusercontent.com/rupeshtiwari/pluralsight-script-development-with-zap/main/docs/learner-diagrams/m2-demo1.svg" width="100%" alt="Illustrative four-step workflow for Authenticated GitHub Actions; not actual ZAP scan evidence"/>
-
-<sub>Learning path illustration; real findings and API values come from your local run.</sub>
-
-</div>
-
-> [!IMPORTANT]
-> **Authorized practice only:** Run scans against the Globomantics training application supplied with this repository. Do not target unrelated systems.
-
-## Start This Demo Independently
-
-Use a separate checkout for this exercise; no previous demo or another student's runtime is required.
+If the one-time Mac setup has already completed, you can skip that setup command. Execute Steps 1–4 above from this demo directory. Then run:
 
 ```bash
-git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
-cd pluralsight-script-development-with-zap
-git switch m2-demo1-before
-./setup/setup-macos.sh
-cd demos/module2-demos/m2-demo1-authenticated-zap-github-actions
-./scripts/demo_up.sh
+./scripts/preflight_check.sh
+./scripts/demo_down.sh
 ```
 
-**Environment:** VS Code and GitHub Actions. Use the numbered commands below in the displayed sequence. Wait for each actual result before advancing. Scan duration and request counts may vary.
+The preflight saves a timestamped log in `logs/`. For hosted evidence, use the GitHub Actions link in the detailed steps and inspect the actual workflow's **run SHA**, status, job log and report. Never assume a successful report from an earlier session satisfies this exercise.
 
-**Starter branch:** `m2-demo1-before` contains the exercise's prerequisites without its completed solution artifact. Follow the steps to produce your own result.
+**Compare with the completed version:** `git diff m2-demo1-before..m2-demo1-after -- demos/module2-demos/m2-demo1-authenticated-zap-github-actions`. This comparison does not overwrite your work. Both the starter and completed branches include their required prerequisites; authored solution files or plans are added by the exercise when applicable.
 
-**Check your result:** `./scripts/preflight_check.sh` saves a timestamped log under `logs/`. Some GUI observations, particularly Script Console output, must also be checked in the live ZAP GUI.
+**Technical evidence note:** The hosted job's source SHA matters: an older successful workflow cannot prove a newer plan. A built-in XSS alert does not substitute for the named custom Python alert. On the starter branch the finished Automation Framework plan must be created before its execution succeeds.
 
-**Clean up:** `./scripts/demo_down.sh`
-
-**Compare safely:** First commit or copy your own work, then compare this branch with `m2-demo1-after` using `git diff m2-demo1-before..m2-demo1-after -- demos/module2-demos/m2-demo1-authenticated-zap-github-actions`. This does not change your working tree.
+All scanning stays within the supplied, authorized Globomantics training environment.
 
 ---
+
+## Detailed Instructions And Expected Evidence
+
+<details><summary><b>View The Four Executable Steps</b></summary>
+
+```bash
+./steps/01-run-headless-automation-plan.sh
+./steps/02-inspect-authenticated-scan-context.sh
+./steps/03-verify-reused-security-scripts.sh
+./steps/04-confirm-authenticated-custom-alert.sh
+```
+
+Run these commands in order from this demo's folder, then execute `./scripts/preflight_check.sh`. Inspect actual ZAP GUI or GitHub Actions evidence where indicated.
+</details>
 
 
 Run the ZAP scripts you built in Module 1 automatically and headless inside a
