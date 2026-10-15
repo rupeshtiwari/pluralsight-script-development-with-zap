@@ -1,12 +1,76 @@
-# Enforce ZAP quality gates in GitHub Actions
+# Enforce Security Quality Gates in GitHub Actions
 
 <div align="center">
 
-<img src="../../../docs/learner-diagrams/m2-demo3-architecture.svg" alt="Architecture and evidence flow for m2-demo3" width="100%"/>
+![ZAP](https://img.shields.io/badge/OWASP_ZAP-CI_Quality_Gate-0284c7?style=for-the-badge)
+![Lab](https://img.shields.io/badge/Practice-m2-demo3-d946ef?style=for-the-badge)
 
-<sub>Illustrative architecture, not live scan output · Generated using ChatGPT</sub>
+<img src="../../../docs/learner-diagrams/m2-demo3-architecture.svg" width="100%" alt="Enforce Security Quality Gates in GitHub Actions architecture"/>
+
+<sub>Illustrative architecture · Generated using ChatGPT · Verify the actual API, report or CI results</sub>
 
 </div>
+
+## What Problem Are You Solving?
+
+An organization wants to ignore a reviewed benign header finding on one path while still blocking release if reflected XSS remains High risk. Maya must show the exact filter, job order, final report and process exit—not simply interpret every red build as a valid security block.
+
+**Your outcome:** Understand how the system behaves, run four meaningful commands, inspect the real output and explain the engineering decision. No external course outline is required.
+
+## Learning Objective Covered
+
+<table><thead><tr><th>Objective</th><th>What You Will Learn</th></tr></thead><tbody>
+<tr><td><code>EO3c</code></td><td>Apply threshold-based quality gates for security findings in build pipelines</td></tr>
+</tbody></table>
+
+## Your Four-Step Learning Path
+
+```mermaid
+flowchart LR
+  N0["Scoped alertFilter"]
+  N1["Active scan"]
+  N2["Filtered report"]
+  N3["exitStatus / CI"]
+  N0 --> N1 --> N2 --> N3
+```
+
+<table>
+<thead><tr><th>Step</th><th>Exact Command</th><th>What You Do</th><th>What To Verify</th><th>Why It Matters</th></tr></thead>
+<tbody><tr><td><b>1</b></td><td><code>./steps/01-inspect-false-positive-filter.sh</code></td><td>Scope the known benign rule 10021 on /greet</td><td>Actual alertFilter rule ID, URL and False Positive setting</td><td>Narrow filtering avoids suppressing unrelated risk</td></tr>
+<tr><td><b>2</b></td><td><code>./steps/02-check-automation-job-order.sh</code></td><td>Verify filter, scan, report and gate ordering</td><td>alertFilter before activeScan; exitStatus last</td><td>Order determines when the disposition is applied</td></tr>
+<tr><td><b>3</b></td><td><code>./steps/03-run-security-quality-gate.sh</code></td><td>Run the plan and capture the real exit code</td><td>Actual remaining High finding and exit code 1</td><td>A deliberate security block differs from failed infrastructure</td></tr>
+<tr><td><b>4</b></td><td><code>./steps/04-verify-filtered-alert-report.sh</code></td><td>Inspect both expected report findings</td><td>Rule 10021 disposed False Positive; rule 40012 remains High</td><td>Prove the filter suppressed noise without hiding real risk</td></tr></tbody></table>
+
+## Start This Exercise
+
+From the repository root:
+
+```bash
+git fetch origin
+git switch m2-demo3-before
+./setup/setup-macos.sh
+cd demos/module2-demos/m2-demo3-security-quality-gates
+./scripts/demo_up.sh
+```
+
+If the one-time Mac setup has already completed, you can skip that setup command. Execute Steps 1–4 above from this demo directory. Then run:
+
+```bash
+./scripts/preflight_check.sh
+./scripts/demo_down.sh
+```
+
+The preflight saves a timestamped log in `logs/`. For hosted evidence, use the GitHub Actions link in the detailed steps and inspect the actual workflow's **run SHA**, status, job log and report. Never assume a successful report from an earlier session satisfies this exercise.
+
+**Compare with the completed version:** `git diff m2-demo3-before..m2-demo3-after -- demos/module2-demos/m2-demo3-security-quality-gates`. This comparison does not overwrite your work. Both the starter and completed branches include their required prerequisites; authored solution files or plans are added by the exercise when applicable.
+
+**Technical evidence note:** In a verified historical run the official report showed rule 10021 as Low (False Positive), rule 40012 as High (Medium), and exit code 1. Treat those as an example—not proof for a different run. A generic nonzero exit or a missing filtered finding is insufficient proof.
+
+All scanning stays within the supplied, authorized Globomantics training environment.
+
+---
+
+## Detailed Instructions And Expected Evidence
 
 <details><summary><b>View The Four Executable Steps</b></summary>
 
