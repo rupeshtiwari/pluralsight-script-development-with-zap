@@ -1,12 +1,78 @@
-# Validate injection, XSS, and CSRF with ZAP
+# Validate Injection, XSS and CSRF
 
 <div align="center">
 
-<img src="../../../docs/learner-diagrams/m1-demo1-architecture.svg" alt="Architecture and evidence flow for m1-demo1" width="100%"/>
+![ZAP](https://img.shields.io/badge/OWASP_ZAP-Targeted_Scanning-0284c7?style=for-the-badge)
+![Lab](https://img.shields.io/badge/Practice-m1-demo1-d946ef?style=for-the-badge)
 
-<sub>Illustrative architecture, not live scan output · Generated using ChatGPT</sub>
+<img src="../../../docs/learner-diagrams/m1-demo1-architecture.svg" width="100%" alt="Validate Injection, XSS and CSRF: application, tool and evidence architecture"/>
+
+<sub>Illustrative architecture · Generated using ChatGPT · Verify real results in your own lab</sub>
 
 </div>
+
+## What Problem Are You Solving?
+
+Maya Chen receives scanner findings about the Globomantics search, account and admin endpoints. She must show which inputs actually change SQL, MongoDB, or shell behavior, whether reflected HTML can be exploited in its output context, and whether a CSRF token belongs to the right session. A long alert list is not an engineering decision.
+
+**Your outcome:** Complete four practical checks and be able to explain both the actual evidence and the engineering decision it supports. This page is self-contained; you do not need access to a separate course outline.
+
+## Learning Objectives Covered
+
+<table><thead><tr><th>Objective</th><th>What You Will Learn</th></tr></thead><tbody>
+<tr><td><code>EO1a</code></td><td>Configure specialized scanners for injection vulnerabilities (SQL, NoSQL, Command)</td></tr>
+<tr><td><code>EO1b</code></td><td>Implement Cross-Site Scripting (XSS) validation with context-specific payloads</td></tr>
+<tr><td><code>EO1c</code></td><td>Execute CSRF token bypass techniques for testing anti-CSRF protections</td></tr>
+</tbody></table>
+
+## Your Four-Step Learning Path
+
+```mermaid
+flowchart LR
+  N0["Focused injection scan"]
+  N1["XSS context evidence"]
+  N2["Session-token replay"]
+  N3["Confirmed disposition"]
+  N0 --> N1 --> N2 --> N3
+```
+
+<table>
+<thead><tr><th>Step</th><th>Exact Command</th><th>What You Do</th><th>What To Verify</th><th>Why It Matters</th></tr></thead>
+<tbody><tr><td><b>1</b></td><td><code>./steps/01-run-targeted-injection-scan.sh</code></td><td>Target SQL, MongoDB and command-injection parameters</td><td>Rule/parameter-specific ZAP alerts and scan policy</td><td>Focused scanning separates three different unsafe sinks</td></tr>
+<tr><td><b>2</b></td><td><code>./steps/02-verify-reflected-xss-contexts.sh</code></td><td>Test HTML body, attribute and JavaScript contexts</td><td>Injected request, reflected response and ZAP finding</td><td>Output context determines payload and required encoding</td></tr>
+<tr><td><b>3</b></td><td><code>./steps/03-test-cross-session-csrf-token.sh</code></td><td>Compare valid, missing and cross-session token behavior</td><td>HTTP 200 / 403 / 200 and actual account email mutation</td><td>Token presence is insufficient without session ownership</td></tr>
+<tr><td><b>4</b></td><td><code>./steps/04-reconcile-security-alerts.sh</code></td><td>Compare alerts against live application evidence</td><td>SQL error, NoSQL count, injected-command proof and XSS evidence</td><td>A finding needs behavior to support its disposition</td></tr></tbody></table>
+
+## Start This Exercise
+
+From the repository root:
+
+```bash
+git fetch origin
+git switch m1-demo1-before
+./setup/setup-macos.sh
+cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
+./scripts/demo_reset.sh
+```
+
+If you already prepared your Mac, the one-time setup script can be skipped. Run **Steps 1–4 above** from this demo directory, in order. Then validate and stop:
+
+```bash
+./scripts/preflight_check.sh
+./scripts/demo_down.sh
+```
+
+The preflight writes a timestamped log to `logs/`; GUI-only evidence must also be verified in the real ZAP interface at <http://localhost:8080/zap/>. The app runs at <http://localhost:8000/> and ZAP's local API/proxy at <http://localhost:8090/>.
+
+**Compare with the completed version:** `git diff m1-demo1-before..m1-demo1-after -- demos/module1-demos/m1-demo1-targeted-injection-xss-csrf`. This command does not overwrite your files. The `before` branch starts the exercise; the `after` branch provides its completed reference, where applicable.
+
+**Technical evidence note:** A normal successful ping alone does not prove command injection. Confirm the injected host parameter and relevant alert request/response before describing it as exploitable.
+
+All testing must stay within the authorized Globomantics training application.
+
+---
+
+## Detailed Instructions And Expected Evidence
 
 <details><summary><b>View The Four Executable Steps</b></summary>
 
@@ -214,7 +280,7 @@ Proof artifact: CSRF token replay result.
 reconciled with observed application behavior before it is recorded as confirmed.
 
 **Open the record template.** The disposition template is
-[`docs/alert-disposition-template.md`](../../docs/alert-disposition-template.md) —
+[`docs/alert-disposition-template.md`](../../../docs/alert-disposition-template.md) —
 one row per finding, pairing the alert with the behavior that confirms it.
 
 **Run the reconciliation.**
