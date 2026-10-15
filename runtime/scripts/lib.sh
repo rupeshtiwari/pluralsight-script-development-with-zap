@@ -3,7 +3,7 @@
 
 # Resolve repo root regardless of where the script is called from.
 LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${LIB_DIR}/.." && pwd)"
+REPO_ROOT="$(cd "${LIB_DIR}/../.." && pwd)"
 
 # Load .env so compose variables and the ZAP API key are available to scripts.
 if [ -f "${REPO_ROOT}/.env" ]; then
@@ -35,7 +35,7 @@ ensure_docker() {
         done
         die "Colima started but Docker did not become reachable. Try 'colima restart'."
     fi
-    die "Docker engine is not running and Colima is not installed. Run ./before-running-demo-run-this/setup-macos.sh first."
+    die "Docker engine is not running and Colima is not installed. Run ./setup/setup-macos.sh first."
 }
 
 # ANSI colours (fall back to empty if not a tty).
