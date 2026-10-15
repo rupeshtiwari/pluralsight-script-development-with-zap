@@ -2,6 +2,36 @@
 
 <div align="center">
 
+![Security](https://img.shields.io/badge/Globomantics-ZAP-130F25?style=for-the-badge) ![Demo](https://img.shields.io/badge/m2-demo2-FF1675?style=for-the-badge) ![State](https://img.shields.io/badge/before-00A3FF?style=for-the-badge)
+
+<img width="100%" alt="Illustrative four-step ZAP API and Insights workflow" src="https://raw.githubusercontent.com/rupeshtiwari/pluralsight-script-development-with-zap/main/docs/learner-diagrams/m2-demo2.svg"/>
+
+<sub>Learning workflow illustration — generate actual scan results using the commands below.</sub>
+</div>
+
+## Start This Demo Independently
+
+```bash
+git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
+cd pluralsight-script-development-with-zap
+git switch m2-demo2-before
+./env-setup/setup-macos.sh
+cd module2/m2-c4
+./scripts/demo_up.sh
+```
+
+**Branch role:** Independent learner starter with declared prerequisites. Complete this exercise without first running another demo. Follow steps 1–4 below, then run `./scripts/preflight_check.sh` and inspect `logs/`. If a step uses GitHub Actions, also inspect its actual job log and report artifact. Clean up with `./scripts/demo_down.sh`.
+
+**Compare without overwriting changes:** `git diff m2-demo2-before..m2-demo2-after -- module2/m2-c4`.
+
+> [!IMPORTANT]
+> All vulnerability testing must remain inside the authorized Globomantics training environment.
+
+---
+
+
+<div align="center">
+
 ![Demo](https://img.shields.io/badge/Globomantics-ZAP%20Security-130F25?style=for-the-badge) ![Module](https://img.shields.io/badge/M2-Demo%202-FF1675?style=for-the-badge) ![Practice](https://img.shields.io/badge/Practice-Starter-00A3FF?style=for-the-badge)
 
 ### ZAP API and Insights
