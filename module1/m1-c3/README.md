@@ -2,6 +2,36 @@
 
 <div align="center">
 
+![ZAP](https://img.shields.io/badge/Globomantics-ZAP-130F25?style=for-the-badge) ![Demo](https://img.shields.io/badge/Module%201-Demo%201-FF1675?style=for-the-badge) ![State](https://img.shields.io/badge/State-before-00A3FF?style=for-the-badge)
+
+<img alt="Illustrative targeted ZAP workflow" width="100%" src="https://raw.githubusercontent.com/rupeshtiwari/pluralsight-script-development-with-zap/main/docs/learner-diagrams/m1-demo1.svg"/>
+
+<sub>Illustrative workflow — run the commands to obtain live evidence.</sub>
+</div>
+
+## Start Independently
+
+```bash
+git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
+cd pluralsight-script-development-with-zap
+git switch m1-demo1-before
+./env-setup/setup-macos.sh
+cd module1/m1-c3
+./scripts/demo_reset.sh
+```
+
+This before branch provides the learner starting point. No earlier demo is required. Run the four numbered steps below, then `./scripts/preflight_check.sh` to create a log under `logs/`. Stop with `./scripts/demo_down.sh`.
+
+**Compare without modifying your work:** `git diff m1-demo1-before..m1-demo1-after -- module1/m1-c3`.
+
+> [!CAUTION]
+> Scan only the supplied Globomantics training application under authorization.
+
+---
+
+
+<div align="center">
+
 ![Demo](https://img.shields.io/badge/Globomantics-ZAP%20Security-130F25?style=for-the-badge) ![Module](https://img.shields.io/badge/M1-Demo%201-FF1675?style=for-the-badge) ![Practice](https://img.shields.io/badge/Practice-Starter-00A3FF?style=for-the-badge)
 
 ### Injection, XSS, and CSRF
