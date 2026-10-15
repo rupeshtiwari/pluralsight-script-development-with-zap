@@ -56,4 +56,10 @@ Key constraints from the outline:
 - All commits are authored and committed by **Rupesh Tiwari <roopkt@gmail.com>** only.
 - Do NOT add `Co-Authored-By:` or `Claude-Session:` trailers, or any AI attribution,
   to commit messages. The repository history shows the owner alone.
-- Work on `main`; no per-demo branches; do not rewrite history unless explicitly asked.
+- Branch policy (owner decision, 2026-10): the course uses **per-demo before/after
+  branches** for distributed, isolated recording by a team. `main` is the **generic
+  starter** (shared app, infra, runbooks, demo tooling — NO learner-authored solution
+  files). Each demo has `m<module>-demo<N>-before` (its starting point: prerequisites
+  present, this demo's own work not yet done) and `m<module>-demo<N>-after` (this
+  demo completed). `claude/stoic-cannon-nbupjt` remains the integration branch holding
+  the full verified solution. Do not rewrite history unless explicitly asked.

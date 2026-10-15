@@ -87,26 +87,33 @@ presentation clips; the demos are clips 3–5).
 
 ---
 
-## 🌿 Branches — what lives where
+## 🌿 Branches — per-demo isolation for distributed recording
 
-The six demos are **folders inside one branch**, not separate branches. By course
-convention there are **no per-demo branches**: each demo maps to a folder (see the
-Labs table above), e.g. `module1/m1-c3` … `module2/m2-c5`. So "which branch for
-which demo" is really "which folder for which demo" — the table above answers that.
+The course uses **per-demo `before`/`after` branches** so a team can record each demo
+independently, and so students see a clean starting point and a clean finished state.
 
-Only two branches exist:
+- **`main` = generic starter.** Shared app (vulnerable + remediated builds), compose,
+  ZAP entrypoint, shared scripts, and every demo's runbook + tooling — **but none of
+  the learner-authored solution files**. Clone this to begin any demo from scratch.
+- **`m<module>-demo<N>-before` = that demo's starting point.** Its prerequisites are
+  present (e.g. the Module 2 demos keep the Module 1 scripts they reuse), but the
+  demo's own authored work is not done yet — you perform it live.
+- **`m<module>-demo<N>-after` = that demo completed.** The authored artifact is present
+  and the demo is in its finished, verified state.
 
-| Branch | Role | What's on it |
-|--------|------|--------------|
-| `main` | Published baseline | The last promoted state of the course repo. Moves forward only when a reviewed set is promoted into it. |
-| `claude/stoic-cannon-nbupjt` | **Active working / validation branch** | All six demos **plus the latest validation and CI fixes** (digest-pinned ZAP image, hardened evidence checks). Review and validate here first. |
+| Demo branch stem | Clip | Author-live artifact (absent in `before`, present in `after`) |
+|---|---|---|
+| `m1-demo1` | M1 C3 — Injection/XSS/CSRF | *(run-only: scans + disposition)* |
+| `m1-demo2` | M1 C4 — JavaScript HTTP Sender | `module1/m1-c4/zap-scripts/globomantics-marker.js` |
+| `m1-demo3` | M1 C5 — Python rule + auth | `module1/m1-c5/zap-scripts/globomantics-active-rule.py`, `…/globomantics-auth.py` |
+| `m2-demo1` | M2 C3 — Authenticated GitHub Actions | `module2/m2-c3/ci/af-plan.yaml` (keeps M1 scripts as prereqs) |
+| `m2-demo2` | M2 C4 — ZAP API | *(run-only: API queries over a finished scan)* |
+| `m2-demo3` | M2 C5 — Quality gates | `module2/m2-c5/ci/gate-plan.yaml` |
 
-> [!IMPORTANT]
-> Review the demos on the **active working branch** above — that is where the
-> current, validated versions of all six clips live. `main` is intentionally kept
-> a step behind and is only fast-forwarded when a reviewed set is approved for
-> promotion. If a validator reports a fix "missing," confirm it is checking the
-> active working branch, not `main`.
+> [!NOTE]
+> `claude/stoic-cannon-nbupjt` is the integration branch holding the full verified
+> solution (all demos + CI/validation fixes). The `…-after` branches are carved from
+> it so each shows only its own demo completed.
 
 ---
 
