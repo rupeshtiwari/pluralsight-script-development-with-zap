@@ -4,10 +4,10 @@
 # =============================================================================
 # Run this ONCE before any demo:
 #
-#     ./before-running-demo-run-this/setup-macos.sh
+#     ./setup/setup-macos.sh
 #
 # It checks every dependency the demos need, installs whatever is missing, and
-# writes a full verbose transcript to before-running-demo-run-this/logs/. When it finishes it
+# writes a full verbose transcript to setup/logs/. When it finishes it
 # prints a readiness table so you can see, at a glance, whether the machine is
 # ready. If anything is not ready it prints the exact command to fix it.
 #
@@ -17,7 +17,7 @@
 set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-LOG_DIR="${REPO_ROOT}/before-running-demo-run-this/logs"
+LOG_DIR="${REPO_ROOT}/setup/logs"
 mkdir -p "${LOG_DIR}"
 LOG="${LOG_DIR}/setup-$(date +%Y%m%d-%H%M%S).log"
 
@@ -43,13 +43,19 @@ echo "${C_MUT}host: $(uname -mrs)    date: $(date)    log: ${LOG}${C_RST}"
 
 # --- 1. Homebrew -------------------------------------------------------------
 step "Homebrew"
+if [ -x /opt/homebrew/bin/brew ] && ! command -v brew >/dev/null 2>&1; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+if [ -x /usr/local/bin/brew ] && ! command -v brew >/dev/null 2>&1; then
+    eval "$(/usr/local/bin/brew shellenv)"
+fi
 if command -v brew >/dev/null 2>&1; then
     echo "brew found: $(brew --version | head -1)"
     record "Homebrew" "READY" "$(brew --version | head -1)"
 else
     echo "Homebrew not found. Installing..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" \
-        && record "Homebrew" "READY" "installed just now" \
+        && { if [ -x /opt/homebrew/bin/brew ]; then eval "$(/opt/homebrew/bin/brew shellenv)"; elif [ -x /usr/local/bin/brew ]; then eval "$(/usr/local/bin/brew shellenv)"; fi; record "Homebrew" "READY" "installed just now"; } \
         || record "Homebrew" "MISSING" "install failed" \
                   'run the Homebrew installer from https://brew.sh, then re-run this script'
 fi
@@ -113,12 +119,17 @@ if colima status >/dev/null 2>&1; then
     echo "Colima is running:"; colima status 2>&1 | sed 's/^/  /'
     record "Colima VM" "READY" "running"
 else
-    echo "Starting Colima (4 CPU / 8 GiB / aarch64)..."
-    if colima start --cpu 4 --memory 8 --arch aarch64; then
+    case "$(uname -m)" in
+        arm64|aarch64) machine_arch="aarch64" ;;
+        x86_64|amd64) machine_arch="x86_64" ;;
+        *) machine_arch="$(uname -m)" ;;
+    esac
+    echo "Starting Colima (4 CPU / 8 GiB / ${machine_arch})..."
+    if colima start --cpu 4 --memory 8 --arch "${machine_arch}"; then
         record "Colima VM" "READY" "started just now"
     else
         record "Colima VM" "MISSING" "colima start failed" \
-               "colima start --cpu 4 --memory 8 --arch aarch64"
+               "colima start --cpu 4 --memory 8 --arch "${machine_arch}""
     fi
 fi
 

@@ -1,5 +1,8 @@
 # Validate injection, XSS, and CSRF with ZAP
 
+<div align="center"><img src="../../../docs/learner-diagrams/m1-demo1-architecture.svg" width="100%" alt="Illustrative security architecture"/><sub>Generated using ChatGPT · architecture, not actual scan output</sub></div>
+
+
 <div align="center">
 
 ![ZAP](https://img.shields.io/badge/Globomantics-ZAP-130F25?style=for-the-badge) ![Demo](https://img.shields.io/badge/Module%201-Demo%201-FF1675?style=for-the-badge) ![State](https://img.shields.io/badge/State-before-00A3FF?style=for-the-badge)
@@ -15,7 +18,7 @@
 git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
 cd pluralsight-script-development-with-zap
 git switch m1-demo1-before
-./before-running-demo-run-this/setup-macos.sh
+./setup/setup-macos.sh
 cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
 ./scripts/demo_reset.sh
 ```
@@ -53,7 +56,7 @@ Use a separate checkout for this exercise; no previous demo or another student's
 git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
 cd pluralsight-script-development-with-zap
 git switch m1-demo1-before
-./before-running-demo-run-this/setup-macos.sh
+./setup/setup-macos.sh
 cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
 ./scripts/demo_reset.sh
 ```
@@ -84,18 +87,18 @@ real defect.
 
 | Application | Where | Used for |
 |-------------|-------|----------|
-| VS Code | `app/main.py` + the integrated terminal in `demos/module1-demos/m1-demo1-targeted-injection-xss-csrf` | reading each vulnerable sink, then running `./scripts/demo_step.sh N` in the same window |
+| VS Code | `runtime/app/main.py` + the integrated terminal in `demos/module1-demos/m1-demo1-targeted-injection-xss-csrf` | reading each vulnerable sink, then running `./scripts/demo_step.sh N` in the same window |
 | ZAP (one container) | API/proxy on `:8090` | the same instance the terminal drives; alerts a step raises are ZAP's own findings, printed back by the command |
 | Local Globomantics app | `http://localhost:8000/` | the target under test |
 
 Work in **VS Code** with the integrated terminal: read the sink in the editor
 pane, then run the step in the terminal pane. The terminal output is the
 authoritative evidence; `./scripts/show_code.sh` prints the live vulnerable lines
-straight from `app/main.py`, so they never drift.
+straight from `runtime/app/main.py`, so they never drift.
 
 ## Setup
 
-Install once from the repo root: `./before-running-demo-run-this/setup-macos.sh` (wait for the
+Install once from the repo root: `./setup/setup-macos.sh` (wait for the
 readiness table). Then start the vulnerable build:
 
 ```bash
@@ -107,7 +110,7 @@ Exact alert IDs, risk, and confidence are the live values from your run.
 
 ## Step-by-step LO traceability
 
-| Step | LO | Code inspected (`app/main.py`) | Commands | Observed result | Proof artifact |
+| Step | LO | Code inspected (`runtime/app/main.py`) | Commands | Observed result | Proof artifact |
 |------|----|--------------------------------|----------|-----------------|----------------|
 | 1 | EO1a | `search` 149–153 · `account` 196–204 (regex 180) · `admin_ping` 227–231 | `show_code.sh sqli\|nosql\|cmd` · `steps/01-run-targeted-injection-scan.sh` | alerts `40018` / `40033` / `90020`, one per parameter | Targeted scan policy and rule list |
 | 2 | EO1b | `greet` 257–277 | `show_code.sh xss` · `steps/02-verify-reflected-xss-contexts.sh` | *Cross Site Scripting (Reflected)* on `name` with injected payload + reflected evidence | XSS request and response body |
@@ -126,9 +129,9 @@ and command — each from the application's own response, on three endpoints.
 they fail in three distinct ways. In the integrated terminal:
 
 ```bash
-./scripts/show_code.sh sqli     # app/main.py  search()      lines 149–153
-./scripts/show_code.sh nosql    # app/main.py  account()     lines 196–204 (regex at 180)
-./scripts/show_code.sh cmd      # app/main.py  admin_ping()  lines 227–231
+./scripts/show_code.sh sqli     # runtime/app/main.py  search()      lines 149–153
+./scripts/show_code.sh nosql    # runtime/app/main.py  account()     lines 196–204 (regex at 180)
+./scripts/show_code.sh cmd      # runtime/app/main.py  admin_ping()  lines 227–231
 ```
 
 **Why each is vulnerable — the distinct mechanism:**
@@ -177,7 +180,7 @@ in another. Maya must prove the reflection is *executable*, not merely present.
 **Inspect the vulnerable code in VS Code.**
 
 ```bash
-./scripts/show_code.sh xss       # app/main.py  greet()  lines 257–277
+./scripts/show_code.sh xss       # runtime/app/main.py  greet()  lines 257–277
 ```
 
 **Why it's vulnerable.** The vulnerable build assigns the raw `name` to all three
@@ -221,7 +224,7 @@ token minted in one session can be replayed with a different session's cookie.
 **Inspect the vulnerable code in VS Code.**
 
 ```bash
-./scripts/show_code.sh csrf      # app/main.py  change_email()  lines 332–336
+./scripts/show_code.sh csrf      # runtime/app/main.py  change_email()  lines 332–336
 ```
 
 **Why it's vulnerable.** `change_email()` looks the token up and rejects a missing
@@ -297,7 +300,7 @@ Proof artifact: Alert disposition record.
 `./scripts/demo_down.sh`.
 
 Optional: `./scripts/show_code.sh {sqli|nosql|cmd|xss|csrf}` prints the exact
-vulnerable line(s) from `app/main.py`. The remediated build
+vulnerable line(s) from `runtime/app/main.py`. The remediated build
 (`APP_BUILD=remediated docker compose up -d --build app`) removes the injection
 alerts, encodes the XSS output (no reflected-XSS alert), and rejects the
 cross-session CSRF request with `403`.

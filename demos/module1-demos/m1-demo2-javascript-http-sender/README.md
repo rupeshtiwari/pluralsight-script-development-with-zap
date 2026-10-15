@@ -1,5 +1,26 @@
 # Write a JavaScript security script in ZAP
 
+<div align="center">
+
+<img src="../../../docs/learner-diagrams/m1-demo2-architecture.svg" alt="Architecture and evidence flow for m1-demo2" width="100%"/>
+
+<sub>Illustrative architecture, not live scan output · Generated using ChatGPT</sub>
+
+</div>
+
+<details><summary><b>View The Four Executable Steps</b></summary>
+
+```bash
+./steps/01-load-javascript-http-sender.sh
+./steps/02-prove-outbound-marker-header.sh
+./steps/03-check-live-script-console.sh
+./steps/04-verify-enabled-script-registration.sh
+```
+
+Run these commands in order from this demo's folder, then execute `./scripts/preflight_check.sh`. Inspect actual ZAP GUI or GitHub Actions evidence where indicated.
+</details>
+
+
 Use a JavaScript **HTTP Sender** script to add a request marker and print an identifiable console message. Prove the result in ZAP rather than relying only on a successful Terminal command.
 
 > **Authorized target:** Only the local Globomantics training application. Do not use this workflow against systems without authorization.
@@ -20,7 +41,7 @@ Use a JavaScript **HTTP Sender** script to add a request marker and print an ide
 From the **repository root**, install the environment once if not already installed:
 
 ```bash
-./before-running-demo-run-this/setup-macos.sh
+./setup/setup-macos.sh
 ```
 
 Then start Clip 4 from the repository root:
