@@ -1,4 +1,5 @@
 name: Globomantics authenticated ZAP scan
+# Branch proof: completed authenticated demo.
 
 # Runs the Module 1 ZAP scripts headless, as an authenticated user, in CI.
 # The GitHub Actions job log and archived JSON report are the scan evidence.
