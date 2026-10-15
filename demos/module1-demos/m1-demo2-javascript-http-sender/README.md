@@ -1,5 +1,8 @@
 # Write a JavaScript security script in ZAP
 
+<div align="center"><img src="../../../docs/learner-diagrams/m1-demo2-architecture.svg" width="100%" alt="JavaScript HTTP Sender architecture"/><sub>Generated using ChatGPT · diagram is illustrative</sub></div>
+
+
 <div align="center">
 
 ![ZAP](https://img.shields.io/badge/Globomantics-ZAP-130F25?style=for-the-badge) ![Demo](https://img.shields.io/badge/m1%20demo2-before-FF1675?style=for-the-badge)
@@ -15,7 +18,7 @@
 git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
 cd pluralsight-script-development-with-zap
 git switch m1-demo2-before
-./before-running-demo-run-this/setup-macos.sh
+./setup/setup-macos.sh
 cd demos/module1-demos/m1-demo2-javascript-http-sender
 ./scripts/demo_up.sh
 ```
@@ -53,7 +56,7 @@ Use a separate checkout for this exercise; no previous demo or another student's
 git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
 cd pluralsight-script-development-with-zap
 git switch m1-demo2-before
-./before-running-demo-run-this/setup-macos.sh
+./setup/setup-macos.sh
 cd demos/module1-demos/m1-demo2-javascript-http-sender
 ./scripts/demo_up.sh
 ```
@@ -91,7 +94,7 @@ Use a JavaScript **HTTP Sender** script to add a request marker and print an ide
 From the **repository root**, install the environment once if not already installed:
 
 ```bash
-./before-running-demo-run-this/setup-macos.sh
+./setup/setup-macos.sh
 ```
 
 Then start Clip 4 from the repository root:
