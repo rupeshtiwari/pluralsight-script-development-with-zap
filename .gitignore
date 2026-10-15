@@ -3,3 +3,6 @@
 .vscode/
 # Local gate-run artifacts (headless report + plan copy) — regenerated each run
 **/logs/.gate/
+
+# Private production playbooks stay outside public Git history
+/docs/author-instructions/
