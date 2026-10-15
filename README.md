@@ -1,167 +1,153 @@
 <div align="center">
 
-# 🛡️ Script Development with ZAP
+# 🛡️ Script Development with OWASP ZAP
 
-### Hands-on labs for extending OWASP ZAP beyond default scans
+### From Verifiable Findings to Automated Security Gates
 
-_Targeted vulnerability validation · Custom scripting · DevSecOps automation_
+<p>Six independent Globomantics security labs · FastAPI · PostgreSQL · MongoDB · ZAP 2.17.0</p>
 
-<br/>
+![macOS](https://img.shields.io/badge/macOS-Apple_Silicon-111827?style=for-the-badge&logo=apple&logoColor=white)
+![ZAP](https://img.shields.io/badge/OWASP_ZAP-2.17.0-f72585?style=for-the-badge)
+![Docker](https://img.shields.io/badge/Docker-Compose-0ea5e9?style=for-the-badge&logo=docker&logoColor=white)
+![Labs](https://img.shields.io/badge/Guided_Labs-6-22c55e?style=for-the-badge)
+![Branches](https://img.shields.io/badge/Starter_%26_Solution-12_branches-f59e0b?style=for-the-badge)
 
-<img alt="OWASP ZAP 2.17.0" src="https://img.shields.io/badge/OWASP%20ZAP-2.17.0-E5522F?style=for-the-badge&logo=owasp&logoColor=white"/>
-<img alt="Docker" src="https://img.shields.io/badge/Docker%20Compose-1D63ED?style=for-the-badge&logo=docker&logoColor=white"/>
-<img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white"/>
-<img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white"/>
-<img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white"/>
-
-<br/>
-
-<img alt="Platform: macOS" src="https://img.shields.io/badge/Platform-macOS-black?style=flat-square&logo=apple"/>
-<img alt="Level: Entry" src="https://img.shields.io/badge/Level-Entry--friendly-2EA043?style=flat-square"/>
-<img alt="Labs: 6" src="https://img.shields.io/badge/Labs-6-8957E5?style=flat-square"/>
-<img alt="Runs locally" src="https://img.shields.io/badge/Runs-100%25%20locally-0969DA?style=flat-square"/>
-
+<p><b>Clone → Prepare your Mac → Select a demo → Execute four named steps → Verify → Clean up</b></p>
 </div>
 
----
-
-Every lab runs against **one deliberately vulnerable Globomantics training
-application** (Python / FastAPI + PostgreSQL + MongoDB) on **your own machine**.
-You start with focused scans, grow into writing your own ZAP scripts, and finish
-by wiring ZAP into a CI/CD pipeline as an automated security gate.
-
 > [!WARNING]
-> **Authorization and scope.** All techniques in these labs target **only** the
-> local Globomantics training app. Never point them at any system you are not
-> explicitly authorized to test.
+> **Authorized environment only.** These exercises intentionally use vulnerable code. Scan only the bundled local Globomantics training application; never scan unrelated systems.
 
----
-
-## 🚀 Set up your machine (once)
-
-```bash
-./env-setup/setup-macos.sh
-```
+## 🚀 Start Here — One-Time Mac Setup
 
 <table>
-<tr>
-<td>✅</td><td>Checks &amp; installs every dependency — Homebrew, Colima, Docker, Docker Compose, tmux, Python</td>
-</tr>
-<tr>
-<td>✅</td><td>Pulls the pinned ZAP image</td>
-</tr>
-<tr>
-<td>✅</td><td>Prints a readiness table and writes a full transcript to <code>env-setup/logs/</code></td>
-</tr>
+<tr><td width="72"><b>01</b></td><td><b>Get the project</b><pre>git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
+cd pluralsight-script-development-with-zap</pre></td></tr>
+<tr><td><b>02</b></td><td><b>Check and install prerequisites</b><pre>./before-running-demo-run-this/setup-macos.sh</pre>Checks Homebrew, Colima, Docker CLI/Compose, Python 3, and the pinned ZAP container. Prints a readiness table; saves a log under <code>before-running-demo-run-this/logs/</code>.</td></tr>
+<tr><td><b>03</b></td><td><b>Choose your demo's starter branch</b><pre>git fetch origin
+git switch m1-demo1-before</pre>Use the matching <code>m1-demoN-before</code> or <code>m2-demoN-before</code> branch from the catalog below.</td></tr>
+<tr><td><b>04</b></td><td><b>Run the selected demo</b><pre>cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
+./scripts/demo_up.sh
+./steps/01-run-targeted-injection-scan.sh</pre>Follow that demo's four named commands in its own README. Some demos use <code>demo_reset.sh</code> for a completely fresh vulnerable build.</td></tr>
+<tr><td><b>05</b></td><td><b>Verify and clean up</b><pre>./scripts/preflight_check.sh
+./scripts/demo_down.sh</pre>Review the actual evidence and generated log in <code>logs/</code>. For ZAP Script Console steps, verify the real GUI output.</td></tr>
 </table>
 
 > [!TIP]
-> One script, one time. When it prints a green readiness table, you are ready
-> for every lab in the course.
+> **Each demo runs independently.** You do not need to complete a different demo first. Module 2 starter branches contain their required Module 1 script prerequisites. Use a separate checkout or worktree when working on more than one demo.
 
-> [!NOTE]
-> **You don't need to start Docker yourself.** Colima (the Docker engine on
-> macOS) stops when your Mac sleeps or restarts — so each lab's `demo_up.sh`
-> now **starts it automatically** if it's down and waits until it's ready.
-> Just run the lab; the stack comes up on its own.
+## 📚 Complete Demo Catalog
 
----
+<table>
+<thead><tr><th>Module</th><th>Demo</th><th>Hands-On Exercise</th><th>Learning Objectives</th><th>Branches</th></tr></thead>
+<tbody>
+<tr><td><b>01</b></td><td><b>1</b></td><td><a href="demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/README.md"><b>Targeted Injection, XSS & CSRF</b></a></td><td>EO1a · EO1b · EO1c</td><td><code>m1-demo1-before</code> → <code>m1-demo1-after</code></td></tr>
+<tr><td><b>01</b></td><td><b>2</b></td><td><a href="demos/module1-demos/m1-demo2-javascript-http-sender/README.md"><b>JavaScript HTTP Sender</b></a></td><td>EO2a</td><td><code>m1-demo2-before</code> → <code>m1-demo2-after</code></td></tr>
+<tr><td><b>01</b></td><td><b>3</b></td><td><a href="demos/module1-demos/m1-demo3-python-scanning-authentication/README.md"><b>Python Rules & Authentication</b></a></td><td>EO2b · EO2c</td><td><code>m1-demo3-before</code> → <code>m1-demo3-after</code></td></tr>
+<tr><td><b>02</b></td><td><b>1</b></td><td><a href="demos/module2-demos/m2-demo1-authenticated-zap-github-actions/README.md"><b>Authenticated ZAP in GitHub Actions</b></a></td><td>EO3a</td><td><code>m2-demo1-before</code> → <code>m2-demo1-after</code></td></tr>
+<tr><td><b>02</b></td><td><b>2</b></td><td><a href="demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md"><b>ZAP API & Scan Evidence</b></a></td><td>EO3b</td><td><code>m2-demo2-before</code> → <code>m2-demo2-after</code></td></tr>
+<tr><td><b>02</b></td><td><b>3</b></td><td><a href="demos/module2-demos/m2-demo3-security-quality-gates/README.md"><b>Security Quality Gates</b></a></td><td>EO3c</td><td><code>m2-demo3-before</code> → <code>m2-demo3-after</code></td></tr>
+</tbody></table>
 
-## 📚 Labs
+### Module 1 — Validate and Extend ZAP
 
-Work through them in order — each one builds on the skills before it. Every lab
-is self-contained: open its runbook and follow along.
+[**Module 1 overview →**](demos/module1-demos/README.md)
 
-Folders are named by their **outline clip** — `m<module>-c<clip>-<name>` — so each
-demo maps straight to the approved outline (clips 1–2 of each module are
-presentation clips; the demos are clips 3–5).
+<a href="demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/README.md"><img src="docs/learner-diagrams/m1-demo1.svg" alt="Targeted Injection, XSS & CSRF four step learning path" width="100%"/></a>
 
-| Clip | Demo (runbook) | Learning objectives | Source |
-|:----:|----------------|:-------------------:|:------:|
-| **M1 · C3** | **[Validate injection, XSS, and CSRF with ZAP](module1/m1-c3/README.md)** — build a focused scan policy; prove SQL, NoSQL, and command injection; map reflected XSS to its three contexts; replay a CSRF token | EO1a · EO1b · EO1c | [code](module1/m1-c3) |
-| **M1 · C4** | **[Write a JavaScript security script in ZAP](module1/m1-c4/README.md)** — extend ZAP with an HTTP Sender script that marks every request | EO2a | [code](module1/m1-c4) |
-| **M1 · C5** | **[Write Python scan and authentication scripts in ZAP](module1/m1-c5/README.md)** — write a custom Python active-scan rule and a scripted login, then scan a login-only page | EO2b · EO2c | [code](module1/m1-c5) |
-| **M2 · C3** | **[Run authenticated ZAP scripts in GitHub Actions](module2/m2-c3/README.md)** — run your Module 1 scripts headless and authenticated in a GitHub Actions pipeline, via the ZAP Automation Framework | EO3a | [code](module2/m2-c3) |
-| **M2 · C4** | **[Query the ZAP API and inspect scan evidence](module2/m2-c4/README.md)** — query runtime + scan status, the finding's rule identity and disposition, the official JSON report, and ZAP 2.17.0 Insights, all over the HTTP API | EO3b | [code](module2/m2-c4) |
-| **M2 · C5** | **[Enforce ZAP quality gates in GitHub Actions](module2/m2-c5/README.md)** — mark a benign finding False Positive with `alertFilter`, confirm job order, then gate the build on the remaining risk via `exitStatus` exit codes | EO3c | [code](module2/m2-c5) |
+<a href="demos/module1-demos/m1-demo2-javascript-http-sender/README.md"><img src="docs/learner-diagrams/m1-demo2.svg" alt="JavaScript HTTP Sender four step learning path" width="100%"/></a>
 
----
+<a href="demos/module1-demos/m1-demo3-python-scanning-authentication/README.md"><img src="docs/learner-diagrams/m1-demo3.svg" alt="Python Rules & Authentication four step learning path" width="100%"/></a>
 
-## 🌿 Branches — per-demo isolation for distributed recording
+### Module 2 — Automate and Gate Findings
 
-The course uses **per-demo `before`/`after` branches** so a team can record each demo
-independently, and so students see a clean starting point and a clean finished state.
+[**Module 2 overview →**](demos/module2-demos/README.md)
 
-- **`main` = generic starter.** Shared app (vulnerable + remediated builds), compose,
-  ZAP entrypoint, shared scripts, and every demo's runbook + tooling — **but none of
-  the learner-authored solution files**. Clone this to begin any demo from scratch.
-- **`m<module>-demo<N>-before` = that demo's starting point.** Its prerequisites are
-  present (e.g. the Module 2 demos keep the Module 1 scripts they reuse), but the
-  demo's own authored work is not done yet — you perform it live.
-- **`m<module>-demo<N>-after` = that demo completed.** The authored artifact is present
-  and the demo is in its finished, verified state.
+<a href="demos/module2-demos/m2-demo1-authenticated-zap-github-actions/README.md"><img src="docs/learner-diagrams/m2-demo1.svg" alt="Authenticated ZAP in GitHub Actions four step learning path" width="100%"/></a>
 
-| Demo branch stem | Clip | Author-live artifact (absent in `before`, present in `after`) |
-|---|---|---|
-| `m1-demo1` | M1 C3 — Injection/XSS/CSRF | *(run-only: scans + disposition)* |
-| `m1-demo2` | M1 C4 — JavaScript HTTP Sender | `module1/m1-c4/zap-scripts/globomantics-marker.js` |
-| `m1-demo3` | M1 C5 — Python rule + auth | `module1/m1-c5/zap-scripts/globomantics-active-rule.py`, `…/globomantics-auth.py` |
-| `m2-demo1` | M2 C3 — Authenticated GitHub Actions | `module2/m2-c3/ci/af-plan.yaml` (keeps M1 scripts as prereqs) |
-| `m2-demo2` | M2 C4 — ZAP API | *(run-only: API queries over a finished scan)* |
-| `m2-demo3` | M2 C5 — Quality gates | `module2/m2-c5/ci/gate-plan.yaml` |
+<a href="demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md"><img src="docs/learner-diagrams/m2-demo2.svg" alt="ZAP API & Scan Evidence four step learning path" width="100%"/></a>
 
-> [!NOTE]
-> `claude/stoic-cannon-nbupjt` is the integration branch holding the full verified
-> solution (all demos + CI/validation fixes). The `…-after` branches are carved from
-> it so each shows only its own demo completed.
+<a href="demos/module2-demos/m2-demo3-security-quality-gates/README.md"><img src="docs/learner-diagrams/m2-demo3.svg" alt="Security Quality Gates four step learning path" width="100%"/></a>
 
----
-
-## 🗂️ Repository layout
+## 📁 Repository Layout
 
 ```text
-env-setup/
-  setup-macos.sh          One-file dependency check + install (verbose log)
-scripts/
-  fmt.py                  Shared colored output formatter (one palette to swap)
-  lib.sh                  Shared shell helpers
-  demo_up.sh / demo_down.sh / preflight_check.sh   Shared stack engine
-app/                      Globomantics FastAPI app (vulnerable + remediated builds)
-zap/                      ZAP container entrypoint (Webswing GUI + add-on install)
-docker-compose.yaml       zap + app + postgres + mongo (bound to 127.0.0.1)
-data/payloads/            Per-lab step manifests
-docs/                     Gap report, preflight report, alert-disposition template
-module1/
-  README.md               Overview of the first set of labs
-  m1-c3-.../
-    README.md             The lab runbook
-    scripts/              demo_up · demo_down · demo_reset · capture · preflight_check
-    logs/                 Validation logs (git-ignored)
-module2/
-  README.md               Overview of the pipeline labs
+.
+├── README.md                           Start here
+├── before-running-demo-run-this/       One-time Mac prerequisites and readiness
+│   ├── setup-macos.sh
+│   └── logs/                           Generated on your machine, not committed
+├── demos/
+│   ├── module1-demos/
+│   │   ├── README.md
+│   │   ├── m1-demo1-targeted-injection-xss-csrf/
+│   │   ├── m1-demo2-javascript-http-sender/
+│   │   └── m1-demo3-python-scanning-authentication/
+│   └── module2-demos/
+│       ├── README.md
+│       ├── m2-demo1-authenticated-zap-github-actions/
+│       ├── m2-demo2-zap-api-scan-evidence/
+│       └── m2-demo3-security-quality-gates/
+├── app/                                Vulnerable training application
+├── zap/                                Scanner container and entrypoint
+├── data/                               Training payloads
+├── scripts/                            Shared stack and preflight helpers
+├── docs/                               Course outline and learner references
+├── .github/workflows/                  Reproducible GitHub Actions examples
+├── docker-compose.yaml                 Local multi-service stack
+└── .env                                Non-production training configuration
 ```
 
----
+### Every Demo Uses the Same Four-Step Pattern
 
-## 🧰 Technology used
+```text
+demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/
+  README.md          Learner instructions and observable results
+  steps/             Four concept-named executable commands
+  scripts/           Setup, reset, preflight, teardown; internal step engine
+  logs/              Local run results (ignored by Git)
+```
+
+Examples of easy-to-narrate commands:
+
+```bash
+./steps/01-run-targeted-injection-scan.sh
+./steps/02-verify-reflected-xss-contexts.sh
+./steps/03-test-cross-session-csrf-token.sh
+./steps/04-reconcile-security-alerts.sh
+```
+
+Each named script runs the same validated step logic as the course's internal runner. The preflight invokes that same source of truth rather than independently implementing test behavior.
+
+## 🧪 Student Workflow and Reference Solutions
+
+- Start in your demo's `*-before` branch. It contains the prepared prerequisites, not that demo's completed authored solution.
+- Execute the four named steps, inspect actual console/API/report evidence, and compare observations with the README.
+- Run `./scripts/preflight_check.sh` to collect a local evidence transcript. **A static example or predicted console line is never a substitute for live ZAP output.**
+- Compare with `*-after` without overwriting work: `git diff m1-demo1-before..m1-demo1-after -- demos/module1-demos/m1-demo1-targeted-injection-xss-csrf`.
+- Some demos are operational (not source-authoring); their proof is the live ZAP finding or report, not a source-file delta.
+
+## 🛠️ Technical Baseline
+
+| Component | Baseline |
+|---|---|
+| Scanner | OWASP ZAP 2.17.0, pinned container digest |
+| Runtime | macOS (Apple Silicon), Homebrew, Colima and Docker Compose |
+| Application | Python / FastAPI, PostgreSQL, MongoDB |
+| Scripting | JavaScript HTTP Sender; Jython scanning and authentication scripts |
+| Automation | ZAP Automation Framework, ZAP API, GitHub Actions on `ubuntu-24.04` |
+| ZAP GUI | http://localhost:8080/zap/ |
+| Local application | http://localhost:8000/ |
+| ZAP API and proxy | http://localhost:8090 |
+
+Some ports and generated metrics are demo-specific and must be checked from the actual run.
+
+---
 
 <div align="center">
 
-| Layer | Tech |
-|:-----:|------|
-| 🔎 **Scanner** | OWASP ZAP 2.17.0 (`ghcr.io/zaproxy/zaproxy`, pinned by digest = tag `20260807-stable`) + `ascanrules` / `ascanrulesBeta` add-ons |
-| 🌐 **App** | FastAPI (Python) — the Globomantics Store |
-| 🗄️ **Data** | PostgreSQL · MongoDB |
-| 🐳 **Runtime** | Docker Compose · Colima |
+<b>Learn the mechanism. Execute the request. Verify the result.</b>
 
-</div>
-
-Each lab uses the subset it needs; more of the stack appears as later labs land.
-
----
-
-<div align="center">
-
-**Built by [Rupesh Tiwari](https://github.com/rupeshtiwari)** · Learn security testing by doing 🛡️
+Maintained by <a href="https://github.com/rupeshtiwari">Rupesh Tiwari</a>
 
 </div>
