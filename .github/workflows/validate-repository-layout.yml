@@ -1,0 +1,26 @@
+name: Student repository structure and syntax
+
+on:
+  push:
+    branches:
+      - main
+      - 'm1-demo*'
+      - 'm2-demo*'
+  workflow_dispatch: {}
+
+jobs:
+  static-validation:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out current branch
+        uses: actions/checkout@v4
+      - name: Validate shell syntax
+        run: find setup runtime demos -type f -name '*.sh' -print0 | xargs -0 -r -n1 bash -n
+      - name: Validate Python syntax
+        run: python3 -m compileall -q runtime/app runtime/scripts
+      - name: Validate Docker Compose wiring
+        run: docker compose config --quiet
+      - name: Validate branch-aware student project structure
+        run: python3 runtime/scripts/check_repository_layout.py
+      - name: Validate learner documentation
+        run: python3 runtime/scripts/repo_quality_check.py

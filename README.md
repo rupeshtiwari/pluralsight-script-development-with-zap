@@ -23,7 +23,7 @@
 <table>
 <tr><td width="72"><b>01</b></td><td><b>Get the project</b><pre>git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
 cd pluralsight-script-development-with-zap</pre></td></tr>
-<tr><td><b>02</b></td><td><b>Check and install prerequisites</b><pre>./before-running-demo-run-this/setup-macos.sh</pre>Checks Homebrew, Colima, Docker CLI/Compose, Python 3, and the pinned ZAP container. Prints a readiness table; saves a log under <code>before-running-demo-run-this/logs/</code>.</td></tr>
+<tr><td><b>02</b></td><td><b>Check and install prerequisites</b><pre>./setup/setup-macos.sh</pre>Checks Homebrew, Colima, Docker CLI/Compose, Python 3, and the pinned ZAP container. Prints a readiness table; saves a log under <code>setup/logs/</code>.</td></tr>
 <tr><td><b>03</b></td><td><b>Choose your demo's starter branch</b><pre>git fetch origin
 git switch m1-demo1-before</pre>Use the matching <code>m1-demoN-before</code> or <code>m2-demoN-before</code> branch from the catalog below.</td></tr>
 <tr><td><b>04</b></td><td><b>Run the selected demo</b><pre>cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
@@ -55,9 +55,15 @@ git switch m1-demo1-before</pre>Use the matching <code>m1-demoN-before</code> or
 
 <a href="demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/README.md"><img src="docs/learner-diagrams/m1-demo1.svg" alt="Targeted Injection, XSS & CSRF four step learning path" width="100%"/></a>
 
+<sub>Generated using ChatGPT</sub>
+
 <a href="demos/module1-demos/m1-demo2-javascript-http-sender/README.md"><img src="docs/learner-diagrams/m1-demo2.svg" alt="JavaScript HTTP Sender four step learning path" width="100%"/></a>
 
+<sub>Generated using ChatGPT</sub>
+
 <a href="demos/module1-demos/m1-demo3-python-scanning-authentication/README.md"><img src="docs/learner-diagrams/m1-demo3.svg" alt="Python Rules & Authentication four step learning path" width="100%"/></a>
+
+<sub>Generated using ChatGPT</sub>
 
 ### Module 2 — Automate and Gate Findings
 
@@ -65,16 +71,45 @@ git switch m1-demo1-before</pre>Use the matching <code>m1-demoN-before</code> or
 
 <a href="demos/module2-demos/m2-demo1-authenticated-zap-github-actions/README.md"><img src="docs/learner-diagrams/m2-demo1.svg" alt="Authenticated ZAP in GitHub Actions four step learning path" width="100%"/></a>
 
+<sub>Generated using ChatGPT</sub>
+
 <a href="demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md"><img src="docs/learner-diagrams/m2-demo2.svg" alt="ZAP API & Scan Evidence four step learning path" width="100%"/></a>
 
+<sub>Generated using ChatGPT</sub>
+
 <a href="demos/module2-demos/m2-demo3-security-quality-gates/README.md"><img src="docs/learner-diagrams/m2-demo3.svg" alt="Security Quality Gates four step learning path" width="100%"/></a>
+
+<sub>Generated using ChatGPT</sub>
+
+
+## 🧩 System Architecture
+
+<div align="center">
+
+<img src="docs/learner-diagrams/course-architecture.svg" width="100%" alt="Mac host, Colima, Docker Compose, ZAP proxy, Globomantics FastAPI app and databases"/>
+
+<sub>Illustrative architecture · Generated using ChatGPT</sub>
+
+</div>
+
+<details><summary><b>Why These Folders Exist</b></summary>
+
+| Folder | Purpose |
+|---|---|
+| `setup/` | Mac prerequisites, environment readiness and installation logs |
+| `demos/` | The six independent, concept-named learner walkthroughs |
+| `runtime/` | Shared training application, ZAP container, fixtures and common scripts |
+| `docs/` | Learner diagrams, approved course outline and reference material |
+
+`docker-compose.yaml`, `.env`, `CLAUDE.md`, `.gitignore` and `README.md` remain at the root because Docker, Git, Claude Code or first-time learners use those standard locations.
+</details>
 
 ## 📁 Repository Layout
 
 ```text
 .
 ├── README.md                           Start here
-├── before-running-demo-run-this/       One-time Mac prerequisites and readiness
+├── setup/       One-time Mac prerequisites and readiness
 │   ├── setup-macos.sh
 │   └── logs/                           Generated on your machine, not committed
 ├── demos/
@@ -88,10 +123,11 @@ git switch m1-demo1-before</pre>Use the matching <code>m1-demoN-before</code> or
 │       ├── m2-demo1-authenticated-zap-github-actions/
 │       ├── m2-demo2-zap-api-scan-evidence/
 │       └── m2-demo3-security-quality-gates/
-├── app/                                Vulnerable training application
-├── zap/                                Scanner container and entrypoint
-├── data/                               Training payloads
-├── scripts/                            Shared stack and preflight helpers
+├── runtime/                            Shared local training runtime
+│   ├── app/                            FastAPI + database fixtures
+│   ├── zap/                            OWASP ZAP container entrypoint
+│   ├── data/                           Training payloads
+│   └── scripts/                        Shared lifecycle and quality checks
 ├── docs/                               Course outline and learner references
 ├── .github/workflows/                  Reproducible GitHub Actions examples
 ├── docker-compose.yaml                 Local multi-service stack

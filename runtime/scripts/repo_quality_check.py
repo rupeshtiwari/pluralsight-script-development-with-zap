@@ -10,15 +10,15 @@ This is maintainers' tooling. It does NOT run ZAP or validate runtime behavior â
 use each demo's scripts/preflight_check.sh on a Docker host for that.
 
 Usage:
-  python3 scripts/repo_quality_check.py            # check the working tree
-  python3 scripts/repo_quality_check.py --branches # also check remote branch names
+  python3 runtime/scripts/repo_quality_check.py            # check the working tree
+  python3 runtime/scripts/repo_quality_check.py --branches # also check remote branch names
 """
 import os
 import re
 import subprocess
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Demo folder <-> branch stem. (Clips 1-2 of each module are presentation, no folder.)
 DEMOS = [
@@ -62,7 +62,7 @@ def read(path):
 
 def check_production_wording():
     for dirpath, _dirs, files in os.walk(ROOT):
-        if "/.git" in dirpath:
+        if "/.git" in dirpath or "/.author-instructions" in dirpath:
             continue
         for name in files:
             if not name.endswith(".md"):
