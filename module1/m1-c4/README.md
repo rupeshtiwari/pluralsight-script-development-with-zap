@@ -13,9 +13,9 @@ Use a JavaScript **HTTP Sender** script to add a request marker and print an ide
 | Local Globomantics app | [http://localhost:8000/](http://localhost:8000/) | Authorized target; the probe runs against its `/greet` endpoint through the ZAP proxy |
 | Script source file | [zap-scripts/globomantics-marker.js](zap-scripts/globomantics-marker.js) | Exact source used by the demo; optionally open in VS Code **only for showing source** |
 
-**Recording focus:** Terminal + ZAP GUI are sufficient. VS Code is optional for displaying source, not for executing it. The GUI runs on port **8080**; the ZAP API / proxy used by the Terminal scripts runs on port **8090**. Both refer to the same ZAP container. An HTTP request generated in Terminal may appear in ZAP's history; a console line must be checked in the **actual Script Console**, not inferred from a Terminal expectation.
+**Where things run:** Terminal + ZAP GUI are all you need; VS Code is optional, for viewing source. The GUI runs on port **8080**; the ZAP API / proxy the Terminal scripts use runs on port **8090** — both are the same ZAP container. An HTTP request generated in the Terminal may appear in ZAP's history; a console line must be checked in the **actual Script Console**, not inferred from a Terminal expectation.
 
-## Setup — before recording
+## Setup
 
 From the **repository root**, install the environment once if not already installed:
 
@@ -30,7 +30,7 @@ cd module1/m1-c4
 ./scripts/demo_up.sh
 ```
 
-**Wait** for the healthy `Up` result. Open [ZAP GUI](http://localhost:8080/zap/) in a full-screen browser view and locate its **Scripts** area; keep a Terminal window ready at `module1/m1-c4`. Make Terminal text large and readable. Each command block below is run **in this directory**, not from the repository root. Use a clean full-screen recording; hide browser tabs and unnecessary UI.
+**Wait** for the healthy `Up` result. Open the [ZAP GUI](http://localhost:8080/zap/) and locate its **Scripts** area; keep a Terminal ready at `module1/m1-c4`. Each command block below is run **in this directory**, not from the repository root.
 
 > **Important choreography:** The committed JavaScript already exists on disk, and Step 1's helper **loads and enables that file via the ZAP API**. Steps 2–4 require that same enabled registration and do not silently reload it. The demonstrator does not need to create a second copy in the GUI or type code live. Show the loaded script in the ZAP Scripts tree/editor. Do not claim the GUI was used to author the file when the API loaded it. The ZAP script engine name is detected at runtime and can differ from the display string shown in examples.
 
@@ -44,19 +44,6 @@ cd module1/m1-c4
 | 4 | EO2a | Script registration type and enabled state | Registered script remains visible under HTTP Sender |
 
 **Source reference (VS Code, Step 1):** `zap-scripts/globomantics-marker.js` — `sendingRequest()` lines 16–20, `responseReceived()` lines 24–25.
-
-## Five-minute timing allocation
-
-Recording budget: **5:00**.
-
-| Segment | Duration | Running total |
-|---------|----------|---------------|
-| Setup and problem | 0:25 | 0:25 |
-| Step 1 — read the source, load, show in ZAP | 1:40 | 2:05 |
-| Step 2 — marker on a real request | 0:55 | 3:00 |
-| Step 3 — live Script Console output | 0:50 | 3:50 |
-| Step 4 — saved registration | 0:50 | 4:40 |
-| Wrap-up | 0:20 | 5:00 |
 
 ## Step 1: Load and inspect the HTTP Sender script (EO2a)
 
@@ -93,7 +80,7 @@ function responseReceived(msg, initiator, helper) {
 
 **Explain to learners:** `sendingRequest` is invoked before ZAP sends a request. The header is attached to messages that pass through this active HTTP Sender script; it does **not** automatically modify requests made directly to the application without ZAP.
 
-**Highlight:** `sendingRequest` → `setHeader` → loaded script name. Remove or move each callout as the focus changes.
+**Highlight:** `sendingRequest` → `setHeader` → loaded script name.
 
 **Proof:** Source file + successful load + script visible in ZAP. Do not stop at the Terminal PASS alone.
 
@@ -119,7 +106,7 @@ X-Globomantics-Marker: GLOBO-DEMO
 
 **Explain to learners:** The header in the outgoing HTTP message demonstrates execution of the script on real proxied traffic. Merely seeing the source file or script registration does not establish that it ran.
 
-**Highlight:** The GET request line, then the exact marker header in the request. Show one focus at a time.
+**Highlight:** The GET request line, then the exact marker header in the request.
 
 **Proof:** Terminal-captured request header; ideally the identical header in ZAP's selected request. If that GUI message cannot be located, the Terminal check remains the recorded proof—do not claim a GUI proof you did not show.
 
@@ -149,7 +136,7 @@ X-Globomantics-Marker: GLOBO-DEMO
 
 **Explain to learners:** The fixed `[globo-marker]` prefix helps an operator distinguish this script's output from other console messages. The URL shows which request was marked.
 
-**Highlight:** The fresh console output line—not the helper's `Console line (seen in ZAP's Script Console)` label.
+**Highlight:** The fresh console output line.
 
 **Proof:** Actual Script Console line in ZAP. Do not assert console-output verification solely from the Terminal PASS.
 
@@ -180,7 +167,7 @@ X-Globomantics-Marker: GLOBO-DEMO
 
 **Explain to learners:** A stable script name, correct script type and enabled state make the script reusable. This step verifies the registration in the running ZAP instance; it does **not** prove persistence after destroying or rebuilding the container.
 
-**Highlight:** Script name, type, and enabled status. Do not introduce an Automation Framework configuration screen here.
+**Highlight:** Script name, type, and enabled status.
 
 **Proof:** The live ZAP registration returned by the helper plus the visible script entry in the GUI.
 
@@ -194,21 +181,17 @@ From `module1/m1-c4`, run:
 
 **Expected result:** `5 checks passed, 0 failed`. A plain-text log is saved under `module1/m1-c4/logs/preflight-*.log`. The five checks include readiness and the four scripted checks. Steps 2 and 3 each use a fresh request ID; stale history entries cannot satisfy their header check. **This does not replace visually confirming the Script Console output in Step 3.**
 
-After recording, stop the demo stack:
+When you're done, stop the demo stack:
 
 ```bash
 ./scripts/demo_down.sh
 ```
 
-## Recording quality gate
+## What to remember
 
-- Preserve the exact order: **source and load → marked request → live console output → saved registration**
-- Display **which application** is active for every beat; Terminal and ZAP GUI are the primary recording surfaces
-- When showing a ZAP pane, include its full URL above or in the README: [http://localhost:8080/zap/](http://localhost:8080/zap/)
-- Use full-screen capture, mobile-readable text, one callout target at a time, and clean cuts instead of typing corrections
-- Do not claim manual GUI authoring when the script is actually loaded by `demo_step.sh 1`
-- Do not claim that the script affects traffic bypassing ZAP or that the script survived a container rebuild
-- Do not claim the Terminal preflight captures the live Script Console line
-- Keep the demonstrated target limited to the local Globomantics training app
+- The order that matters: **source and load → marked request → live console output → saved registration**.
+- The script only adds the header to traffic that passes **through ZAP**; it does not affect requests made directly to the app.
+- The Terminal check does not capture the live Script Console line — confirm that line in the **actual** ZAP Script Console (Step 3).
+- Everything here targets only the local Globomantics training app.
 
-**End state:** The learner has seen the exact JavaScript hook, a modified real request, the emitted console message, and the enabled HTTP Sender registration.
+**End state:** you have seen the exact JavaScript hook, a modified real request, the emitted console message, and the enabled HTTP Sender registration.
