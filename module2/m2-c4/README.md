@@ -17,7 +17,7 @@ the scan ran.
 | ZAP HTTP API | `http://localhost:8090` (local only) | status, alerts, report generation, statistics |
 | Generated JSON report | produced by `reports/action/generate` (template `traditional-json`); the step prints its relevant fields | the archivable record reconciled against the API |
 
-This clip is API/Terminal only — no ZAP window is required. The numeric values
+This demo is API/Terminal only — no ZAP window is required. The numeric values
 (request counts, Insight statistics) are live and vary per run; the rule identity,
 ratings, and report structure are stable.
 
