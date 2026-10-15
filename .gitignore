@@ -6,3 +6,8 @@
 
 # Private production playbooks stay outside public Git history
 /docs/author-instructions/
+
+# Local Mac setup logs and training evidence
+setup/logs/
+**/logs/*.json
+**/logs/*.ansi.log

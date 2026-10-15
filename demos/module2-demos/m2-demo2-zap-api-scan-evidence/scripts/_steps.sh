@@ -13,8 +13,8 @@ HERE_STEPS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEMO_DIR="$(cd "${HERE_STEPS}/.." && pwd)"
 REPO_ROOT="$(cd "${DEMO_DIR}/../../.." && pwd)"
 # shellcheck disable=SC1091
-source "${REPO_ROOT}/scripts/lib.sh"
-FMT="${REPO_ROOT}/scripts/fmt.py"
+source "${REPO_ROOT}/runtime/scripts/lib.sh"
+FMT="${REPO_ROOT}/runtime/scripts/fmt.py"
 fm() { python3 "${FMT}" "$@"; }
 
 APP_INTERNAL="http://app:8000"

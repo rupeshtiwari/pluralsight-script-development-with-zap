@@ -1,5 +1,26 @@
 # Run authenticated ZAP scripts in GitHub Actions
 
+<div align="center">
+
+<img src="../../../docs/learner-diagrams/m2-demo1-architecture.svg" alt="Architecture and evidence flow for m2-demo1" width="100%"/>
+
+<sub>Illustrative architecture, not live scan output · Generated using ChatGPT</sub>
+
+</div>
+
+<details><summary><b>View The Four Executable Steps</b></summary>
+
+```bash
+./steps/01-run-headless-automation-plan.sh
+./steps/02-inspect-authenticated-scan-context.sh
+./steps/03-verify-reused-security-scripts.sh
+./steps/04-confirm-authenticated-custom-alert.sh
+```
+
+Run these commands in order from this demo's folder, then execute `./scripts/preflight_check.sh`. Inspect actual ZAP GUI or GitHub Actions evidence where indicated.
+</details>
+
+
 Run the ZAP scripts you built in Module 1 automatically and headless inside a
 GitHub Actions pipeline — logged in as a real user, driven entirely by one ZAP
 Automation Framework plan. You read the plan in VS Code to understand how it binds
