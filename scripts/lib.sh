@@ -35,7 +35,7 @@ ensure_docker() {
         done
         die "Colima started but Docker did not become reachable. Try 'colima restart'."
     fi
-    die "Docker engine is not running and Colima is not installed. Run ./env-setup/setup-macos.sh first."
+    die "Docker engine is not running and Colima is not installed. Run ./before-running-demo-run-this/setup-macos.sh first."
 }
 
 # ANSI colours (fall back to empty if not a tty).
