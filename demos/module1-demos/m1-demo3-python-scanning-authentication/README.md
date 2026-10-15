@@ -1,5 +1,26 @@
 # Write Python scan and authentication scripts in ZAP
 
+<div align="center">
+
+<img src="../../../docs/learner-diagrams/m1-demo3-architecture.svg" alt="Architecture and evidence flow for m1-demo3" width="100%"/>
+
+<sub>Illustrative architecture, not live scan output · Generated using ChatGPT</sub>
+
+</div>
+
+<details><summary><b>View The Four Executable Steps</b></summary>
+
+```bash
+./steps/01-load-python-active-scan-rule.sh
+./steps/02-register-scripted-authentication.sh
+./steps/03-confirm-authenticated-profile-access.sh
+./steps/04-confirm-custom-scan-alert.sh
+```
+
+Run these commands in order from this demo's folder, then execute `./scripts/preflight_check.sh`. Inspect actual ZAP GUI or GitHub Actions evidence where indicated.
+</details>
+
+
 Extend ZAP with two Jython scripts — a custom active-scan rule and an
 authentication script. You read each implementation in VS Code to understand the
 mechanism, author both in ZAP's Script Console, then run the rule against a
@@ -12,7 +33,7 @@ login-only Globomantics page and confirm it raises your alert.
 
 | Application | Where | Used for |
 |-------------|-------|----------|
-| VS Code | `demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts/globomantics-active-rule.py`, `…/globomantics-auth.py`, `app/main.py` | reading the scripts and the app sink they target |
+| VS Code | `demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts/globomantics-active-rule.py`, `…/globomantics-auth.py`, `runtime/app/main.py` | reading the scripts and the app sink they target |
 | ZAP Script Console | **Scripts** tab (Active Rules, Authentication) | authoring both scripts |
 | ZAP GUI | **Sites** (Context dialog), **Alerts** tab | configuring script-based authentication, viewing the alert |
 | macOS Terminal | working directory `demos/module1-demos/m1-demo3-python-scanning-authentication` | running each `./scripts/demo_step.sh N` |
@@ -68,7 +89,7 @@ house-specific reflection no built-in rule targets exactly.
     `getattr(alert, "raise")()` (because `raise` is a reserved word in Python).
   - **`scan` / `scanNode` (lines 97–103)** — ZAP's two active-scan entry points; both
     call `_check`, and ZAP de-duplicates identical alerts.
-- **VS Code — app sink:** open `app/main.py` → `profile()` (lines 375–377). In the
+- **VS Code — app sink:** open `runtime/app/main.py` → `profile()` (lines 375–377). In the
   vulnerable build the `note` value is assigned straight into the page
   (`note_ctx = note`) with no encoding. That unencoded reflection is exactly what the
   rule detects.

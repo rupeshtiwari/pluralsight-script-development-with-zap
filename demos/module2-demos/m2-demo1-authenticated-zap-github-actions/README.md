@@ -1,5 +1,8 @@
 # Run authenticated ZAP scripts in GitHub Actions
 
+<div align="center"><img src="../../../docs/learner-diagrams/m2-demo1-architecture.svg" width="100%" alt="Headless ZAP authenticated CI scanning architecture"/><sub>Generated using ChatGPT · diagram is illustrative</sub></div>
+
+
 <div align="center">
 
 ![Security](https://img.shields.io/badge/Globomantics-ZAP-130F25?style=for-the-badge) ![Demo](https://img.shields.io/badge/m2-demo1-FF1675?style=for-the-badge) ![State](https://img.shields.io/badge/before-00A3FF?style=for-the-badge)
@@ -15,7 +18,7 @@
 git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
 cd pluralsight-script-development-with-zap
 git switch m2-demo1-before
-./before-running-demo-run-this/setup-macos.sh
+./setup/setup-macos.sh
 cd demos/module2-demos/m2-demo1-authenticated-zap-github-actions
 ./scripts/demo_up.sh
 ```
@@ -53,7 +56,7 @@ Use a separate checkout for this exercise; no previous demo or another student's
 git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
 cd pluralsight-script-development-with-zap
 git switch m2-demo1-before
-./before-running-demo-run-this/setup-macos.sh
+./setup/setup-macos.sh
 cd demos/module2-demos/m2-demo1-authenticated-zap-github-actions
 ./scripts/demo_up.sh
 ```
