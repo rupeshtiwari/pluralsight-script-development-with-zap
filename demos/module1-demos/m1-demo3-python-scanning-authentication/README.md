@@ -1,5 +1,8 @@
 # Write Python scan and authentication scripts in ZAP
 
+<div align="center"><img src="../../../docs/learner-diagrams/m1-demo3-architecture.svg" width="100%" alt="Authenticated Python scanning diagram"/><sub>Generated using ChatGPT · diagram is illustrative</sub></div>
+
+
 <div align="center">
 
 ![ZAP](https://img.shields.io/badge/Globomantics-ZAP-130F25?style=for-the-badge) ![Demo](https://img.shields.io/badge/m1%20demo3-before-FF1675?style=for-the-badge)
@@ -15,7 +18,7 @@
 git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
 cd pluralsight-script-development-with-zap
 git switch m1-demo3-before
-./before-running-demo-run-this/setup-macos.sh
+./setup/setup-macos.sh
 cd demos/module1-demos/m1-demo3-python-scanning-authentication
 ./scripts/demo_reset.sh
 ```
@@ -53,7 +56,7 @@ Use a separate checkout for this exercise; no previous demo or another student's
 git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
 cd pluralsight-script-development-with-zap
 git switch m1-demo3-before
-./before-running-demo-run-this/setup-macos.sh
+./setup/setup-macos.sh
 cd demos/module1-demos/m1-demo3-python-scanning-authentication
 ./scripts/demo_reset.sh
 ```
@@ -83,7 +86,7 @@ login-only Globomantics page and confirm it raises your alert.
 
 | Application | Where | Used for |
 |-------------|-------|----------|
-| VS Code | `demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts/globomantics-active-rule.py`, `…/globomantics-auth.py`, `app/main.py` | reading the scripts and the app sink they target |
+| VS Code | `demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts/globomantics-active-rule.py`, `…/globomantics-auth.py`, `runtime/app/main.py` | reading the scripts and the app sink they target |
 | ZAP Script Console | **Scripts** tab (Active Rules, Authentication) | authoring both scripts |
 | ZAP GUI | **Sites** (Context dialog), **Alerts** tab | configuring script-based authentication, viewing the alert |
 | macOS Terminal | working directory `demos/module1-demos/m1-demo3-python-scanning-authentication` | running each `./scripts/demo_step.sh N` |
@@ -139,7 +142,7 @@ house-specific reflection no built-in rule targets exactly.
     `getattr(alert, "raise")()` (because `raise` is a reserved word in Python).
   - **`scan` / `scanNode` (lines 97–103)** — ZAP's two active-scan entry points; both
     call `_check`, and ZAP de-duplicates identical alerts.
-- **VS Code — app sink:** open `app/main.py` → `profile()` (lines 375–377). In the
+- **VS Code — app sink:** open `runtime/app/main.py` → `profile()` (lines 375–377). In the
   vulnerable build the `note` value is assigned straight into the page
   (`note_ctx = note`) with no encoding. That unencoded reflection is exactly what the
   rule detects.
