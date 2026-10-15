@@ -1,12 +1,76 @@
-# Query the ZAP API and inspect scan evidence
+# Query ZAP Results Through Its API and Reports
 
 <div align="center">
 
-<img src="../../../docs/learner-diagrams/m2-demo2-architecture.svg" alt="Architecture and evidence flow for m2-demo2" width="100%"/>
+![ZAP](https://img.shields.io/badge/OWASP_ZAP-API_Evidence-0284c7?style=for-the-badge)
+![Lab](https://img.shields.io/badge/Practice-m2-demo2-d946ef?style=for-the-badge)
 
-<sub>Illustrative architecture, not live scan output · Generated using ChatGPT</sub>
+<img src="../../../docs/learner-diagrams/m2-demo2-architecture.svg" width="100%" alt="Query ZAP Results Through Its API and Reports architecture"/>
+
+<sub>Illustrative architecture · Generated using ChatGPT · Verify the actual API, report or CI results</sub>
 
 </div>
+
+## What Problem Are You Solving?
+
+A team cannot automate release checks by reading a GUI manually. Maya needs machine-readable evidence that ZAP finished scanning, that the exact script-generated alert has the expected identity and rating, and that the official JSON report and scan-effectiveness Insights agree.
+
+**Your outcome:** Understand how the system behaves, run four meaningful commands, inspect the real output and explain the engineering decision. No external course outline is required.
+
+## Learning Objective Covered
+
+<table><thead><tr><th>Objective</th><th>What You Will Learn</th></tr></thead><tbody>
+<tr><td><code>EO3b</code></td><td>Implement ZAP API for programmatic security testing</td></tr>
+</tbody></table>
+
+## Your Four-Step Learning Path
+
+```mermaid
+flowchart LR
+  N0["Completed scan"]
+  N1["HTTP API status + alert"]
+  N2["Official JSON report"]
+  N3["Real Insights"]
+  N0 --> N1 --> N2 --> N3
+```
+
+<table>
+<thead><tr><th>Step</th><th>Exact Command</th><th>What You Do</th><th>What To Verify</th><th>Why It Matters</th></tr></thead>
+<tbody><tr><td><b>1</b></td><td><code>./steps/01-check-zap-scan-status.sh</code></td><td>Query the ZAP engine and completed scan</td><td>Version, scan status/progress, actual request count</td><td>Wait for finished results before processing findings</td></tr>
+<tr><td><b>2</b></td><td><code>./steps/02-query-custom-rule-alert.sh</code></td><td>Query the specific script-generated finding</td><td>Named custom rule, plugin identity, risk and confidence</td><td>A gate must identify which check raised the alert</td></tr>
+<tr><td><b>3</b></td><td><code>./steps/03-reconcile-json-report.sh</code></td><td>Generate the official traditional-json report</td><td>Same custom alert and riskdesc as API output</td><td>Archived evidence must reconcile with the live API</td></tr>
+<tr><td><b>4</b></td><td><code>./steps/04-read-zap-insights.sh</code></td><td>Inspect the report's scan-quality Insights</td><td>Actual nonempty insights[] entries and meanings</td><td>Scanner health and coverage differ from vulnerability severity</td></tr></tbody></table>
+
+## Start This Exercise
+
+From the repository root:
+
+```bash
+git fetch origin
+git switch m2-demo2-before
+./setup/setup-macos.sh
+cd demos/module2-demos/m2-demo2-zap-api-scan-evidence
+./scripts/demo_up.sh
+```
+
+If the one-time Mac setup has already completed, you can skip that setup command. Execute Steps 1–4 above from this demo directory. Then run:
+
+```bash
+./scripts/preflight_check.sh
+./scripts/demo_down.sh
+```
+
+The preflight saves a timestamped log in `logs/`. For hosted evidence, use the GitHub Actions link in the detailed steps and inspect the actual workflow's **run SHA**, status, job log and report. Never assume a successful report from an earlier session satisfies this exercise.
+
+**Compare with the completed version:** `git diff m2-demo2-before..m2-demo2-after -- demos/module2-demos/m2-demo2-zap-api-scan-evidence`. This comparison does not overwrite your work. Both the starter and completed branches include their required prerequisites; authored solution files or plans are added by the exercise when applicable.
+
+**Technical evidence note:** Live request counts can vary. Missing or empty report Insights are not replaced by unrelated ZAP statistics. This demo provisions its own required scan state, so another demo does not need to run first.
+
+All scanning stays within the supplied, authorized Globomantics training environment.
+
+---
+
+## Detailed Instructions And Expected Evidence
 
 <details><summary><b>View The Four Executable Steps</b></summary>
 
