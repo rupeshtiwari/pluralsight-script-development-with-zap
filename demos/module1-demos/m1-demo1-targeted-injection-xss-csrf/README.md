@@ -1,77 +1,97 @@
-# Validate injection, XSS, and CSRF with ZAP
+# Validate Injection, XSS and CSRF
 
-<div align="center"><img src="../../../docs/learner-diagrams/m1-demo1-architecture.svg" width="100%" alt="Illustrative security architecture"/><sub>Generated using ChatGPT · architecture, not actual scan output</sub></div>
+<details><summary><b>Branch: m1-demo1-after — Completed Reference</b></summary>
+
+This branch preserves the finished exercise reference. For a fresh learning run, check out `m1-demo1-before` first. No previously run demo is required.
+
+</details>
 
 
 <div align="center">
 
-![ZAP](https://img.shields.io/badge/Globomantics-ZAP-130F25?style=for-the-badge) ![Demo](https://img.shields.io/badge/Module%201-Demo%201-FF1675?style=for-the-badge) ![State](https://img.shields.io/badge/State-after-00A3FF?style=for-the-badge)
+![ZAP](https://img.shields.io/badge/OWASP_ZAP-Targeted_Scanning-0284c7?style=for-the-badge)
+![Lab](https://img.shields.io/badge/Practice-m1-demo1-d946ef?style=for-the-badge)
 
-<img alt="Illustrative targeted ZAP workflow" width="100%" src="https://raw.githubusercontent.com/rupeshtiwari/pluralsight-script-development-with-zap/main/docs/learner-diagrams/m1-demo1.svg"/>
+<img src="../../../docs/learner-diagrams/m1-demo1-architecture.svg" width="100%" alt="Validate Injection, XSS and CSRF: application, tool and evidence architecture"/>
 
-<sub>Illustrative workflow — run the commands to obtain live evidence.</sub>
+<sub>Illustrative architecture · Generated using ChatGPT · Verify real results in your own lab</sub>
+
 </div>
 
-## Start Independently
+## What Problem Are You Solving?
+
+Maya Chen receives scanner findings about the Globomantics search, account and admin endpoints. She must show which inputs actually change SQL, MongoDB, or shell behavior, whether reflected HTML can be exploited in its output context, and whether a CSRF token belongs to the right session. A long alert list is not an engineering decision.
+
+**Your outcome:** Complete four practical checks and be able to explain both the actual evidence and the engineering decision it supports. This page is self-contained; you do not need access to a separate course outline.
+
+## Learning Objectives Covered
+
+<table><thead><tr><th>Objective</th><th>What You Will Learn</th></tr></thead><tbody>
+<tr><td><code>EO1a</code></td><td>Configure specialized scanners for injection vulnerabilities (SQL, NoSQL, Command)</td></tr>
+<tr><td><code>EO1b</code></td><td>Implement Cross-Site Scripting (XSS) validation with context-specific payloads</td></tr>
+<tr><td><code>EO1c</code></td><td>Execute CSRF token bypass techniques for testing anti-CSRF protections</td></tr>
+</tbody></table>
+
+## Your Four-Step Learning Path
+
+```mermaid
+flowchart LR
+  N0["Focused injection scan"]
+  N1["XSS context evidence"]
+  N2["Session-token replay"]
+  N3["Confirmed disposition"]
+  N0 --> N1 --> N2 --> N3
+```
+
+<table>
+<thead><tr><th>Step</th><th>Exact Command</th><th>What You Do</th><th>What To Verify</th><th>Why It Matters</th></tr></thead>
+<tbody><tr><td><b>1</b></td><td><code>./steps/01-run-targeted-injection-scan.sh</code></td><td>Target SQL, MongoDB and command-injection parameters</td><td>Rule/parameter-specific ZAP alerts and scan policy</td><td>Focused scanning separates three different unsafe sinks</td></tr>
+<tr><td><b>2</b></td><td><code>./steps/02-verify-reflected-xss-contexts.sh</code></td><td>Test HTML body, attribute and JavaScript contexts</td><td>Injected request, reflected response and ZAP finding</td><td>Output context determines payload and required encoding</td></tr>
+<tr><td><b>3</b></td><td><code>./steps/03-test-cross-session-csrf-token.sh</code></td><td>Compare valid, missing and cross-session token behavior</td><td>HTTP 200 / 403 / 200 and actual account email mutation</td><td>Token presence is insufficient without session ownership</td></tr>
+<tr><td><b>4</b></td><td><code>./steps/04-reconcile-security-alerts.sh</code></td><td>Compare alerts against live application evidence</td><td>SQL error, NoSQL count, injected-command proof and XSS evidence</td><td>A finding needs behavior to support its disposition</td></tr></tbody></table>
+
+## Start This Exercise
+
+From the repository root:
 
 ```bash
-git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
-cd pluralsight-script-development-with-zap
-git switch m1-demo1-after
+git fetch origin
+git switch m1-demo1-before
 ./setup/setup-macos.sh
 cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
 ./scripts/demo_reset.sh
 ```
 
-This after branch contains the completed reference state. No earlier demo is required. Run the four numbered steps below, then `./scripts/preflight_check.sh` to create a log under `logs/`. Stop with `./scripts/demo_down.sh`.
-
-**Compare without modifying your work:** `git diff m1-demo1-before..m1-demo1-after -- demos/module1-demos/m1-demo1-targeted-injection-xss-csrf`.
-
-> [!CAUTION]
-> Scan only the supplied Globomantics training application under authorization.
-
----
-
-
-<div align="center">
-
-![Demo](https://img.shields.io/badge/Globomantics-ZAP%20Security-130F25?style=for-the-badge) ![Module](https://img.shields.io/badge/M1-Demo%201-FF1675?style=for-the-badge) ![Practice](https://img.shields.io/badge/Practice-Completed-00A3FF?style=for-the-badge)
-
-### Injection, XSS, and CSRF
-
-<img src="https://raw.githubusercontent.com/rupeshtiwari/pluralsight-script-development-with-zap/main/docs/learner-diagrams/m1-demo1.svg" width="100%" alt="Illustrative four-step workflow for Injection, XSS, and CSRF; not actual ZAP scan evidence"/>
-
-<sub>Learning path illustration; real findings and API values come from your local run.</sub>
-
-</div>
-
-> [!IMPORTANT]
-> **Authorized practice only:** Run scans against the Globomantics training application supplied with this repository. Do not target unrelated systems.
-
-## Start This Demo Independently
-
-Use a separate checkout for this exercise; no previous demo or another student's runtime is required.
+If you already prepared your Mac, the one-time setup script can be skipped. Run **Steps 1–4 above** from this demo directory, in order. Then validate and stop:
 
 ```bash
-git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
-cd pluralsight-script-development-with-zap
-git switch m1-demo1-after
-./setup/setup-macos.sh
-cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
-./scripts/demo_reset.sh
+./scripts/preflight_check.sh
+./scripts/demo_down.sh
 ```
 
-**Environment:** VS Code, Terminal, ZAP. Use the numbered commands below in the displayed sequence. Wait for each actual result before advancing. Scan duration and request counts may vary.
+The preflight writes a timestamped log to `logs/`; GUI-only evidence must also be verified in the real ZAP interface at <http://localhost:8080/zap/>. The app runs at <http://localhost:8000/> and ZAP's local API/proxy at <http://localhost:8090/>.
 
-**Completed reference:** `m1-demo1-after` contains the final operational exercise state. Use it to compare your results; do not assume a previous session's alerts are present.
+**Compare with the completed version:** `git diff m1-demo1-before..m1-demo1-after -- demos/module1-demos/m1-demo1-targeted-injection-xss-csrf`. This command does not overwrite your files. The `before` branch starts the exercise; the `after` branch provides its completed reference, where applicable.
 
-**Check your result:** `./scripts/preflight_check.sh` saves a timestamped log under `logs/`. Some GUI observations, particularly Script Console output, must also be checked in the live ZAP GUI.
+**Technical evidence note:** A normal successful ping alone does not prove command injection. Confirm the injected host parameter and relevant alert request/response before describing it as exploitable.
 
-**Clean up:** `./scripts/demo_down.sh`
-
-**Compare safely:** First commit or copy your own work, then compare this branch with `m1-demo1-before` using `git diff m1-demo1-before..m1-demo1-after -- demos/module1-demos/m1-demo1-targeted-injection-xss-csrf`. This does not change your working tree.
+All testing must stay within the authorized Globomantics training application.
 
 ---
+
+## Detailed Instructions And Expected Evidence
+
+<details><summary><b>View The Four Executable Steps</b></summary>
+
+```bash
+./steps/01-run-targeted-injection-scan.sh
+./steps/02-verify-reflected-xss-contexts.sh
+./steps/03-test-cross-session-csrf-token.sh
+./steps/04-reconcile-security-alerts.sh
+```
+
+Run these commands in order from this demo's folder, then execute `./scripts/preflight_check.sh`. Inspect actual ZAP GUI or GitHub Actions evidence where indicated.
+</details>
 
 
 Turn a broad ZAP scan into four validated findings against the deliberately
@@ -267,7 +287,7 @@ Proof artifact: CSRF token replay result.
 reconciled with observed application behavior before it is recorded as confirmed.
 
 **Open the record template.** The disposition template is
-[`docs/alert-disposition-template.md`](../../docs/alert-disposition-template.md) —
+[`docs/alert-disposition-template.md`](../../../docs/alert-disposition-template.md) —
 one row per finding, pairing the alert with the behavior that confirms it.
 
 **Run the reconciliation.**
