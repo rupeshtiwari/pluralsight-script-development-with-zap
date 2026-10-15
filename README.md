@@ -142,7 +142,7 @@ module2/
 
 | Layer | Tech |
 |:-----:|------|
-| 🔎 **Scanner** | OWASP ZAP 2.17.0 (`ghcr.io/zaproxy/zaproxy:stable`, pinned by digest) + `ascanrules` / `ascanrulesBeta` add-ons |
+| 🔎 **Scanner** | OWASP ZAP 2.17.0 (`ghcr.io/zaproxy/zaproxy`, pinned by digest = tag `20260807-stable`) + `ascanrules` / `ascanrulesBeta` add-ons |
 | 🌐 **App** | FastAPI (Python) — the Globomantics Store |
 | 🗄️ **Data** | PostgreSQL · MongoDB |
 | 🐳 **Runtime** | Docker Compose · Colima |

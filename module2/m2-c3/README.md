@@ -36,9 +36,9 @@ of *Globomantics authenticated ZAP scan*.
 | Step | LO | Config / mechanism (`ci/af-plan.yaml`) | Command | Observed result | Proof artifact |
 |------|----|----------------------------------------|---------|-----------------|----------------|
 | 1 | EO3a | whole plan, run via `zap.sh -cmd -autorun` | `demo_step.sh 1` | plan runs headless to completion, no errors | GitHub Actions job log |
-| 2 | EO3a | `authentication` 19–31 · `users` 34–37 · `includePaths` 16–18 | `demo_step.sh 2` | plan binds context `Globomantics`, scripted auth, user `alice`, scope `http://app:8000` | Authenticated context configuration |
-| 3 | EO3a | script `add`/`enable` 50–72 · `requestor` 77–82 · `activeScan` + rule `50000` 88–99 | `demo_step.sh 3` | Module 1 scripts load and run against `/account/profile` while logged in | Authenticated script job result |
-| 4 | EO3a | `report` 103–108 | `demo_step.sh 4` | custom alert `Globomantics unsafe reflection (custom rule)` on `/account/profile`, param `note` | Authenticated custom alert record |
+| 2 | EO3a | `authentication` 29–40 · `users` 44–47 · `includePaths` 26–28 | `demo_step.sh 2` | plan binds context `Globomantics`, scripted auth, user `alice`, scope `http://app:8000` | Authenticated context configuration |
+| 3 | EO3a | `passiveScan-config` 60–62 · script `add`/`enable` 67–91 · `spider` 93–99 · `requestor` 109–119 · `activeScan` + rule `50000` 121–134 | `demo_step.sh 3` | Module 1 scripts load and run against `/account/profile` while logged in | Authenticated script job result |
+| 4 | EO3a | `report` 141–146 | `demo_step.sh 4` | custom alert `Globomantics unsafe reflection (custom rule)` on `/account/profile`, param `note` | Authenticated custom alert record |
 
 ## Five-minute timing allocation
 
@@ -68,8 +68,11 @@ does.
 ./scripts/demo_step.sh 1
 ```
 
-**Inspect the actual evidence.** ZAP runs `ghcr.io/zaproxy/zaproxy:stable` via
-`zap.sh -cmd -autorun …` and the plan runs headless to completion with no errors.
+**Inspect the actual evidence.** ZAP runs `ghcr.io/zaproxy/zaproxy` (pinned by
+digest = tag `20260807-stable`, ZAP 2.17.0) via `zap.sh -cmd -autorun …` and the
+plan runs headless to completion with no errors, following the canonical job order
+`passiveScan-config → script → spider → passiveScan-wait → activeScan →
+passiveScan-wait → report` (the gate jobs `alertFilter`/`exitStatus` are M2 C5).
 In CI, the same beat is the **authenticated-scan** job's **Run ZAP headless with the
 Automation Framework plan** step on `ubuntu-24.04`.
 
@@ -88,13 +91,13 @@ Proof artifact: GitHub Actions job log.
 **Inspect the plan in VS Code.** Open `module2/m2-c3/ci/af-plan.yaml` →
 `env.contexts`:
 
-- **`authentication` (lines 19–31)** — `method: script` loads
+- **`authentication` (lines 29–40)** — `method: script` loads
   `globomantics-auth.py` by path, with `scriptEngine: "python : jython"` and the
   `Login URL` it needs. Verification is response-based: `loggedInRegex: "Signed in
   as"` and `loggedOutRegex: "Please log in first"` tell ZAP when the session is valid.
-- **`users` (lines 34–37)** — the user the scan runs as: `alice`, with the
+- **`users` (lines 44–47)** — the user the scan runs as: `alice`, with the
   `username` credential the auth script consumes.
-- **`includePaths` (lines 16–18)** — the scope: the profile and greet paths on
+- **`includePaths` (lines 26–28)** — the scope: the profile and greet paths on
   `http://app:8000`.
 
 The mechanism: authentication and scope are declared as config, so the same login
@@ -122,14 +125,22 @@ Proof artifact: Authenticated context configuration.
 **The problem.** The plan has to load the exact scripts from Module 1 and run them
 as `alice` against the login-only page — not re-implement them.
 
-**Inspect the jobs in VS Code.** In the same file, the `jobs` list:
+**Inspect the jobs in VS Code.** In the same file, the `jobs` list follows the
+canonical Automation Framework order (non-gate portion):
 
-- **script `add` / `enable` (lines 50–72)** — loads `globomantics-active-rule` (Py)
+- **`passiveScan-config` (lines 60–62)** — enables scope-limited passive scanning
+  before any traffic.
+- **script `add` / `enable` (lines 67–91)** — loads `globomantics-active-rule` (Py)
   and `globomantics-marker` (JS) by path; the auth script is loaded by the context.
-- **`requestor` (lines 77–82)** — seeds `/account/profile?note=seed` into the sites
-  tree *as alice*, so the active scan has an authenticated node to attack.
-- **`activeScan` + rule `50000` (lines 88–99)** — runs the scan as the context user;
-  the Script Active Scan Rules plugin (`50000`) is what runs the custom Python rule.
+- **`spider` (lines 93–99)** — crawls the scope *as alice* so the sites tree is
+  populated from inside the session.
+- **`passiveScan-wait` (lines 101–103)** — drains the passive-scan queue.
+- **`requestor` (lines 109–119)** — seeds `/account/profile?note=seed` into the sites
+  tree *as alice*, guaranteeing the authenticated node (with the `note` param) the
+  active scan and custom rule attack.
+- **`activeScan` + rule `50000` (lines 121–134)** — runs the scan as the context user;
+  the Script Active Scan Rules plugin (`50000`, inline policy at LOW threshold) is what
+  runs the custom Python rule. A second `passiveScan-wait` then `report` follow.
 
 **Execute.**
 

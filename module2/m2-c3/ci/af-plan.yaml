@@ -4,21 +4,19 @@
 # target scope, the scripted login, the user to scan as, and the custom scripts
 # to run — everything a headless, unattended CI run needs, with no GUI.
 #
-# It is executed headless by ghcr.io/zaproxy/zaproxy:stable in GitHub Actions
-# (and locally by the author preflight) with:
+# It is executed headless by ghcr.io/zaproxy/zaproxy (pinned digest = tag
+# 20260807-stable, ZAP 2.17.0) in GitHub Actions (and locally by the author
+# preflight) with:
 #   zap.sh -cmd -autorun /zap/wrk/af-plan.yaml
 #
-# Scope note (M2 Clip 1 vs M2 Clip 3): the full canonical Automation Framework
-# job sequence — passiveScan-config -> alertFilter -> script -> spider ->
-# passiveScan-wait -> activeScan-policy -> activeScan -> passiveScan-wait ->
-# report -> exitStatus — is TAUGHT in the M2 Clip 1 architecture presentation.
-# THIS file is the focused M2 Clip 3 DEMO plan (EO3a: authenticated, headless
-# script reuse), whose four proof artifacts are the job log, the authenticated
-# context config, the script-job result, and the custom-alert record. It
-# deliberately omits the gate job (exitStatus) and alertFilter, which belong to
-# the M2 Clip 5 gate plan (ci/gate-plan.yaml, EO3c): adding exitStatus here
-# would fail this authenticated-scan run by design and contradict Clip 3's
-# "job log = success" artifact.
+# Job sequence (M2 Clip 1 architecture, non-gate portion): this plan follows the
+# canonical Automation Framework order taught in the M2 Clip 1 presentation —
+#   passiveScan-config -> script -> spider -> passiveScan-wait -> activeScan
+#   -> passiveScan-wait -> report
+# It deliberately omits the GATE jobs (alertFilter + exitStatus), which belong to
+# the M2 Clip 5 gate plan (ci/gate-plan.yaml, EO3c): adding exitStatus here would
+# fail this authenticated-scan run by design and contradict M2 Clip 3's
+# "job log = success" / "authenticated custom alert record" proof artifacts (EO3a).
 ---
 env:
   contexts:
@@ -57,8 +55,15 @@ jobs:
   # runs (by the CI step, and by the compose entrypoint for the local preflight),
   # so no addOns job is needed here.
 
-  # 1) Load the custom checks built in Module 1 (the auth script is loaded by
-  #    the context above). 'source' is the on-disk path key for this ZAP build.
+  # 1) passiveScan-config — turn on passive scanning (scope-limited) before any
+  #    traffic, so passive rules observe every request the plan generates.
+  - type: passiveScan-config
+    parameters:
+      scanOnlyInScope: true
+
+  # 2) script — load the custom checks built in Module 1 (the auth script is
+  #    loaded by the context above). 'source' is the on-disk path key for this
+  #    ZAP build.
   - type: script
     parameters:
       action: "add"
@@ -83,9 +88,24 @@ jobs:
       action: "enable"
       name: "globomantics-marker"
 
-  # 2) Seed the login-only page INTO the sites tree AS alice, so the active scan
-  #    has an authenticated node (carrying the note parameter) to attack. The
-  #    scripted auth logs in first, so this reaches the page behind the session.
+  # 3) spider — crawl the authenticated scope AS alice (the scripted login runs
+  #    first), so the sites tree is populated from inside the session.
+  - type: spider
+    parameters:
+      context: "Globomantics"
+      user: "alice"
+      url: "http://app:8000/account/profile?note=seed"
+      maxDuration: 1
+
+  # 4) passiveScan-wait — let the passive scan queue drain before the active scan.
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 2
+
+  # 5) requestor — seed the exact login-only node (carrying the note parameter)
+  #    INTO the sites tree AS alice, so the active scan has an authenticated node
+  #    to attack even if the spider did not reach this precise URL. This is the
+  #    node the custom Python rule inspects.
   - type: requestor
     parameters:
       user: "alice"
@@ -93,10 +113,11 @@ jobs:
       - url: "http://app:8000/account/profile?note=seed"
         method: "GET"
 
-  # 3) Run the active scan AS THE AUTHENTICATED USER against the context scope.
-  #    The custom Python rule runs here; the JS marker stamps every request.
-  #    The policy's default threshold enables every active rule, including the
-  #    Script Active Scan Rules plugin (50000) that runs our custom Python rule.
+  # 6) activeScan — run the active scan AS THE AUTHENTICATED USER against the
+  #    context scope. The inline policy enables the Script Active Scan Rules
+  #    plugin (50000) at LOW threshold, which routes the scan into our custom
+  #    Python rule; the JS marker stamps every request. (This is the
+  #    activeScan-policy + activeScan step of the canonical sequence, inline.)
   - type: activeScan
     parameters:
       context: "Globomantics"
@@ -111,7 +132,12 @@ jobs:
           strength: "medium"
           threshold: "low"
 
-  # 4) Write the evidence the job and the author preflight read back.
+  # 7) passiveScan-wait — catch passive findings raised by active-scan traffic.
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 2
+
+  # 8) report — write the evidence the job and the author preflight read back.
   - type: report
     parameters:
       template: "traditional-json"
