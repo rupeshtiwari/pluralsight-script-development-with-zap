@@ -1,166 +1,75 @@
-# M1-DEMO2 · JavaScript HTTP Sender — Author Production Playbook
+# Module 1 · Demo 2 — JavaScript HTTP Sender · Production guide
 
 <div align="center">
 
-![Recorder](https://img.shields.io/badge/Recorder-Exact_Screen-0284c7?style=for-the-badge)
-![Narrator](https://img.shields.io/badge/Narrator-Verified_Script-9333ea?style=for-the-badge)
-![Editor](https://img.shields.io/badge/Editor-Timed_Highlights-16a34a?style=for-the-badge)
+![Recorder](https://img.shields.io/badge/RECORDER-Show_Real_Evidence-00A3FF?style=for-the-badge)
+![Editor](https://img.shields.io/badge/EDITOR-One_Highlight-02E088?style=for-the-badge)
+![Narrator](https://img.shields.io/badge/NARRATOR-ElevenLabs_Words-770EF7?style=for-the-badge)
 
-<img src="../learner-diagrams/m1-demo2-architecture.svg" alt="Illustrative JavaScript HTTP Sender workflow" width="100%"/>
-
-<sub>Generated using ChatGPT · Temporary PUBLIC author guidance</sub>
+<img src="../learner-diagrams/m1-demo2-architecture.svg" width="100%" alt="Training evidence flow for m1-demo2"/>
+<sub>Illustrative architecture · Generated using ChatGPT · Temporary PUBLIC production material</sub>
 
 </div>
 
-[← **All Six Production Playbooks**](README.md) · [**Student Starter README ↗**](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo2-before/demos/module1-demos/m1-demo2-javascript-http-sender/README.md) · [**Completed README ↗**](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo2-after/demos/module1-demos/m1-demo2-javascript-http-sender/README.md)
+[← Production dashboard](README.md) · [Open student's Module 1 demo README](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo2-before/demos/module1-demos/m1-demo2-javascript-http-sender/README.md)
 
-## Recording Assignment
+## Recorder assignment
 
-<table>
-<tr><th>Field</th><th>Exact Value</th></tr>
-<tr><td>Demonstration</td><td><b>JavaScript HTTP Sender</b> · m1-demo2</td></tr>
-<tr><td>Approved Objectives</td><td>EO2a — check the complete wording in the linked learner README</td></tr>
-<tr><td>Reference branch</td><td><code>m1-demo2-after</code> — completed source for preflight</td></tr>
-<tr><td>Recording branch</td><td><code>m1-demo2-before</code> — follow the student workflow</td></tr>
-<tr><td>Demo directory</td><td><code>demos/module1-demos/m1-demo2-javascript-http-sender</code></td></tr>
-<tr><td>Student exercise state</td><td>The starter intentionally lacks globomantics-marker.js; author it before the recording checks</td></tr>
-</table>
+**Work only on `m1-demo2-before`**, completing missing exercise source where applicable. The Developer has already generated the batch preflight, saved four approved baseline transcripts and made the `deliverables/m1-demo2/` package available. **Do not rerun Mac setup or batch preflight as part of filming.** Read the [one-time setup and Developer responsibilities](README.md) on the author dashboard.
 
-## Start Here — One Clone, Two Branches, One Demo
+**Start privately before recording:** from repository root, `git switch m1-demo2-before`, then `cd demos/module1-demos/m1-demo2-javascript-http-sender`; start the vulnerable lab with `./scripts/demo_up.sh`. Confirm the app is reachable at `http://localhost:8000/`, and preserve all intended authored changes. Run commands from the specified VS Code integrated Terminal or macOS Terminal in the appropriate step.
 
-**Do not clone this repository separately for every demo.** Each recorder clones the course once, then switches to the specific demo's `after` branch for preflight and `before` branch for recording. Before switching, stop the old demo environment and preserve the narration references.
+**Recording order:** show source/context → display exact command for approximately 8 seconds → Enter once → show real output in 6–8-second proof windows → switch screens only as the current claim requires. The Editor trims long waits. A mismatched recording transcript is a retake, not a chance to create a fake PASS.
+
+## Follow these four steps
+
+## Step 1 — Load the JavaScript HTTP Sender script
 
 <details open>
-<summary><b><font color="#0284c7">A · Clone Once and Prepare the Mac</font></b></summary>
+<summary><b>Open step 1 — command, real expected fields and role instructions</b></summary>
 
-Use this step only for your first assigned demo. For second and third demos, keep the same repository folder and skip the clone/setup if already complete.
+<summary><b>Step 1: Load the JavaScript HTTP Sender script</b> — Register HTTP Sender</summary>
 
-```bash
-cd ~
-git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
-cd pluralsight-script-development-with-zap
-./setup/setup-macos.sh
-git fetch origin
-```
+### The small problem to solve
 
-**Where is the folder?** It is `~/pluralsight-script-development-with-zap` by default. `git switch` does not create a second or third folder; it changes the checked-out branch in the same directory.
+A JavaScript file cannot modify traffic merely by existing in the repository.
 
-</details>
+**Learning focus:** Develop a JavaScript extension at the request-sending boundary *(EO2a)*
 
-<details open>
-<summary><b><font color="#9333ea">B · Run Preflight From the Completed Branch FIRST</font></b></summary>
+### Where to go
 
-This is the **narration evidence source**. It executes all four real named commands, saves raw live proof, and produces stable per-step reference logs so the Narrator can start while footage is still being recorded.
+**Open VS Code.** Create or inspect `zap-scripts/globomantics-marker.js` in the demo directory. Locate `sendingRequest()`, `MARKER_HEADER`, `MARKER_VALUE` and `setHeader()`. Then open the VS Code integrated Terminal in this demo directory.
 
-```bash
-cd ~/pluralsight-script-development-with-zap
-git status --short
-git fetch origin
-git switch m1-demo2-after
-git rev-parse HEAD
-cd demos/module1-demos/m1-demo2-javascript-http-sender
-./scripts/demo_up.sh
-./scripts/preflight_check.sh
-ls -l logs/preflight-step-0[1-4].log
-```
+### Run this exact command
 
-**Only proceed when preflight exits 0 and prints the actual summary below** (this is the expected format, not a fabricated test run):
-
-```text
-RESULT: 5 checks passed, 0 failed
-REFERENCE: logs/preflight-step-01.log through logs/preflight-step-04.log
-```
-
-**Proof stays real:** `logs/preflight-step-01.log` through `04.log` are the Narrator's four outputs. `logs/.producer/` holds untouched raw details. Separate ZAP GUI / GitHub Actions evidence must be checked independently when a terminal command cannot observe it.
-
-**Optional but strongly recommended repeatability check:** after successful preflight, set `DEMO_SYNC_MODE=1` and `DEMO_SYNC_PHASE=compare` off-camera, then execute the same four named steps while still on this completed reference. Each must match its baseline; a material mismatch blocks recording.
-
-**Archive the references and stop the stack before switching:**
-
-```bash
-mkdir -p ~/zap-production-evidence/m1-demo2
-cp logs/preflight-step-0[1-4].log ~/zap-production-evidence/m1-demo2/
-./scripts/demo_down.sh
-cd ~/pluralsight-script-development-with-zap
-git status --short
-```
-
-Never delete the reference logs with a destructive Git cleanup.
-
-</details>
-
-<details open>
-<summary><b><font color="#0284c7">C · Switch to the Student Starting Branch and Record</font></b></summary>
-
-```bash
-cd ~/pluralsight-script-development-with-zap
-git switch m1-demo2-before
-git rev-parse HEAD
-cd demos/module1-demos/m1-demo2-javascript-http-sender
-cp ~/zap-production-evidence/m1-demo2/preflight-step-0[1-4].log logs/
-./scripts/demo_up.sh
-
-# Off-camera recording parity settings
-export DEMO_SYNC_MODE=1
-export DEMO_SYNC_PHASE=compare
-```
-
-**The starter intentionally lacks globomantics-marker.js; author it before the recording checks.** Follow the [student README on this exact starter branch](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo2-before/demos/module1-demos/m1-demo2-javascript-http-sender/README.md) to complete any required source writing, then record the four exact commands listed below. The starter branch may be intentionally incomplete and **must not** be expected to pass its final checks before the work has been done.
-
-After the four named commands, capture the GUI/CI proof, then:
-
-```bash
-./scripts/demo_down.sh
-cd ~/pluralsight-script-development-with-zap
-git status --short
-```
-
-**If Git refuses the next branch switch:** preserve the changed code on a task branch or in a deliberate backup before switching. Do not use force/reset to discard recorded work.
-
-</details>
-
-<details><summary><b><font color="#16a34a">D · Recording More Demos From This Same Clone</font></b></summary>
-
-```bash
-cd ~/pluralsight-script-development-with-zap
-git status --short
-git fetch origin
-# Example: select another assigned demo (replace as needed):
-git switch m1-demo3-after
-```
-
-For a different demo, replace the branch and folder with the corresponding entry on the [six-demo author dashboard](README.md). Repeat preflight → archive logs → cleanup → branch switch → record. One local repository is sufficient for sequential recordings. A separate worktree is optional when you need two branches open concurrently.
-
-</details>
-
-## Camera, Narration and Edit Contract
-
-<table>
-<tr><td width="18%"><img src="https://img.shields.io/badge/RECORDER-Blue-0284c7"/></td><td>Record full-screen at readable zoom. Open the source/GUI pane specified in the relevant step, then hold the complete named command ~8 seconds before Enter. Hold each actual output focus 6–8 seconds. On significant UI clicks provide 8-second pre-click and post-click handles in raw footage for the editor.</td></tr>
-<tr><td><img src="https://img.shields.io/badge/NARRATOR-Purple-9333ea"/></td><td>Use the real `preflight-step-0N.log` plus the corresponding filmed GUI/CI evidence. The step tables below give exact ElevenLabs lines with word counts, one mechanism and one operator consequence per reveal. Do not narrate sample placeholders.</td></tr>
-<tr><td><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/></td><td>Cut cleanly at source/terminal/GUI transitions and scanning waits. Highlight one field using a small square, arrow or callout; remove it immediately as the focus changes. Match voice to the same take, not a historic preflight value from a different implementation.</td></tr>
-</table>
-
-## Four Fixed Teaching Steps — Follow In Order
-
-## Step 1 — Load And Enable The HTTP Sender Script
-
-**Why it matters:** A JavaScript file cannot modify traffic until it is registered with ZAP.
-
-**Exact on-screen command**, executed in `demos/module1-demos/m1-demo2-javascript-http-sender`:
+**Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
 ```bash
 ./steps/01-load-javascript-http-sender.sh
 ```
 
-**Expected output format from the real step engine (ILLUSTRATIVE; replace with the current preflight log):**
+### What the script prints
 
-```text
-Script name: globomantics-marker (type: HTTP Sender · engine: <detected JavaScript engine>)
-Marker header it adds: X-Globomantics-Marker: GLOBO-DEMO
-Named console line it prints: [globo-marker] added X-Globomantics-Marker: GLOBO-DEMO to <url>
-✔ PASS script is a valid HTTP Sender action and loaded into ZAP
-```
+The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
+
+<table>
+<thead><tr><th>Displayed field</th><th>Example or expected value</th><th>What to check</th></tr></thead>
+<tbody>
+<tr><td><b>Script name</b></td><td><code>globomantics-marker (HTTP Sender · &lt;detected JavaScript engine&gt;)</code></td><td>Script registered in ZAP</td></tr>
+<tr><td><b>Marker header it adds</b></td><td><code>X-Globomantics-Marker: GLOBO-DEMO</code></td><td>Exact header and value</td></tr>
+<tr><td><b>Named console line it prints</b></td><td><code>[globo-marker] added X-Globomantics-Marker ... to &lt;url&gt;</code></td><td>Expected script print format</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS script is a valid HTTP Sender action and loaded</code></td><td>Script registered; traffic not yet proven</td></tr>
+</tbody></table>
+
+**Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
+
+### What you should understand
+
+Loading and enabling a script is separate from sending an HTTP message. The output establishes script identity, type and intended modification only.
+
+**How this connects:** Send a fresh request through ZAP to prove the hook executed.
+
+### Recorder — execute and show
 
 <details open>
 <summary><img src="https://img.shields.io/badge/RECORDER-Exact_Shots-0284c7"/></summary>
@@ -174,7 +83,23 @@ Named console line it prints: [globo-marker] added X-Globomantics-Marker: GLOBO-
 </table>
 </details>
 
-<details open>
+### Editor — callouts and cut plan
+
+<details>
+<summary><img src="https://img.shields.io/badge/RECORDER-Exact_Shots-0284c7"/></summary>
+<table>
+<tr><th>Relative shot / duration</th><th>Prescriptive actions</th></tr>
+<tr><td>Before terminal · 8 seconds</td><td>VS Code / ZAP script editor: show zap-scripts/globomantics-marker.js, `MARKER_HEADER`, `MARKER_VALUE`, `sendingRequest()`, and `setHeader()`. In starter worktree author the JavaScript source first.</td></tr>
+<tr><td>Command · 8 seconds</td><td>Run <code>./steps/01-load-javascript-http-sender.sh</code> once. Keep full filename readable, cursor clear, and no visible typo or backspace.</td></tr>
+<tr><td>Proof A · 6–8 seconds</td><td>Highlight the script name and HTTP Sender type only.</td></tr>
+<tr><td>Proof B · 6–8 seconds</td><td>Move the callout to X-Globomantics-Marker and GLOBO-DEMO, then the PASS line.</td></tr>
+<tr><td>Exit / decision · 6–8 seconds</td><td>Show the actual PASS and any GUI proof. For a ZAP click, stage a pointer on its target 8 seconds before click, hold result 8 seconds after, then cut extra dead air.</td></tr>
+</table>
+</details>
+
+### Narrator — spoken evidence
+
+<details>
 <summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
 <table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
 <tr><td>Command shown</td><td>Load the JavaScript HTTP Sender script. Its sending request hook can change a message only after ZAP registers and enables it.</td><td>21</td></tr>
@@ -184,37 +109,61 @@ Named console line it prints: [globo-marker] added X-Globomantics-Marker: GLOBO-
 Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
 </details>
 
-<details open>
-<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
-<table><tr><th>Transition</th><th>Precise edit</th></tr>
-<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
-<tr><td>Command → proof</td><td>Square `sendingRequest()` and `setHeader()`, then arrow to the marker-header value in the terminal. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
-<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
-<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-01.log</code> and <code>logs/recorded-step-01.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
-</table>
+### Technical approval
+
+- **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo2/logs/preflight-step-01.log` and the same-take GUI evidence
+- **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
+- **Source confidence:** Source-review confidence 95%, before live rehearsal. An estimate below the owner's release threshold cannot
+- **Release:** Missing or contradictory proof remains NOT VERIFIED; do not increase a score to 94% without evidence
+
 </details>
 
-**Source-review confidence 95%**, before live rehearsal. An estimate below the owner's release threshold cannot be increased without a matching real proof and reviewer approval.
+## Step 2 — Prove the marker on an outbound request
 
----
+<details>
+<summary><b>Open step 2 — command, real expected fields and role instructions</b></summary>
 
-## Step 2 — Prove A Marker On An Outbound Request
+<summary><b>Step 2: Prove the marker on an outbound request</b> — Inspect modified request</summary>
 
-**Why it matters:** A successfully loaded script is not evidence that it ran against actual traffic.
+### The small problem to solve
 
-**Exact on-screen command**, executed in `demos/module1-demos/m1-demo2-javascript-http-sender`:
+Script registration does not prove that an HTTP request actually passed through the hook.
+
+**Learning focus:** Verify observable request modification *(EO2a)*
+
+### Where to go
+
+**Open ZAP GUI** at `http://localhost:8080/zap/` in a browser. Select **History**, then the newest `/greet?name=marker-...` request, and open its **Request** panel. Use the VS Code integrated Terminal for the command.
+
+### Run this exact command
+
+**Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
 ```bash
 ./steps/02-prove-outbound-marker-header.sh
 ```
 
-**Expected output format from the real step engine (ILLUSTRATIVE; replace with the current preflight log):**
+### What the script prints
 
-```text
-Outbound request: GET http://app:8000/greet?name=marker-<live-request-id> HTTP/1.1
-Header added by the script: X-Globomantics-Marker: GLOBO-DEMO
-✔ PASS the script added X-Globomantics-Marker to the outbound request
-```
+The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
+
+<table>
+<thead><tr><th>Displayed field</th><th>Example or expected value</th><th>What to check</th></tr></thead>
+<tbody>
+<tr><td><b>Outbound request</b></td><td><code>GET /greet?name=marker-&lt;live ID&gt; ...</code></td><td>Fresh message, not a prior run</td></tr>
+<tr><td><b>Header added by the script</b></td><td><code>X-Globomantics-Marker: GLOBO-DEMO</code></td><td>Inspect Request panel and terminal</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS script added header to outgoing request</code></td><td>Real outbound traffic carries marker</td></tr>
+</tbody></table>
+
+**Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
+
+### What you should understand
+
+The header in the actual ZAP-captured request proves the JavaScript hook modified traffic. Request identifiers may vary, while the marker name and value remain stable.
+
+**How this connects:** Now establish that the script also printed its named console message.
+
+### Recorder — execute and show
 
 <details open>
 <summary><img src="https://img.shields.io/badge/RECORDER-Exact_Shots-0284c7"/></summary>
@@ -228,17 +177,9 @@ Header added by the script: X-Globomantics-Marker: GLOBO-DEMO
 </table>
 </details>
 
-<details open>
-<summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
-<table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
-<tr><td>Command shown</td><td>Send a fresh request through ZAP instead of directly to the store. The HTTP Sender hook runs only on proxied messages.</td><td>21</td></tr>
-<tr><td>First actual output</td><td>The captured request contains the marker header and its fixed value. That is proof of an actual outbound modification.</td><td>19</td></tr>
-<tr><td>Second output / decision</td><td>The request identifier changes on every execution, but the script's header and the technical result must remain consistent.</td><td>18</td></tr>
-</table>
-Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
-</details>
+### Editor — callouts and cut plan
 
-<details open>
+<details>
 <summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
 <table><tr><th>Transition</th><th>Precise edit</th></tr>
 <tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
@@ -248,27 +189,73 @@ Only record a statement after the matching evidence is visible in the take. The 
 </table>
 </details>
 
-**Source-review confidence 96%**, before live rehearsal. An estimate below the owner's release threshold cannot be increased without a matching real proof and reviewer approval.
+### Narrator — spoken evidence
 
----
+<details>
+<summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
+<table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
+<tr><td>Command shown</td><td>Send a fresh request through ZAP instead of directly to the store. The HTTP Sender hook runs only on proxied messages.</td><td>21</td></tr>
+<tr><td>First actual output</td><td>The captured request contains the marker header and its fixed value. That is proof of an actual outbound modification.</td><td>19</td></tr>
+<tr><td>Second output / decision</td><td>The request identifier changes on every execution, but the script's header and the technical result must remain consistent.</td><td>18</td></tr>
+</table>
+Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
+</details>
 
-## Step 3 — Verify The Live Script Console Line
+### Technical approval
 
-**Why it matters:** A terminal helper can print the expected format without observing JavaScript's actual console output.
+- **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo2/logs/preflight-step-02.log` and the same-take GUI evidence
+- **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
+- **Source confidence:** Source-review confidence 96%, before live rehearsal. An estimate below the owner's release threshold cannot
+- **Release:** Missing or contradictory proof remains NOT VERIFIED; do not increase a score to 94% without evidence
 
-**Exact on-screen command**, executed in `demos/module1-demos/m1-demo2-javascript-http-sender`:
+</details>
+
+## Step 3 — Verify the live Script Console output
+
+<details>
+<summary><b>Open step 3 — command, real expected fields and role instructions</b></summary>
+
+<summary><b>Step 3: Verify the live Script Console output</b> — Inspect Script Console</summary>
+
+### The small problem to solve
+
+A terminal can show a predicted console string without actually observing ZAP's Script Console.
+
+**Learning focus:** Validate the script's emitted diagnostic output *(EO2a)*
+
+### Where to go
+
+**Keep ZAP GUI open** at `http://localhost:8080/zap/`. Open **Scripts → Script Console** and inspect fresh lines after the command. The command itself runs in the integrated Terminal.
+
+### Run this exact command
+
+**Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
 ```bash
 ./steps/03-check-live-script-console.sh
 ```
 
-**Expected output format from the real step engine (ILLUSTRATIVE; replace with the current preflight log):**
+### What the script prints
 
-```text
-Expected format (verify live ZAP Script Console): [globo-marker] added X-Globomantics-Marker: GLOBO-DEMO to <url>
-✔ PASS fresh marked request confirmed; verify emitted line in live ZAP Script Console
-[GUI-ONLY PROOF] [globo-marker] added X-Globomantics-Marker: GLOBO-DEMO to http://app:8000/greet?name=marker-<live-request-id>
-```
+The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
+
+<table>
+<thead><tr><th>Displayed field</th><th>Example or expected value</th><th>What to check</th></tr></thead>
+<tbody>
+<tr><td><b>Expected format (terminal)</b></td><td><code>[globo-marker] added X-Globomantics-Marker: GLOBO-DEMO to &lt;url&gt;</code></td><td>Terminal explicitly says expected format</td></tr>
+<tr><td><b>Real Script Console</b></td><td><code>[globo-marker] ... to &lt;actual fresh request URL&gt;</code></td><td>MUST inspect in GUI; not captured by shell</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS fresh marked request; verify live console</code></td><td>Terminal PASS alone does not prove GUI print</td></tr>
+</tbody></table>
+
+**Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
+
+### What you should understand
+
+Compare the expected print format with the new line that actually appears in ZAP Script Console. Do not confuse the shell's expected format with live script execution proof.
+
+**How this connects:** Confirm the script remains registered and enabled in this ZAP session.
+
+### Recorder — execute and show
 
 <details open>
 <summary><img src="https://img.shields.io/badge/RECORDER-Exact_Shots-0284c7"/></summary>
@@ -282,17 +269,9 @@ Expected format (verify live ZAP Script Console): [globo-marker] added X-Globoma
 </table>
 </details>
 
-<details open>
-<summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
-<table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
-<tr><td>Command shown</td><td>Trigger a new request to make the JavaScript print its marker. The terminal displays the expected format, not the console itself.</td><td>21</td></tr>
-<tr><td>First actual output</td><td>Open the live Script Console and find the fresh marker line. Match its URL to the request sent through ZAP.</td><td>20</td></tr>
-<tr><td>Second output / decision</td><td>The console proves the script reported a real action. A copied expected line would not establish that behavior.</td><td>18</td></tr>
-</table>
-Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
-</details>
+### Editor — callouts and cut plan
 
-<details open>
+<details>
 <summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
 <table><tr><th>Transition</th><th>Precise edit</th></tr>
 <tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
@@ -302,30 +281,75 @@ Only record a statement after the matching evidence is visible in the take. The 
 </table>
 </details>
 
-**Source-review confidence 86%**, before live rehearsal. An estimate below the owner's release threshold cannot be increased without a matching real proof and reviewer approval.
+### Narrator — spoken evidence
 
----
+<details>
+<summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
+<table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
+<tr><td>Command shown</td><td>Trigger a new request to make the JavaScript print its marker. The terminal displays the expected format, not the console itself.</td><td>21</td></tr>
+<tr><td>First actual output</td><td>Open the live Script Console and find the fresh marker line. Match its URL to the request sent through ZAP.</td><td>20</td></tr>
+<tr><td>Second output / decision</td><td>The console proves the script reported a real action. A copied expected line would not establish that behavior.</td><td>18</td></tr>
+</table>
+Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
+</details>
 
-## Step 4 — Confirm Reusable Script Registration
+### Technical approval
 
-**Why it matters:** The team needs a reliably named, enabled HTTP Sender registration for later automation.
+- **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo2/logs/preflight-step-03.log` and the same-take GUI evidence
+- **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
+- **Source confidence:** Source-review confidence 86%, before live rehearsal. An estimate below the owner's release threshold cannot
+- **Release:** Missing or contradictory proof remains NOT VERIFIED; do not increase a score to 94% without evidence
 
-**Exact on-screen command**, executed in `demos/module1-demos/m1-demo2-javascript-http-sender`:
+</details>
+
+## Step 4 — Verify the script registration
+
+<details>
+<summary><b>Open step 4 — command, real expected fields and role instructions</b></summary>
+
+<summary><b>Step 4: Verify the script registration</b> — Check saved script</summary>
+
+### The small problem to solve
+
+Reusable automation needs a stable named script and a verifiable enabled state.
+
+**Learning focus:** Confirm configured JavaScript extension state *(EO2a)*
+
+### Where to go
+
+**Open ZAP GUI** → **Scripts → HTTP Sender → globomantics-marker**. Keep its name/type/engine visible. Then return to VS Code Terminal for the command.
+
+### Run this exact command
+
+**Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
 ```bash
 ./steps/04-verify-enabled-script-registration.sh
 ```
 
-**Expected output format from the real step engine (ILLUSTRATIVE; replace with the current preflight log):**
+### What the script prints
 
-```text
-Registered name: globomantics-marker
-Type: httpsender
-Engine: <detected engine>
-Enabled: true
-Path (repo): zap-scripts/globomantics-marker.js
-✔ PASS script registered and enabled as HTTP Sender
-```
+The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
+
+<table>
+<thead><tr><th>Displayed field</th><th>Example or expected value</th><th>What to check</th></tr></thead>
+<tbody>
+<tr><td><b>Registered name</b></td><td><code>globomantics-marker</code></td><td>Stable name reused by automation</td></tr>
+<tr><td><b>Type</b></td><td><code>httpsender</code></td><td>Correct hook category</td></tr>
+<tr><td><b>Enabled</b></td><td><code>true</code></td><td>Script active in current ZAP session</td></tr>
+<tr><td><b>Path (repo)</b></td><td><code>zap-scripts/globomantics-marker.js</code></td><td>Current script source</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS script registered and enabled</code></td><td>Registration is ready for reuse</td></tr>
+</tbody></table>
+
+**Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
+
+### What you should understand
+
+The script has a stable source path, a valid HTTP Sender type, and enabled registration. This is not a claim it persists after the container is destroyed.
+
+**How this connects:** The demo finishes with source, modified request, console message and registration all independently observed.
+
+### Recorder — execute and show
 
 <details open>
 <summary><img src="https://img.shields.io/badge/RECORDER-Exact_Shots-0284c7"/></summary>
@@ -339,17 +363,9 @@ Path (repo): zap-scripts/globomantics-marker.js
 </table>
 </details>
 
-<details open>
-<summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
-<table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
-<tr><td>Command shown</td><td>A reusable automation needs a stable script identity, not just one marked request. Inspect its registration before depending on it.</td><td>20</td></tr>
-<tr><td>First actual output</td><td>The type identifies the HTTP Sender hook, and the enabled flag confirms ZAP can use that registered script.</td><td>18</td></tr>
-<tr><td>Second output / decision</td><td>The source path provides a stable reference for automation. It does not promise persistence after the container is destroyed.</td><td>19</td></tr>
-</table>
-Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
-</details>
+### Editor — callouts and cut plan
 
-<details open>
+<details>
 <summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
 <table><tr><th>Transition</th><th>Precise edit</th></tr>
 <tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
@@ -359,10 +375,31 @@ Only record a statement after the matching evidence is visible in the take. The 
 </table>
 </details>
 
-**Source-review confidence 95%**, before live rehearsal. An estimate below the owner's release threshold cannot be increased without a matching real proof and reviewer approval.
+### Narrator — spoken evidence
 
----
+<details>
+<summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
+<table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
+<tr><td>Command shown</td><td>A reusable automation needs a stable script identity, not just one marked request. Inspect its registration before depending on it.</td><td>20</td></tr>
+<tr><td>First actual output</td><td>The type identifies the HTTP Sender hook, and the enabled flag confirms ZAP can use that registered script.</td><td>18</td></tr>
+<tr><td>Second output / decision</td><td>The source path provides a stable reference for automation. It does not promise persistence after the container is destroyed.</td><td>19</td></tr>
+</table>
+Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
+</details>
 
-## Delivery Gate
+### Technical approval
 
-Deliver both branch refs and SHA, full preflight plus step logs, normalized parity result, untouched raw proof, GUI screenshots with timestamps, exact ElevenLabs script or audio, and Editor timeline. Record each live step from the authorized training target only. Never call an old scan or estimated screenshot actual evidence.
+- **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo2/logs/preflight-step-04.log` and the same-take GUI evidence
+- **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
+- **Source confidence:** Source-review confidence 95%, before live rehearsal. An estimate below the owner's release threshold cannot
+- **Release:** Missing or contradictory proof remains NOT VERIFIED; do not increase a score to 94% without evidence
+
+</details>
+
+## Finish the recording
+
+1. Capture all four real step outcomes, their matching raw logs and GUI/CI evidence; preserve the recorded branch SHA
+2. Stop the lab from the same demo folder: `./scripts/demo_down.sh`
+3. Hand the video takes to the Editor and the Developer's generated narration draft and logs to the Narrator
+4. Leave the developer-wide batch validation and its configuration in the landing page, not in this per-demo recording page
+
