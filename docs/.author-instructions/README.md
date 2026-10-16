@@ -153,6 +153,62 @@ Then save `m1-demo2` references, stop its stack, switch to `m1-demo2-before`, cr
 
 </details>
 
+## Batch Preflight: All Six Demos In One Command
+
+<div align="center">
+
+![Batch](https://img.shields.io/badge/ONE_COMMAND-Six_Demos-0284c7?style=for-the-badge)
+![Log](https://img.shields.io/badge/OUTPUT-Real_Logs-16a34a?style=for-the-badge)
+![Draft](https://img.shields.io/badge/NARRATION-Proof_Linked_Drafts-9333ea?style=for-the-badge)
+
+**No six separate clones. No change to your current working branch.**
+
+</div>
+
+<details open><summary><b>1 · Run all six completed-demo preflights on your Mac</b></summary>
+
+From the same single checkout you already use for recording:
+
+```bash
+cd ~/pluralsight-script-development-with-zap
+./setup/run-all-demo-preflights.sh
+```
+
+This command prepares the Mac once if needed, fetches current demo branch refs, then checks out each `m1-demoN-after` and `m2-demoN-after` **temporarily in its own detached worktree**. It runs the actual demo start, four real named step commands via preflight, then tears down and removes only that temporary worktree. The six ZAP stacks run **sequentially**, avoiding fixed-port collisions. Your original repository stays on the same branch.
+
+Use `./setup/run-all-demo-preflights.sh --dry-run` to see the plan without changing anything. Use `--skip-setup` if Homebrew, Colima, Docker and ZAP were already prepared. Use `--only m1-demo1,m2-demo2` when testing just two demos.
+
+**Mac and Docker are required for live output.** Running on a machine without Docker does not create simulated PASS logs.
+
+</details>
+
+<details open><summary><b>2 · Find the three deliverables generated for each passing demo</b></summary>
+
+The command prints the exact destination when it finishes, such as `~/zap-production-evidence/batch-YYYYMMDD-HHMMSS/`, and creates a sibling `.zip` suitable for upload to ChatGPT.
+
+<table>
+<tr><th>File or Folder</th><th>Contents</th><th>Who Uses It</th></tr>
+<tr><td><code>m1-demo1/steps-and-output.md</code></td><td>The four executed concept-named commands and <b>real, observed</b> preflight output</td><td>Recorder + Narrator</td></tr>
+<tr><td><code>m1-demo1/logs/</code></td><td>Full preflight transcript, <code>preflight-step-01.log</code> to <code>-04.log</code>, and unchanged <code>.producer/</code> raw evidence</td><td>Technical CQA + Narrator</td></tr>
+<tr><td><code>m1-demo1/narration-draft.md</code></td><td>Existing ElevenLabs spoken lines from that demo's author playbook, linked to each actual successful preflight step</td><td>Narrator; <b>draft pending GUI/CI proof</b></td></tr>
+<tr><td><code>m1-demo1/manifest.json</code></td><td>Actual branch, SHA, process exit codes and run status</td><td>Recorder + Editor + CQA</td></tr>
+</table>
+
+The same structure is generated for all six demo IDs. A failed demo keeps its diagnostic files and does <b>not</b> receive an approved narration draft. Never use the output of a failed preflight as proof for the video.
+
+</details>
+
+<details open><summary><b>3 · Finalize narration in ChatGPT after collecting live evidence</b></summary>
+
+Upload the generated batch ZIP along with actual ZAP Script Console screenshots or matching GitHub Actions job/report evidence. Ask:
+
+> Review the real outputs, raw logs, author playbooks and actual GUI/CI evidence for all six ZAP demos. Create final ElevenLabs-safe narration **per step**, teaching its unique mechanism, parameters and observed values, with exact word counts and LO coverage. Match every spoken line to the Recorder's current take. Never invent a result or replace missing GUI/CI proof.
+
+The generated `narration-draft.md` is a **source-grounded starting point**, not an automatic finished audio script. Without the Recorder's same-source footage and required GUI/CI evidence, the Narrator must not claim final synchronization.
+
+</details>
+
+
 ## 3. Producer Handoff — Who Does What?
 
 <table>

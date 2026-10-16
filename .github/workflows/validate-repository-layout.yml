@@ -20,6 +20,8 @@ jobs:
         run: python3 -m compileall -q runtime/app runtime/scripts
       - name: Verify evidence output replay and fail-closed parity
         run: python3 -m unittest discover -s runtime/scripts -p 'test_recording_step.py' -v
+      - name: Verify six-demo batch manifest and narration extraction
+        run: python3 -m unittest discover -s setup -p 'test_run_all_demo_preflights.py' -v
       - name: Validate Docker Compose wiring
         run: docker compose config --quiet
       - name: Validate branch-aware student project structure
