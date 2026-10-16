@@ -141,7 +141,7 @@ details details>table,details details>p{margin:12px}
 pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#352B6F;
 color:#EBEFF5;border-radius:10px;padding:16px;font:0.94rem/1.75 Menlo,monospace}
 pre.command{background:#1B1834;color:#FFC942;font-weight:bold}
-.pass{color:#02E088;font-weight:bold}.stop{color:#B9004B;font-weight:bold}
+.pass{color:#02E088;font-weight:bold}.stop{color:#fff;background:#B9004B;padding:0 4px;border-radius:3px;font-weight:bold}
 .focus{color:#FFC942;font-weight:bold}
 table{width:calc(100% - 24px);border-collapse:collapse;font-size:0.92rem}
 th,td{padding:9px;border:1px solid #d4dcec;text-align:left;vertical-align:top}
