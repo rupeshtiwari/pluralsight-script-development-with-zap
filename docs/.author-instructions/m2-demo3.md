@@ -37,6 +37,15 @@ A global ignore list can hide risk elsewhere in the application.
 
 ### Which application and screen?
 
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
+```
+
+**Branch:** `m2-demo3-before` (complete any deliberately missing student source first). The separate `./steps/01-*.sh` command below is the only on-camera execution for this step.
+
 **Open VS Code**, inspect `ci/gate-plan.yaml` at `alertFilter`, and keep rule ID, URL and new disposition visible in the editor. Run the command in VS Code Terminal.
 
 ### Run this exact command
@@ -76,16 +85,6 @@ The filter records a reviewed disposition for one class of benign finding on a s
 <tr><td>Result · 6–8s</td><td>Keep the actual verified PASS or report result in view. Click handles are filmed for 8s before/after but trimmed; long scan waits are edited out.</td></tr>
 </table></details>
 
-### Editor — highlights and cuts
-
-<details><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
-<table><tr><th>Beat</th><th>Exact Camtasia Action</th></tr>
-<tr><td>Source → command</td><td>Cut cleanly at window/pane change. Square the relevant config key, remove before introducing the named command.</td></tr>
-<tr><td>Proof A/B</td><td>Separate squares on ID, newRisk and URL; use no persistent decoration after scrolling. Keep one callout at a time for 6–8s, moving to the next value as the narrator speaks.</td></tr>
-<tr><td>Final result</td><td>Show observed alert/report/exit and the actual PASSED condition; no fake overlays or stale arrows.</td></tr>
-<tr><td>Sync artifact</td><td>Compare `logs/preflight-step-01.log` and `logs/recorded-step-01.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
-</table></details>
-
 ### Narrator — spoken lines
 
 <details><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
@@ -96,6 +95,28 @@ The filter records a reviewed disposition for one class of benign finding on a s
 </table>
 These spoken lines teach only the visible evidence. Never say placeholder values aloud or claim a GUI/API fact a different command did not establish.
 </details>
+
+### Editor — highlights and cuts
+
+<details><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>Scoped alertFilter YAML block</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>Filtered rule  (ruleId)</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>New disposition  (newRisk)</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>A benign filter must stay narrow</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Beat</th><th>Exact Camtasia Action</th></tr>
+<tr><td>Source → command</td><td>Cut cleanly at window/pane change. Square the relevant config key, remove before introducing the named command.</td></tr>
+<tr><td>Proof A/B</td><td>Separate squares on ID, newRisk and URL; use no persistent decoration after scrolling. Keep one callout at a time for 6–8s, moving to the next value as the narrator speaks.</td></tr>
+<tr><td>Final result</td><td>Show observed alert/report/exit and the actual PASSED condition; no fake overlays or stale arrows.</td></tr>
+<tr><td>Sync artifact</td><td>Compare `logs/preflight-step-01.log` and `logs/recorded-step-01.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
+</table></details>
 
 ### Validation and confidence
 
@@ -119,6 +140,15 @@ Applying the filter after scanning can leave earlier alerts unaffected.
 **What you are learning:** Put filtering and reporting in a defensible pipeline sequence *(EO3c)*
 
 ### Which application and screen?
+
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
+```
+
+**Branch:** `m2-demo3-before` (complete any deliberately missing student source first). The separate `./steps/02-*.sh` command below is the only on-camera execution for this step.
 
 **Remain in VS Code**, scroll within `ci/gate-plan.yaml` to the jobs list. Show `alertFilter`, `requestor`, `activeScan`, `report`, and `exitStatus` in order.
 
@@ -159,16 +189,6 @@ The filter must exist when ZAP discovers alerts; the report follows scanning and
 <tr><td>Result · 6–8s</td><td>Keep the actual verified PASS or report result in view. Click handles are filmed for 8s before/after but trimmed; long scan waits are edited out.</td></tr>
 </table></details>
 
-### Editor — highlights and cuts
-
-<details><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
-<table><tr><th>Beat</th><th>Exact Camtasia Action</th></tr>
-<tr><td>Source → command</td><td>Cut cleanly at window/pane change. Square the relevant config key, remove before introducing the named command.</td></tr>
-<tr><td>Proof A/B</td><td>Show short arrow filter → scan, then another report → exitStatus. Only one arrow at any moment. Keep one callout at a time for 6–8s, moving to the next value as the narrator speaks.</td></tr>
-<tr><td>Final result</td><td>Show observed alert/report/exit and the actual PASSED condition; no fake overlays or stale arrows.</td></tr>
-<tr><td>Sync artifact</td><td>Compare `logs/preflight-step-02.log` and `logs/recorded-step-02.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
-</table></details>
-
 ### Narrator — spoken lines
 
 <details><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
@@ -179,6 +199,28 @@ The filter must exist when ZAP discovers alerts; the report follows scanning and
 </table>
 These spoken lines teach only the visible evidence. Never say placeholder values aloud or claim a GUI/API fact a different command did not establish.
 </details>
+
+### Editor — highlights and cuts
+
+<details><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>Automation Framework ordered job list</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>Job order (ci/gate-plan.yaml)</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>exitStatus runs last</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>Filter before scanning, gate at the end</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Beat</th><th>Exact Camtasia Action</th></tr>
+<tr><td>Source → command</td><td>Cut cleanly at window/pane change. Square the relevant config key, remove before introducing the named command.</td></tr>
+<tr><td>Proof A/B</td><td>Show short arrow filter → scan, then another report → exitStatus. Only one arrow at any moment. Keep one callout at a time for 6–8s, moving to the next value as the narrator speaks.</td></tr>
+<tr><td>Final result</td><td>Show observed alert/report/exit and the actual PASSED condition; no fake overlays or stale arrows.</td></tr>
+<tr><td>Sync artifact</td><td>Compare `logs/preflight-step-02.log` and `logs/recorded-step-02.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
+</table></details>
 
 ### Validation and confidence
 
@@ -202,6 +244,15 @@ An arbitrary nonzero process code could mean the runner failed, not that a secur
 **What you are learning:** Enforce High-risk threshold in a build pipeline *(EO3c)*
 
 ### Which application and screen?
+
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
+```
+
+**Branch:** `m2-demo3-before` (complete any deliberately missing student source first). The separate `./steps/03-*.sh` command below is the only on-camera execution for this step.
 
 **Open VS Code** at `ci/gate-plan.yaml` on `exitStatus`, then run the step in integrated Terminal. Also inspect **GitHub → Actions → quality-gate job** for the matching commit.
 
@@ -243,16 +294,6 @@ The gate should block only when the configured risk threshold encounters a genui
 <tr><td>Result · 6–8s</td><td>Keep the actual verified PASS or report result in view. Click handles are filmed for 8s before/after but trimmed; long scan waits are edited out.</td></tr>
 </table></details>
 
-### Editor — highlights and cuts
-
-<details><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
-<table><tr><th>Beat</th><th>Exact Camtasia Action</th></tr>
-<tr><td>Source → command</td><td>Cut cleanly at window/pane change. Square the relevant config key, remove before introducing the named command.</td></tr>
-<tr><td>Proof A/B</td><td>Three distinct proof frames: threshold, positive High count, actual exit 1. Never use a red run icon alone. Keep one callout at a time for 6–8s, moving to the next value as the narrator speaks.</td></tr>
-<tr><td>Final result</td><td>Show observed alert/report/exit and the actual PASSED condition; no fake overlays or stale arrows.</td></tr>
-<tr><td>Sync artifact</td><td>Compare `logs/preflight-step-03.log` and `logs/recorded-step-03.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
-</table></details>
-
 ### Narrator — spoken lines
 
 <details><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
@@ -263,6 +304,28 @@ The gate should block only when the configured risk threshold encounters a genui
 </table>
 These spoken lines teach only the visible evidence. Never say placeholder values aloud or claim a GUI/API fact a different command did not establish.
 </details>
+
+### Editor — highlights and cuts
+
+<details><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>Gate report count plus actual exit</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>High-risk alerts after filtering</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>Process exit code  (echo \$?)</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>A blocked build requires High-risk proof and real process exit</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Beat</th><th>Exact Camtasia Action</th></tr>
+<tr><td>Source → command</td><td>Cut cleanly at window/pane change. Square the relevant config key, remove before introducing the named command.</td></tr>
+<tr><td>Proof A/B</td><td>Three distinct proof frames: threshold, positive High count, actual exit 1. Never use a red run icon alone. Keep one callout at a time for 6–8s, moving to the next value as the narrator speaks.</td></tr>
+<tr><td>Final result</td><td>Show observed alert/report/exit and the actual PASSED condition; no fake overlays or stale arrows.</td></tr>
+<tr><td>Sync artifact</td><td>Compare `logs/preflight-step-03.log` and `logs/recorded-step-03.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
+</table></details>
 
 ### Validation and confidence
 
@@ -286,6 +349,15 @@ A job failure alone cannot prove the scoped False Positive and the remaining Hig
 **What you are learning:** Confirm the policy decision against official alert disposition *(EO3c)*
 
 ### Which application and screen?
+
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
+```
+
+**Branch:** `m2-demo3-before` (complete any deliberately missing student source first). The separate `./steps/04-*.sh` command below is the only on-camera execution for this step.
 
 **In GitHub Actions**, open the matching run's report artifact (not an old run). Inspect rules 10021 and 40012 in the JSON report. Run the terminal step for local evidence.
 
@@ -326,16 +398,6 @@ The JSON report confirms benign noise was scoped while real High risk was retain
 <tr><td>Result · 6–8s</td><td>Keep the actual verified PASS or report result in view. Click handles are filmed for 8s before/after but trimmed; long scan waits are edited out.</td></tr>
 </table></details>
 
-### Editor — highlights and cuts
-
-<details><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
-<table><tr><th>Beat</th><th>Exact Camtasia Action</th></tr>
-<tr><td>Source → command</td><td>Cut cleanly at window/pane change. Square the relevant config key, remove before introducing the named command.</td></tr>
-<tr><td>Proof A/B</td><td>One rectangle on 10021 False Positive, then a separate one on 40012 High, then on exit 1. No fallbacks. Keep one callout at a time for 6–8s, moving to the next value as the narrator speaks.</td></tr>
-<tr><td>Final result</td><td>Show observed alert/report/exit and the actual PASSED condition; no fake overlays or stale arrows.</td></tr>
-<tr><td>Sync artifact</td><td>Compare `logs/preflight-step-04.log` and `logs/recorded-step-04.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
-</table></details>
-
 ### Narrator — spoken lines
 
 <details><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
@@ -346,6 +408,28 @@ The JSON report confirms benign noise was scoped while real High risk was retain
 </table>
 These spoken lines teach only the visible evidence. Never say placeholder values aloud or claim a GUI/API fact a different command did not establish.
 </details>
+
+### Editor — highlights and cuts
+
+<details><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>Two real entries in the same JSON report</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>Benign finding  (rule 10021)</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>Real finding  (rule 40012)</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>The reviewed False Positive must not hide the surviving High</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Beat</th><th>Exact Camtasia Action</th></tr>
+<tr><td>Source → command</td><td>Cut cleanly at window/pane change. Square the relevant config key, remove before introducing the named command.</td></tr>
+<tr><td>Proof A/B</td><td>One rectangle on 10021 False Positive, then a separate one on 40012 High, then on exit 1. No fallbacks. Keep one callout at a time for 6–8s, moving to the next value as the narrator speaks.</td></tr>
+<tr><td>Final result</td><td>Show observed alert/report/exit and the actual PASSED condition; no fake overlays or stale arrows.</td></tr>
+<tr><td>Sync artifact</td><td>Compare `logs/preflight-step-04.log` and `logs/recorded-step-04.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
+</table></details>
 
 ### Validation and confidence
 
