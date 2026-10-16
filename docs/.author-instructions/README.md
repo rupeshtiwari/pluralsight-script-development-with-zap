@@ -96,6 +96,21 @@ These are the actual values to enter using the repository **About → gear icon*
 
 These metadata values are **prepared for manual entry**, not claims they have been applied. The reusable skill must apply them automatically in future only when authenticated GitHub administrative actions are available.
 
+### One portable, locally hosted production portal
+
+Once the **Developer's real Mac batch** completes, the generated folder contains `index.html`, `serve.sh`, `refresh.sh`, `PRODUCTION_PORTAL_GUIDE.md`, `NARRATOR_NEXT_SESSION_PROMPT.md`, `tools/` (self-contained HTML renderer), `author-playbooks/`, and six demo subfolders with manifests, actual normalized and raw logs, step evidence, production HTML, and narrator handoff inputs. The whole folder is zipped to share with distributed producers. Failed/missing proof stays visibly on **HOLD**.
+
+Open macOS Terminal manually, then paste the real timestamped path and launch the server:
+
+```bash
+cd "$HOME/zap-course-deliverables/batch-YYYYMMDD-HHMMSS"
+./serve.sh
+```
+
+Replace the timestamp with the folder actually printed after batch execution. The command serves `http://127.0.0.1:8765/index.html` only on your Mac and opens the browser; stop with Ctrl+C. The portal has five ordered roles: **Developer → Recorder → Narrator → Editor → Technical CQA**. It provides 24 step-specific copyable `cd` commands, script commands, current output tables, capture/overlay decisions, and ElevenLabs speech. The **Narrator** hands its ZIP to a separate skill and returns `narration-final.json` plus `narration-final.md` to the corresponding demo folder; `./refresh.sh` imports those real reviewed lines without running ZAP again.
+
+The plain `docs/.author-instructions/mN-demoN.md` playbooks are mirrored into the portal and now show the actual folder-navigation command and concrete Camtasia overlays for every step. Do not treat `narration-draft.md` as final speech without same-take review.
+
 ## 2. Recorder — choose your Module and Demo
 
 **Follow the exact before-branch demonstration**, using one existing repository checkout per engineer. Before recording, receive the Developer's corresponding real step logs; complete any missing student-authored scripts or plans in your own working copy. Run only the demo startup and four named commands, showing the exact values called for by your playbook.
@@ -110,19 +125,20 @@ These metadata values are **prepared for manual entry**, not claims they have be
 
 The first step in each production guide is expanded. Other steps are collapsed so you can focus. Within an expanded step, the **Recorder** panel is open and the **Editor** and **Narrator** panels are collapsed.
 
-## 3. Editor — synchronize real footage and highlights
-
-Use `production-guide.html` in each generated deliverables folder for the current step's real terminal output and role cards. Start with the Recorder's footage, then add one square or arrow to the stated source parameter, request field, alert ID, HTTP status, report value or exit code at a time. Cut during pane changes and long scans, remove the old callout as soon as the highlighted region changes, and preserve the visible proof for 6–8 seconds per focus. Retain the important mouse-click handles in raw footage and trim them in the final delivery.
-
-[Editor timing and callout standards](01_PERSONA_PROTOCOLS.md) · [Output synchronization contract](02_LOG_SYNC_CONTRACT.md)
-
-## 4. Narrator — use actual logs and narration draft
+## 3. Narrator — use actual logs and narration draft
 
 Open the same demo folder in the generated deliverables: `steps-and-output.md`, `logs/preflight-step-0N.log`, raw `logs/.producer/`, and `narration-draft.md`. Those are the **real outputs from the Developer's preflight** and the approved starter spoken lines, not a substitute for the Recorder's footage.
 
 Read the Developer's `production-guide.html` and compare with the Recorder's actual take. Use natural ElevenLabs speech about the exact command, its parameters, the relevant output, and the operator decision. Each step teaches a distinct mechanism aligned with its objective. Do not narrate an estimated counter, fake GUI Script Console line, or an older Actions report.
 
 Once the recording and actual GUI/CI evidence are shared, upload the generated ZIP with that proof to ChatGPT for final per-step narration, word count, LO coverage and video/audio synchronization. Never label a draft as final before those checks.
+
+
+## 4. Editor — synchronize real footage and highlights
+
+Finalize edits after the Narrator supplies the evidence-checked spoken lines. Use the portal's per-step box/label/arrow/callout table: blue area box, primary pink actual-value label, purple relationship arrow only where valid, yellow 6–8-second gist callout only if otherwise static beyond 12 seconds. Every added overlay must be removed on focus or pane change. Use `production-guide.html` in each generated deliverables folder for the current step's real terminal output and role cards. Start with the Recorder's footage, then add one square or arrow to the stated source parameter, request field, alert ID, HTTP status, report value or exit code at a time. Cut during pane changes and long scans, remove the old callout as soon as the highlighted region changes, and preserve the visible proof for 6–8 seconds per focus. Retain the important mouse-click handles in raw footage and trim them in the final delivery.
+
+[Editor timing and callout standards](01_PERSONA_PROTOCOLS.md) · [Output synchronization contract](02_LOG_SYNC_CONTRACT.md)
 
 ## 5. Technical CQA and release
 
