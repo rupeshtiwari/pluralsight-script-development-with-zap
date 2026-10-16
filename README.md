@@ -154,7 +154,7 @@ git switch m1-demo1-before</pre>Each <code>*-before</code> branch is an independ
 <tr><td>④</td><td><b>Run its four understandable commands</b><pre>cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
 ./scripts/demo_reset.sh
 ./steps/01-run-targeted-injection-scan.sh</pre>Follow that demo's README for Steps 2–4 and exactly what evidence should appear.</td></tr>
-<tr><td>⑤</td><td><b>Observe the result and clean up</b><pre>./scripts/demo_down.sh</pre>Record the actual displayed evidence. The author performs one complete-course preflight with <code>./setup/run-all-demo-preflights.sh</code> from the repository root instead of six individual preflight commands.</td></tr>
+<tr><td>⑤</td><td><b>Observe the result and clean up</b><pre>./scripts/demo_down.sh</pre>Record the actual displayed evidence.</td></tr>
 </table>
 
 **Different demo?** Return to the repository root, save any personal changes, switch to its `*-before` branch, then follow its own README. Don't reuse scan history from another demo.
@@ -217,8 +217,7 @@ Each demo's README lists the branch-specific source, commands, expected evidence
 | `README.md` | Exact student instructions and evidence to inspect |
 | `steps/01-*.sh` through `steps/04-*.sh` | Four short commands with meaningful, readable names |
 | `scripts/demo_up.sh`, `demo_reset.sh`, `demo_down.sh` | Start, reset and stop that demo's environment |
-| `setup/run-all-demo-preflights.sh` | Execute all six completed-demo checks and generate production evidence |
-| `scripts/_steps.sh` | Implementation used by both the named steps and preflight |
+| `scripts/_steps.sh` | Implementation used by the named steps |
 | `logs/` | Locally generated validation logs |
 
 </details>
