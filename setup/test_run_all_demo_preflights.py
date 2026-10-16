@@ -55,6 +55,18 @@ class BatchContractTests(unittest.TestCase):
                 self.assertGreater(len(section_html(step,"EDITOR")),100)
                 self.assertEqual(len(narrator_rows(step)),3,(id_,i))
 
+
+    def test_author_step_cards_have_valid_collapsible_markers(self):
+        import re
+        for id_,_,_ in MODULE.DEMOS:
+            source=(ROOT/"docs/.author-instructions"/(id_+".md")).read_text()
+            blocks=re.split(r"(?=^## Step [1-4]\b)",source,flags=re.M)[1:]
+            self.assertEqual(len(blocks),4,id_)
+            for number,block in enumerate(blocks,1):
+                self.assertEqual(len(re.findall(r"<details(?:\s+open)?>",block)),4,(id_,number))
+                self.assertEqual(block.count("<summary>"),4,(id_,number))
+                self.assertTrue(block.lstrip().splitlines()[2].strip()=="<details open>" if number==1 else block.lstrip().splitlines()[2].strip()=="<details>",(id_,number))
+
     def test_dry_run_does_not_create_evidence(self):
         with tempfile.TemporaryDirectory() as t:
             output=Path(t)/"not-created"
