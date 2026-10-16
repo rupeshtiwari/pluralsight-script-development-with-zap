@@ -30,6 +30,4 @@ The Globomantics release team needs repeatable security checks in CI. Its pipeli
 
 Use the one-time Mac prerequisites described on the [course landing page](../../README.md). Each demo has independent prerequisites in its starter branch; no prior exercise needs to be executed. Start its local training stack from the specified demo folder, run the four named commands, inspect actual API/CI proof, then stop the lab.
 
-The Developer's production batch check is `./setup/run-all-demo-preflights.sh`, separate from learner exercise execution.
-
 [← Course home](../../README.md)
