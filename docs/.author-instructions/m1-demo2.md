@@ -86,14 +86,12 @@ Loading and enabling a script is separate from sending an HTTP message. The outp
 ### Editor — callouts and cut plan
 
 <details>
-<summary><img src="https://img.shields.io/badge/RECORDER-Exact_Shots-0284c7"/></summary>
-<table>
-<tr><th>Relative shot / duration</th><th>Prescriptive actions</th></tr>
-<tr><td>Before terminal · 8 seconds</td><td>VS Code / ZAP script editor: show zap-scripts/globomantics-marker.js, `MARKER_HEADER`, `MARKER_VALUE`, `sendingRequest()`, and `setHeader()`. In starter worktree author the JavaScript source first.</td></tr>
-<tr><td>Command · 8 seconds</td><td>Run <code>./steps/01-load-javascript-http-sender.sh</code> once. Keep full filename readable, cursor clear, and no visible typo or backspace.</td></tr>
-<tr><td>Proof A · 6–8 seconds</td><td>Highlight the script name and HTTP Sender type only.</td></tr>
-<tr><td>Proof B · 6–8 seconds</td><td>Move the callout to X-Globomantics-Marker and GLOBO-DEMO, then the PASS line.</td></tr>
-<tr><td>Exit / decision · 6–8 seconds</td><td>Show the actual PASS and any GUI proof. For a ZAP click, stage a pointer on its target 8 seconds before click, hold result 8 seconds after, then cut extra dead air.</td></tr>
+<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
+<table><tr><th>Transition</th><th>Precise edit</th></tr>
+<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
+<tr><td>Command → proof</td><td>Square `sendingRequest()` and `setHeader()`, then arrow to the marker-header value in the terminal. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
+<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
+<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-01.log</code> and <code>logs/recorded-step-01.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
 </table>
 </details>
 
