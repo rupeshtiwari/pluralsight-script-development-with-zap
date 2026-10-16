@@ -1,31 +1,33 @@
-# Recorder, Narrator and Editor — Exact Contract
+# Recorder, Narrator, Editor — Course Production Roles
 
-## Recorder: prescriptive full-screen footage
-- Work from a clean and independent checkout of the assigned **before** branch. Record the branch SHA, OS, ZAP image digest and lab URL before recording; no previous demo session is a prerequisite.
-- Use `setup/setup-macos.sh` once per Mac, then the demo's `./scripts/demo_up.sh` or `./scripts/demo_reset.sh` (where required). Use descriptive `./steps/01-*.sh` through `./steps/04-*.sh` only. No on-screen `demo_step.sh 1` commands.
-- Start with the real business/security problem and one operator goal. Each step must teach an individual concept, not another step's definition.
-- Record **full screen**; when the target is terminal, do not display distracting browser tabs. Use mobile-readable font/zoom proactively; one primary pane at a time. Show source+integrated terminal in VS Code when source is the proof; use standalone terminal when only commands matter; show ZAP GUI when it uniquely establishes proof.
-- Before executing a step, place its entire concept-named command and important parameter on screen for **8–10 seconds**. Explain its purpose and expected evidence briefly; then run it, hold the relevant actual output readable. Do not leave the frame idle longer than 20–30 seconds.
-- Before a significant UI click, position the pointer on the target and provide ~8 seconds of footage; click once and hold the resulting state ~8 more seconds. Those are editing handles, **not mandatory final-video dead air**.
-- Track the exact pane/URL, tab, path, line or parameter, scroll position, mouse location, and proof region in the step's private recording manifest. No on-screen corrections/backspaces; redo the take and cut cleanly.
-- A literal script printed in Terminal is not the same thing as a ZAP Script Console line. Capture separate live GUI/CI proof where mandated. Every technical assertion needs visible output, alert, trace, process exit, or log/report line.
+## Recorder
+- Start from matching `*-before` branch, not `main` or another engineer's branch. First verify successful preflight from a separate completed `*-after` reference. Correctly create any missing files as the student would.
+- Use the exact public conceptual step script names. Prepare the source pane, hold the command for ~8 seconds before Enter, then show actual output fields, one field per 6–8 seconds. Proactively zoom to phone-readable text.
+- Show exact application URL or GUI navigation. Do not jump between panes without a clean focus change. For significant mouse click: pointer on target for ~8 seconds, click once, show resulting state for ~8 seconds in source footage.
+- Avoid browser tabs when recording full-screen application UI. No on-screen backspaces, corrections or idle long waits; cut and retake.
+- Keep named command execution real. Off-camera use `DEMO_SYNC_MODE=1` and `DEMO_SYNC_PHASE=compare`; inspect the current per-step logs before marking footage accepted.
+- Capture actual GUI-only ZAP Script Console lines, Alerts tab records, request History headers, and GitHub Actions reports separately when source-step output cannot observe them.
 
-## Narrator: ElevenLabs, grounded in evidence
-- Use the **same-run preflight log and matching take's GUI/CI evidence manifest** to create exact spoken narration, not speculative sample values. Do not hardcode variable request IDs, counts, session handles or scan timings.
-- Teaching flow per step: concrete production problem → bounded mechanism and parameter → observed proof → operator decision. Every step adds **one unique** mechanism or consequence; eliminate duplication.
-- Natural TTS phrasing: say 'trust boundary one', 'LLM one', and 'rag' where TTS needs it; avoid abbreviation stacks, punctuation-heavy scripts and artificial transitions. No 'this module', 'previous clip', 'on this slide', 'next section', or other relative course navigation.
-- For an 8–10-second command hold, use ~18–22 spoken words. For slide reveals follow max **27 spoken words per 12 seconds**. Clip narration targets only the approved LO and visible evidence; do not narrate hidden setup as if shown.
-- Revision must be completed **before freeze**. Regenerate narration for any changed step command, branch SHA, visible proof, screenshot/callout, query, or report. Finalize with per-step word count and LO traceability.
+## Narrator
+- Use successful preflight baseline logs per step and associated live GUI/Actions proof from the same approved source revision. Never script from a hypothetical PASS.
+- Provide the **exact spoken words** for ElevenLabs, not production notes; one unique technical mechanism and practitioner decision per step, directly tied to what the Recorder shows.
+- Lead with the security question; then introduce the exact named command, significant script parameters, result fields and operator consequence. Avoid module-relative course navigation.
+- For an 8-second command hold write around 18–22 spoken words; additional output explanations each fit the displayed 6–8-second proof beat. Slide reveals max 27 words/12 seconds.
+- Spoken forms should be natural: 'trust boundary one', 'LLM one', and 'rag' as appropriate, no slash-heavy syntax or acronym stacks. Narrate observed values only after validating the actual take.
+- Any change to source, output, report or recorded value triggers revalidation and narration regeneration before freeze.
 
-## Editor: precise video/audio/evidence synchronization
-- Assemble approved full-screen footage and separate ElevenLabs voice files. Cut during source/terminal/GUI transitions, before visible script typing if it risks typo/backspace, and after actual output is held steady. Never cut away before the evidence is legible.
-- Highlight one parameter, pane, button or output region at a time. Use transient callouts/arrows when switching panes; **remove as soon as the focus changes or becomes blank**. Avoid stale highlights.
-- Do not fabricate missing alerts or replace a failed command with a PASS from a different run. When narration references live identifiers, match the exact video evidence; if impossible, rewrite the spoken line to describe stable fields instead.
-- Aim for consistent course loudness: average **−6 to −12 dB**, with **no peaks above −6 dB**. Confirm clean readability on a phone and no awkward line/token wraps.
-- Keep visual activity meaningful every 20–30 seconds, but never speed through the key response, request, job result, or gate decision.
-- Maintain source SHA, step ID, take number, terminal log file, GUI screenshot/timestamp, narration filename and editor timecode in the private manifest.
+## Editor
+- Match branch SHA, preflight reference, recording comparison log and audio to the same approved take. A retake must not silently change the proof.
+- Cut at screen/pane transitions and before and after script writing or actual output display. Do not hide a failing step with a PASS from another run.
+- Use a small, legible square box around key parameters, arrows between related evidence fields, or a single subtle callout. One focus only; immediately remove the previous overlay on focus change.
+- Keep each proof stable 6–8 seconds, never over ten seconds of idle final footage. Cut long scans cleanly without deleting the proof. Important clicks have eight-second handles in raw footage; trim in final cut.
+- Validate on phone, no watermarks obscuring code, readable metric/parameter names, no awkward text wraps.
+- Audio: consistent level across clips, average −6 to −12 dB, peaks no higher than −6 dB.
 
-## CQA and delivery
-- Check outline alignment and source correctness **slide first, narration second** where applicable. Also check technical currency, professional realism, student repeatability, and whether any definition-only step lacks an operator choice.
-- Check for duplication, early spill into other topics, and proof overclaims. Label each finding CONFIRMED / REPORTED BUT UNVERIFIED / NOT VERIFIED / FAILED.
-- The course is eligible for content freeze at the owner's accepted threshold **95% and above**, but runtime verification is a separate status. Do not assign false 95% evidence; flag risk at individual steps and fix only with approved code changes.
+## Final CQA
+- Technical accuracy, current methods, correct learner workflow and scenario realism; inspect the approved outline for exact LO alignment
+- Slide content reviewed before slide narration; demonstration narration tied to actual visible proof
+- Per-step objective and proof artifact, exact command/script filename, real request/response and operator decision
+- Source-review percentage distinct from verified runtime result; 95% and above is owner's content acceptance threshold, not permission to fabricate missing evidence
+- Freeze a valid step, don't redesign an entire working repo because an unrelated demo lacks local Docker
+- Internal author instructions remain temporary in PUBLIC dot folder only at owner's explicit request; private storage is required before learner release
