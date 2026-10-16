@@ -35,7 +35,7 @@ class DashboardTests(unittest.TestCase):
 
     def test_field_values_roundtrip_and_escape(self):
         parsed=d.rows_from_terminal('  ★ │ Marker                             │ <script>alert(1)</script>\n'+self.proof)
-        self.assertEqual(parsed[0],{'label':'Marker','value':'<script>alert(1)</script>'})
+        self.assertEqual(parsed[0],{'label':'Marker','value':'<script>alert(1)</script>','focus':False})
         self.assertEqual(parsed[1]['value'],'<live-count-in-raw-log>')
         self.assertEqual(len(parsed),3)
         self.assertEqual(d.rows_from_terminal('  ★ Old format: value')[0]['value'],'value')
@@ -83,6 +83,18 @@ class DashboardTests(unittest.TestCase):
 
     def test_invalid_empty_manifest(self):
         with self.assertRaises(ValueError): d.render_dashboard(self.batch,[],self.auth)
+
+    def test_primary_pink_focus_tracks_real_ansi_value_only(self):
+        terminal="  ★ │ Current status                         │ 200\n  ★ │ Risk                                   │ High\n"
+        raw="  ★ │ Current status                         │ 200\n  ★ │ Risk                                   │ \x1b[38;2;255;22;117mHigh\x1b[0m\n"
+        rows=d.rows_from_terminal(terminal,raw)
+        self.assertEqual([r["focus"] for r in rows],[False,True])
+        rendered=d.style_terminal(terminal,d.focused_labels(raw))
+        self.assertIn('class="focused-value"',rendered)
+        self.assertIn('class="ordinary-value"',rendered)
+        import re
+        from html import unescape
+        self.assertEqual(unescape(re.sub(r"<[^>]+>","",rendered)),terminal.rstrip("\n"))
 
     def test_quoted_source_security(self):
         value='  ★ │ Request ID │ <svg onload=alert(1)>\n'
