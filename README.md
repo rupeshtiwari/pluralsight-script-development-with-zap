@@ -19,6 +19,21 @@ Learn to move beyond generic vulnerability scans in six practical Globomantics s
 
 </div>
 
+## Watch the course and follow along
+
+<div align="center">
+
+![Video course](https://img.shields.io/badge/Pluralsight-Video_Course-FF1675?style=for-the-badge)
+![Publication](https://img.shields.io/badge/Course_Link-Coming_After_Publication-130F25?style=for-the-badge)
+
+**Script Development with ZAP · Video course on Pluralsight**
+
+Follow the video lessons, pause at each demonstrated step, and execute the matching scripts in this repository. Every demo README explains the commands and observations even without access to the course outline.
+
+**Course video link: To be added after Pluralsight publishes the course.** The repository Developer will replace this label with the verified direct course URL. No unpublished or guessed address is provided.
+
+</div>
+
 ## Why Does This Project Exist?
 
 Imagine you're responsible for releasing the **Globomantics Store**. Its search endpoint accepts customer input, its accounts use two databases, its profile page requires login, and its build pipeline must not ship a serious vulnerability. A conventional scan can produce hundreds of alerts, but those alerts don't answer the questions a developer or application-security engineer must resolve.
@@ -47,24 +62,49 @@ In these labs you'll use ZAP to:
 
 The training target is local and purpose-built. **Use these techniques only against the supplied Globomantics application or other systems you're explicitly authorized to test.**
 
-## What You'll Learn — Complete Learning Objectives
+## What you will learn — grouped by demonstration
 
-You do **not** need access to the Pluralsight course outline to understand these objectives. These are the approved enabling objectives, reproduced here in full.
+You don't need the separate course outline. The six demonstrations follow one engineering story: identify an application weakness, confirm it using HTTP evidence, then automate the security decision.
 
-<table>
-<thead><tr><th>Objective</th><th>What You Will Learn</th><th>Where You Practice</th></tr></thead>
-<tbody>
-<tr><td><code>EO1a</code></td><td>Configure specialized scanners for injection vulnerabilities (SQL, NoSQL, Command)</td><td><a href="demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/README.md">M1 Demo 1</a></td></tr>
-<tr><td><code>EO1b</code></td><td>Implement Cross-Site Scripting (XSS) validation with context-specific payloads</td><td><a href="demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/README.md">M1 Demo 1</a></td></tr>
-<tr><td><code>EO1c</code></td><td>Execute CSRF token bypass techniques for testing anti-CSRF protections</td><td><a href="demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/README.md">M1 Demo 1</a></td></tr>
-<tr><td><code>EO2a</code></td><td>Develop JavaScript scripts to extend ZAP functionality</td><td><a href="demos/module1-demos/m1-demo2-javascript-http-sender/README.md">M1 Demo 2</a></td></tr>
-<tr><td><code>EO2b</code></td><td>Implement Python scripts for custom scanning rules</td><td><a href="demos/module1-demos/m1-demo3-python-scanning-authentication/README.md">M1 Demo 3</a></td></tr>
-<tr><td><code>EO2c</code></td><td>Apply scripting for authentication sequence automation</td><td><a href="demos/module1-demos/m1-demo3-python-scanning-authentication/README.md">M1 Demo 3</a></td></tr>
-<tr><td><code>EO3a</code></td><td>Configure ZAP for headless execution in CI/CD environments</td><td><a href="demos/module2-demos/m2-demo1-authenticated-zap-github-actions/README.md">M2 Demo 1</a></td></tr>
-<tr><td><code>EO3b</code></td><td>Implement ZAP API for programmatic security testing</td><td><a href="demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md">M2 Demo 2</a></td></tr>
-<tr><td><code>EO3c</code></td><td>Apply threshold-based quality gates for security findings in build pipelines</td><td><a href="demos/module2-demos/m2-demo3-security-quality-gates/README.md">M2 Demo 3</a></td></tr>
-</tbody>
-</table>
+### Module 1 · Demo 1 — Injection, XSS and CSRF
+
+You will focus the scanner on the store's unsafe inputs and then validate each finding using the request, response and resulting application state.
+
+- Configure specialized SQL, NoSQL and command-injection checks *(EO1a)*
+- Test reflected cross-site scripting using the correct output context *(EO1b)*
+- Investigate CSRF tokens reused across authenticated sessions *(EO1c)*
+
+[Start Module 1 Demo 1 →](demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/README.md)
+
+### Module 1 · Demo 2 — JavaScript HTTP Sender
+
+You will write a JavaScript extension that adds a stable marker to an authorized HTTP request. You will confirm the change in ZAP History, verify the Script Console line, and check the reusable registration *(EO2a)*.
+
+[Start Module 1 Demo 2 →](demos/module1-demos/m1-demo2-javascript-http-sender/README.md)
+
+### Module 1 · Demo 3 — Python scanning and authentication
+
+You will create an application-specific Jython active-scan rule *(EO2b)* and a separate scripted login *(EO2c)*. An authenticated request and a fresh named alert prove the two mechanisms work together.
+
+[Start Module 1 Demo 3 →](demos/module1-demos/m1-demo3-python-scanning-authentication/README.md)
+
+### Module 2 · Demo 1 — Authenticated CI scanning
+
+You will configure an Automation Framework plan that runs ZAP headlessly in GitHub Actions *(EO3a)*. The evidence is a correctly authenticated target, the original reused scripts, and the named custom finding in the report.
+
+[Start Module 2 Demo 1 →](demos/module2-demos/m2-demo1-authenticated-zap-github-actions/README.md)
+
+### Module 2 · Demo 2 — ZAP API and reporting
+
+You will query ZAP programmatically *(EO3b)*, confirm a completed scan, inspect the named alert, reconcile the official JSON report and interpret scan-effectiveness Insights.
+
+[Start Module 2 Demo 2 →](demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md)
+
+### Module 2 · Demo 3 — Security quality gates
+
+You will use a scoped alert filter and a threshold-based build gate *(EO3c)* to ensure a reviewed False Positive does not conceal a remaining High-risk issue. The final report and actual exit code explain the CI decision.
+
+[Start Module 2 Demo 3 →](demos/module2-demos/m2-demo3-security-quality-gates/README.md)
 
 ## See The System Before Running It
 
@@ -114,8 +154,7 @@ git switch m1-demo1-before</pre>Each <code>*-before</code> branch is an independ
 <tr><td>④</td><td><b>Run its four understandable commands</b><pre>cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
 ./scripts/demo_reset.sh
 ./steps/01-run-targeted-injection-scan.sh</pre>Follow that demo's README for Steps 2–4 and exactly what evidence should appear.</td></tr>
-<tr><td>⑤</td><td><b>Validate and clean up</b><pre>./scripts/preflight_check.sh
-./scripts/demo_down.sh</pre>Review the generated log in <code>logs/</code> and any real ZAP GUI or GitHub Actions output required by that demo.</td></tr>
+<tr><td>⑤</td><td><b>Observe the result and clean up</b><pre>./scripts/demo_down.sh</pre>Record the actual displayed evidence. The author performs one complete-course preflight with <code>./setup/run-all-demo-preflights.sh</code> from the repository root instead of six individual preflight commands.</td></tr>
 </table>
 
 **Different demo?** Return to the repository root, save any personal changes, switch to its `*-before` branch, then follow its own README. Don't reuse scan history from another demo.
@@ -178,7 +217,7 @@ Each demo's README lists the branch-specific source, commands, expected evidence
 | `README.md` | Exact student instructions and evidence to inspect |
 | `steps/01-*.sh` through `steps/04-*.sh` | Four short commands with meaningful, readable names |
 | `scripts/demo_up.sh`, `demo_reset.sh`, `demo_down.sh` | Start, reset and stop that demo's environment |
-| `scripts/preflight_check.sh` | Execute the checks and save a local transcript |
+| `setup/run-all-demo-preflights.sh` | Execute all six completed-demo checks and generate production evidence |
 | `scripts/_steps.sh` | Implementation used by both the named steps and preflight |
 | `logs/` | Locally generated validation logs |
 

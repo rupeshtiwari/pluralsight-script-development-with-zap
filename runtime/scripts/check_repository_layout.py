@@ -36,7 +36,7 @@ for old in ("before-running-demo-run-this", "app", "data", "zap", "scripts", "mo
     must(not (ROOT / old).exists(), f"deprecated root folder: {old}")
 for f in ("runtime/app/main.py", "runtime/zap/entrypoint.sh",
           "runtime/scripts/lib.sh", "runtime/scripts/demo_up.sh",
-          "runtime/scripts/demo_down.sh", "runtime/scripts/preflight_check.sh",
+          "runtime/scripts/demo_down.sh", "runtime/scripts/preflight_all_steps.sh",
           "setup/setup-macos.sh"):
     must((ROOT / f).is_file(), f"missing shared runtime file: {f}")
 
@@ -50,13 +50,13 @@ for lab, rel in LABS.items():
     for step in steps:
         must(os.access(step, os.X_OK), f"{lab}: step not executable: {step.name}")
         must("_run_step.sh" in step.read_text(), f"{lab}: named step must reuse frozen step engine: {step.name}")
-    for name in ("demo_up.sh", "demo_down.sh", "preflight_check.sh", "_run_step.sh", "_steps.sh"):
+    for name in ("demo_up.sh", "demo_down.sh", "_run_step.sh", "_steps.sh"):
         must((path / "scripts" / name).is_file(), f"{lab}: missing scripts/{name}")
     if (path / "README.md").exists():
         body = (path / "README.md").read_text(encoding="utf-8")
         for step in steps:
             must(step.name in body, f"{lab}: README missing named command {step.name}")
-        must("preflight_check.sh" in body, f"{lab}: README missing preflight instructions")
+        must("run-all-demo-preflights.sh" in body, f"{lab}: README missing batch preflight instructions")
         must("demo_down.sh" in body, f"{lab}: README missing teardown instructions")
 
 branch = os.environ.get("GITHUB_REF_NAME", "").strip() or subprocess.run(
