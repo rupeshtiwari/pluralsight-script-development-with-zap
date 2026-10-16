@@ -38,7 +38,7 @@ The same internal rule engine executes in both cases. A successful preflight pro
 ## Exact procedure
 
 1. Use the Recorder's **single existing course checkout**; switch to the specific `m*-demo*-after` reference branch. Record the full Git SHA and pinned runtime version
-2. Prepare Mac, start isolated demo, run `./scripts/preflight_check.sh`. Require exit 0 and the final summary `5 checks passed, 0 failed`
+2. Prepare Mac, start isolated demo, run `./setup/run-all-demo-preflights.sh`. Require exit 0 and the final summary `5 checks passed, 0 failed`
 3. Share the four per-step normalized logs, full preflight transcript, **and unaltered raw logs** with Narrator
 4. Narrator drafts exact spoken lines based only on these fields and relevant live ZAP GUI or GitHub Actions proof
 5. Recorder stops the demo, archives the reference logs outside the checkout, and **switches** the same repository to matching `m*-demo*-before`, then performs necessary authored work, brings the exercise to the verified completed state, and places approved per-step baseline logs in the demo's `logs/` directory
