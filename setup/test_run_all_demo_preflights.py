@@ -76,7 +76,7 @@ class BatchContractTests(unittest.TestCase):
             runtime.mkdir(parents=True)
             for name in ("demo_up.sh", "demo_down.sh"):
                 fake = runtime/name
-                fake.write_text('#!/bin/bash\\nprintf "SHARED:%s\\\\n" "$(basename "$0")"\\n', encoding="utf-8")
+                fake.write_text("#!/bin/bash" + chr(10) + "echo SHARED:" + name + chr(10), encoding="utf-8")
                 fake.chmod(0o755)
             for demo, folder, _ in MODULE.DEMOS:
                 source = ROOT/folder/"scripts"
