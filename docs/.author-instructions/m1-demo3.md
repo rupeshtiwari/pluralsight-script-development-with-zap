@@ -1,43 +1,147 @@
-# M1-DEMO3 · Jython Active Rule And Authentication — Production Playbook
+# M1-DEMO3 · Python Scanning and Authentication — Author Production Playbook
 
 <div align="center">
 
-![Recorder](https://img.shields.io/badge/RECORDER-Screen_Plan-0284c7?style=for-the-badge)
-![Narrator](https://img.shields.io/badge/NARRATOR-Spoken_Teaching-d946ef?style=for-the-badge)
-![Editor](https://img.shields.io/badge/EDITOR-Callouts-16a34a?style=for-the-badge)
+![Recorder](https://img.shields.io/badge/Recorder-Exact_Screen-0284c7?style=for-the-badge)
+![Narrator](https://img.shields.io/badge/Narrator-Verified_Script-9333ea?style=for-the-badge)
+![Editor](https://img.shields.io/badge/Editor-Timed_Highlights-16a34a?style=for-the-badge)
 
-<img src="../learner-diagrams/m1-demo3-architecture.svg" alt="Jython Active Rule And Authentication flow diagram" width="100%"/>
-<sub>Illustrative architecture · Generated using ChatGPT · TEMPORARILY PUBLIC author file</sub>
+<img src="../learner-diagrams/m1-demo3-architecture.svg" alt="Illustrative Python Scanning and Authentication workflow" width="100%"/>
+
+<sub>Generated using ChatGPT · Temporary PUBLIC author guidance</sub>
 
 </div>
 
-## First: Preflight And Parallel Narration Handoff
+[← **All Six Production Playbooks**](README.md) · [**Student Starter README ↗**](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo3-before/demos/module1-demos/m1-demo3-python-scanning-authentication/README.md) · [**Completed README ↗**](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo3-after/demos/module1-demos/m1-demo3-python-scanning-authentication/README.md)
 
-**Scenario:** Maya must authenticate to a protected Globomantics profile and run a custom Jython rule against the note parameter. The named custom alert only matters if the authenticated request really reached the page.
+## Recording Assignment
 
-**Objectives:** EO2b — Implement Python scripts for custom scanning rules; EO2c — Apply scripting for authentication sequence automation
+<table>
+<tr><th>Field</th><th>Exact Value</th></tr>
+<tr><td>Demonstration</td><td><b>Python Scanning and Authentication</b> · m1-demo3</td></tr>
+<tr><td>Approved Objectives</td><td>EO2b · EO2c — check the complete wording in the linked learner README</td></tr>
+<tr><td>Reference branch</td><td><code>m1-demo3-after</code> — completed source for preflight</td></tr>
+<tr><td>Recording branch</td><td><code>m1-demo3-before</code> — follow the student workflow</td></tr>
+<tr><td>Demo directory</td><td><code>demos/module1-demos/m1-demo3-python-scanning-authentication</code></td></tr>
+<tr><td>Student exercise state</td><td>The starter intentionally lacks the completed Jython active rule and authentication scripts</td></tr>
+</table>
 
-**1. Validate from the completed reference branch**, because the student starter intentionally excludes authored source files.
+## Start Here — One Clone, Two Branches, One Demo
+
+**Do not clone this repository separately for every demo.** Each recorder clones the course once, then switches to the specific demo's `after` branch for preflight and `before` branch for recording. Before switching, stop the old demo environment and preserve the narration references.
+
+<details open>
+<summary><b><font color="#0284c7">A · Clone Once and Prepare the Mac</font></b></summary>
+
+Use this step only for your first assigned demo. For second and third demos, keep the same repository folder and skip the clone/setup if already complete.
 
 ```bash
-git clone -b m1-demo3-after https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git ~/zap-m1-demo3-reference
-cd ~/zap-m1-demo3-reference
+cd ~
+git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
+cd pluralsight-script-development-with-zap
 ./setup/setup-macos.sh
+git fetch origin
+```
+
+**Where is the folder?** It is `~/pluralsight-script-development-with-zap` by default. `git switch` does not create a second or third folder; it changes the checked-out branch in the same directory.
+
+</details>
+
+<details open>
+<summary><b><font color="#9333ea">B · Run Preflight From the Completed Branch FIRST</font></b></summary>
+
+This is the **narration evidence source**. It executes all four real named commands, saves raw live proof, and produces stable per-step reference logs so the Narrator can start while footage is still being recorded.
+
+```bash
+cd ~/pluralsight-script-development-with-zap
+git status --short
+git fetch origin
+git switch m1-demo3-after
+git rev-parse HEAD
 cd demos/module1-demos/m1-demo3-python-scanning-authentication
 ./scripts/demo_reset.sh
 ./scripts/preflight_check.sh
-ls logs/preflight-step-0[1-4].log
+ls -l logs/preflight-step-0[1-4].log
 ```
 
-All four named commands are executed by preflight, not simulated by a separate implementation. **The narrator receives the four actual output logs and the unaltered raw evidence**. A correct preflight finishes `5 checks passed, 0 failed`. Record GUI-only proof separately. Shut the reference stack down with `./scripts/demo_down.sh`.
+**Only proceed when preflight exits 0 and prints the actual summary below** (this is the expected format, not a fabricated test run):
 
-**2. Recorder starts independently from the [m1-demo3-before branch](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/tree/m1-demo3-before/demos/module1-demos/m1-demo3-python-scanning-authentication)**. Clone to a different folder, create the missing script files during the exercise, and copy the four preflight-step logs from the reference to the recorder demo's `logs/` folder once source is completed. The actual preflight runs on the completed state: a starter lacking code cannot produce successful scan proof yet.
+```text
+RESULT: 5 checks passed, 0 failed
+REFERENCE: logs/preflight-step-01.log through logs/preflight-step-04.log
+```
 
-**3. Before filming, off-screen**, run `export DEMO_SYNC_MODE=1` and `export DEMO_SYNC_PHASE=compare`. Each command still executes live. The visible transcript normalizes variable identifiers and telemetry, compares material proof to preflight, and fails the take on mismatch; raw outputs are archived. Exact command names below match the student README. Do not use copied preflight values as live ZAP Script Console proof.
+**Proof stays real:** `logs/preflight-step-01.log` through `04.log` are the Narrator's four outputs. `logs/.producer/` holds untouched raw details. Separate ZAP GUI / GitHub Actions evidence must be checked independently when a terminal command cannot observe it.
 
-**Primary UI:** VS Code source + integrated terminal; ZAP GUI http://localhost:8080/zap/ → Scripts, Sites and Alerts. Capture full-screen. Increase zoom for phone readability. Command hold ~8 seconds before Enter; each meaningful output 6–8 seconds (maximum 10 seconds idle final frame). For important clicks, provide 8-second pre-click and post-click editing handles in raw footage; trim later.
+**Optional but strongly recommended repeatability check:** after successful preflight, set `DEMO_SYNC_MODE=1` and `DEMO_SYNC_PHASE=compare` off-camera, then execute the same four named steps while still on this completed reference. Each must match its baseline; a material mismatch blocks recording.
 
-## Exact Four-Step Recorder / Narrator / Editor Choreography
+**Archive the references and stop the stack before switching:**
+
+```bash
+mkdir -p ~/zap-production-evidence/m1-demo3
+cp logs/preflight-step-0[1-4].log ~/zap-production-evidence/m1-demo3/
+./scripts/demo_down.sh
+cd ~/pluralsight-script-development-with-zap
+git status --short
+```
+
+Never delete the reference logs with a destructive Git cleanup.
+
+</details>
+
+<details open>
+<summary><b><font color="#0284c7">C · Switch to the Student Starting Branch and Record</font></b></summary>
+
+```bash
+cd ~/pluralsight-script-development-with-zap
+git switch m1-demo3-before
+git rev-parse HEAD
+cd demos/module1-demos/m1-demo3-python-scanning-authentication
+cp ~/zap-production-evidence/m1-demo3/preflight-step-0[1-4].log logs/
+./scripts/demo_reset.sh
+
+# Off-camera recording parity settings
+export DEMO_SYNC_MODE=1
+export DEMO_SYNC_PHASE=compare
+```
+
+**The starter intentionally lacks the completed Jython active rule and authentication scripts.** Follow the [student README on this exact starter branch](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo3-before/demos/module1-demos/m1-demo3-python-scanning-authentication/README.md) to complete any required source writing, then record the four exact commands listed below. The starter branch may be intentionally incomplete and **must not** be expected to pass its final checks before the work has been done.
+
+After the four named commands, capture the GUI/CI proof, then:
+
+```bash
+./scripts/demo_down.sh
+cd ~/pluralsight-script-development-with-zap
+git status --short
+```
+
+**If Git refuses the next branch switch:** preserve the changed code on a task branch or in a deliberate backup before switching. Do not use force/reset to discard recorded work.
+
+</details>
+
+<details><summary><b><font color="#16a34a">D · Recording More Demos From This Same Clone</font></b></summary>
+
+```bash
+cd ~/pluralsight-script-development-with-zap
+git status --short
+git fetch origin
+# Example: select another assigned demo (replace as needed):
+git switch m2-demo1-after
+```
+
+For a different demo, replace the branch and folder with the corresponding entry on the [six-demo author dashboard](README.md). Repeat preflight → archive logs → cleanup → branch switch → record. One local repository is sufficient for sequential recordings. A separate worktree is optional when you need two branches open concurrently.
+
+</details>
+
+## Camera, Narration and Edit Contract
+
+<table>
+<tr><td width="18%"><img src="https://img.shields.io/badge/RECORDER-Blue-0284c7"/></td><td>Record full-screen at readable zoom. Open the source/GUI pane specified in the relevant step, then hold the complete named command ~8 seconds before Enter. Hold each actual output focus 6–8 seconds. On significant UI clicks provide 8-second pre-click and post-click handles in raw footage for the editor.</td></tr>
+<tr><td><img src="https://img.shields.io/badge/NARRATOR-Purple-9333ea"/></td><td>Use the real `preflight-step-0N.log` plus the corresponding filmed GUI/CI evidence. The step tables below give exact ElevenLabs lines with word counts, one mechanism and one operator consequence per reveal. Do not narrate sample placeholders.</td></tr>
+<tr><td><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/></td><td>Cut cleanly at source/terminal/GUI transitions and scanning waits. Highlight one field using a small square, arrow or callout; remove it immediately as the focus changes. Match voice to the same take, not a historic preflight value from a different implementation.</td></tr>
+</table>
+
+## Four Fixed Teaching Steps — Follow In Order
 
 ## Step 1 — Load A Jython Active Scan Rule
 
