@@ -126,6 +126,6 @@ Once the recording and actual GUI/CI evidence are shared, upload the generated Z
 
 [Technical proof findings](03_CQA_FINDINGS.md) · [Recording checklist](04_RELEASE_CHECKLIST.md) · [All six step-level playbooks](README.md)
 
-The owner accepts source-review estimates of **94% and above** for content freeze, but the runtime evidence must still show the claimed result. Low-confidence or unverified security proofs are documented honestly, not promoted to 94% by rewriting the narration. Preserve the branch and run SHA and all evidence.
+The owner's minimum content-confidence threshold is **95%**. Documentation alone cannot establish it, and an unverified runtime or GUI claim remains on HOLD regardless of a source-review estimate. Do not inflate confidence by rewriting narration. Preserve the branch and run SHA and all evidence.
 
 **Only student GitHub assets, approved slides, and edited video are Pluralsight deliverables.** This temporary author hub must be removed from the learner repo before publishing, with a private copy retained.
