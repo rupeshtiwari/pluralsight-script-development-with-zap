@@ -40,11 +40,12 @@ def execute(command,cwd,log,verbose=False,heartbeat_label=None):
         with log.open("w",encoding="utf-8") as f:
             proc=subprocess.Popen(command,cwd=cwd,stdout=subprocess.PIPE,
                                   stderr=subprocess.STDOUT,text=True,errors="replace")
-            for line in proc.stdout:
-                f.write(line)
-                f.flush()
-                if verbose:
-                    print(line,end="",flush=True)
+            with proc.stdout as output_stream:
+                for line in output_stream:
+                    f.write(line)
+                    f.flush()
+                    if verbose:
+                        print(line,end="",flush=True)
             return proc.wait()
     finally:
         stop.set()
@@ -90,7 +91,7 @@ def show_next_steps(output,archive,rows,exit_code):
     print("  ─────────────────────────────────────────────────────────")
     for row in rows:
         ok=row["status"].startswith("PREFLIGHT PASSED") and row["cleanup_exit"]==0
-        word="PASS • evidence review pending" if ok else "HOLD • "+row["status"]
+        word="PASS • GUI/CI review pending" if ok else "HOLD • "+row["status"]
         print(f"  {row['demo']:<12} {color(word,'2;224;136' if ok else '185;0;75')}")
     print()
     print("  Evidence folder: "+str(output))
