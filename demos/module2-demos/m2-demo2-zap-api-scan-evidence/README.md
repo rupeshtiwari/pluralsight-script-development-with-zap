@@ -1,218 +1,243 @@
-# Query ZAP Results Through Its API and Reports
-
-<details><summary><b>Branch: m2-demo2-before — Ready-To-Run API Starter</b></summary>
-
-This is an operational lab, not a new source-file exercise. Its prerequisites include the authenticated scan plan and scripts; your task is to run fresh API queries and inspect their evidence.
-
-</details>
-
+# Module 2 · Demo 2 — Query the ZAP API and evidence reports
 
 <div align="center">
 
-![ZAP](https://img.shields.io/badge/OWASP_ZAP-API_Evidence-0284c7?style=for-the-badge)
-![Lab](https://img.shields.io/badge/Practice-m2-demo2-d946ef?style=for-the-badge)
+![Training](https://img.shields.io/badge/Globomantics-Authorized_Lab-130F25?style=for-the-badge)
+![ZAP](https://img.shields.io/badge/OWASP_ZAP-API_Evidence-FF1675?style=for-the-badge)
 
-<img src="../../../docs/learner-diagrams/m2-demo2-architecture.svg" width="100%" alt="Query ZAP Results Through Its API and Reports architecture"/>
+<img src="../../../docs/learner-diagrams/m2-demo2-architecture.svg" width="100%" alt="Module 2 · Demo 2 — Query the ZAP API and evidence reports architecture"/>
 
-<sub>Illustrative architecture · Generated using ChatGPT · Verify the actual API, report or CI results</sub>
+<sub>Illustrative workflow · Generated using ChatGPT · Verify actual evidence in your own lab</sub>
 
 </div>
 
-## What Problem Are You Solving?
+## The problem you are solving
 
-A team cannot automate release checks by reading a GUI manually. Maya needs machine-readable evidence that ZAP finished scanning, that the exact script-generated alert has the expected identity and rating, and that the official JSON report and scan-effectiveness Insights agree.
+Maya has a completed security scan but needs a machine-readable status, precise custom alert, archived report, and scan-quality evidence. A screenshot or arbitrary alert total is insufficient for a release pipeline.
 
-**Your outcome:** Understand how the system behaves, run four meaningful commands, inspect the real output and explain the engineering decision. No external course outline is required.
+**What success looks like:** API status, named alert, official JSON report, and actual Insights reconciled to one scan. All four steps address parts of this same engineering problem.
 
-## Learning Objective Covered
+## What you will learn in this demonstration
 
-<table><thead><tr><th>Objective</th><th>What You Will Learn</th></tr></thead><tbody>
-<tr><td><code>EO3b</code></td><td>Implement ZAP API for programmatic security testing</td></tr>
-</tbody></table>
+You will retrieve four kinds of evidence from ZAP programmatically:
 
-## Your Four-Step Learning Path
+- Query scan status and findings using the official ZAP API *(EO3b)*
+- Reconcile the API's named custom rule with a generated JSON report and actual Insights about scan effectiveness *(EO3b)*
+
+You do not need the separate course outline to understand the objective or follow the exercises.
+
+## From setup to a defensible decision
 
 ```mermaid
 flowchart LR
-  N0["Completed scan"]
-  N1["HTTP API status + alert"]
-  N2["Official JSON report"]
-  N3["Real Insights"]
-  N0 --> N1 --> N2 --> N3
+  S1["Check completion"]
+  S2["Inspect custom alert"]
+  S3["Reconcile JSON"]
+  S4["Check Insights"]
+  S1 --> S2
+  S2 --> S3
+  S3 --> S4
 ```
 
-<table>
-<thead><tr><th>Step</th><th>Exact Command</th><th>What You Do</th><th>What To Verify</th><th>Why It Matters</th></tr></thead>
-<tbody><tr><td><b>1</b></td><td><code>./steps/01-check-zap-scan-status.sh</code></td><td>Query the ZAP engine and completed scan</td><td>Version, scan status/progress, actual request count</td><td>Wait for finished results before processing findings</td></tr>
-<tr><td><b>2</b></td><td><code>./steps/02-query-custom-rule-alert.sh</code></td><td>Query the specific script-generated finding</td><td>Named custom rule, plugin identity, risk and confidence</td><td>A gate must identify which check raised the alert</td></tr>
-<tr><td><b>3</b></td><td><code>./steps/03-reconcile-json-report.sh</code></td><td>Generate the official traditional-json report</td><td>Same custom alert and riskdesc as API output</td><td>Archived evidence must reconcile with the live API</td></tr>
-<tr><td><b>4</b></td><td><code>./steps/04-read-zap-insights.sh</code></td><td>Inspect the report's scan-quality Insights</td><td>Actual nonempty insights[] entries and meanings</td><td>Scanner health and coverage differ from vulnerability severity</td></tr></tbody></table>
+## Start the demo's application
 
-## Start This Exercise
+Mac dependencies are prepared **once for the course** using `setup/setup-macos.sh`, as shown in the [course README](../../../README.md). Each demo must then start its **own local training stack**:
 
-From the repository root:
+<details open>
+<summary><b>Open the exact branch and start Module 2 Demo 2</b></summary>
+
+**Where:** macOS Terminal or VS Code integrated Terminal, from the root of your existing Git checkout.
 
 ```bash
 git fetch origin
 git switch m2-demo2-before
-./setup/setup-macos.sh
 cd demos/module2-demos/m2-demo2-zap-api-scan-evidence
 ./scripts/demo_up.sh
 ```
 
-If the one-time Mac setup has already completed, you can skip that setup command. Execute Steps 1–4 above from this demo directory. Then run:
+**Expected start:** healthy Globomantics, Postgres, MongoDB, and ZAP services, reported by the startup script. If they are not ready, stop and inspect the actual output before proceeding.
 
-```bash
-./scripts/preflight_check.sh
-./scripts/demo_down.sh
-```
+**URLs:** [Training application](http://localhost:8000/) · [ZAP GUI](http://localhost:8080/zap/) · [ZAP API and proxy](http://localhost:8090/). This independent exercise provisions its own authenticated scanning prerequisites, so you do not need to run another demonstration first.
 
-The preflight saves a timestamped log in `logs/`. For hosted evidence, use the GitHub Actions link in the detailed steps and inspect the actual workflow's **run SHA**, status, job log and report. Never assume a successful report from an earlier session satisfies this exercise.
+</details>
 
-**Compare with the completed version:** `git diff m2-demo2-before..m2-demo2-after -- demos/module2-demos/m2-demo2-zap-api-scan-evidence`. This comparison does not overwrite your work. Both the starter and completed branches include their required prerequisites; authored solution files or plans are added by the exercise when applicable.
+## Complete the four demo steps
 
-**Technical evidence note:** Live request counts can vary. Missing or empty report Insights are not replaced by unrelated ZAP statistics. This demo provisions its own required scan state, so another demo does not need to run first.
+<details open>
+<summary><b>Step 1 — Ask the API whether the scan finished</b> · Check completion</summary>
 
-All scanning stays within the supplied, authorized Globomantics training environment.
+### The specific problem
 
----
+The API can be available while the active scan is incomplete.
 
-## Detailed Instructions And Expected Evidence
+**What you are learning:** Query machine-readable scan status *(EO3b)*
 
-<details><summary><b>View The Four Executable Steps</b></summary>
+### Which application and screen?
+
+**Open macOS Terminal**, enter the demo folder, and inspect ZAP API endpoints used by `scripts/_steps.sh` when needed. No GUI is required for this step.
+
+### Run this exact command
+
+**Where:** macOS Terminal. **Current folder:** `demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
 
 ```bash
 ./steps/01-check-zap-scan-status.sh
+```
+
+### Expected output and what it means
+
+This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
+
+<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
+<tbody><tr><td><b>ZAP runtime (GET core/view/version)</b></td><td><code>2.17.0</code></td><td>Scanner version</td></tr>
+<tr><td><b>Active scan (GET ascan/view/scans)</b></td><td><code>id=&lt;live scan ID&gt; · progress=100% · state=FINISHED</code></td><td>Complete scan, not merely open API</td></tr>
+<tr><td><b>Requests the scan sent</b></td><td><code>&lt;live count&gt;</code></td><td>Actual telemetry may differ</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS API reports finished scan</code></td><td>Machine-readable readiness</td></tr></tbody></table>
+
+**Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
+
+### How to interpret this result
+
+The version confirms which engine generated the findings. Progress and finished status tell an automated consumer when scan results are ready.
+
+**How the investigation advances:** Retrieve the one custom alert rather than treating every scanner finding as equivalent.
+
+</details>
+
+<details>
+<summary><b>Step 2 — Query the custom rule's risk and confidence</b> · Inspect custom alert</summary>
+
+### The specific problem
+
+A count of twenty alerts is not actionable without rule identity and affected parameter.
+
+**What you are learning:** Retrieve a specific scanner finding through the API *(EO3b)*
+
+### Which application and screen?
+
+**Remain in macOS Terminal**. The command queries `core/view/alerts` using the authenticated profile URL. Inspect the response fields printed by the step.
+
+### Run this exact command
+
+**Where:** macOS Terminal. **Current folder:** `demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
+
+```bash
 ./steps/02-query-custom-rule-alert.sh
+```
+
+### Expected output and what it means
+
+This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
+
+<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
+<tbody><tr><td><b>Rule identity (pluginId · alert)</b></td><td><code>50000 · Globomantics unsafe reflection (custom rule)</code></td><td>Script-generated finding</td></tr>
+<tr><td><b>Disposition (risk · confidence)</b></td><td><code>Medium · Medium</code></td><td>Risk versus evidence strength</td></tr>
+<tr><td><b>Parameter</b></td><td><code>note</code></td><td>Profile input</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS API returns custom alert</code></td><td>Named rule must be present</td></tr></tbody></table>
+
+**Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
+
+### How to interpret this result
+
+Rule ID and name distinguish the application-specific Jython finding from built-in XSS. Risk and confidence are separate fields that a pipeline can reason about.
+
+**How the investigation advances:** Verify the officially generated report contains that same finding.
+
+</details>
+
+<details>
+<summary><b>Step 3 — Compare the JSON report with the API result</b> · Reconcile JSON</summary>
+
+### The specific problem
+
+If the stored JSON disagrees with the current API, it cannot support a reliable release decision.
+
+**What you are learning:** Generate and reconcile an official security report *(EO3b)*
+
+### Which application and screen?
+
+**Remain in macOS Terminal**. Inspect the official `reports/action/generate` request and `traditional-json` report type used by the script.
+
+### Run this exact command
+
+**Where:** macOS Terminal. **Current folder:** `demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
+
+```bash
 ./steps/03-reconcile-json-report.sh
+```
+
+### Expected output and what it means
+
+This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
+
+<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
+<tbody><tr><td><b>Report template</b></td><td><code>traditional-json</code></td><td>Official ZAP report type</td></tr>
+<tr><td><b>Report alert (pluginid · name)</b></td><td><code>50000 · Globomantics unsafe reflection (custom rule)</code></td><td>Same rule as live API</td></tr>
+<tr><td><b>Report rating (riskdesc)</b></td><td><code>Medium (Medium)</code></td><td>Risk and confidence same as Step 2</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS JSON report reconciled with API</code></td><td>Archived and live evidence agree</td></tr></tbody></table>
+
+**Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
+
+### How to interpret this result
+
+The generated report preserves the named custom finding in a shareable format. Matching its identity and rating against the API prevents stale-report assumptions.
+
+**How the investigation advances:** Inspect the scan's operational quality in addition to the vulnerability result.
+
+</details>
+
+<details>
+<summary><b>Step 4 — Read the report's scan-effectiveness Insights</b> · Check Insights</summary>
+
+### The specific problem
+
+A scan might appear clean because it encountered an authentication, scope or execution problem.
+
+**What you are learning:** Interpret operational findings exposed with the scan report *(EO3b)*
+
+### Which application and screen?
+
+**Remain in macOS Terminal**. Locate the actual `insights[]` entries returned by the report extraction, with the key and explanation readable.
+
+### Run this exact command
+
+**Where:** macOS Terminal. **Current folder:** `demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
+
+```bash
 ./steps/04-read-zap-insights.sh
 ```
 
-Run these commands in order from this demo's folder, then execute `./scripts/preflight_check.sh`. Inspect actual ZAP GUI or GitHub Actions evidence where indicated.
+### Expected output and what it means
+
+This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
+
+<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
+<tbody><tr><td><b>Insight (level · key)</b></td><td><code>&lt;actual level&gt; · &lt;actual insight key&gt;</code></td><td>Must be from nonempty insights[]</td></tr>
+<tr><td><b>Statistic · meaning</b></td><td><code>&lt;actual value&gt; · &lt;real description&gt;</code></td><td>Scan-effectiveness evidence</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS report Insights returned</code></td><td>Do not substitute unrelated counters</td></tr></tbody></table>
+
+**Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
+
+### How to interpret this result
+
+Insights describe scan behavior and confidence in coverage, not only vulnerability risk. A missing Insights section is a reason to investigate, not something to invent or ignore.
+
+**How the investigation advances:** The four fields now support a programmatic, evidence-backed scan assessment.
+
 </details>
 
+## Complete the exercise
 
-Inspect a finished authenticated scan entirely through ZAP's HTTP API — no GUI.
-Ask the engine for its status, pull the finding with its rule identity and rating,
-generate ZAP's official JSON report, and read ZAP 2.17.0 Insights to judge how well
-the scan ran.
+A report is trustworthy only when its custom finding, rating and scan-quality context match the current API evidence.
 
-> **Authorization and scope.** Every request targets only the local Globomantics
-> training app on the compose network. Never point these queries at any system you
-> are not authorized to test.
-
-## Applications and locations used
-
-| Application | Where | Used for |
-|-------------|-------|----------|
-| macOS Terminal | working directory `demos/module2-demos/m2-demo2-zap-api-scan-evidence` | running each `./scripts/demo_step.sh N` |
-| ZAP HTTP API | `http://localhost:8090` (local only) | status, alerts, report generation, statistics |
-| Generated JSON report | produced by `reports/action/generate` (template `traditional-json`); the step prints its relevant fields | the archivable record reconciled against the API |
-
-This demo is API/Terminal only — no ZAP window is required. The numeric values
-(request counts, Insight statistics) are live and vary per run; the rule identity,
-ratings, and report structure are stable.
-
-## Setup
+From the same demo directory, stop the local services:
 
 ```bash
-cd demos/module2-demos/m2-demo2-zap-api-scan-evidence
-./scripts/demo_up.sh             # prints "Up" when healthy
+./scripts/demo_down.sh
 ```
 
-The first step inspects a finished authenticated scan; if none exists in the ZAP
-session yet, the step runs the authenticated plan once to create it, then inspects
-it.
+The `m2-demo2-after` branch contains the completed example or reference behavior. Preserve student changes before switching branches. For a safe comparison run `git diff m2-demo2-before..m2-demo2-after -- demos/module2-demos/m2-demo2-zap-api-scan-evidence` from the repository root; operational-only exercises may have no source diff.
 
-## Learning-objective coverage
+**One batch validation command for the course:** `./setup/run-all-demo-preflights.sh` from the repository root. This checks all six finished branches and creates real evidence bundles for the production team. There are no separate per-demo preflight commands.
 
-| Step | Objective | Proof artifact |
-|------|-----------|----------------|
-| 1 | EO3b | ZAP API status response |
-| 2 | EO3b | ZAP API alert response |
-| 3 | EO3b | ZAP JSON report |
-| 4 | EO3b | ZAP Insights evidence |
-
-## Step 1: Ask the API for runtime and scan status (EO3b)
-
-Goal: Establish, over HTTP, that the engine is up and the scan has finished — a
-pipeline's first question.
-
-Application: macOS Terminal querying the ZAP API.
-Open / Navigate: Terminal in `demos/module2-demos/m2-demo2-zap-api-scan-evidence`; API at `http://localhost:8090`
-(`GET core/view/version`, `GET ascan/view/scans`).
-Execute: `./steps/01-check-zap-scan-status.sh`.
-
-Expected output: the ZAP runtime version `2.17.0`, an active scan reporting
-`progress=100%` / `state=FINISHED`, and the number of requests the scan sent (a live
-value, e.g. several hundred).
-
-What the learner should notice: scan state and progress are machine-readable over
-HTTP, so a pipeline can wait for completion without a screen.
-
-Proof artifact: ZAP API status response.
-
-## Step 2: Ask the API for the finding's rule identity and disposition (EO3b)
-
-Goal: Read the two things a gate cares about for the script-generated finding —
-which rule found the issue, and how it is rated.
-
-Application: macOS Terminal querying the ZAP API.
-Open / Navigate: Terminal in `demos/module2-demos/m2-demo2-zap-api-scan-evidence`; API `GET core/view/alerts`.
-Execute: `./steps/02-query-custom-rule-alert.sh`.
-
-Expected output: the script-generated alert `Globomantics unsafe reflection (custom
-rule)` (raised by the Script Active Scan Rules plugin, id `50000`), disposition
-`Medium · Medium` (risk · confidence), on parameter `note`.
-
-What the learner should notice: your Module 1 Python rule's finding carries a rule
-identity and a risk/confidence rating — the fields a quality gate later thresholds on.
-
-Proof artifact: ZAP API alert response.
-
-## Step 3: Generate the official JSON report and reconcile it (EO3b)
-
-Goal: Produce ZAP's archivable JSON report and confirm it carries the same finding
-as the live API, so what you archive matches what you queried.
-
-Application: macOS Terminal querying the ZAP API.
-Open / Navigate: Terminal in `demos/module2-demos/m2-demo2-zap-api-scan-evidence`; API `POST reports/action/generate`
-with template `traditional-json`. (In CI, the equivalent report is the downloadable
-`globo-ci-report` artifact from the authenticated-scan run.)
-Execute: `./steps/03-reconcile-json-report.sh`.
-
-Expected output: the `traditional-json` report containing the script-generated alert
-`Globomantics unsafe reflection (custom rule)`, `riskdesc` `Medium (Medium)` — the
-same script-generated alert and rating as the Step 2 API response.
-
-What the learner should notice: the report is a point-in-time record that reconciles
-with the live API, so the archived evidence is trustworthy.
-
-Proof artifact: ZAP JSON report.
-
-## Step 4: Read ZAP 2.17.0 Insights (EO3b)
-
-Goal: Judge how well the scan ran, not just what it found — Insights are operational
-signals that ZAP 2.17.0 includes in its report.
-
-Application: macOS Terminal querying the ZAP API.
-Open / Navigate: Terminal in `demos/module2-demos/m2-demo2-zap-api-scan-evidence`; the report's `insights[]` section.
-Execute: `./steps/04-read-zap-insights.sh`.
-
-Expected output: the report's Insights section reporting scan-effectiveness signals —
-for example logged ZAP errors (`insight.log.error`), logged warnings
-(`insight.log.warn`), and an authentication-failure percentage (`insight.auth.failure`);
-the counts are live values and the exact Insight keys vary per run. If the report carries no Insights section, the step fails
-(generic statistics are not accepted as a substitute).
-
-What the learner should notice: Insights are operational signals, not
-vulnerabilities — they tell you whether to trust the scan's coverage before acting
-on its findings.
-
-Proof artifact: ZAP Insights evidence.
-
-## Validate and reset
-
-`./scripts/preflight_check.sh` runs all four steps and writes a reviewable log to
-`logs/`, ending with `5 checks passed, 0 failed`. Tear down with
-`./scripts/demo_down.sh`.
+[← Module 2 catalog](../README.md) · [← Course home](../../../README.md)
