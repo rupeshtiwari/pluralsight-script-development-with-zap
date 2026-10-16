@@ -67,6 +67,31 @@ class BatchContractTests(unittest.TestCase):
                 self.assertEqual(block.count("<summary>"),4,(id_,number))
                 self.assertTrue(block.lstrip().splitlines()[2].strip()=="<details open>" if number==1 else block.lstrip().splitlines()[2].strip()=="<details>",(id_,number))
 
+    def test_demo_wrappers_find_shared_runtime_inside_a_temporary_worktree(self):
+        """All six startup/reset/teardown wrappers must resolve FOUR parents."""
+        import shutil
+        with tempfile.TemporaryDirectory(prefix="zap-batch-path-test-") as tmp:
+            tree = Path(tmp)/"checkout"
+            runtime = tree/"runtime"/"scripts"
+            runtime.mkdir(parents=True)
+            for name in ("demo_up.sh", "demo_down.sh"):
+                fake = runtime/name
+                fake.write_text('#!/bin/bash\\nprintf "SHARED:%s\\\\n" "$(basename "$0")"\\n', encoding="utf-8")
+                fake.chmod(0o755)
+            for demo, folder, _ in MODULE.DEMOS:
+                source = ROOT/folder/"scripts"
+                dest = tree/folder/"scripts"
+                dest.mkdir(parents=True)
+                for name in ("demo_up.sh", "demo_down.sh", "demo_reset.sh"):
+                    shutil.copy2(source/name, dest/name)
+                    run = subprocess.run(["bash", str(dest/name)],
+                                         cwd=tree/folder, capture_output=True, text=True)
+                    self.assertEqual(run.returncode, 0,
+                                     f"{demo}/{name}: {run.stdout} {run.stderr}")
+                    expected = 2 if name == "demo_reset.sh" else 1
+                    self.assertEqual(run.stdout.count("SHARED:"), expected,
+                                     f"{demo}/{name}: did not call correct shared runtime")
+
     def test_dry_run_does_not_create_evidence(self):
         with tempfile.TemporaryDirectory() as t:
             output=Path(t)/"not-created"
