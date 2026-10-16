@@ -128,7 +128,7 @@ class BatchContractTests(unittest.TestCase):
         import re
         for demo,folder,_ in MODULE.DEMOS:
             author=(ROOT/"docs/.author-instructions"/(demo+".md")).read_text()
-            steps=re.split(r"(?=^## Step [1-4]\\b)",author,flags=re.M)[1:]
+            steps=re.split(r"(?=^## Step [1-4]\b)",author,flags=re.M)[1:]
             self.assertEqual(len(steps),4,demo)
             self.assertIn("http://localhost:8000",author, demo)
             for i,step in enumerate(steps,1):
@@ -139,7 +139,7 @@ class BatchContractTests(unittest.TestCase):
                 self.assertIn("cd \""+folder+"\"",step,(demo,i))
                 self.assertIn("**Actual screen and browser check:**",step,(demo,i))
                 self.assertIn("<details open>",step,(demo,i))
-                narrator=MODULE.narrator_groups("## Step "+str(i)+" — fixture\\n"+step)[0]
+                narrator=MODULE.narrator_groups(step)[0]
                 self.assertEqual(len(narrator),3,(demo,i))
                 self.assertTrue(all(0 < len(words.split()) <= 27 for _,words,_ in narrator))
 
