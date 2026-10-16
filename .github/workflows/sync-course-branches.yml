@@ -55,7 +55,10 @@ jobs:
           from sync_all_branches import validate
           validate(Path.cwd(), 'main')
           PY
+          python3 -m unittest discover -s setup -p 'test_*.py' -v
           docker compose config --quiet
+      - name: Reconcile the exact reviewed legacy layout conflicts once
+        run: python3 runtime/scripts/reconcile_legacy_branch.py
       - name: Discover, merge, validate and push every child branch
         run: >-
           python3 runtime/scripts/sync_all_branches.py
