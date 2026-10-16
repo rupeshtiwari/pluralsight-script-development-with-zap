@@ -13,7 +13,15 @@
 
 [← Production dashboard](README.md) · [Open student's Module 2 demo README](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo1-before/demos/module2-demos/m2-demo1-authenticated-zap-github-actions/README.md)
 
-## Recording assignment
+<!-- demo-navigation:start -->
+<p align="center"><b>Author production guide · Demo 4 of 6</b></p>
+<p align="center">
+  <a href="m1-demo3.md"><img alt="Previous author guide: Module 1 Demo 3 — Python scanning and authentication" src="https://img.shields.io/badge/%E2%86%90_Previous-M1_Demo_3-130F25?style=for-the-badge"></a>
+  <a href="m2-demo2.md"><img alt="Next author guide: Module 2 Demo 2 — ZAP API and reports" src="https://img.shields.io/badge/Next_%E2%86%92-M2_Demo_2-FF1675?style=for-the-badge"></a>
+</p>
+<!-- demo-navigation:end -->
+
+## Prepare Recording
 
 **Record the `m2-demo1-before` branch**, completing the missing plan where applicable, and keep source changes traceable. The Developer runs the **one combined batch preflight before the recording team starts** and distributes `deliverables/m2-demo1/`: commands, verified logs, generated HTML and narration drafts.
 
@@ -21,7 +29,7 @@
 
 **Recording sequence:** show code or GUI context, display exact command and its key parameters for about 8 seconds, execute once, then reveal real output in 6–8-second proof windows; show real GitHub Actions job and report where the LO requires hosted proof. The Editor cuts waiting and focus changes cleanly.
 
-## Four fixed teaching steps
+## Recording Steps
 
 ## Step 1 — Run ZAP from the Automation Framework plan
 
@@ -29,26 +37,29 @@
 <summary><b>Open step 1 — where, command, output and production roles</b></summary>
 
 
-### The specific problem
+### Learning Goal
 
 A security test needing manual clicks is not a repeatable CI control.
 
 **What you are learning:** Configure headless ZAP in CI/CD *(EO3a)*
 
-### Which application and screen?
+### Demo Workspace
 
 
-**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+**Off-camera terminal setup:** Open VS Code integrated Terminal. Preserve any uncommitted work before changing branches. Paste these commands exactly; they select the demo starter and working folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
+cd "$HOME/pluralsight-script-development-with-zap"
+git switch m2-demo1-before
+cd "demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
 ```
 
-**Branch:** `m2-demo1-before` (complete any deliberately missing student source first). The separate `./steps/01-*.sh` command below is the only on-camera execution for this step.
+**Actual screen and browser check:** Check http://localhost:8000/ for local readiness off camera. Show ci/af-plan.yaml and the real GitHub Actions workflow at https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/actions/workflows/zap-authenticated-scan.yml; require current run SHA for hosted proof.
+
 
 **Open VS Code.** Inspect `ci/af-plan.yaml` and the `.github/workflows/zap-authenticated-scan.yml` workflow. Open **GitHub → Actions → authenticated-scan** for hosted proof of the exact current commit.
 
-### Run this exact command
+### Run Command
 
 **Where:** VS Code integrated Terminal for the local check; GitHub Actions page for CI evidence. **Current folder:** `demos/module2-demos/m2-demo1-authenticated-zap-github-actions`.
 
@@ -56,7 +67,7 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-a
 ./steps/01-run-headless-automation-plan.sh
 ```
 
-### Expected output and what it means
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -67,13 +78,13 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Operator Decision
 
 The Automation Framework plan moves the scan configuration into versioned code. The local step proves that plan can execute headlessly; a hosted run must be verified separately against the same plan revision.
 
 **How the investigation advances:** Inspect the user and scope declared by that plan.
 
-### Recorder — screen and timing
+### Recorder Shots
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Precisely_What_To_Show-0284c7"/></summary>
 <table>
@@ -85,18 +96,18 @@ The Automation Framework plan moves the scan configuration into versioned code. 
 <tr><td>Completion · 6–8s</td><td>Hold the actual PASS and/or hosted evidence; on an important GUI click provide 8s before and 8s after in the source take.</td></tr>
 </table></details>
 
-### Narrator — spoken lines
+### Spoken Narration
 
-<details><summary><img src="https://img.shields.io/badge/NARRATOR-Final_Spoken_Words-d946ef"/></summary>
+<details open><summary><img src="https://img.shields.io/badge/NARRATOR-Final_Spoken_Words-d946ef"/></summary>
 <table><tr><th>Shot</th><th>Speak Exactly After Confirming The Screen</th><th>Words</th></tr>
 <tr><td>Command</td><td>Run the Automation Framework plan headlessly so ZAP can assess Globomantics without clicking through a desktop interface.</td><td>17</td></tr>
-<tr><td>Output A</td><td>The runner uses Ubuntu twenty-four oh-four and starts ZAP from the pinned container image with autorun.</td><td>16</td></tr>
-<tr><td>Output B / decision</td><td>The completed job proves the plan executed. Always match the run's commit to the reference used during recording.</td><td>18</td></tr>
+<tr><td>Output A</td><td>The workflow specifies an Ubuntu runner and a pinned ZAP image. Confirm the hosted log actually used them before treating configuration as evidence.</td><td>23</td></tr>
+<tr><td>Output B / decision</td><td>This local result supports headless execution. A matching GitHub Actions run and commit are still required before claiming hosted CI proof.</td><td>21</td></tr>
 </table>
 The voice must match actual displayed evidence. Never read a sample result as an observed finding.
 </details>
 
-### Editor — highlights and cuts
+### Editor Actions
 
 <details><summary><img src="https://img.shields.io/badge/EDITOR-Single_Focus_Cuts-16a34a"/></summary>
 <p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
@@ -118,7 +129,7 @@ The voice must match actual displayed evidence. Never read a sample result as an
 <tr><td>Evidence files</td><td>Compare `preflight-step-01.log` and `recorded-step-01.log`, retain raw proof and Actions run ID/SHA in the take manifest. Mismatch requires a retake.</td></tr>
 </table></details>
 
-### Validation and confidence
+### Proof Review
 
 - **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo1/logs/preflight-step-01.log`, plus the matching live GUI or GitHub Actions artifact
 - **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
@@ -133,26 +144,29 @@ The voice must match actual displayed evidence. Never read a sample result as an
 <summary><b>Open step 2 — where, command, output and production roles</b></summary>
 
 
-### The specific problem
+### Learning Goal
 
 A headless job can silently scan only the login page without valid context or identity.
 
 **What you are learning:** Specify an authenticated context and bounded targets *(EO3a)*
 
-### Which application and screen?
+### Demo Workspace
 
 
-**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+**Off-camera terminal setup:** Open VS Code integrated Terminal. Preserve any uncommitted work before changing branches. Paste these commands exactly; they select the demo starter and working folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
+cd "$HOME/pluralsight-script-development-with-zap"
+git switch m2-demo1-before
+cd "demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
 ```
 
-**Branch:** `m2-demo1-before` (complete any deliberately missing student source first). The separate `./steps/02-*.sh` command below is the only on-camera execution for this step.
+**Actual screen and browser check:** Show ci/af-plan.yaml → env.contexts, script authentication, alice and target scope in VS Code. Terminal confirms configuration; hosted access requires Actions proof.
+
 
 **In VS Code**, scroll through `ci/af-plan.yaml` to `env.contexts`, authentication script, `alice` user, and `includePaths`. Keep the relevant YAML keys visible.
 
-### Run this exact command
+### Run Command
 
 **Where:** the VS Code integrated Terminal. **Current folder:** `demos/module2-demos/m2-demo1-authenticated-zap-github-actions`.
 
@@ -160,7 +174,7 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-a
 ./steps/02-inspect-authenticated-scan-context.sh
 ```
 
-### Expected output and what it means
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -173,13 +187,13 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Operator Decision
 
 The context specifies how ZAP logs in and where it is allowed to scan. This is the foundation for meaningful authenticated coverage.
 
 **How the investigation advances:** Confirm the original JavaScript and Python scripts are reused rather than replaced.
 
-### Recorder — screen and timing
+### Recorder Shots
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Precisely_What_To_Show-0284c7"/></summary>
 <table>
@@ -191,18 +205,18 @@ The context specifies how ZAP logs in and where it is allowed to scan. This is t
 <tr><td>Completion · 6–8s</td><td>Hold the actual PASS and/or hosted evidence; on an important GUI click provide 8s before and 8s after in the source take.</td></tr>
 </table></details>
 
-### Narrator — spoken lines
+### Spoken Narration
 
-<details><summary><img src="https://img.shields.io/badge/NARRATOR-Final_Spoken_Words-d946ef"/></summary>
+<details open><summary><img src="https://img.shields.io/badge/NARRATOR-Final_Spoken_Words-d946ef"/></summary>
 <table><tr><th>Shot</th><th>Speak Exactly After Confirming The Screen</th><th>Words</th></tr>
 <tr><td>Command</td><td>Define the authenticated context before scanning, so the hosted runner knows how to log in without manual steps.</td><td>18</td></tr>
-<tr><td>Output A</td><td>The authentication script obtains the session for user Alice, while the plan restricts testing to the authorized endpoints.</td><td>18</td></tr>
+<tr><td>Output A</td><td>The plan names scripted authentication, user Alice, and approved target paths. Those settings are necessary but do not alone prove a successful login.</td><td>23</td></tr>
 <tr><td>Output B / decision</td><td>Those settings decide coverage. A scanner that cannot reach the protected profile cannot substantiate its security findings.</td><td>17</td></tr>
 </table>
 The voice must match actual displayed evidence. Never read a sample result as an observed finding.
 </details>
 
-### Editor — highlights and cuts
+### Editor Actions
 
 <details><summary><img src="https://img.shields.io/badge/EDITOR-Single_Focus_Cuts-16a34a"/></summary>
 <p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
@@ -224,7 +238,7 @@ The voice must match actual displayed evidence. Never read a sample result as an
 <tr><td>Evidence files</td><td>Compare `preflight-step-02.log` and `recorded-step-02.log`, retain raw proof and Actions run ID/SHA in the take manifest. Mismatch requires a retake.</td></tr>
 </table></details>
 
-### Validation and confidence
+### Proof Review
 
 - **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo1/logs/preflight-step-02.log`, plus the matching live GUI or GitHub Actions artifact
 - **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
@@ -239,26 +253,29 @@ The voice must match actual displayed evidence. Never read a sample result as an
 <summary><b>Open step 3 — where, command, output and production roles</b></summary>
 
 
-### The specific problem
+### Learning Goal
 
 Rewriting the same script in CI introduces drift and makes the reported result harder to trust.
 
 **What you are learning:** Reuse configured custom security scripts in automation *(EO3a)*
 
-### Which application and screen?
+### Demo Workspace
 
 
-**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+**Off-camera terminal setup:** Open VS Code integrated Terminal. Preserve any uncommitted work before changing branches. Paste these commands exactly; they select the demo starter and working folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
+cd "$HOME/pluralsight-script-development-with-zap"
+git switch m2-demo1-before
+cd "demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
 ```
 
-**Branch:** `m2-demo1-before` (complete any deliberately missing student source first). The separate `./steps/03-*.sh` command below is the only on-camera execution for this step.
+**Actual screen and browser check:** Show script loading and requestor in VS Code then the authenticated GitHub Actions request/report. Loaded scripts alone do not prove outbound sender header.
+
 
 **In VS Code**, inspect the plan's script-loading jobs, requestor, and active scan. Then inspect the protected profile request or report in the same hosted GitHub Actions run.
 
-### Run this exact command
+### Run Command
 
 **Where:** the VS Code integrated Terminal. **Current folder:** `demos/module2-demos/m2-demo1-authenticated-zap-github-actions`.
 
@@ -266,7 +283,7 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-a
 ./steps/03-verify-reused-security-scripts.sh
 ```
 
-### Expected output and what it means
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -277,13 +294,13 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Operator Decision
 
 The plan loads the original extensions and targets the authenticated profile. This confirms script reuse and coverage, not every possible side effect of the HTTP Sender script.
 
 **How the investigation advances:** Locate the exact named custom finding in the current CI evidence.
 
-### Recorder — screen and timing
+### Recorder Shots
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Precisely_What_To_Show-0284c7"/></summary>
 <table>
@@ -295,9 +312,9 @@ The plan loads the original extensions and targets the authenticated profile. Th
 <tr><td>Completion · 6–8s</td><td>Hold the actual PASS and/or hosted evidence; on an important GUI click provide 8s before and 8s after in the source take.</td></tr>
 </table></details>
 
-### Narrator — spoken lines
+### Spoken Narration
 
-<details><summary><img src="https://img.shields.io/badge/NARRATOR-Final_Spoken_Words-d946ef"/></summary>
+<details open><summary><img src="https://img.shields.io/badge/NARRATOR-Final_Spoken_Words-d946ef"/></summary>
 <table><tr><th>Shot</th><th>Speak Exactly After Confirming The Screen</th><th>Words</th></tr>
 <tr><td>Command</td><td>Reuse the original JavaScript sender, Python active rule, and login script rather than rebuilding their behavior for CI.</td><td>18</td></tr>
 <tr><td>Output A</td><td>The requestor accesses the protected profile as Alice, enabling the custom rule to inspect the note parameter.</td><td>17</td></tr>
@@ -306,7 +323,7 @@ The plan loads the original extensions and targets the authenticated profile. Th
 The voice must match actual displayed evidence. Never read a sample result as an observed finding.
 </details>
 
-### Editor — highlights and cuts
+### Editor Actions
 
 <details><summary><img src="https://img.shields.io/badge/EDITOR-Single_Focus_Cuts-16a34a"/></summary>
 <p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
@@ -328,7 +345,7 @@ The voice must match actual displayed evidence. Never read a sample result as an
 <tr><td>Evidence files</td><td>Compare `preflight-step-03.log` and `recorded-step-03.log`, retain raw proof and Actions run ID/SHA in the take manifest. Mismatch requires a retake.</td></tr>
 </table></details>
 
-### Validation and confidence
+### Proof Review
 
 - **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo1/logs/preflight-step-03.log`, plus the matching live GUI or GitHub Actions artifact
 - **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
@@ -343,26 +360,29 @@ The voice must match actual displayed evidence. Never read a sample result as an
 <summary><b>Open step 4 — where, command, output and production roles</b></summary>
 
 
-### The specific problem
+### Learning Goal
 
 A successful job could still omit the application-specific finding it was supposed to prove.
 
 **What you are learning:** Validate authenticated security results in a CI report *(EO3a)*
 
-### Which application and screen?
+### Demo Workspace
 
 
-**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+**Off-camera terminal setup:** Open VS Code integrated Terminal. Preserve any uncommitted work before changing branches. Paste these commands exactly; they select the demo starter and working folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
+cd "$HOME/pluralsight-script-development-with-zap"
+git switch m2-demo1-before
+cd "demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
 ```
 
-**Branch:** `m2-demo1-before` (complete any deliberately missing student source first). The separate `./steps/04-*.sh` command below is the only on-camera execution for this step.
+**Actual screen and browser check:** Show Actions run matching the recorded SHA and its report artifact with the named Python alert, protected profile, note parameter and risk.
+
 
 **Open GitHub → Actions → latest matching authenticated scan run → Artifacts / scan report**. Keep the run's branch and SHA visible. Run the terminal step in VS Code.
 
-### Run this exact command
+### Run Command
 
 **Where:** the VS Code integrated Terminal; inspect the actual GitHub Actions artifact separately. **Current folder:** `demos/module2-demos/m2-demo1-authenticated-zap-github-actions`.
 
@@ -370,7 +390,7 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-a
 ./steps/04-confirm-authenticated-custom-alert.sh
 ```
 
-### Expected output and what it means
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -382,13 +402,13 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Operator Decision
 
 The report's named custom finding, risk and affected parameter connect the headless job to the original application-specific security check. A historical successful job does not prove a newer commit.
 
 **How the investigation advances:** A repeatable authenticated CI report can now become a trusted source for API-driven decisions.
 
-### Recorder — screen and timing
+### Recorder Shots
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Precisely_What_To_Show-0284c7"/></summary>
 <table>
@@ -400,18 +420,18 @@ The report's named custom finding, risk and affected parameter connect the headl
 <tr><td>Completion · 6–8s</td><td>Hold the actual PASS and/or hosted evidence; on an important GUI click provide 8s before and 8s after in the source take.</td></tr>
 </table></details>
 
-### Narrator — spoken lines
+### Spoken Narration
 
-<details><summary><img src="https://img.shields.io/badge/NARRATOR-Final_Spoken_Words-d946ef"/></summary>
+<details open><summary><img src="https://img.shields.io/badge/NARRATOR-Final_Spoken_Words-d946ef"/></summary>
 <table><tr><th>Shot</th><th>Speak Exactly After Confirming The Screen</th><th>Words</th></tr>
 <tr><td>Command</td><td>Inspect the report for the exact custom Python finding, not just the workflow's successful status.</td><td>15</td></tr>
-<tr><td>Output A</td><td>The finding identifies the protected profile's note parameter, and the reported risk is Medium.</td><td>14</td></tr>
+<tr><td>Output A</td><td>Read the reported risk and note parameter from the current report. Never substitute an older successful scan for this commit's actual evidence.</td><td>22</td></tr>
 <tr><td>Output B / decision</td><td>The pipeline explicitly asserts this custom name. A built-in XSS finding cannot replace the required application-specific rule.</td><td>17</td></tr>
 </table>
 The voice must match actual displayed evidence. Never read a sample result as an observed finding.
 </details>
 
-### Editor — highlights and cuts
+### Editor Actions
 
 <details><summary><img src="https://img.shields.io/badge/EDITOR-Single_Focus_Cuts-16a34a"/></summary>
 <p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
@@ -433,7 +453,7 @@ The voice must match actual displayed evidence. Never read a sample result as an
 <tr><td>Evidence files</td><td>Compare `preflight-step-04.log` and `recorded-step-04.log`, retain raw proof and Actions run ID/SHA in the take manifest. Mismatch requires a retake.</td></tr>
 </table></details>
 
-### Validation and confidence
+### Proof Review
 
 - **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo1/logs/preflight-step-04.log`, plus the matching live GUI or GitHub Actions artifact
 - **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
@@ -445,3 +465,11 @@ The voice must match actual displayed evidence. Never read a sample result as an
 ## End the production take
 
 Stop containers with `./scripts/demo_down.sh`, retain the before/after SHAs and proof, and deliver the take to the Editor. The Narrator uses the generated step transcripts plus the actual recorded output. Do not rerun the Developer's six-demo preflight in this per-demo process.
+
+<!-- demo-navigation:start -->
+<p align="center"><b>Author production guide · Demo 4 of 6</b></p>
+<p align="center">
+  <a href="m1-demo3.md"><img alt="Previous author guide: Module 1 Demo 3 — Python scanning and authentication" src="https://img.shields.io/badge/%E2%86%90_Previous-M1_Demo_3-130F25?style=for-the-badge"></a>
+  <a href="m2-demo2.md"><img alt="Next author guide: Module 2 Demo 2 — ZAP API and reports" src="https://img.shields.io/badge/Next_%E2%86%92-M2_Demo_2-FF1675?style=for-the-badge"></a>
+</p>
+<!-- demo-navigation:end -->

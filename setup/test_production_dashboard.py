@@ -183,7 +183,8 @@ class DashboardTests(unittest.TestCase):
         page=d.render_dashboard(self.batch,[self.row],self.auth).read_text()
         order=[page.find('data-role="'+x+'"') for x in ('developer','recorder','narrator','editor','cqa')]
         self.assertEqual(order,sorted(order))
-        self.assertEqual(page.count("class='copy-nav'"),12)
+        self.assertEqual(page.count("class='copy-nav'"),24)
+        self.assertEqual(page.count('Copy branch and folder commands'),12)
         self.assertIn('data-cd=',page)
         self.assertIn('copy-narration-step',page)
         self.assertIn('Synchronize with the narrator',page)

@@ -11,6 +11,14 @@
 
 </div>
 
+<!-- demo-navigation:start -->
+<p align="center"><b>Student exercise · Demo 2 of 6</b></p>
+<p align="center">
+  <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo1-before/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/README.md"><img alt="Previous student demo: Module 1 Demo 1 — Injection, XSS and CSRF" src="https://img.shields.io/badge/%E2%86%90_Previous-M1_Demo_1-130F25?style=for-the-badge"></a>
+  <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo3-before/demos/module1-demos/m1-demo3-python-scanning-authentication/README.md"><img alt="Next student demo: Module 1 Demo 3 — Python scanning and authentication" src="https://img.shields.io/badge/Next_%E2%86%92-M1_Demo_3-FF1675?style=for-the-badge"></a>
+</p>
+<!-- demo-navigation:end -->
+
 ## The problem you are solving
 
 Maya wants every authorized test request to be unmistakable in ZAP traffic. Writing JavaScript is not enough: she must register the HTTP Sender hook, prove a header was added to a real outgoing request, inspect the Script Console, and confirm the registration.
@@ -251,6 +259,14 @@ After Step 4, you should be able to explain how the JavaScript hook affected a r
 To inspect the finished example, switch to `m1-demo2-after` **after preserving any exercise changes**. Compare without modifying files using `git diff m1-demo2-before..m1-demo2-after -- demos/module1-demos/m1-demo2-javascript-http-sender`. For operational-only demos, the important difference may be live scan evidence rather than source code.
 
 **Course-wide validation:** The Developer can run `./setup/run-all-demo-preflights.sh` **once from the repository root** to validate all six completed demo branches and produce real evidence bundles. It is not another script to run after each step.
+
+<!-- demo-navigation:start -->
+<p align="center"><b>Student exercise · Demo 2 of 6</b></p>
+<p align="center">
+  <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo1-before/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/README.md"><img alt="Previous student demo: Module 1 Demo 1 — Injection, XSS and CSRF" src="https://img.shields.io/badge/%E2%86%90_Previous-M1_Demo_1-130F25?style=for-the-badge"></a>
+  <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo3-before/demos/module1-demos/m1-demo3-python-scanning-authentication/README.md"><img alt="Next student demo: Module 1 Demo 3 — Python scanning and authentication" src="https://img.shields.io/badge/Next_%E2%86%92-M1_Demo_3-FF1675?style=for-the-badge"></a>
+</p>
+<!-- demo-navigation:end -->
 
 [← Module 1 demo catalog](../README.md) · [← Course home](../../../README.md)
 
