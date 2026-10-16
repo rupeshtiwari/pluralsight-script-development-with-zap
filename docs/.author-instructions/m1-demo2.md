@@ -31,6 +31,26 @@
 
 ## Recording Steps
 
+<!-- demo-readiness:start -->
+## Demo Readiness
+
+**Approved duration:** 5 minutes. **Execution steps:** four, unchanged. **Acceptance target:** overall review score at least 98/100.
+
+| Step | Current evidence-backed score | Blocking review |
+|---|---|---|
+| 1 | Not assessed | Matching Mac take, required GUI/Actions proof and final spoken coverage |
+| 2 | Not assessed | Matching Mac take, required GUI/Actions proof and final spoken coverage |
+| 3 | Not assessed | Matching Mac take, required GUI/Actions proof and final spoken coverage |
+| 4 | Not assessed | Matching Mac take, required GUI/Actions proof and final spoken coverage |
+
+**Overall confidence:** NOT ASSESSED. Once all four step scores are supported, calculate `(step1 + step2 + step3 + step4) / 4`; do not average only the reviewed steps. A missing critical proof keeps release on HOLD even when the average reaches 98.
+
+**Speech budget:** current short-form draft 234 whitespace words; final 5-minute target 644 spoken words under the owner contract. Remaining before final audio validation: 410 words. This draft is not a complete timed recording script. Expand useful source/action/result teaching within the same four steps; do not fill time with invented stories.
+
+**Recording budget:** approximately 75 seconds per step, including source work, execution and proof. This is an editing plan, not a measured duration or a reason to leave a static screen.
+
+**Review method:** assess LO and outline coverage, technical correctness, example quality, learner clarity, operator decision-making and recorded proof against the exact source SHA. Record the reviewer, rationale and evidence for every numeric score. Old 88–96% source estimates lacked a documented common rubric and are retired, not promoted.
+<!-- demo-readiness:end -->
 ## Step 1 — Load the JavaScript HTTP Sender script
 
 <details open>
@@ -88,6 +108,10 @@ Loading and enabling a script is separate from sending an HTTP message. The outp
 
 **How this connects:** Send a fresh request through ZAP to prove the hook executed.
 
+<!-- capture-location:start -->
+<table><tr><th>Capture moment</th><th>Exact action and result location</th></tr><tr><td>Before Enter</td><td>Use VS Code integrated Terminal. Show the named step command already provided below/above; keep its full filename readable for about eight seconds. Directory and branch setup are off camera.</td></tr><tr><td>After Enter</td><td>Stay in the terminal for registration output. Then open http://localhost:8080/zap/ and select Scripts, HTTP Sender, globomantics-marker.</td></tr><tr><td>Evidence to record</td><td>Actual name, detected JavaScript engine and enabled registration; declared marker format is not yet observed traffic. Hold each meaningful field for six to eight seconds; retain the matching raw log and take ID.</td></tr><tr><td>Meaning and decision</td><td>Use the Spoken Narration for this exact field, then explain whether the evidence is enough to proceed. If it is absent, stop: neither a source declaration nor an expected output is an observed result.</td></tr><tr><td>Editor handoff</td><td>Mark the result region, then the actual value being explained. Clear old overlays on pane change. During an otherwise still explanation beyond 12 seconds, use one relevant 6–8-second takeaway callout; never invent a successful result.</td></tr></table>
+<!-- capture-location:end -->
+
 ### Recorder Shots
 
 <details open>
@@ -142,11 +166,9 @@ Only record a statement after the matching evidence is visible in the take. The 
 
 - **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo2/logs/preflight-step-01.log` and the same-take GUI evidence
 - **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
-- **Source confidence:** Source-review confidence 95%, before live rehearsal. An estimate below the owner's release threshold cannot
-- **Release:** Missing or contradictory proof remains NOT VERIFIED; do not increase a score to 94% without evidence
+- **Release:** HOLD until evidence review; target overall score 98/100, never automatic approval
 
 </details>
-
 ## Step 2 — Prove the marker on an outbound request
 
 <details>
@@ -203,6 +225,10 @@ The header in the actual ZAP-captured request proves the JavaScript hook modifie
 
 **How this connects:** Now establish that the script also printed its named console message.
 
+<!-- capture-location:start -->
+<table><tr><th>Capture moment</th><th>Exact action and result location</th></tr><tr><td>Before Enter</td><td>Use VS Code integrated Terminal. Show the named step command already provided below/above; keep its full filename readable for about eight seconds. Directory and branch setup are off camera.</td></tr><tr><td>After Enter</td><td>Run in the terminal, then switch to http://localhost:8080/zap/. Select History, the newest /greet?name=marker- request matching this take, then Request.</td></tr><tr><td>Evidence to record</td><td>Actual X-Globomantics-Marker header and its value in that captured request. Hold each meaningful field for six to eight seconds; retain the matching raw log and take ID.</td></tr><tr><td>Meaning and decision</td><td>Use the Spoken Narration for this exact field, then explain whether the evidence is enough to proceed. If it is absent, stop: neither a source declaration nor an expected output is an observed result.</td></tr><tr><td>Editor handoff</td><td>Mark the result region, then the actual value being explained. Clear old overlays on pane change. During an otherwise still explanation beyond 12 seconds, use one relevant 6–8-second takeaway callout; never invent a successful result.</td></tr></table>
+<!-- capture-location:end -->
+
 ### Recorder Shots
 
 <details open>
@@ -257,11 +283,9 @@ Only record a statement after the matching evidence is visible in the take. The 
 
 - **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo2/logs/preflight-step-02.log` and the same-take GUI evidence
 - **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
-- **Source confidence:** Source-review confidence 96%, before live rehearsal. An estimate below the owner's release threshold cannot
-- **Release:** Missing or contradictory proof remains NOT VERIFIED; do not increase a score to 94% without evidence
+- **Release:** HOLD until evidence review; target overall score 98/100, never automatic approval
 
 </details>
-
 ## Step 3 — Verify the live Script Console output
 
 <details>
@@ -318,6 +342,10 @@ Compare the expected print format with the new line that actually appears in ZAP
 
 **How this connects:** Confirm the script remains registered and enabled in this ZAP session.
 
+<!-- capture-location:start -->
+<table><tr><th>Capture moment</th><th>Exact action and result location</th></tr><tr><td>Before Enter</td><td>Use VS Code integrated Terminal. Show the named step command already provided below/above; keep its full filename readable for about eight seconds. Directory and branch setup are off camera.</td></tr><tr><td>After Enter</td><td>Trigger the request in the terminal; then switch to http://localhost:8080/zap/ and open Scripts, Script Console. Select the fresh line with the matching request URL.</td></tr><tr><td>Evidence to record</td><td>Fresh [globo-marker] line from the GUI; the terminal EXPECTED-format line does not count as console proof. Hold each meaningful field for six to eight seconds; retain the matching raw log and take ID.</td></tr><tr><td>Meaning and decision</td><td>Use the Spoken Narration for this exact field, then explain whether the evidence is enough to proceed. If it is absent, stop: neither a source declaration nor an expected output is an observed result.</td></tr><tr><td>Editor handoff</td><td>Mark the result region, then the actual value being explained. Clear old overlays on pane change. During an otherwise still explanation beyond 12 seconds, use one relevant 6–8-second takeaway callout; never invent a successful result.</td></tr></table>
+<!-- capture-location:end -->
+
 ### Recorder Shots
 
 <details open>
@@ -372,11 +400,9 @@ Only record a statement after the matching evidence is visible in the take. The 
 
 - **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo2/logs/preflight-step-03.log` and the same-take GUI evidence
 - **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
-- **Source confidence:** Source-review confidence 86%, before live rehearsal. An estimate below the owner's release threshold cannot
-- **Release:** Missing or contradictory proof remains NOT VERIFIED; do not increase a score to 94% without evidence
+- **Release:** HOLD until evidence review; target overall score 98/100, never automatic approval
 
 </details>
-
 ## Step 4 — Verify the script registration
 
 <details>
@@ -435,6 +461,10 @@ The script has a stable source path, a valid HTTP Sender type, and enabled regis
 
 **How this connects:** The demo finishes with source, modified request, console message and registration all independently observed.
 
+<!-- capture-location:start -->
+<table><tr><th>Capture moment</th><th>Exact action and result location</th></tr><tr><td>Before Enter</td><td>Use VS Code integrated Terminal. Show the named step command already provided below/above; keep its full filename readable for about eight seconds. Directory and branch setup are off camera.</td></tr><tr><td>After Enter</td><td>Inspect terminal registration fields; then return to http://localhost:8080/zap/, Scripts, HTTP Sender, globomantics-marker.</td></tr><tr><td>Evidence to record</td><td>Registered name, type, engine and enabled state from the same live ZAP session. Hold each meaningful field for six to eight seconds; retain the matching raw log and take ID.</td></tr><tr><td>Meaning and decision</td><td>Use the Spoken Narration for this exact field, then explain whether the evidence is enough to proceed. If it is absent, stop: neither a source declaration nor an expected output is an observed result.</td></tr><tr><td>Editor handoff</td><td>Mark the result region, then the actual value being explained. Clear old overlays on pane change. During an otherwise still explanation beyond 12 seconds, use one relevant 6–8-second takeaway callout; never invent a successful result.</td></tr></table>
+<!-- capture-location:end -->
+
 ### Recorder Shots
 
 <details open>
@@ -489,8 +519,7 @@ Only record a statement after the matching evidence is visible in the take. The 
 
 - **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo2/logs/preflight-step-04.log` and the same-take GUI evidence
 - **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
-- **Source confidence:** Source-review confidence 95%, before live rehearsal. An estimate below the owner's release threshold cannot
-- **Release:** Missing or contradictory proof remains NOT VERIFIED; do not increase a score to 94% without evidence
+- **Release:** HOLD until evidence review; target overall score 98/100, never automatic approval
 
 </details>
 
