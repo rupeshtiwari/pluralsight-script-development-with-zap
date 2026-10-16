@@ -77,7 +77,7 @@ class DashboardTests(unittest.TestCase):
         proc=subprocess.run([sys.executable,str(formatter),"star","Rule identity","40012","focus"],
                             text=True,capture_output=True,env=env,check=True)
         self.assertIn("\x1b[38;2;255;22;117m",proc.stdout)
-        fields=d.rows_from_terminal(proc.stdout, proc.stdout)
+        fields=d.rows_from_terminal(proc.stdout,proc.stdout)
         self.assertEqual(fields,[{"label":"Rule identity","value":"40012","focus":True}])
         self.assertIn("│",proc.stdout)
 
@@ -101,5 +101,115 @@ class DashboardTests(unittest.TestCase):
         out=d.style_terminal(value)
         self.assertIn('&lt;svg',out)
         self.assertNotIn('<svg',out)
+
+    def test_exact_command_and_location_navigation_all_demos(self):
+        from production_plan import PLAN, LAB_DIRS, REPO_URL
+        self.assertEqual(len(PLAN),6)
+        self.assertEqual(sum(map(len,PLAN.values())),24)
+        self.assertTrue(all(len(items)==4 for items in PLAN.values()))
+        path=d.render_dashboard(self.batch,[self.row],self.auth)
+        html=path.read_text()
+        self.assertIn('cd &quot;$HOME/pluralsight-script-development-with-zap/',html)
+        self.assertIn('Step A · open application manually',html)
+        self.assertIn('Starter',html)
+        self.assertIn(REPO_URL,html)
+        self.assertIn('Process', ''.join(PLAN['m2-demo3'][2]))
+
+    def test_editor_has_individual_box_label_arrow_and_timed_gist(self):
+        html=d.render_dashboard(self.batch,[self.row],self.auth).read_text()
+        self.assertIn('single large blue region box',html)
+        self.assertIn('Transform Pink',html)
+        self.assertIn('purple arrow',html)
+        self.assertIn('6–8 s',html)
+        self.assertIn('same screen stays beyond 12 s',html)
+        self.assertIn('NO VERIFIED STEP PROOF',html)
+
+    def test_machine_handoff_has_actual_capture_and_draft_not_frozen(self):
+        d.render_dashboard(self.batch,[self.row],self.auth)
+        handoff=json.loads((self.batch/'m1-demo1/narration-handoff.json').read_text())
+        self.assertEqual(handoff['reference_sha'],'0'*40)
+        self.assertEqual(handoff['steps'][0]['observed_fields'][0]['value'],'<live-count-in-raw-log>')
+        self.assertFalse(handoff['steps'][1]['proof_verified'])
+        self.assertEqual(handoff['steps'][0]['command'],'./steps/01-named-fixture.sh')
+        self.assertTrue((self.batch/'m1-demo1/narration-final.TEMPLATE.json').exists())
+        self.assertFalse((self.batch/'m1-demo1/narration-final.json').exists())
+        self.assertIn('BEFORE command', (self.batch/'m1-demo1/NARRATION_HANDOFF.md').read_text())
+
+    def test_final_import_and_tts_models_require_exact_sha(self):
+        from narration_handoff import validate_final,tts_text,evidence_ready
+        d.render_dashboard(self.batch,[self.row],self.auth)
+        src=json.loads((self.batch/'m1-demo1/narration-final.TEMPLATE.json').read_text())
+        for item in src['steps']:
+            for stage in ('before','during','after'):
+                if not item[stage]:item[stage]='Test-only fixture speech for the selected evidence.' 
+        imported,errors=validate_final(src,'m1-demo1',self.row['sha'],self.row['step_commands'])
+        self.assertFalse(errors)
+        self.assertFalse(evidence_ready(imported))
+        self.assertIn('<break time="1.0s" />',tts_text(imported,'v2'))
+        self.assertIn('[pause]',tts_text(imported,'v4'))
+        src['reference_sha']='bad-sha'
+        bad,errors=validate_final(src,'m1-demo1',self.row['sha'],self.row['step_commands'])
+        self.assertIsNone(bad)
+        self.assertTrue(any('reference_sha' in x for x in errors))
+
+    def test_imported_speech_rendered_but_not_self_approved(self):
+        d.render_dashboard(self.batch,[self.row],self.auth)
+        src=json.loads((self.batch/'m1-demo1/narration-final.TEMPLATE.json').read_text())
+        for item in src['steps']:
+            for stage in ('before','during','after'):
+                if not item[stage]:item[stage]='Test-only fixture speech for the selected evidence.' 
+        src['steps'][0]['before']='Custom operator narration for the approved action.'
+        (self.batch/'m1-demo1/narration-final.json').write_text(json.dumps(src))
+        html=d.render_dashboard(self.batch,[self.row],self.auth).read_text()
+        self.assertIn('Custom operator narration',html)
+        self.assertIn('same-take evidence and CQA still pending',html)
+        self.assertIn('class=\'copy-demo-narration\'',html)
+        self.assertIn('class=\'copy-narration-step\'',html)
+
+    def test_all_24_workflows_specify_real_app_source_pane_and_navigation(self):
+        from production_plan import SCREENS, PLAN, LAB_DIRS, screen_action
+        self.assertEqual(len(SCREENS),6)
+        self.assertEqual(sum(len(x) for x in SCREENS.values()),24)
+        for demo, steps in SCREENS.items():
+            self.assertEqual(len(steps),4,demo)
+            self.assertIn(demo,PLAN)
+            for number in range(1,5):
+                item=screen_action(demo,number)
+                for needed in ('application','source','pane','preparation','proof'):
+                    self.assertTrue(item[needed].strip(), (demo,number,needed))
+                self.assertIn('demos/module',LAB_DIRS[demo])
+
+    def test_role_order_and_copyable_cd_command_for_each_step(self):
+        page=d.render_dashboard(self.batch,[self.row],self.auth).read_text()
+        order=[page.find('data-role="'+x+'"') for x in ('developer','recorder','narrator','editor','cqa')]
+        self.assertEqual(order,sorted(order))
+        self.assertEqual(page.count("class='copy-nav'"),12)
+        self.assertIn('data-cd=',page)
+        self.assertIn('copy-narration-step',page)
+        self.assertIn('Synchronize with the narrator',page)
+
+    def test_editor_changes_with_imported_final_narration(self):
+        d.render_dashboard(self.batch,[self.row],self.auth)
+        final=json.loads((self.batch/'m1-demo1/narration-final.TEMPLATE.json').read_text())
+        for entry in final['steps']:
+            for phase in ('before','during','after'):
+                if not entry[phase]:entry[phase]='Temporary test fixture speech only.'
+        final['steps'][0]['during']='Inspect the recorded current status and justify the security decision.'
+        (self.batch/'m1-demo1/narration-final.json').write_text(json.dumps(final))
+        page=d.render_dashboard(self.batch,[self.row],self.auth).read_text()
+        self.assertIn('Inspect the recorded current status',page)
+        self.assertIn('imported narration',page)
+        self.assertIn('HOLD — primary value not observed',page)
+
+    def test_script_export_has_model_appropriate_tags_only(self):
+        from narration_handoff import tts_text
+        data={'steps':[{'before':'One cause.','during':'Observed field means X.','after':'Keep this decision.'}]}
+        v2=tts_text(data,'v2');v4=tts_text(data,'v4')
+        self.assertIn('<break time="1.0s" />',v2)
+        self.assertNotIn('[pause]',v2)
+        self.assertIn('[pause]',v4)
+        self.assertNotIn('<break',v4)
+        self.assertNotIn('Step',v2)
+        self.assertNotIn('Step',v4)
 
 if __name__=='__main__':unittest.main()
