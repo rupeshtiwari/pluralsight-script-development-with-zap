@@ -1,240 +1,245 @@
-# Enforce Security Quality Gates in GitHub Actions
+# Module 2 · Demo 3 — Enforce a security quality gate
 
 <div align="center">
 
-![ZAP](https://img.shields.io/badge/OWASP_ZAP-CI_Quality_Gate-0284c7?style=for-the-badge)
-![Lab](https://img.shields.io/badge/Practice-m2-demo3-d946ef?style=for-the-badge)
+![Training](https://img.shields.io/badge/Globomantics-Authorized_Lab-130F25?style=for-the-badge)
+![ZAP](https://img.shields.io/badge/OWASP_ZAP-Risk_Gate-FF1675?style=for-the-badge)
 
-<img src="../../../docs/learner-diagrams/m2-demo3-architecture.svg" width="100%" alt="Enforce Security Quality Gates in GitHub Actions architecture"/>
+<img src="../../../docs/learner-diagrams/m2-demo3-architecture.svg" width="100%" alt="Module 2 · Demo 3 — Enforce a security quality gate architecture"/>
 
-<sub>Illustrative architecture · Generated using ChatGPT · Verify the actual API, report or CI results</sub>
+<sub>Illustrative workflow · Generated using ChatGPT · Verify actual evidence in your own lab</sub>
 
 </div>
 
-## What Problem Are You Solving?
+## The problem you are solving
 
-An organization wants to ignore a reviewed benign header finding on one path while still blocking release if reflected XSS remains High risk. Maya must show the exact filter, job order, final report and process exit—not simply interpret every red build as a valid security block.
+The team wants to disregard one reviewed benign header issue but still block a release on High-risk reflected XSS. The filter, report and actual process exit must show a real policy decision—not a generic red CI job.
 
-**Your outcome:** Understand how the system behaves, run four meaningful commands, inspect the real output and explain the engineering decision. No external course outline is required.
+**What success looks like:** A scoped False Positive filter alongside a verified High-risk block and report evidence. All four steps address parts of this same engineering problem.
 
-## Learning Objective Covered
+## What you will learn in this demonstration
 
-<table><thead><tr><th>Objective</th><th>What You Will Learn</th></tr></thead><tbody>
-<tr><td><code>EO3c</code></td><td>Apply threshold-based quality gates for security findings in build pipelines</td></tr>
-</tbody></table>
+You will make a release decision from the final alert set instead of simply reacting to a red build:
 
-## Your Four-Step Learning Path
+- Apply a scoped alert filter rather than ignoring an entire security rule *(EO3c)*
+- Order the automation jobs, verify final High-risk evidence, and confirm the CI exit status *(EO3c)*
+
+You do not need the separate course outline to understand the objective or follow the exercises.
+
+## From setup to a defensible decision
 
 ```mermaid
 flowchart LR
-  N0["Scoped alertFilter"]
-  N1["Active scan"]
-  N2["Filtered report"]
-  N3["exitStatus / CI"]
-  N0 --> N1 --> N2 --> N3
+  S1["Review scoped filter"]
+  S2["Inspect job order"]
+  S3["Prove blocked build"]
+  S4["Verify final report"]
+  S1 --> S2
+  S2 --> S3
+  S3 --> S4
 ```
 
-<table>
-<thead><tr><th>Step</th><th>Exact Command</th><th>What You Do</th><th>What To Verify</th><th>Why It Matters</th></tr></thead>
-<tbody><tr><td><b>1</b></td><td><code>./steps/01-inspect-false-positive-filter.sh</code></td><td>Scope the known benign rule 10021 on /greet</td><td>Actual alertFilter rule ID, URL and False Positive setting</td><td>Narrow filtering avoids suppressing unrelated risk</td></tr>
-<tr><td><b>2</b></td><td><code>./steps/02-check-automation-job-order.sh</code></td><td>Verify filter, scan, report and gate ordering</td><td>alertFilter before activeScan; exitStatus last</td><td>Order determines when the disposition is applied</td></tr>
-<tr><td><b>3</b></td><td><code>./steps/03-run-security-quality-gate.sh</code></td><td>Run the plan and capture the real exit code</td><td>Actual remaining High finding and exit code 1</td><td>A deliberate security block differs from failed infrastructure</td></tr>
-<tr><td><b>4</b></td><td><code>./steps/04-verify-filtered-alert-report.sh</code></td><td>Inspect both expected report findings</td><td>Rule 10021 disposed False Positive; rule 40012 remains High</td><td>Prove the filter suppressed noise without hiding real risk</td></tr></tbody></table>
+## Start the demo's application
 
-## Start This Exercise
+Mac dependencies are prepared **once for the course** using `setup/setup-macos.sh`, as shown in the [course README](../../../README.md). Each demo must then start its **own local training stack**:
 
-From the repository root:
+<details open>
+<summary><b>Open the exact branch and start Module 2 Demo 3</b></summary>
+
+**Where:** macOS Terminal or VS Code integrated Terminal, from the root of your existing Git checkout.
 
 ```bash
 git fetch origin
 git switch m2-demo3-before
-./setup/setup-macos.sh
 cd demos/module2-demos/m2-demo3-security-quality-gates
 ./scripts/demo_up.sh
 ```
 
-If the one-time Mac setup has already completed, you can skip that setup command. Execute Steps 1–4 above from this demo directory. Then run:
+**Expected start:** healthy Globomantics, Postgres, MongoDB, and ZAP services, reported by the startup script. If they are not ready, stop and inspect the actual output before proceeding.
+
+**URLs:** [Training application](http://localhost:8000/) · [ZAP GUI](http://localhost:8080/zap/) · [ZAP API and proxy](http://localhost:8090/). The starter intentionally omits the finished `ci/gate-plan.yaml`. Author it using the exercise before executing the quality gate.
+
+</details>
+
+## Complete the four demo steps
+
+<details open>
+<summary><b>Step 1 — Inspect the False Positive filter</b> · Review scoped filter</summary>
+
+### The specific problem
+
+A global ignore list can hide risk elsewhere in the application.
+
+**What you are learning:** Configure risk disposition without suppressing unrelated findings *(EO3c)*
+
+### Which application and screen?
+
+**Open VS Code**, inspect `ci/gate-plan.yaml` at `alertFilter`, and keep rule ID, URL and new disposition visible in the editor. Run the command in VS Code Terminal.
+
+### Run this exact command
+
+**Where:** the VS Code integrated Terminal. **Current folder:** `demos/module2-demos/m2-demo3-security-quality-gates`.
 
 ```bash
-./scripts/preflight_check.sh
+./steps/01-inspect-false-positive-filter.sh
+```
+
+### Expected output and what it means
+
+This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
+
+<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
+<tbody><tr><td><b>Filtered rule (ruleId)</b></td><td><code>10021 (X-Content-Type-Options Header Missing)</code></td><td>Exactly which finding</td></tr>
+<tr><td><b>New disposition (newRisk)</b></td><td><code>False Positive</code></td><td>Scoped treatment</td></tr>
+<tr><td><b>Scope (url)</b></td><td><code>http://app:8000/greet.*</code></td><td>Do not globally disable</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS filter configuration is correct</code></td><td>Report still needs verification</td></tr></tbody></table>
+
+**Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
+
+### How to interpret this result
+
+The filter records a reviewed disposition for one class of benign finding on a specific path. Static YAML proves configuration, not that the report actually applied it.
+
+**How the investigation advances:** Make sure the filter applies before scans create alerts.
+
+</details>
+
+<details>
+<summary><b>Step 2 — Verify scan and gate order</b> · Inspect job order</summary>
+
+### The specific problem
+
+Applying the filter after scanning can leave earlier alerts unaffected.
+
+**What you are learning:** Put filtering and reporting in a defensible pipeline sequence *(EO3c)*
+
+### Which application and screen?
+
+**Remain in VS Code**, scroll within `ci/gate-plan.yaml` to the jobs list. Show `alertFilter`, `requestor`, `activeScan`, `report`, and `exitStatus` in order.
+
+### Run this exact command
+
+**Where:** the VS Code integrated Terminal. **Current folder:** `demos/module2-demos/m2-demo3-security-quality-gates`.
+
+```bash
+./steps/02-check-automation-job-order.sh
+```
+
+### Expected output and what it means
+
+This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
+
+<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
+<tbody><tr><td><b>Job order</b></td><td><code>alertFilter → requestor → activeScan → report → exitStatus</code></td><td>Correct order</td></tr>
+<tr><td><b>alertFilter before activeScan</b></td><td><code>yes</code></td><td>New alerts inherit disposition</td></tr>
+<tr><td><b>exitStatus runs last</b></td><td><code>yes</code></td><td>Gate uses final alert set</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS job order checked</code></td><td>Config proof, not yet an exit code</td></tr></tbody></table>
+
+**Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
+
+### How to interpret this result
+
+The filter must exist when ZAP discovers alerts; the report follows scanning and exit status comes last.
+
+**How the investigation advances:** Run the actual gate and distinguish expected policy failure from infrastructure errors.
+
+</details>
+
+<details>
+<summary><b>Step 3 — Run the gate and read its actual exit code</b> · Prove blocked build</summary>
+
+### The specific problem
+
+An arbitrary nonzero process code could mean the runner failed, not that a security rule blocked release.
+
+**What you are learning:** Enforce High-risk threshold in a build pipeline *(EO3c)*
+
+### Which application and screen?
+
+**Open VS Code** at `ci/gate-plan.yaml` on `exitStatus`, then run the step in integrated Terminal. Also inspect **GitHub → Actions → quality-gate job** for the matching commit.
+
+### Run this exact command
+
+**Where:** the VS Code integrated Terminal; Actions for hosted evidence. **Current folder:** `demos/module2-demos/m2-demo3-security-quality-gates`.
+
+```bash
+./steps/03-run-security-quality-gate.sh
+```
+
+### Expected output and what it means
+
+This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
+
+<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
+<tbody><tr><td><b>Gate thresholds (errorLevel · warnLevel)</b></td><td><code>HIGH · MEDIUM</code></td><td>Declared release policy</td></tr>
+<tr><td><b>High-risk alerts after filtering</b></td><td><code>&lt;actual positive count&gt;</code></td><td>Required genuine finding</td></tr>
+<tr><td><b>Process exit code</b></td><td><code>1</code></td><td>Expected security block</td></tr>
+<tr><td><b>Build decision</b></td><td><code>exit 1 → BLOCKED</code></td><td>Must correlate with report</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS exit 1 with remaining High risk</code></td><td>Generic nonzero does not pass</td></tr></tbody></table>
+
+**Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
+
+### How to interpret this result
+
+The gate should block only when the configured risk threshold encounters a genuine remaining High finding. Exit code 1 and a positive High count need the report as corroboration.
+
+**How the investigation advances:** Read the actual alert records to verify that the False Positive and High findings were both handled correctly.
+
+</details>
+
+<details>
+<summary><b>Step 4 — Reconcile filtered and remaining findings</b> · Verify final report</summary>
+
+### The specific problem
+
+A job failure alone cannot prove the scoped False Positive and the remaining High were handled correctly.
+
+**What you are learning:** Confirm the policy decision against official alert disposition *(EO3c)*
+
+### Which application and screen?
+
+**In GitHub Actions**, open the matching run's report artifact (not an old run). Inspect rules 10021 and 40012 in the JSON report. Run the terminal step for local evidence.
+
+### Run this exact command
+
+**Where:** the VS Code integrated Terminal; Actions artifact for CI proof. **Current folder:** `demos/module2-demos/m2-demo3-security-quality-gates`.
+
+```bash
+./steps/04-verify-filtered-alert-report.sh
+```
+
+### Expected output and what it means
+
+This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
+
+<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
+<tbody><tr><td><b>Benign finding (rule 10021)</b></td><td><code>X-Content-Type-Options Header Missing — Low (False Positive)</code></td><td>Actual filtered disposition</td></tr>
+<tr><td><b>Real finding (rule 40012)</b></td><td><code>Cross Site Scripting (Reflected) — High (Medium)</code></td><td>High-risk finding remains</td></tr>
+<tr><td><b>Gate outcome</b></td><td><code>benign filtered, High kept → blocked</code></td><td>Both records explain exit 1</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS report shows both intended findings</code></td><td>No fabricated fallback values</td></tr></tbody></table>
+
+**Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
+
+### How to interpret this result
+
+The JSON report confirms benign noise was scoped while real High risk was retained. Only then does the failed build represent an evidence-backed security gate.
+
+**How the investigation advances:** This completes the security decision and gives another engineer an auditable release-block rationale.
+
+</details>
+
+## Complete the exercise
+
+The gate blocks because real High risk remains after the benign alert was reviewed and filtered.
+
+From the same demo directory, stop the local services:
+
+```bash
 ./scripts/demo_down.sh
 ```
 
-The preflight saves a timestamped log in `logs/`. For hosted evidence, use the GitHub Actions link in the detailed steps and inspect the actual workflow's **run SHA**, status, job log and report. Never assume a successful report from an earlier session satisfies this exercise.
+The `m2-demo3-after` branch contains the completed example or reference behavior. Preserve student changes before switching branches. For a safe comparison run `git diff m2-demo3-before..m2-demo3-after -- demos/module2-demos/m2-demo3-security-quality-gates` from the repository root; operational-only exercises may have no source diff.
 
-**Compare with the completed version:** `git diff m2-demo3-before..m2-demo3-after -- demos/module2-demos/m2-demo3-security-quality-gates`. This comparison does not overwrite your work. Both the starter and completed branches include their required prerequisites; authored solution files or plans are added by the exercise when applicable.
+**One batch validation command for the course:** `./setup/run-all-demo-preflights.sh` from the repository root. This checks all six finished branches and creates real evidence bundles for the production team. There are no separate per-demo preflight commands.
 
-**Technical evidence note:** In a verified historical run the official report showed rule 10021 as Low (False Positive), rule 40012 as High (Medium), and exit code 1. Treat those as an example—not proof for a different run. A generic nonzero exit or a missing filtered finding is insufficient proof.
-
-All scanning stays within the supplied, authorized Globomantics training environment.
-
----
-
-## Detailed Instructions And Expected Evidence
-
-<details><summary><b>View The Four Executable Steps</b></summary>
-
-```bash
-./steps/01-inspect-false-positive-filter.sh
-./steps/02-check-automation-job-order.sh
-./steps/03-run-security-quality-gate.sh
-./steps/04-verify-filtered-alert-report.sh
-```
-
-Run these commands in order from this demo's folder, then execute `./scripts/preflight_check.sh`. Inspect actual ZAP GUI or GitHub Actions evidence where indicated.
-</details>
-
-
-Turn a ZAP scan into a build decision. Mark a known benign finding as a False
-Positive, prove the plan applies that decision before scanning, then let ZAP's
-`exitStatus` job convert the remaining alert risk into a process exit code — the
-signal a pipeline uses to pass or block the build. You read the gate plan in VS
-Code to see how each decision is encoded, then run it headless and read the verdict.
-
-> **Authorization and scope.** The gate scans only the local Globomantics training
-> app on the compose network. Never point it at any system you are not authorized
-> to test.
-
-## Applications and locations used
-
-| Application | Where | Used for |
-|-------------|-------|----------|
-| VS Code | `demos/module2-demos/m2-demo3-security-quality-gates/ci/gate-plan.yaml` + the integrated terminal | reading the filter, job order, and thresholds, then running `./scripts/demo_step.sh N` |
-| GitHub Actions | `https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/actions/workflows/zap-quality-gate.yml` → latest run → job **quality-gate** | the gate pass/fail on the hosted build |
-| CI artifact | run page → **Artifacts** → `globo-gate-report` | the archived gate report |
-
-The gate workflow is `workflow_dispatch` (run it from the Actions tab). The exit
-code is the build decision: `0` ok · `1` error · `2` warning.
-
-## Setup
-
-```bash
-cd demos/module2-demos/m2-demo3-security-quality-gates
-./scripts/demo_up.sh             # prints "Up" when healthy
-```
-
-## Step-by-step LO traceability
-
-| Step | LO | Config / mechanism (`ci/gate-plan.yaml`) | Command | Observed result | Proof artifact |
-|------|----|------------------------------------------|---------|-----------------|----------------|
-| 1 | EO3c | `alertFilter` 27–32 (ruleId `10021` → False Positive, url-scoped) | `steps/01-inspect-false-positive-filter.sh` | rule `10021` marked `newRisk: False Positive`, scoped to `/greet.*` | False Positive alert filter |
-| 2 | EO3c | `jobs` order 24–64 | `steps/02-check-automation-job-order.sh` | `alertFilter → requestor → activeScan → report → exitStatus`; filter before scan, gate last | Automation Framework job order |
-| 3 | EO3c | `exitStatus` 61–64 (`errorLevel HIGH`, `warnLevel MEDIUM`) | `steps/03-run-security-quality-gate.sh` | High-risk alert remains after filtering; process exit code `1`; build blocked | Gate JSON report and exit code |
-| 4 | EO3c | `report` 51–56 output | `steps/04-verify-filtered-alert-report.sh` | `10021` disposed False Positive; `40012` kept High | Filtered alert report |
-
----
-
-## Step 1: Mark a benign finding as a False Positive (EO3c)
-
-**The problem.** A quality gate must ignore noise it has already judged benign, and
-that decision has to live in config — not in a person's memory — so every run
-applies it the same way.
-
-**Inspect the plan in VS Code.** Open `demos/module2-demos/m2-demo3-security-quality-gates/ci/gate-plan.yaml` →
-`alertFilter` job (lines 27–32):
-
-- **`ruleId: 10021`** — X-Content-Type-Options Header Missing, the known-benign
-  finding for this app.
-- **`newRisk: "False Positive"`** — the disposition the filter assigns.
-- **`url` / `urlRegex`** — scoped to `http://app:8000/greet.*`, so only this finding
-  on this path is reclassified.
-
-**Execute.**
-
-```bash
-./steps/01-inspect-false-positive-filter.sh
-```
-
-**Inspect the actual evidence.** The plan marks rule `10021` as
-`newRisk: False Positive`, scoped to `http://app:8000/greet.*`.
-
-**The engineer's decision.** The disposition lives in config, so the gate ignores
-this noise identically on every run.
-
-Proof artifact: False Positive alert filter.
-
----
-
-## Step 2: Confirm the job order applies the filter before scanning (EO3c)
-
-**The problem.** A filter applied *after* the scan would be too late to change the
-alerts the gate sees. Order is the mechanism.
-
-**Inspect the plan in VS Code.** In the same file, the `jobs` list (lines 24–64) runs
-in order: `alertFilter` → `requestor` → `activeScan` → `report` → `exitStatus`. The
-filter precedes the scan, so every alert the scan raises inherits the intended
-disposition; `exitStatus` is last, so the gate evaluates the final alert set.
-
-**Execute.**
-
-```bash
-./steps/02-check-automation-job-order.sh
-```
-
-**Inspect the actual evidence.** The step reports the job order
-`alertFilter -> requestor -> activeScan -> report -> exitStatus`, confirming
-`alertFilter` runs before `activeScan` and `exitStatus` runs last.
-
-**The engineer's decision.** Because the filter is applied before scanning and the
-gate runs last, the disposition is already in effect when the gate makes its call.
-
-Proof artifact: Automation Framework job order.
-
----
-
-## Step 3: Run the gate and read the report plus exit code (EO3c)
-
-**The problem.** The remaining alerts must be compared against thresholds and turned
-into the one signal a pipeline blocks on — a process exit code.
-
-**Inspect the plan in VS Code.** The `exitStatus` job (lines 61–64) sets
-`errorLevel: "HIGH"` and `warnLevel: "MEDIUM"`: a High alert is at or above
-`errorLevel`, so the run must exit non-zero (process result: `0` ok, `1` error,
-`2` warning).
-
-**Execute.**
-
-```bash
-./steps/03-run-security-quality-gate.sh
-```
-
-**Inspect the actual evidence.** With thresholds `errorLevel HIGH` · `warnLevel
-MEDIUM`, at least one High-risk alert (the reflected-XSS finding) remains after
-filtering, the process exits `1`, and the gate blocks the build. In CI, the
-**quality-gate** job's gate step shows the same exit code decide the run.
-
-**The engineer's decision.** A remaining High-risk alert maps, through `errorLevel`,
-to a non-zero exit code — the scan result has become an automatic build verdict.
-
-Proof artifact: Gate JSON report and exit code.
-
----
-
-## Step 4: Confirm the filtered report disposition (EO3c)
-
-**The problem.** Maya must prove the filter held — that the benign finding now
-carries the False Positive disposition while the real High finding remains, which is
-exactly why the gate blocked.
-
-**Execute.**
-
-```bash
-./steps/04-verify-filtered-alert-report.sh
-```
-
-**Inspect the actual evidence.** In the gate report, rule `10021`
-(X-Content-Type-Options Header Missing) is disposed as False Positive, while rule
-`40012` (Cross Site Scripting (Reflected)) is kept at High risk — benign filtered
-out, High kept → build blocked. In CI this is the downloadable `globo-gate-report`
-artifact on the quality-gate run page.
-
-**The engineer's decision.** Filtering changed disposition, not the gate logic; the
-gate still blocked on real risk, so noise suppression did not weaken the check.
-
-Proof artifact: Filtered alert report.
-
-## Validate and reset
-
-`./scripts/preflight_check.sh` runs all four steps and writes a reviewable log to
-`logs/`, ending with `5 checks passed, 0 failed`. Tear down with
-`./scripts/demo_down.sh`.
+[← Module 2 catalog](../README.md) · [← Course home](../../../README.md)
