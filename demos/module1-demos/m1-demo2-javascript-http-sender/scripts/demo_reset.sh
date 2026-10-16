@@ -5,7 +5,7 @@
 # data and any ZAP session state), then brings it back up on the VULNERABLE
 # build, which is where every run of this demo begins.
 set -euo pipefail
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 
 echo "[reset] tearing the stack down (clean slate)..."
 "${REPO_ROOT}/runtime/scripts/demo_down.sh"
