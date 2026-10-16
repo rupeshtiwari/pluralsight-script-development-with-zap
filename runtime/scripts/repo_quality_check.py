@@ -7,7 +7,7 @@ Reports, with actionable file paths and reasons:
   - demo branch naming compliance / missing demo branches (if a remote is given)
 
 This is maintainers' tooling. It does NOT run ZAP or validate runtime behavior —
-use each demo's scripts/preflight_check.sh on a Docker host for that.
+use the single setup/run-all-demo-preflights.sh command on a Mac Docker host for that.
 
 Usage:
   python3 runtime/scripts/repo_quality_check.py            # check the working tree
@@ -91,11 +91,11 @@ def check_demo_readmes():
         if "demo_down.sh" not in text:
             add("REQUIRED FIX", "%s/README.md" % folder,
                 "no cleanup reference (scripts/demo_down.sh)")
-        if "preflight_check.sh" not in text:
+        if "run-all-demo-preflights.sh" not in text:
             add("OPTIONAL POLISH", "%s/README.md" % folder,
-                "no preflight reference (scripts/preflight_check.sh)")
+                "no link to batch preflight (setup/run-all-demo-preflights.sh)")
         # setup / cleanup scripts present on disk
-        for script in ("demo_up.sh", "demo_down.sh", "preflight_check.sh"):
+        for script in ("demo_up.sh", "demo_down.sh"):
             sp = os.path.join(ROOT, folder, "scripts", script)
             if not os.path.exists(sp):
                 add("REQUIRED FIX", "%s/scripts/%s" % (folder, script),

@@ -1,166 +1,72 @@
-# M2-DEMO2 · ZAP API and Insights — Author Production Playbook
+# Module 2 · Demo 2 — ZAP API and Insights · Production guide
 
 <div align="center">
 
-![Recorder](https://img.shields.io/badge/Recorder-Exact_Screen-0284c7?style=for-the-badge)
-![Narrator](https://img.shields.io/badge/Narrator-Verified_Script-9333ea?style=for-the-badge)
-![Editor](https://img.shields.io/badge/Editor-Timed_Highlights-16a34a?style=for-the-badge)
+![Recorder](https://img.shields.io/badge/RECORDER-Actual_Screens-00A3FF?style=for-the-badge)
+![Editor](https://img.shields.io/badge/EDITOR-Clean_Callouts-02E088?style=for-the-badge)
+![Narrator](https://img.shields.io/badge/NARRATOR-ElevenLabs-770EF7?style=for-the-badge)
 
-<img src="../learner-diagrams/m2-demo2-architecture.svg" alt="Illustrative ZAP API and Insights workflow" width="100%"/>
-
-<sub>Generated using ChatGPT · Temporary PUBLIC author guidance</sub>
+<img src="../learner-diagrams/m2-demo2-architecture.svg" width="100%" alt="Demo 2 — ZAP API and Insights component diagram"/>
+<sub>Illustrative architecture · Generated using ChatGPT · Temporary PUBLIC production material</sub>
 
 </div>
 
-[← **All Six Production Playbooks**](README.md) · [**Student Starter README ↗**](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo2-before/demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md) · [**Completed README ↗**](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo2-after/demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md)
+[← Production dashboard](README.md) · [Open student's Module 2 demo README](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo2-before/demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md)
 
-## Recording Assignment
+## Recording assignment
 
-<table>
-<tr><th>Field</th><th>Exact Value</th></tr>
-<tr><td>Demonstration</td><td><b>ZAP API and Insights</b> · m2-demo2</td></tr>
-<tr><td>Approved Objectives</td><td>EO3b — check the complete wording in the linked learner README</td></tr>
-<tr><td>Reference branch</td><td><code>m2-demo2-after</code> — completed source for preflight</td></tr>
-<tr><td>Recording branch</td><td><code>m2-demo2-before</code> — follow the student workflow</td></tr>
-<tr><td>Demo directory</td><td><code>demos/module2-demos/m2-demo2-zap-api-scan-evidence</code></td></tr>
-<tr><td>Student exercise state</td><td>This is an operational exercise; the preflight and recorded results must come from a fresh authenticated scan</td></tr>
-</table>
+**Record the `m2-demo2-before` branch**, completing the missing plan where applicable, and keep source changes traceable. The Developer runs the **one combined batch preflight before the recording team starts** and distributes `deliverables/m2-demo2/`: commands, verified logs, generated HTML and narration drafts.
 
-## Start Here — One Clone, Two Branches, One Demo
+**Off-camera preparation:** from the existing checkout root run `git switch m2-demo2-before`, then `cd demos/module2-demos/m2-demo2-zap-api-scan-evidence`, then `./scripts/demo_up.sh`. Check the local application at `http://localhost:8000/`. Confirm the lesson source/plan is ready before testing. One-time Mac preparation and the batch command live **only on the author dashboard**; do not repeat them during recorded steps.
 
-**Do not clone this repository separately for every demo.** Each recorder clones the course once, then switches to the specific demo's `after` branch for preflight and `before` branch for recording. Before switching, stop the old demo environment and preserve the narration references.
+**Recording sequence:** show code or GUI context, display exact command and its key parameters for about 8 seconds, execute once, then reveal real output in 6–8-second proof windows; show real GitHub Actions job and report where the LO requires hosted proof. The Editor cuts waiting and focus changes cleanly.
+
+## Four fixed teaching steps
+
+## Step 1 — Ask the API whether the scan finished
 
 <details open>
-<summary><b><font color="#0284c7">A · Clone Once and Prepare the Mac</font></b></summary>
+<summary><b>Open step 1 — where, command, output and production roles</b></summary>
 
-Use this step only for your first assigned demo. For second and third demos, keep the same repository folder and skip the clone/setup if already complete.
+<summary><b>Step 1 — Ask the API whether the scan finished</b> · Check completion</summary>
 
-```bash
-cd ~
-git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
-cd pluralsight-script-development-with-zap
-./setup/setup-macos.sh
-git fetch origin
-```
+### The specific problem
 
-**Where is the folder?** It is `~/pluralsight-script-development-with-zap` by default. `git switch` does not create a second or third folder; it changes the checked-out branch in the same directory.
+The API can be available while the active scan is incomplete.
 
-</details>
+**What you are learning:** Query machine-readable scan status *(EO3b)*
 
-<details open>
-<summary><b><font color="#9333ea">B · Run Preflight From the Completed Branch FIRST</font></b></summary>
+### Which application and screen?
 
-This is the **narration evidence source**. It executes all four real named commands, saves raw live proof, and produces stable per-step reference logs so the Narrator can start while footage is still being recorded.
+**Open macOS Terminal**, enter the demo folder, and inspect ZAP API endpoints used by `scripts/_steps.sh` when needed. No GUI is required for this step.
 
-```bash
-cd ~/pluralsight-script-development-with-zap
-git status --short
-git fetch origin
-git switch m2-demo2-after
-git rev-parse HEAD
-cd demos/module2-demos/m2-demo2-zap-api-scan-evidence
-./scripts/demo_up.sh
-./scripts/preflight_check.sh
-ls -l logs/preflight-step-0[1-4].log
-```
+### Run this exact command
 
-**Only proceed when preflight exits 0 and prints the actual summary below** (this is the expected format, not a fabricated test run):
-
-```text
-RESULT: 5 checks passed, 0 failed
-REFERENCE: logs/preflight-step-01.log through logs/preflight-step-04.log
-```
-
-**Proof stays real:** `logs/preflight-step-01.log` through `04.log` are the Narrator's four outputs. `logs/.producer/` holds untouched raw details. Separate ZAP GUI / GitHub Actions evidence must be checked independently when a terminal command cannot observe it.
-
-**Optional but strongly recommended repeatability check:** after successful preflight, set `DEMO_SYNC_MODE=1` and `DEMO_SYNC_PHASE=compare` off-camera, then execute the same four named steps while still on this completed reference. Each must match its baseline; a material mismatch blocks recording.
-
-**Archive the references and stop the stack before switching:**
-
-```bash
-mkdir -p ~/zap-production-evidence/m2-demo2
-cp logs/preflight-step-0[1-4].log ~/zap-production-evidence/m2-demo2/
-./scripts/demo_down.sh
-cd ~/pluralsight-script-development-with-zap
-git status --short
-```
-
-Never delete the reference logs with a destructive Git cleanup.
-
-</details>
-
-<details open>
-<summary><b><font color="#0284c7">C · Switch to the Student Starting Branch and Record</font></b></summary>
-
-```bash
-cd ~/pluralsight-script-development-with-zap
-git switch m2-demo2-before
-git rev-parse HEAD
-cd demos/module2-demos/m2-demo2-zap-api-scan-evidence
-cp ~/zap-production-evidence/m2-demo2/preflight-step-0[1-4].log logs/
-./scripts/demo_up.sh
-
-# Off-camera recording parity settings
-export DEMO_SYNC_MODE=1
-export DEMO_SYNC_PHASE=compare
-```
-
-**This is an operational exercise; the preflight and recorded results must come from a fresh authenticated scan.** Follow the [student README on this exact starter branch](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo2-before/demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md) to complete any required source writing, then record the four exact commands listed below. The starter branch may be intentionally incomplete and **must not** be expected to pass its final checks before the work has been done.
-
-After the four named commands, capture the GUI/CI proof, then:
-
-```bash
-./scripts/demo_down.sh
-cd ~/pluralsight-script-development-with-zap
-git status --short
-```
-
-**If Git refuses the next branch switch:** preserve the changed code on a task branch or in a deliberate backup before switching. Do not use force/reset to discard recorded work.
-
-</details>
-
-<details><summary><b><font color="#16a34a">D · Recording More Demos From This Same Clone</font></b></summary>
-
-```bash
-cd ~/pluralsight-script-development-with-zap
-git status --short
-git fetch origin
-# Example: select another assigned demo (replace as needed):
-git switch m2-demo3-after
-```
-
-For a different demo, replace the branch and folder with the corresponding entry on the [six-demo author dashboard](README.md). Repeat preflight → archive logs → cleanup → branch switch → record. One local repository is sufficient for sequential recordings. A separate worktree is optional when you need two branches open concurrently.
-
-</details>
-
-## Camera, Narration and Edit Contract
-
-<table>
-<tr><td width="18%"><img src="https://img.shields.io/badge/RECORDER-Blue-0284c7"/></td><td>Record full-screen at readable zoom. Open the source/GUI pane specified in the relevant step, then hold the complete named command ~8 seconds before Enter. Hold each actual output focus 6–8 seconds. On significant UI clicks provide 8-second pre-click and post-click handles in raw footage for the editor.</td></tr>
-<tr><td><img src="https://img.shields.io/badge/NARRATOR-Purple-9333ea"/></td><td>Use the real `preflight-step-0N.log` plus the corresponding filmed GUI/CI evidence. The step tables below give exact ElevenLabs lines with word counts, one mechanism and one operator consequence per reveal. Do not narrate sample placeholders.</td></tr>
-<tr><td><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/></td><td>Cut cleanly at source/terminal/GUI transitions and scanning waits. Highlight one field using a small square, arrow or callout; remove it immediately as the focus changes. Match voice to the same take, not a historic preflight value from a different implementation.</td></tr>
-</table>
-
-## Four Fixed Teaching Steps — Follow In Order
-
-## Step 1 — Ask The API If Scanning Finished
-
-**Problem and operator consequence:** An API endpoint can be reachable while the active scan is incomplete
-
-**Exact command from `demos/module2-demos/m2-demo2-zap-api-scan-evidence`:**
+**Where:** macOS Terminal. **Current folder:** `demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
 
 ```bash
 ./steps/01-check-zap-scan-status.sh
 ```
 
-**Expected terminal fields from the existing script. Examples are illustrative; live values must come from the actual preflight and take:**
+### Expected output and what it means
 
-```text
-ZAP runtime (GET core/view/version): 2.17.0
-Active scan (GET ascan/view/scans): id=<live-id> · progress=100% · state=FINISHED
-Requests the scan sent: <live count, see raw log>
-✔ PASS the API reports the ZAP runtime and a finished scan
-```
+This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
+
+<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
+<tbody><tr><td><b>ZAP runtime (GET core/view/version)</b></td><td><code>2.17.0</code></td><td>Scanner version</td></tr>
+<tr><td><b>Active scan (GET ascan/view/scans)</b></td><td><code>id=&lt;live scan ID&gt; · progress=100% · state=FINISHED</code></td><td>Complete scan, not merely open API</td></tr>
+<tr><td><b>Requests the scan sent</b></td><td><code>&lt;live count&gt;</code></td><td>Actual telemetry may differ</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS API reports finished scan</code></td><td>Machine-readable readiness</td></tr></tbody></table>
+
+**Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
+
+### How to interpret this result
+
+The version confirms which engine generated the findings. Progress and finished status tell an automated consumer when scan results are ready.
+
+**How the investigation advances:** Retrieve the one custom alert rather than treating every scanner finding as equivalent.
+
+### Recorder — screen and timing
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Screen_%26_Scroll-0284c7"/></summary>
 <table><tr><th>Time Handle</th><th>Required Screen Action</th></tr>
@@ -171,7 +77,19 @@ Requests the scan sent: <live count, see raw log>
 <tr><td>Result · 6–8s</td><td>Keep the actual verified PASS or report result in view. Click handles are filmed for 8s before/after but trimmed; long scan waits are edited out.</td></tr>
 </table></details>
 
-<details open><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
+### Editor — highlights and cuts
+
+<details><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
+<table><tr><th>Beat</th><th>Exact Camtasia Action</th></tr>
+<tr><td>Source → command</td><td>Cut cleanly at window/pane change. Square the relevant config key, remove before introducing the named command.</td></tr>
+<tr><td>Proof A/B</td><td>Square the version, then arrow to FINISHED. Keep separate proof frames, each six to eight seconds. Keep one callout at a time for 6–8s, moving to the next value as the narrator speaks.</td></tr>
+<tr><td>Final result</td><td>Show observed alert/report/exit and the actual PASSED condition; no fake overlays or stale arrows.</td></tr>
+<tr><td>Sync artifact</td><td>Compare `logs/preflight-step-01.log` and `logs/recorded-step-01.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
+</table></details>
+
+### Narrator — spoken lines
+
+<details><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
 <table><tr><th>Visible Focus</th><th>ElevenLabs Spoken Words</th><th>Word Count</th></tr>
 <tr><td>Named command</td><td>Query ZAP's version and scan status before processing any finding. An accessible engine does not prove the assessment finished.</td><td>19</td></tr>
 <tr><td>Actual output A</td><td>The API reports full progress and a finished scan. These are machine-readable conditions the pipeline can wait for.</td><td>18</td></tr>
@@ -180,36 +98,59 @@ Requests the scan sent: <live count, see raw log>
 These spoken lines teach only the visible evidence. Never say placeholder values aloud or claim a GUI/API fact a different command did not establish.
 </details>
 
-<details open><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
-<table><tr><th>Beat</th><th>Exact Camtasia Action</th></tr>
-<tr><td>Source → command</td><td>Cut cleanly at window/pane change. Square the relevant config key, remove before introducing the named command.</td></tr>
-<tr><td>Proof A/B</td><td>Square the version, then arrow to FINISHED. Keep separate proof frames, each six to eight seconds. Keep one callout at a time for 6–8s, moving to the next value as the narrator speaks.</td></tr>
-<tr><td>Final result</td><td>Show observed alert/report/exit and the actual PASSED condition; no fake overlays or stale arrows.</td></tr>
-<tr><td>Sync artifact</td><td>Compare `logs/preflight-step-01.log` and `logs/recorded-step-01.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
-</table></details>
+### Validation and confidence
 
-**Source-review confidence: 95%**. Do not inflate scores simply because documentation exists; release requires actual technical evidence.
+- **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo2/logs/preflight-step-01.log`, plus the matching live GUI or GitHub Actions artifact
+- **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
+- **Source review:** Source-review confidence: 95%. Do not inflate scores simply because documentation exists; release requires actua
+- **Final release:** Do not invent an alert or inflate confidence. Unsupported GUI/CI steps remain explicitly NOT VERIFIED until corrected
 
----
+</details>
 
-## Step 2 — Query The Custom Finding Identity And Disposition
+## Step 2 — Query the custom rule's risk and confidence
 
-**Problem and operator consequence:** Aggregated alert counts do not identify what the application-specific rule actually found
+<details>
+<summary><b>Open step 2 — where, command, output and production roles</b></summary>
 
-**Exact command from `demos/module2-demos/m2-demo2-zap-api-scan-evidence`:**
+<summary><b>Step 2 — Query the custom rule's risk and confidence</b> · Inspect custom alert</summary>
+
+### The specific problem
+
+A count of twenty alerts is not actionable without rule identity and affected parameter.
+
+**What you are learning:** Retrieve a specific scanner finding through the API *(EO3b)*
+
+### Which application and screen?
+
+**Remain in macOS Terminal**. The command queries `core/view/alerts` using the authenticated profile URL. Inspect the response fields printed by the step.
+
+### Run this exact command
+
+**Where:** macOS Terminal. **Current folder:** `demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
 
 ```bash
 ./steps/02-query-custom-rule-alert.sh
 ```
 
-**Expected terminal fields from the existing script. Examples are illustrative; live values must come from the actual preflight and take:**
+### Expected output and what it means
 
-```text
-Rule identity (pluginId · alert): 50000 · Globomantics unsafe reflection (custom rule)
-Disposition (risk · confidence): Medium · Medium
-Parameter: note
-✔ PASS the API returns the script-generated alert's rule identity and disposition
-```
+This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
+
+<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
+<tbody><tr><td><b>Rule identity (pluginId · alert)</b></td><td><code>50000 · Globomantics unsafe reflection (custom rule)</code></td><td>Script-generated finding</td></tr>
+<tr><td><b>Disposition (risk · confidence)</b></td><td><code>Medium · Medium</code></td><td>Risk versus evidence strength</td></tr>
+<tr><td><b>Parameter</b></td><td><code>note</code></td><td>Profile input</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS API returns custom alert</code></td><td>Named rule must be present</td></tr></tbody></table>
+
+**Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
+
+### How to interpret this result
+
+Rule ID and name distinguish the application-specific Jython finding from built-in XSS. Risk and confidence are separate fields that a pipeline can reason about.
+
+**How the investigation advances:** Verify the officially generated report contains that same finding.
+
+### Recorder — screen and timing
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Screen_%26_Scroll-0284c7"/></summary>
 <table><tr><th>Time Handle</th><th>Required Screen Action</th></tr>
@@ -220,7 +161,19 @@ Parameter: note
 <tr><td>Result · 6–8s</td><td>Keep the actual verified PASS or report result in view. Click handles are filmed for 8s before/after but trimmed; long scan waits are edited out.</td></tr>
 </table></details>
 
-<details open><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
+### Editor — highlights and cuts
+
+<details><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
+<table><tr><th>Beat</th><th>Exact Camtasia Action</th></tr>
+<tr><td>Source → command</td><td>Cut cleanly at window/pane change. Square the relevant config key, remove before introducing the named command.</td></tr>
+<tr><td>Proof A/B</td><td>Rectangle rule ID, then risk and confidence labels, then note, with each old highlight cleared. Keep one callout at a time for 6–8s, moving to the next value as the narrator speaks.</td></tr>
+<tr><td>Final result</td><td>Show observed alert/report/exit and the actual PASSED condition; no fake overlays or stale arrows.</td></tr>
+<tr><td>Sync artifact</td><td>Compare `logs/preflight-step-02.log` and `logs/recorded-step-02.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
+</table></details>
+
+### Narrator — spoken lines
+
+<details><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
 <table><tr><th>Visible Focus</th><th>ElevenLabs Spoken Words</th><th>Word Count</th></tr>
 <tr><td>Named command</td><td>Read the authenticated alert using ZAP's API. The custom rule identity distinguishes the finding from a built-in XSS result.</td><td>19</td></tr>
 <tr><td>Actual output A</td><td>Risk describes severity; confidence describes certainty of evidence. The reported finding is rated Medium on both dimensions.</td><td>17</td></tr>
@@ -229,37 +182,59 @@ Parameter: note
 These spoken lines teach only the visible evidence. Never say placeholder values aloud or claim a GUI/API fact a different command did not establish.
 </details>
 
-<details open><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
-<table><tr><th>Beat</th><th>Exact Camtasia Action</th></tr>
-<tr><td>Source → command</td><td>Cut cleanly at window/pane change. Square the relevant config key, remove before introducing the named command.</td></tr>
-<tr><td>Proof A/B</td><td>Rectangle rule ID, then risk and confidence labels, then note, with each old highlight cleared. Keep one callout at a time for 6–8s, moving to the next value as the narrator speaks.</td></tr>
-<tr><td>Final result</td><td>Show observed alert/report/exit and the actual PASSED condition; no fake overlays or stale arrows.</td></tr>
-<tr><td>Sync artifact</td><td>Compare `logs/preflight-step-02.log` and `logs/recorded-step-02.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
-</table></details>
+### Validation and confidence
 
-**Source-review confidence: 95%**. Do not inflate scores simply because documentation exists; release requires actual technical evidence.
+- **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo2/logs/preflight-step-02.log`, plus the matching live GUI or GitHub Actions artifact
+- **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
+- **Source review:** Source-review confidence: 95%. Do not inflate scores simply because documentation exists; release requires actua
+- **Final release:** Do not invent an alert or inflate confidence. Unsupported GUI/CI steps remain explicitly NOT VERIFIED until corrected
 
----
+</details>
 
-## Step 3 — Reconcile The Official JSON Report With The API
+## Step 3 — Compare the JSON report with the API result
 
-**Problem and operator consequence:** Archived report data must match the live API finding
+<details>
+<summary><b>Open step 3 — where, command, output and production roles</b></summary>
 
-**Exact command from `demos/module2-demos/m2-demo2-zap-api-scan-evidence`:**
+<summary><b>Step 3 — Compare the JSON report with the API result</b> · Reconcile JSON</summary>
+
+### The specific problem
+
+If the stored JSON disagrees with the current API, it cannot support a reliable release decision.
+
+**What you are learning:** Generate and reconcile an official security report *(EO3b)*
+
+### Which application and screen?
+
+**Remain in macOS Terminal**. Inspect the official `reports/action/generate` request and `traditional-json` report type used by the script.
+
+### Run this exact command
+
+**Where:** macOS Terminal. **Current folder:** `demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
 
 ```bash
 ./steps/03-reconcile-json-report.sh
 ```
 
-**Expected terminal fields from the existing script. Examples are illustrative; live values must come from the actual preflight and take:**
+### Expected output and what it means
 
-```text
-Report template: traditional-json (reports/action/generate)
-Report alert (pluginid · name): 50000 · Globomantics unsafe reflection (custom rule)
-Report rating (riskdesc): Medium (Medium)
-Reconciled with the API: same script-generated alert as the Step 2 alert response
-✔ PASS the official JSON report carries the same script-generated alert as the API
-```
+This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
+
+<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
+<tbody><tr><td><b>Report template</b></td><td><code>traditional-json</code></td><td>Official ZAP report type</td></tr>
+<tr><td><b>Report alert (pluginid · name)</b></td><td><code>50000 · Globomantics unsafe reflection (custom rule)</code></td><td>Same rule as live API</td></tr>
+<tr><td><b>Report rating (riskdesc)</b></td><td><code>Medium (Medium)</code></td><td>Risk and confidence same as Step 2</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS JSON report reconciled with API</code></td><td>Archived and live evidence agree</td></tr></tbody></table>
+
+**Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
+
+### How to interpret this result
+
+The generated report preserves the named custom finding in a shareable format. Matching its identity and rating against the API prevents stale-report assumptions.
+
+**How the investigation advances:** Inspect the scan's operational quality in addition to the vulnerability result.
+
+### Recorder — screen and timing
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Screen_%26_Scroll-0284c7"/></summary>
 <table><tr><th>Time Handle</th><th>Required Screen Action</th></tr>
@@ -270,7 +245,19 @@ Reconciled with the API: same script-generated alert as the Step 2 alert respons
 <tr><td>Result · 6–8s</td><td>Keep the actual verified PASS or report result in view. Click handles are filmed for 8s before/after but trimmed; long scan waits are edited out.</td></tr>
 </table></details>
 
-<details open><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
+### Editor — highlights and cuts
+
+<details><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
+<table><tr><th>Beat</th><th>Exact Camtasia Action</th></tr>
+<tr><td>Source → command</td><td>Cut cleanly at window/pane change. Square the relevant config key, remove before introducing the named command.</td></tr>
+<tr><td>Proof A/B</td><td>Small box on report name and riskdesc, then remove it at the next focus. Do not show fake report contents. Keep one callout at a time for 6–8s, moving to the next value as the narrator speaks.</td></tr>
+<tr><td>Final result</td><td>Show observed alert/report/exit and the actual PASSED condition; no fake overlays or stale arrows.</td></tr>
+<tr><td>Sync artifact</td><td>Compare `logs/preflight-step-03.log` and `logs/recorded-step-03.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
+</table></details>
+
+### Narrator — spoken lines
+
+<details><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
 <table><tr><th>Visible Focus</th><th>ElevenLabs Spoken Words</th><th>Word Count</th></tr>
 <tr><td>Named command</td><td>Generate ZAP's official JSON report, instead of writing an unverified summary. The template produces an archivable finding record.</td><td>18</td></tr>
 <tr><td>Actual output A</td><td>The report contains the same custom rule name and plugin identity returned by the live API.</td><td>16</td></tr>
@@ -279,35 +266,58 @@ Reconciled with the API: same script-generated alert as the Step 2 alert respons
 These spoken lines teach only the visible evidence. Never say placeholder values aloud or claim a GUI/API fact a different command did not establish.
 </details>
 
-<details open><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
-<table><tr><th>Beat</th><th>Exact Camtasia Action</th></tr>
-<tr><td>Source → command</td><td>Cut cleanly at window/pane change. Square the relevant config key, remove before introducing the named command.</td></tr>
-<tr><td>Proof A/B</td><td>Small box on report name and riskdesc, then remove it at the next focus. Do not show fake report contents. Keep one callout at a time for 6–8s, moving to the next value as the narrator speaks.</td></tr>
-<tr><td>Final result</td><td>Show observed alert/report/exit and the actual PASSED condition; no fake overlays or stale arrows.</td></tr>
-<tr><td>Sync artifact</td><td>Compare `logs/preflight-step-03.log` and `logs/recorded-step-03.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
-</table></details>
+### Validation and confidence
 
-**Source-review confidence: 95%**. Do not inflate scores simply because documentation exists; release requires actual technical evidence.
+- **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo2/logs/preflight-step-03.log`, plus the matching live GUI or GitHub Actions artifact
+- **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
+- **Source review:** Source-review confidence: 95%. Do not inflate scores simply because documentation exists; release requires actua
+- **Final release:** Do not invent an alert or inflate confidence. Unsupported GUI/CI steps remain explicitly NOT VERIFIED until corrected
 
----
+</details>
 
-## Step 4 — Inspect The Scan's Operational Insights
+## Step 4 — Read the report's scan-effectiveness Insights
 
-**Problem and operator consequence:** A scan can produce findings even when authentication or scanning reliability is poor
+<details>
+<summary><b>Open step 4 — where, command, output and production roles</b></summary>
 
-**Exact command from `demos/module2-demos/m2-demo2-zap-api-scan-evidence`:**
+<summary><b>Step 4 — Read the report's scan-effectiveness Insights</b> · Check Insights</summary>
+
+### The specific problem
+
+A scan might appear clean because it encountered an authentication, scope or execution problem.
+
+**What you are learning:** Interpret operational findings exposed with the scan report *(EO3b)*
+
+### Which application and screen?
+
+**Remain in macOS Terminal**. Locate the actual `insights[]` entries returned by the report extraction, with the key and explanation readable.
+
+### Run this exact command
+
+**Where:** macOS Terminal. **Current folder:** `demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
 
 ```bash
 ./steps/04-read-zap-insights.sh
 ```
 
-**Expected terminal fields from the existing script. Examples are illustrative; live values must come from the actual preflight and take:**
+### Expected output and what it means
 
-```text
-Insight (level · key): <actual level> · <actual insight key>
-Statistic · meaning: <actual numeric value> · <actual meaning>
-✔ PASS the report's own Insights section reports scan effectiveness
-```
+This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
+
+<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
+<tbody><tr><td><b>Insight (level · key)</b></td><td><code>&lt;actual level&gt; · &lt;actual insight key&gt;</code></td><td>Must be from nonempty insights[]</td></tr>
+<tr><td><b>Statistic · meaning</b></td><td><code>&lt;actual value&gt; · &lt;real description&gt;</code></td><td>Scan-effectiveness evidence</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS report Insights returned</code></td><td>Do not substitute unrelated counters</td></tr></tbody></table>
+
+**Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
+
+### How to interpret this result
+
+Insights describe scan behavior and confidence in coverage, not only vulnerability risk. A missing Insights section is a reason to investigate, not something to invent or ignore.
+
+**How the investigation advances:** The four fields now support a programmatic, evidence-backed scan assessment.
+
+### Recorder — screen and timing
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Screen_%26_Scroll-0284c7"/></summary>
 <table><tr><th>Time Handle</th><th>Required Screen Action</th></tr>
@@ -318,7 +328,19 @@ Statistic · meaning: <actual numeric value> · <actual meaning>
 <tr><td>Result · 6–8s</td><td>Keep the actual verified PASS or report result in view. Click handles are filmed for 8s before/after but trimmed; long scan waits are edited out.</td></tr>
 </table></details>
 
-<details open><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
+### Editor — highlights and cuts
+
+<details><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
+<table><tr><th>Beat</th><th>Exact Camtasia Action</th></tr>
+<tr><td>Source → command</td><td>Cut cleanly at window/pane change. Square the relevant config key, remove before introducing the named command.</td></tr>
+<tr><td>Proof A/B</td><td>First square actual key, then arrow to explanatory field. Never narrate the placeholder values. Keep one callout at a time for 6–8s, moving to the next value as the narrator speaks.</td></tr>
+<tr><td>Final result</td><td>Show observed alert/report/exit and the actual PASSED condition; no fake overlays or stale arrows.</td></tr>
+<tr><td>Sync artifact</td><td>Compare `logs/preflight-step-04.log` and `logs/recorded-step-04.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
+</table></details>
+
+### Narrator — spoken lines
+
+<details><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
 <table><tr><th>Visible Focus</th><th>ElevenLabs Spoken Words</th><th>Word Count</th></tr>
 <tr><td>Named command</td><td>Read ZAP's Insights to assess scan effectiveness, not the vulnerability severity of one finding.</td><td>14</td></tr>
 <tr><td>Actual output A</td><td>The insight key names an operational condition, while its statistic and explanation show what happened during execution.</td><td>17</td></tr>
@@ -327,18 +349,15 @@ Statistic · meaning: <actual numeric value> · <actual meaning>
 These spoken lines teach only the visible evidence. Never say placeholder values aloud or claim a GUI/API fact a different command did not establish.
 </details>
 
-<details open><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
-<table><tr><th>Beat</th><th>Exact Camtasia Action</th></tr>
-<tr><td>Source → command</td><td>Cut cleanly at window/pane change. Square the relevant config key, remove before introducing the named command.</td></tr>
-<tr><td>Proof A/B</td><td>First square actual key, then arrow to explanatory field. Never narrate the placeholder values. Keep one callout at a time for 6–8s, moving to the next value as the narrator speaks.</td></tr>
-<tr><td>Final result</td><td>Show observed alert/report/exit and the actual PASSED condition; no fake overlays or stale arrows.</td></tr>
-<tr><td>Sync artifact</td><td>Compare `logs/preflight-step-04.log` and `logs/recorded-step-04.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
-</table></details>
+### Validation and confidence
 
-**Source-review confidence: 90%**. Do not inflate scores simply because documentation exists; release requires actual technical evidence.
+- **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo2/logs/preflight-step-04.log`, plus the matching live GUI or GitHub Actions artifact
+- **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
+- **Source review:** Source-review confidence: 90%. Do not inflate scores simply because documentation exists; release requires actua
+- **Final release:** Do not invent an alert or inflate confidence. Unsupported GUI/CI steps remain explicitly NOT VERIFIED until corrected
 
----
+</details>
 
-## Editor / Narrator Handoff
+## End the production take
 
-Publish the frozen narration reference together with exact branch/commit SHA, four preflight step logs, filmed comparison logs, unmodified raw evidence, GUI or Actions run references, and each spoken line's corresponding video timecode. The author folder is intentionally temporary and publicly visible. Move it to private storage before the learner deliverable is finalized.
+Stop containers with `./scripts/demo_down.sh`, retain the before/after SHAs and proof, and deliver the take to the Editor. The Narrator uses the generated step transcripts plus the actual recorded output. Do not rerun the Developer's six-demo preflight in this per-demo process.
