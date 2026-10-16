@@ -50,10 +50,8 @@ def validate(root, branch):
         for file in sorted((root/parent).rglob('*.sh')):
             run(['bash','-n',str(file)],root,env)
     commands=[
-        [sys.executable,'-m','compileall','-q','runtime/app','runtime/scripts','setup'],
+        [sys.executable,'-m','compileall','-q','runtime/app','runtime/scripts'],
         [sys.executable,'-m','unittest','discover','-s','runtime/scripts','-p','test_recording_step.py','-v'],
-        [sys.executable,'-m','unittest','discover','-s','setup','-p','test_run_all_demo_preflights.py','-v'],
-        [sys.executable,'-m','unittest','discover','-s','setup','-p','test_production_dashboard.py','-v'],
         [sys.executable,'runtime/scripts/check_repository_layout.py'],
         [sys.executable,'runtime/scripts/repo_quality_check.py'],
     ]

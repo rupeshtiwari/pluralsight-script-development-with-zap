@@ -311,8 +311,6 @@ From the same demo directory, stop the local services:
 
 The `m2-demo2-after` branch contains the completed example or reference behavior. Preserve student changes before switching branches. For a safe comparison run `git diff m2-demo2-before..m2-demo2-after -- demos/module2-demos/m2-demo2-zap-api-scan-evidence` from the repository root; operational-only exercises may have no source diff.
 
-**One batch validation command for the course:** `./setup/run-all-demo-preflights.sh` from the repository root. This checks all six finished branches and creates real evidence bundles for the production team. There are no separate per-demo preflight commands.
-
 <!-- demo-navigation:start -->
 <p align="center"><b>Student exercise · Demo 5 of 6</b></p>
 <p align="center">
