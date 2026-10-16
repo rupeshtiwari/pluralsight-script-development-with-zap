@@ -161,6 +161,24 @@ Then save `m1-demo2` references, stop its stack, switch to `m1-demo2-before`, cr
 <tr><td align="center"><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/></td><td><b>Evidence-driven Camtasia cuts.</b> Cut on pane changes, before/after visible script typing, and after the output has been held legibly. One short square/arrow/callout per output focus, removed immediately on the next focus. Trim scanner waits and click handles. Match audio to the actual same-step output, not a different take.</td></tr>
 </table>
 
+## 5. GitHub Repository Profile — Copy/Paste Values For The Author
+
+These fields are **GitHub repository settings**, not part of the README. Open the repository homepage, find **About** (top-right), click the **gear icon**, paste the description, add the topics, and save.
+
+<table>
+<tr><th>GitHub Field</th><th>Copy/Paste Or Action</th><th>Current Policy</th></tr>
+<tr><td><b>About → Description</b></td><td><code>Hands-on OWASP ZAP labs for injection, XSS, CSRF, JavaScript and Jython security scripts, authenticated CI scans, API evidence, and release quality gates.</code></td><td>Course overview, under GitHub's description character limit</td></tr>
+<tr><td><b>About → Website</b></td><td>Leave blank until the Pluralsight course has its genuine published URL</td><td>Never invent a course URL</td></tr>
+<tr><td><b>About → Topics</b></td><td><code>owasp-zap</code> · <code>appsec</code> · <code>devsecops</code> · <code>security-testing</code> · <code>github-actions</code> · <code>fastapi</code> · <code>python</code> · <code>javascript</code> · <code>docker-compose</code> · <code>pluralsight</code></td><td>Open About gear icon and add these ten topics</td></tr>
+<tr><td><b>Releases</b></td><td>GitHub → Releases → Draft a new release, but <b>only after</b> source/branch freeze and all required real Mac and hosted checks pass. Create a version tag and attach actual learner artifacts</td><td>No unverified release simply to populate the sidebar</td></tr>
+<tr><td><b>Packages</b></td><td>Leave empty unless this repository actually publishes a maintained installable artifact or container image. It currently <b>consumes</b> a pinned ZAP image rather than publishing one</td><td>No meaningless package publishing</td></tr>
+</table>
+
+**Repository settings status:** These entries are prepared for manual entry; they have not been applied by the available GitHub connection. The project instructions require the assistant to update them directly when an authenticated administrative integration actually supports doing so. Do not mark a metadata field complete based only on this table.
+
+[GitHub repository homepage](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap) · [Prepared presentation checklist](../maintainer/github-repository-presentation.md)
+
+
 ## 4. Output Files and Approval
 
 | Evidence artifact | Where to get it | How it is used |
