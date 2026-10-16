@@ -80,7 +80,7 @@ def render(demo: str, sha: str, lab: Path, destination: Path) -> Path:
         if "✔ PASS" not in proof or "✘ FAIL" in proof:
             raise ValueError("Step %d has no verified PASS log" % index)
         title = html.escape(step.splitlines()[0].lstrip("# ").strip())
-        intro = re.search(r"### (?:The small problem to solve|The specific problem)\s*\n\s*([^\n]+)",step,re.I) or re.search(r"\*\*(?:Business / operator consequence|Problem and operator consequence|Why it matters|Operator reason|Real-world problem)\s*:?\*\*\s*([^\n]+)",step,re.I)
+        intro = re.search(r"### (?:Learning Goal|The small problem to solve|The specific problem)\s*\n\s*([^\n]+)",step,re.I) or re.search(r"\*\*(?:Business / operator consequence|Problem and operator consequence|Why it matters|Operator reason|Real-world problem)\s*:?\*\*\s*([^\n]+)",step,re.I)
         micro = html.escape(intro.group(1) if intro else
                             "Resolve the specific security evidence question.")
         recorder = section_html(step, "RECORDER")
