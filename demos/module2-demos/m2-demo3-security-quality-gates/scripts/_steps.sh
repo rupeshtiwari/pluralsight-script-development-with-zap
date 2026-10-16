@@ -50,7 +50,8 @@ run_gate() {
     mkdir -p "${GATE_DIR}"; rm -f "${GATE_REPORT}"
     cp "${GATE_PLAN_HOST}" "${GATE_DIR}/gate-plan.yaml"
     chmod -R 0777 "${GATE_DIR}"
-    docker run --rm --network "${net}" -v "${GATE_DIR}:/zap/wrk:rw" "${img}" \
+    docker run --rm --network "${net}" -v "${GATE_DIR}:/zap/wrk:rw" \
+        -v "${REPO_ROOT}/demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts:/zap-scripts:ro" "${img}" \
         zap.sh -cmd -autorun "${GATE_PLAN_ZAP}" >"${GATE_DIR}/run.log" 2>&1
     local code=$?
     echo "${code}" > "${GATE_EXIT_FILE}"
@@ -71,28 +72,33 @@ ensure_ready() {
     return 0
 }
 
+OUTLINE_ORDER="passiveScan-config alertFilter script spider passiveScan-wait activeScan-policy activeScan passiveScan-wait report exitStatus"
+plan_jobs() { python3 -c 'import re,sys
+t=open(sys.argv[1]).read()
+print(" ".join(re.findall(r"^\s*-\s*type:\s*([\w-]+)", t, re.M)))' "${GATE_PLAN_HOST}"; }
+plan_value() { python3 -c 'import re,sys
+m=re.search(sys.argv[2]+r":\s*\"?([^\"\n#]+?)\"?\s*(?:#.*)?$", open(sys.argv[1]).read(), re.M)
+print(m.group(1).strip() if m else "")' "${GATE_PLAN_HOST}" "$1"; }
+HOSTED_PATHS=(demos/module2-demos/m2-demo3-security-quality-gates/ci .github/workflows/zap-quality-gate.yml runtime/app)
+hosted() { python3 "${REPO_ROOT}/runtime/scripts/hosted_run.py" "${REPO_ROOT}" zap-quality-gate.yml m2-demo3-after "${HOSTED_PATHS[@]}" 2>/dev/null; }
+
 # ===========================================================================
 # STEP 1 — False Positive alert filter (EO3c)  -> "False Positive alert filter"
 # ===========================================================================
 step1_fp_filter() {
     fm header "A known benign finding is marked False Positive — by config" \
               "A quality gate must ignore noise it has already judged benign. The alertFilter job records that decision once, in the plan, so every run applies it (EO3c)."
-    local blk; blk="$(jq_py 'import re,sys
-t=open("'"${GATE_PLAN_HOST}"'").read()
-rid=re.search(r"ruleId:\s*([0-9]+)",t)
-risk=re.search(r"newRisk:\s*\"([^\"]+)\"",t)
-url=re.search(r"url:\s*\"([^\"]+)\"",t)
-print("%s|%s|%s" % (rid.group(1) if rid else "", risk.group(1) if risk else "", url.group(1) if url else ""))')"
-    IFS='|' read -r rid risk url <<<"${blk}"
-    if [ "${rid}" = "${FP_RULE}" ] && [ -n "${risk}" ]; then
-        fm star "Filtered rule  (ruleId)" "${rid}  (X-Content-Type-Options Header Missing)" focus
-        fm star "New disposition  (newRisk)" "${risk}"
-        fm star "Scope  (url)" "${url}"
-        pass "the plan marks the benign finding as a False Positive"
+    local rid risk url
+    rid="$(plan_value ruleId)"; risk="$(plan_value newRisk)"; url="$(plan_value url)"
+    fm star "Filtered rule  (ruleId)" "${rid:-<none>}  (X-Content-Type-Options Header Missing)" focus
+    fm star "New disposition  (newRisk)" "${risk:-<none>}" focus
+    fm star "Scope  (url)" "${url:-<none>}"
+    if [ "${rid}" = "${FP_RULE}" ] && [ "${risk}" = "False Positive" ] && [ -n "${url}" ]; then
+        pass "the plan marks rule ${FP_RULE} as a False Positive, scoped to ${url}"
     else
-        fail "the alertFilter config is missing or wrong" \
-             "expected ruleId ${FP_RULE} with newRisk in ci/gate-plan.yaml" \
-             "ask: 'the alertFilter job in gate-plan.yaml is incomplete; restore the False Positive filter for rule ${FP_RULE}'"
+        fail "the alertFilter config is missing or wrong (ruleId=${rid:-none}, newRisk=${risk:-none})" \
+             "expected ruleId ${FP_RULE} with newRisk \"False Positive\" and a url scope in ci/gate-plan.yaml" \
+             "restore the alertFilter job for rule ${FP_RULE}"
     fi
     return "${STEP_RC}"
 }
@@ -102,28 +108,18 @@ print("%s|%s|%s" % (rid.group(1) if rid else "", risk.group(1) if risk else "", 
 # ===========================================================================
 step2_job_order() {
     fm header "Order matters: filter BEFORE scan, gate LAST" \
-              "A filter applied after scanning would be too late. The plan's job order makes the disposition apply to every alert, and the gate run last (EO3c)."
-    local order; order="$(jq_py 'import re,sys
-t=open("'"${GATE_PLAN_HOST}"'").read()
-jobs=re.findall(r"-\s*type:\s*(\w+)",t)
-print(" -> ".join(jobs))')"
-    fm star "Job order (ci/gate-plan.yaml)" "${order}" focus
-    # alertFilter must come before activeScan, and exitStatus must be last.
-    local ok; ok="$(jq_py 'import re
-t=open("'"${GATE_PLAN_HOST}"'").read()
-jobs=re.findall(r"-\s*type:\s*(\w+)",t)
-af=jobs.index("alertFilter") if "alertFilter" in jobs else -1
-asc=jobs.index("activeScan") if "activeScan" in jobs else -1
-ok = af>=0 and asc>=0 and af<asc and jobs and jobs[-1]=="exitStatus"
-print("yes" if ok else "no")')"
-    if [ "${ok}" = "yes" ]; then
-        fm star "alertFilter before activeScan" "yes — later alerts inherit the disposition"
-        fm star "exitStatus runs last" "yes — the gate decides on the final alert set"
-        pass "the job order applies the filter before scanning and gates last"
+              "A filter applied after scanning would be too late. The plan follows the architecture's job order, so the disposition applies to every alert and the gate runs last (EO3c)."
+    local jobs; jobs="$(plan_jobs)"
+    fm star "Job order (ci/gate-plan.yaml)" "$(echo "${jobs}" | sed 's/ / → /g')" focus
+    fm star "Architecture order (Module 2)" "$(echo "${OUTLINE_ORDER}" | sed 's/ / → /g')"
+    # Collapse repeated script jobs (add + enable) before comparing.
+    local cmp; cmp="$(echo "${jobs}" | tr ' ' '\n' | awk 'NR==1||$0!=p{print}{p=$0}' | tr '\n' ' ' | sed 's/ $//')"
+    if [ "${cmp}" = "${OUTLINE_ORDER}" ]; then
+        fm star "alertFilter before activeScan · exitStatus last" "yes · yes"
+        pass "the plan follows the architecture job order: filter before scanning, gate last"
     else
-        fail "the job order is wrong" \
-             "alertFilter must precede activeScan and exitStatus must be last" \
-             "ask: 'reorder gate-plan.yaml jobs so alertFilter runs before activeScan and exitStatus is last'"
+        fail "the job order does not follow the architecture order" \
+             "got: ${cmp}" "reorder ci/gate-plan.yaml to: ${OUTLINE_ORDER}"
     fi
     return "${STEP_RC}"
 }
@@ -134,31 +130,29 @@ print("yes" if ok else "no")')"
 step3_gate_exit() {
     fm header "The gate turns alert risk into a build decision" \
               "exitStatus compares the remaining alerts against warnLevel/errorLevel and sets the process exit code — the signal a pipeline blocks on (EO3c)."
-    run_gate || { fail "the gate run did not produce a report" "zap.sh -cmd -autorun failed" "ask: 'the headless gate run failed; read logs/.gate/run.log and fix gate-plan.yaml'"; return "${STEP_RC}"; }
+    run_gate || { fail "the gate run did not produce a report" "zap.sh -cmd -autorun failed" "read logs/.gate/run.log and fix gate-plan.yaml"; return "${STEP_RC}"; }
     local code; code="$(cat "${GATE_EXIT_FILE}" 2>/dev/null)"
     local highs; highs="$(jq_py 'import json
-try: d=json.load(open("'"${GATE_REPORT}"'"))
-except Exception: print(0); raise SystemExit
-n=0
-for s in d.get("site",[]):
-    for a in s.get("alerts",[]):
-        if str(a.get("riskcode"))=="3": n+=1
-print(n)')"
-    fm star "Gate thresholds  (errorLevel · warnLevel)" "HIGH · MEDIUM" focus
-    fm star "High-risk alerts after filtering" "${highs}"
-    fm star "Process exit code  (echo \$?)" "${code}"
-    local verdict; verdict="BLOCKED"; [ "${code}" = "0" ] && verdict="passed"
-    fm star "Build decision" "exit ${code} → the gate ${verdict} the build"
-    if [ "${code}" = "1" ] && [[ "${highs}" =~ ^[0-9]+$ ]] && [ "${highs}" -gt 0 ]; then
-        pass "the gate exited 1 with at least one remaining High-risk alert"
-    elif [ "${code}" = "0" ]; then
-        fail "the gate did not block the build" \
-             "exit code was 0 though a High-risk alert was expected (highs=${highs})" \
-             "ask: 'the gate exited 0; confirm /greet still has the reflected-XSS High and errorLevel=HIGH in gate-plan.yaml'"
+d=json.load(open("'"${GATE_REPORT}"'"))
+print(sum(1 for s in d.get("site",[]) for a in s.get("alerts",[]) if str(a.get("riskcode"))=="3"))')"
+    local el wl; el="$(plan_value errorLevel)"; wl="$(plan_value warnLevel)"
+    fm star "Gate thresholds from the plan  (errorLevel · warnLevel)" "${el:-?} · ${wl:-?}" focus
+    fm star "High-risk alerts after filtering (report)" "${highs}"
+    fm star "Process exit code  (echo \$?)" "${code}" focus
+    local h id concl sha labels covers url steps gstep
+    h="$(hosted)"; IFS='|' read -r id concl sha labels covers url steps <<<"${h}"
+    gstep="$(printf '%s' "${steps}" | tr ';' '\n' | grep -m1 '^Run the ZAP quality gate' | cut -d= -f2)"
+    fm star "Hosted gate run (GitHub Actions)" "${id:-none found} · gate step ${gstep:-?} · commit ${sha:-?} · covers this code: ${covers:-no}"
+    if [ "${code}" = "1" ] && [[ "${highs}" =~ ^[0-9]+$ ]] && [ "${highs}" -gt 0 ] && [ "${el}" = "HIGH" ] \
+       && [ "${gstep}" = "failure" ] && [ "${covers}" = "yes" -o "${covers}" = "branch" ]; then
+        pass "the gate exited 1 for a real High-risk alert, and the hosted gate job blocked the build for this code"
+    elif [ "${code}" = "1" ] && [ "${highs:-0}" -gt 0 ]; then
+        fail "local gate blocked correctly, but no hosted gate run covers this code" \
+             "the GitHub Actions gate run is part of this demo's proof" \
+             "run the 'Globomantics ZAP quality gate' workflow on m2-demo3-after (Actions → Run workflow), then retry"
     else
-        fail "the gate did not prove the expected exit=1 High-risk decision" \
-             "expected exit 1 with at least one High finding, got exit=${code:-<missing>}, high_count=${highs:-<missing>}" \
-             "ask: 'the gate run produced no exit code; read logs/.gate/run.log'"
+        fail "the gate did not prove the expected exit=1 High-risk decision (exit=${code:-?}, highs=${highs:-?})" \
+             "expected exit 1 with at least one High finding" "read logs/.gate/run.log"
     fi
     return "${STEP_RC}"
 }
@@ -170,35 +164,25 @@ step4_filtered_report() {
     fm header "The report proves the filter held and the gate was right" \
               "The benign finding now carries the False Positive disposition, while the real High finding remains — exactly why the gate blocked (EO3c)."
     ensure_gate || { return "${STEP_RC}"; }
-    local fp; fp="$(jq_py 'import json
-try: d=json.load(open("'"${GATE_REPORT}"'"))
-except Exception: print("|"); raise SystemExit
+    local row; row="$(jq_py 'import json
+d=json.load(open("'"${GATE_REPORT}"'"))
+fp=xs=("","")
 for s in d.get("site",[]):
     for a in s.get("alerts",[]):
-        if str(a.get("pluginid"))=="'"${FP_RULE}"'":
-            print("%s|%s" % (a.get("name") or a.get("alert"), a.get("riskdesc","")))
-            raise SystemExit
-print("|")')"
-    local xss; xss="$(jq_py 'import json
-try: d=json.load(open("'"${GATE_REPORT}"'"))
-except Exception: print("|"); raise SystemExit
-for s in d.get("site",[]):
-    for a in s.get("alerts",[]):
-        if str(a.get("pluginid"))=="'"${XSS_RULE}"'":
-            print("%s|%s" % (a.get("name") or a.get("alert"), a.get("riskdesc","")))
-            raise SystemExit
-print("|")')"
-    IFS='|' read -r fpn fpr <<<"${fp}"
-    IFS='|' read -r xn xr <<<"${xss}"
+        if str(a.get("pluginid"))=="'"${FP_RULE}"'": fp=(a.get("name") or a.get("alert",""), a.get("riskdesc",""))
+        if str(a.get("pluginid"))=="'"${XSS_RULE}"'": xs=(a.get("name") or a.get("alert",""), a.get("riskdesc",""))
+print("|".join(fp+xs))')"
+    IFS='|' read -r fpn fpr xn xr <<<"${row}"
+    local code; code="$(cat "${GATE_EXIT_FILE}" 2>/dev/null)"
     fm star "Benign finding  (rule ${FP_RULE})" "${fpn:-not present} — ${fpr:-not present}" focus
-    fm star "Real finding  (rule ${XSS_RULE})" "${xn:-not present} — ${xr:-not present}"
-    fm star "Gate outcome" "benign filtered out, High kept → build blocked"
-    if [ -n "${fpn}" ] && [[ "${fpr}" == *"False Positive"* ]] && [ -n "${xn}" ] && [[ "${xr}" == High* ]]; then
-        pass "the filtered report shows the benign finding disposed and the High kept"
+    fm star "Real finding  (rule ${XSS_RULE})" "${xn:-not present} — ${xr:-not present}" focus
+    fm star "Gate outcome (from this run)" "exit ${code:-?} → $([ "${code}" = 1 ] && echo 'build blocked' || echo 'build NOT blocked')"
+    if [ -n "${fpn}" ] && [[ "${fpr}" == *"False Positive"* ]] && [ -n "${xn}" ] && [[ "${xr}" == High* ]] && [ "${code}" = 1 ]; then
+        pass "the filtered report shows the benign finding as False Positive and the High kept — the reason the gate blocked"
     else
-        fail "the report did not prove both the scoped False Positive and remaining High-risk alert" \
-             "expected rule 10021 False Positive and rule 40012 High, with no fallback placeholders" \
-             "ask: 'the gate report is missing expected alerts; confirm the scan reached /greet and the filter rule id'"
+        fail "the report did not prove both the False Positive and the remaining High-risk alert" \
+             "expected rule ${FP_RULE} False Positive and rule ${XSS_RULE} High from the same run that exited 1" \
+             "run Step 3 first; confirm the scan reached /greet"
     fi
     return "${STEP_RC}"
 }

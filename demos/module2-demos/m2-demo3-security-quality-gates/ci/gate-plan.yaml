@@ -1,0 +1,103 @@
+# ZAP Automation Framework plan — Globomantics quality GATE.
+#
+# This plan does NOT just scan: it DECIDES. It marks a known benign finding as a
+# False Positive, scans the Globomantics app, writes a JSON report, and then runs
+# exitStatus — which turns the remaining alert risks into a process exit code a
+# pipeline can gate on.
+#
+# Run headless, exactly as the GitHub Actions job does:
+#   zap.sh -cmd -autorun /zap/wrk/gate-plan.yaml ; echo "exit=$?"
+---
+env:
+  contexts:
+    - name: GlobomanticsGate
+      urls:
+        - "http://app:8000"
+      includePaths:
+        - "http://app:8000/greet.*"
+  parameters:
+    # Let exitStatus make the gate decision — do not abort early on findings.
+    failOnError: false
+    failOnWarning: false
+    progressToStdout: true
+
+jobs:
+  # The job order follows the Module 2 architecture exactly:
+  # passiveScan-config -> alertFilter -> script -> spider -> passiveScan-wait
+  # -> activeScan-policy -> activeScan -> passiveScan-wait -> report -> exitStatus
+
+  # 1) Passive scanning on, scoped, before any traffic.
+  - type: passiveScan-config
+    parameters:
+      scanOnlyInScope: true
+
+  # 2) FILTER BEFORE SCANNING: mark a known benign Globomantics finding as a
+  #    False Positive, so every later alert inherits this disposition.
+  - type: alertFilter
+    alertFilters:
+      - ruleId: 10021                       # X-Content-Type-Options Header Missing
+        newRisk: "False Positive"
+        url: "http://app:8000/greet.*"
+        urlRegex: true
+
+  # 3) The Module 1 JavaScript marker script stamps every request the scan sends.
+  - type: script
+    parameters:
+      action: "add"
+      type: "httpsender"
+      engine: "ECMAScript : Graal.js"
+      name: "globomantics-marker"
+      source: "/zap-scripts/globomantics-marker.js"
+  - type: script
+    parameters:
+      action: "enable"
+      name: "globomantics-marker"
+
+  # 4) Crawl the page under test.
+  - type: spider
+    parameters:
+      context: "GlobomanticsGate"
+      url: "http://app:8000/greet?name=gate"
+      maxDuration: 1
+
+  # 5) Let passive findings (such as 10021) be recorded before scanning.
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 2
+
+  # 6) The active-scan policy.
+  - type: activeScan-policy
+    parameters:
+      name: "globomantics-gate"
+    policyDefinition:
+      defaultStrength: "medium"
+      defaultThreshold: "medium"
+
+  # 7) Scan it. The reflected-XSS High finding is what the gate will catch.
+  - type: activeScan
+    parameters:
+      context: "GlobomanticsGate"
+      policy: "globomantics-gate"
+      maxRuleDurationInMins: 2
+      maxScanDurationInMins: 5
+
+  # 8) Catch passive findings raised by the active-scan traffic.
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 2
+
+  # 9) Write the evidence the gate decision is read from.
+  - type: report
+    parameters:
+      template: "traditional-json"
+      reportDir: "/zap/wrk"
+      reportFile: "globo-gate-report.json"
+      reportTitle: "Globomantics quality gate"
+
+  # 10) THE GATE: turn the remaining alert risks into a process exit code.
+  #     A High alert is at/above errorLevel, so the run exits 1 — the build is
+  #     blocked. (Default process result: 0 ok, 1 errors, 2 warnings.)
+  - type: exitStatus
+    parameters:
+      errorLevel: "HIGH"
+      warnLevel: "MEDIUM"
