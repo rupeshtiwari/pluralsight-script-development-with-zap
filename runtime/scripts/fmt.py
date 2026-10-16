@@ -41,7 +41,7 @@ PALETTE = {
     "header":   "blue",         # box borders + WHAT title
     "label":    "purple",       # the label part of a star line (names / identifiers)
     "value":    None,           # the value part of a star line (default text, high contrast)
-    "focus":    "yellow",       # the ONE field we want the audience to read
+    "focus":    "pink",         # primary Transform Pink: one precise on-screen value
     "pass":     "green",        # a check that passed
     "fail":     "red",          # a check that failed (stop red; never decorative)
     "fix":      "orange",       # the suggested fix / prompt
@@ -73,20 +73,21 @@ def header(what: str, why: str = "", width: int = 74) -> None:
         for row in _wrap(f"WHY:   {why}", width - 4):
             print(_w("header", "│ ") + _w("muted", row.ljust(width - 4)) + _w("header", " │"))
     print(_w("header", f"└{line}┘"))
+    print(_w("header", "  ★ │ " + "OBSERVED FIELD".ljust(40) + " │ " + "ACTUAL VALUE"))
 
 
 def star(label: str, value: str, focus: bool = False) -> None:
-    """A single highlighted line in the mandated star format.
+    """Aligned field/value row, never truncating observed security evidence.
 
-    Prints:  ★ <label>: <value>   followed by one blank line.
-    When focus=True the value is drawn in the focus color (the field the
-    author reads aloud). Values are never truncated.
+    The one field intended for narration is highlighted using primary pink.
+    The display is compatible with the companion HTML evidence table parser.
     """
-    bullet = _w("focus" if focus else "header", "★")
-    lab = _w("label", f"{label}:")
-    val = _w("focus" if focus else "value", value)
-    print(f"  {bullet} {lab} {val}")
-    print()
+    label, value = str(label).strip(), str(value)
+    prefix = _w("header", "  ★ │ ")
+    field = _w("label", f"{label:<40}")
+    separator = _w("header", " │ ")
+    observed = _w("focus" if focus else "value", value)
+    print(prefix + field + separator + observed)
 
 
 def section(title: str) -> None:
