@@ -5,7 +5,7 @@
 - [ ] Correct descriptive demo directory, before branch and after branch
 - [ ] Both branches contain latest shared `main` foundation (zero commits behind)
 - [ ] Starter does not expose completed answer; after contains expected solution or operational proof
-- [ ] `./setup/setup-macos.sh` verified on target Mac and command-line prerequisites report READY
+- [ ] The Mac prerequisite setup reports READY before the Developer batch command
 - [ ] `./scripts/demo_up.sh` / reset / preflight / down run independently in a fresh checkout
 - [ ] Four conceptual `./steps/0N-*.sh` commands are visible, readable and stable
 - [ ] Per-step observed evidence satisfies exactly its LO; no stale or substituted proof
