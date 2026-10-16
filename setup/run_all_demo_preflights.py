@@ -104,7 +104,7 @@ def batch(ids,output,skip_setup):
         folder,startup=INDEX[demo]
         out=output/demo
         out.mkdir()
-        row={"demo":demo,"branch":demo+"-after","sha":"","status":"NOT VERIFIED","startup_exit":None,"preflight_exit":None,"cleanup_exit":None,"narration":"NOT GENERATED"}
+        row={"demo":demo,"branch":demo+"-after","sha":"","status":"NOT VERIFIED","startup_exit":None,"preflight_exit":None,"cleanup_exit":None,"narration":"NOT GENERATED","step_commands":[]}
         with tempfile.TemporaryDirectory(prefix="zap-batch-"+demo+"-") as temp:
             worktree=Path(temp)/"checkout"
             lab=worktree/folder
@@ -119,6 +119,10 @@ def batch(ids,output,skip_setup):
                     continue
                 added=True
                 row["sha"]=subprocess.check_output(["git","rev-parse","HEAD"],cwd=worktree,text=True).strip()
+                row["step_commands"]=["./steps/"+p.name for p in sorted((lab/"steps").glob("0[1-4]-*.sh"))]
+                if len(row["step_commands"]) != 4:
+                    row["status"]="FOUR NAMED STEPS MISSING"
+                    continue
                 row["startup_exit"]=execute(["bash","./scripts/"+startup],lab,out/"startup.log")
                 if row["startup_exit"]:
                     row["status"]="STARTUP FAILED"
@@ -150,17 +154,29 @@ def batch(ids,output,skip_setup):
         "| Demo | Source SHA | Execution | Narration |","|---|---|---|---|"]
     for row in results:
         summary.append("| "+row["demo"]+" | "+row["sha"][:12]+" | "+row["status"]+" | "+row["narration"]+" |")
-    summary+=["","Each passing demo includes steps-and-output.md, logs/, production-guide.html and narration-draft.md.","",
+    summary+=["","Each passing demo includes steps-and-output.md, logs/, production-guide.html and narration-draft.md.","","Run ./serve.sh in the actual batch folder to open the navigable local production HTML.","",
         "Upload this ZIP to ChatGPT with your recorded GUI/CI proof and request final per-step ElevenLabs narration. Never invent output.",""]
     (output/"README.md").write_text("\n".join(summary),encoding="utf-8")
     (output/"manifest.json").write_text(json.dumps(results,indent=2)+"\n",encoding="utf-8")
+    # Build a browsable offline-first view from genuine on-disk step captures.
+    # It is a presentation of current evidence, never a simulation of ZAP.
+    dashboard_ok=True
+    try:
+        from production_dashboard import render_dashboard
+        render_dashboard(output,results,ROOT/"docs/.author-instructions")
+        shutil.copy2(ROOT/"setup/serve-production-deliverables.sh",output/"serve.sh")
+        (output/"serve.sh").chmod(0o755)
+    except (OSError,ValueError,KeyError) as exc:
+        dashboard_ok=False
+        (output/"dashboard-error.txt").write_text(str(exc)+"\\n",encoding="utf-8")
+        print("ERROR: production HTML dashboard generation failed: "+str(exc),file=sys.stderr)
     archive=output.with_suffix(".zip")
     with zipfile.ZipFile(archive,"w",zipfile.ZIP_DEFLATED) as z:
         for file in sorted(output.rglob("*")):
             if file.is_file():
                 z.write(file,Path(output.name)/file.relative_to(output))
     print("\nEVIDENCE: "+str(output)+"\nUPLOAD THIS ZIP: "+str(archive))
-    return 0 if all(r["status"].startswith("PREFLIGHT PASSED") for r in results) else 1
+    return 0 if dashboard_ok and all(r["status"].startswith("PREFLIGHT PASSED") for r in results) else 1
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
