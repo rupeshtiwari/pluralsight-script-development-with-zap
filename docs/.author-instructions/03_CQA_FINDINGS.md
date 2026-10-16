@@ -10,8 +10,8 @@ These are source-level findings, **not authorization to alter frozen demo code**
 | M1 Demo 3 / 2 | Training login takes username without realistic password flow | Label as deliberate lab simplification, not a secure production auth recipe |
 | M2 Demo 1 / 3 | Plan may show scripts loaded but not each distinct side effect | Real marker-bearing request as needed; named Python alert belongs to the authenticated scan |
 | M2 Demo 2 / 4 | Insights are separate scan-quality evidence, not vulnerability alerts | Real official report `insights[]` content and meaningful entries |
-| M2 Demo 3 / 3 | Gate preflight accepts any nonzero code; does not strictly require exit=1 and actual High | Explicit process exit `1` + report High finding; inspect failed job logs |
-| M2 Demo 3 / 4 | Code can show a default fallback 'filtered to False Positive' without real FP item | Actual `10021` riskdesc False Positive and `40012` High in report; fail closed on missing proof |
+| M2 Demo 3 / 3 | **Source corrected:** the current `_steps.sh` requires exit code `1` and a positive High alert count; runtime still unverified | Show actual exit `1`, genuine High alert in report and blocked GitHub Actions job |
+| M2 Demo 3 / 4 | **Source corrected:** the current `_steps.sh` fails if the report lacks either real finding; runtime still unverified | Actual rule `10021` False Positive and `40012` High in the same report |
 
 Use current ZAP documentation as the technical reference: `https://www.zaproxy.org/docs/desktop/addons/automation-framework/` and `https://www.zaproxy.org/docs/desktop/addons/alert-filters/automation/`.
 
