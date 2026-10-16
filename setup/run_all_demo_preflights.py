@@ -82,6 +82,10 @@ def write_documents(demo,sha,lab,out):
     draft+=["## Finalize with ChatGPT after recording","",
             "Upload this batch ZIP with real GUI/CI screenshots or run links. Ask ChatGPT to validate each output and produce frozen exact ElevenLabs narration without inventing values.",""]
     (out/"narration-draft.md").write_text("\n".join(draft),encoding="utf-8")
+    from setup.evidence_report import render
+    render(demo,sha,lab,out)
+    from setup.evidence_report import render
+    render(demo,sha,lab,out)
 
 def batch(ids,output,skip_setup):
     if sys.platform!="darwin":
@@ -121,7 +125,7 @@ def batch(ids,output,skip_setup):
                 if row["startup_exit"]:
                     row["status"]="STARTUP FAILED"
                     continue
-                row["preflight_exit"]=execute(["bash","./scripts/preflight_check.sh"],lab,out/"preflight-console.log")
+                row["preflight_exit"]=execute(["bash",str(worktree/"runtime/scripts/preflight_all_steps.sh"),str(lab)],lab,out/"preflight-console.log")
                 if row["preflight_exit"] or not references_ready(lab/"logs"):
                     row["status"]="PREFLIGHT FAILED"
                     continue
@@ -148,7 +152,7 @@ def batch(ids,output,skip_setup):
         "| Demo | Source SHA | Execution | Narration |","|---|---|---|---|"]
     for row in results:
         summary.append("| "+row["demo"]+" | "+row["sha"][:12]+" | "+row["status"]+" | "+row["narration"]+" |")
-    summary+=["","Each passing demo includes steps-and-output.md, real logs/ and narration-draft.md.","",
+    summary+=["","Each passing demo includes steps-and-output.md, logs/, production-guide.html and narration-draft.md.","",
         "Upload this ZIP to ChatGPT with your recorded GUI/CI proof and request final per-step ElevenLabs narration. Never invent output.",""]
     (output/"README.md").write_text("\n".join(summary),encoding="utf-8")
     (output/"manifest.json").write_text(json.dumps(results,indent=2)+"\n",encoding="utf-8")
@@ -170,12 +174,12 @@ def main():
     ids=a.only.split(",") if a.only else [d[0] for d in DEMOS]
     if not ids or len(ids)!=len(set(ids)) or any(x not in INDEX for x in ids):
         p.error("unknown or duplicate demo ID")
-    output=(a.output or (Path.home()/"zap-production-evidence"/("batch-"+datetime.now().strftime("%Y%m%d-%H%M%S")))).expanduser().resolve()
+    output=(a.output or (Path.home()/"zap-course-deliverables"/("batch-"+datetime.now().strftime("%Y%m%d-%H%M%S")))).expanduser().resolve()
     if a.dry_run:
         print("DRY RUN: No Docker, Git, setup or file writes.")
         for demo in ids:
             folder,startup=INDEX[demo]
-            print(demo+"-after → "+folder+"/scripts/"+startup+" → preflight_check.sh")
+            print(demo+"-after → "+folder+"/scripts/"+startup+" → shared four-step validator")
         print("Output: "+str(output))
         return 0
     if output.exists():

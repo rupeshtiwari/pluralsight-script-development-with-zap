@@ -1,48 +1,35 @@
+# Module 1 — Test application behavior and extend ZAP
+
 <div align="center">
 
-# Module 1 · Validate and Extend ZAP
+![Security](https://img.shields.io/badge/Module_1-Application_Security-FF1675?style=for-the-badge)
 
-### Turn an alert into evidence, then extend the scanner to fit the application
+<img src="../../docs/learner-diagrams/m1-demo1-architecture.svg" width="100%" alt="Focused application security tests and ZAP" />
 
-![ZAP Scanning](https://img.shields.io/badge/Targeted_Scanning-EO1a--EO1c-0284c7?style=for-the-badge)
-![ZAP Scripting](https://img.shields.io/badge/Custom_Scripting-EO2a--EO2c-d946ef?style=for-the-badge)
-
-<img src="../../docs/learner-diagrams/m1-demo1-architecture.svg" width="100%" alt="Targeted injection, XSS and CSRF verification architecture"/>
-
-<sub>Illustrative architecture · Generated using ChatGPT</sub>
+<sub>Illustrative diagram · Generated using ChatGPT</sub>
 
 </div>
 
-## Why Does This Matter?
+The Globomantics Store has several distinct input boundaries. Maya must test them precisely, extend ZAP with custom scripts, and prove the scanner reached the authenticated code she intended to assess.
 
-A scan can call an endpoint vulnerable without proving the underlying behavior, and a default scanner may not understand the business-specific checks or authentication needed by your application. Maya Chen, the Globomantics security engineer, needs evidence she can defend: the exact parameter, the actual request and response, and a meaningful engineering decision.
+## What you will learn
 
-## Learning Objectives You Can Practice
+**Demo 1 — Validate injection, XSS and CSRF.** A focused ZAP policy detects three types of injection; context-specific payloads validate XSS, and two sessions reveal the CSRF token-binding failure. These findings are then reconciled with real application behavior *(EO1a, EO1b, EO1c)*.
 
-| Objective | What You Will Learn | Demo |
-|---|---|---|
-| **EO1a** | Configure specialized scanners for injection vulnerabilities (SQL, NoSQL, Command) | [Targeted Injection, XSS & CSRF](m1-demo1-targeted-injection-xss-csrf/README.md) |
-| **EO1b** | Implement Cross-Site Scripting (XSS) validation with context-specific payloads | [Targeted Injection, XSS & CSRF](m1-demo1-targeted-injection-xss-csrf/README.md) |
-| **EO1c** | Execute CSRF token bypass techniques for testing anti-CSRF protections | [Targeted Injection, XSS & CSRF](m1-demo1-targeted-injection-xss-csrf/README.md) |
-| **EO2a** | Develop JavaScript scripts to extend ZAP functionality | [JavaScript HTTP Sender](m1-demo2-javascript-http-sender/README.md) |
-| **EO2b** | Implement Python scripts for custom scanning rules | [Python Rule & Authentication](m1-demo3-python-scanning-authentication/README.md) |
-| **EO2c** | Apply scripting for authentication sequence automation | [Python Rule & Authentication](m1-demo3-python-scanning-authentication/README.md) |
+[Open Module 1 Demo 1 →](m1-demo1-targeted-injection-xss-csrf/README.md)
 
-## Choose One Independent Exercise
+**Demo 2 — Extend ZAP with JavaScript.** Add a request marker through an HTTP Sender script, then verify the outbound message, live Script Console line and registered script state *(EO2a)*.
 
-<table>
-<tr><th>Demo</th><th>Real Question</th><th>Evidence You Will Inspect</th><th>Guide</th></tr>
-<tr><td><b>1 · Targeted vulnerabilities</b></td><td>Which alerts correspond to actual injection, XSS and CSRF behavior?</td><td>Targeted rule list, request/response, token controls and alert disposition</td><td><a href="m1-demo1-targeted-injection-xss-csrf/README.md">Open Demo 1 →</a></td></tr>
-<tr><td><b>2 · JavaScript HTTP Sender</b></td><td>Did our custom hook really change an outgoing HTTP request?</td><td>Marker header, live Script Console line and enabled registration</td><td><a href="m1-demo2-javascript-http-sender/README.md">Open Demo 2 →</a></td></tr>
-<tr><td><b>3 · Python scripts and login</b></td><td>Can a custom rule reliably test a profile that requires authentication?</td><td>Jython rule source, scripted login, 401-versus-200 and custom alert</td><td><a href="m1-demo3-python-scanning-authentication/README.md">Open Demo 3 →</a></td></tr>
-</table>
+[Open Module 1 Demo 2 →](m1-demo2-javascript-http-sender/README.md)
 
-## How To Start
+**Demo 3 — Scan an authenticated page with Python scripts.** Register a custom active-scan rule and separate scripted login, then prove that ZAP reaches the protected profile and raises the named custom alert *(EO2b, EO2c)*.
 
-From the repository root run `./setup/setup-macos.sh` once. Choose a demo's `m1-demoN-before` branch and follow that demo's README. Each page gives the exact folder, four concept-named commands, expected proof, preflight and cleanup. The `*-after` branch is your completed reference. No earlier demo must be executed first.
+[Open Module 1 Demo 3 →](m1-demo3-python-scanning-authentication/README.md)
 
-**Local interfaces:** Globomantics Store at <http://localhost:8000/> · ZAP GUI at <http://localhost:8080/zap/> · ZAP API/proxy at <http://localhost:8090/>.
+## Start an exercise
 
-All vulnerability testing is restricted to the supplied authorized Globomantics training application.
+Prepare your Mac **once** using `./setup/setup-macos.sh` from the repository root. Follow the chosen demo README to select its starter branch, start its local app and ZAP with `./scripts/demo_up.sh` or `demo_reset.sh`, and run its four concept-named steps in order.
 
-[← Return To Course Home](../../README.md)
+The Developer's one-command complete-course validation is `./setup/run-all-demo-preflights.sh` from the root. It is separate from the student's step-by-step exercise.
+
+[← Course home](../../README.md)
