@@ -19,13 +19,13 @@
 </p>
 <!-- demo-navigation:end -->
 
-## The problem you are solving
+## Your Scenario
 
-The protected Globomantics profile is invisible to an unauthenticated security test. Maya needs an application-specific rule, a scripted login, proof that the scanner reached the protected page, and the exact named custom alert.
+Your custom security check needs a protected Store profile, but an unauthenticated scanner cannot reach it. You need separate scanning and login scripts, and evidence that ZAP used the authenticated session.
 
-**What success looks like:** Script-driven authenticated coverage and a fresh custom Python active-scan alert. The four steps solve different parts of one problem. Read them in order: each adds evidence needed for the final decision.
+**Your practical goal:** I will guide you through a Jython-compatible active rule and a separate authentication script. You will compare denied and authenticated profile access, then require a fresh alert from your named custom rule.
 
-## What you will learn in this demonstration
+## Your Learning Goals
 
 You will create two distinct script capabilities that work together:
 
@@ -34,7 +34,7 @@ You will create two distinct script capabilities that work together:
 
 No separate course outline is required to complete this lab.
 
-## Follow the evidence
+## Your Evidence Path
 
 ```mermaid
 flowchart LR
@@ -47,7 +47,7 @@ flowchart LR
   S3 --> S4
 ```
 
-## Start the local demo
+## Start Your Lab
 
 This step starts the actual vulnerable Globomantics web application and ZAP container. The Mac prerequisite installer, `setup/setup-macos.sh`, is a **one-time preparation task** explained in the [course README](../../../README.md). You do not need to reinstall tools for every demo.
 
@@ -57,6 +57,7 @@ This step starts the actual vulnerable Globomantics web application and ZAP cont
 **Where:** macOS Terminal or the VS Code integrated terminal, starting in the root of your existing local repository.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap"
 git fetch origin
 git switch m1-demo3-before
 cd demos/module1-demos/m1-demo3-python-scanning-authentication
@@ -69,22 +70,30 @@ cd demos/module1-demos/m1-demo3-python-scanning-authentication
 
 </details>
 
-## The four teaching steps
+## Your Four Steps
 
 <details open>
 <summary><b>Step 1: Register a custom Jython active-scan rule</b> — Load custom rule</summary>
 
-### The small problem to solve
+### Learning Goal
 
 A built-in scanner may not test the application's own unsafe reflection condition.
 
 **Learning focus:** Implement a custom Python scanning rule *(EO2b)*
 
-### Where to go
+### Demo Workspace
 
 **Open VS Code.** Open `zap-scripts/globomantics-active-rule.py`. Inspect `scan` and `newAlert` / `raiseAlert`. Show **ZAP GUI → Scripts → Active Rules** if validating the loaded script.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo3-python-scanning-authentication`.
 
@@ -92,7 +101,13 @@ A built-in scanner may not test the application's own unsafe reflection conditio
 ./steps/01-load-python-active-scan-rule.sh
 ```
 
-### What the script prints
+<!-- student-proof:start -->
+**Where your result appears:** Show the completed active-rule source in VS Code before execution; after terminal registration, switch to http://localhost:8080/zap/, Scripts, Active Rules.
+
+**Inspect this evidence:** Actual loaded Jython rule, custom alert name and scan/alert-creation logic; loading is not a finding.
+<!-- student-proof:end -->
+
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -106,7 +121,7 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Interpret Results
 
 The custom rule is now registered with ZAP's active scanning mechanism, where it can inspect application-specific parameters.
 
@@ -117,17 +132,25 @@ The custom rule is now registered with ZAP's active scanning mechanism, where it
 <details>
 <summary><b>Step 2: Register the login script</b> — Script authentication</summary>
 
-### The small problem to solve
+### Learning Goal
 
 Manual cookie copying is unreliable in repeatable automated scanning.
 
 **Learning focus:** Apply scripting to authentication sequence automation *(EO2c)*
 
-### Where to go
+### Demo Workspace
 
 **In VS Code**, inspect `zap-scripts/globomantics-auth.py`, focusing on `authenticate` and `getCredentialsParamsNames`. Use ZAP GUI → Scripts → Authentication for confirmation.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo3-python-scanning-authentication`.
 
@@ -135,7 +158,13 @@ Manual cookie copying is unreliable in repeatable automated scanning.
 ./steps/02-register-scripted-authentication.sh
 ```
 
-### What the script prints
+<!-- student-proof:start -->
+**Where your result appears:** Show the separate authentication source in VS Code; after terminal registration switch to http://localhost:8080/zap/, Scripts, Authentication.
+
+**Inspect this evidence:** Login submission and registered script identity; explicitly bound the simplified lab login.
+<!-- student-proof:end -->
+
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -149,7 +178,7 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Interpret Results
 
 ZAP can now obtain a session by running a script rather than accepting an operator's copied cookie. The course's simplified username-only login is not a production security model.
 
@@ -160,17 +189,25 @@ ZAP can now obtain a session by running a script rather than accepting an operat
 <details>
 <summary><b>Step 3: Compare unauthenticated and scripted access</b> — Prove protected access</summary>
 
-### The small problem to solve
+### Learning Goal
 
 A scan can incorrectly look clean if it never passes the login wall.
 
 **Learning focus:** Verify scripted authentication effectiveness *(EO2c)*
 
-### Where to go
+### Demo Workspace
 
 **In ZAP GUI**, inspect Globomantics context and user Alice. Then return to **VS Code Terminal** to run the comparison. No cookie is manually supplied by the shell probe.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo3-python-scanning-authentication`.
 
@@ -178,7 +215,13 @@ A scan can incorrectly look clean if it never passes the login wall.
 ./steps/03-confirm-authenticated-profile-access.sh
 ```
 
-### What the script prints
+<!-- student-proof:start -->
+**Where your result appears:** Stay in the terminal for denied and authenticated profile requests and the authentication trace. Then show http://localhost:8080/zap/, Globomantics context, Users, Alice when verifying context state.
+
+**Inspect this evidence:** Real protected-profile HTTP responses and ZAP script execution, not a manually supplied shell cookie.
+<!-- student-proof:end -->
+
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -193,7 +236,7 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Interpret Results
 
 HTTP 401 without login and HTTP 200 with ZAP's scripted user establish that the scanner can access the authenticated resource.
 
@@ -204,17 +247,25 @@ HTTP 401 without login and HTTP 200 with ZAP's scripted user establish that the 
 <details>
 <summary><b>Step 4: Confirm a fresh custom scan alert</b> — Prove custom alert</summary>
 
-### The small problem to solve
+### Learning Goal
 
 A previous alert can make a new scan seem successful when the custom rule never ran.
 
 **Learning focus:** Demonstrate application-specific scanning proof *(EO2b)*
 
-### Where to go
+### Demo Workspace
 
 **Open ZAP GUI → Alerts** for the targeted profile. Run the command in **VS Code Terminal**, then return to the Alerts pane and inspect the newly produced named finding.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo3-python-scanning-authentication`.
 
@@ -222,7 +273,13 @@ A previous alert can make a new scan seem successful when the custom rule never 
 ./steps/04-confirm-custom-scan-alert.sh
 ```
 
-### What the script prints
+<!-- student-proof:start -->
+**Where your result appears:** Show absent-before and fresh-after terminal evidence. Switch to http://localhost:8080/zap/, Alerts, and select the newly named custom alert on /account/profile.
+
+**Inspect this evidence:** Fresh custom name, note parameter, risk and response evidence; built-in XSS is not equivalent.
+<!-- student-proof:end -->
+
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -239,7 +296,7 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Interpret Results
 
 A new authenticated scan now produces the required custom alert tied to `note`. Built-in XSS alerts are not substitutes.
 
@@ -247,7 +304,15 @@ A new authenticated scan now produces the required custom alert tied to `note`. 
 
 </details>
 
-## Finish and clean up
+<!-- student-achievement:start -->
+## What You Achieved
+
+After the four checks, you can separate a scanning rule from authentication, prove protected-page coverage and distinguish a new custom alert from an old or built-in finding. You also know the username-only training login is not a production authentication design.
+
+**Your final check:** Explain the result using your own captured evidence. A README example, missing result or earlier run does not satisfy this exercise.
+<!-- student-achievement:end -->
+
+## Finish Your Lab
 
 After Step 4, you should be able to explain why the named custom rule fired on an authenticated profile from real evidence rather than only recalling a command.
 
