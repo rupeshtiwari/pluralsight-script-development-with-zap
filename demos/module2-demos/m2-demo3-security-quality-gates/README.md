@@ -29,8 +29,8 @@ Your team has reviewed one benign header finding, but genuine High-risk reflecte
 
 You will make a release decision from the final alert set instead of simply reacting to a red build:
 
-- Apply a scoped alert filter rather than ignoring an entire security rule *(EO3c)*
-- Order the automation jobs, verify final High-risk evidence, and confirm the CI exit status *(EO3c)*
+1. Apply a scoped alert filter rather than ignoring an entire security rule *(EO3c)*
+2. Order the automation jobs, verify final High-risk evidence, and confirm the CI exit status *(EO3c)*
 
 You do not need the separate course outline to understand the objective or follow the exercises.
 
@@ -296,9 +296,12 @@ The JSON report confirms benign noise was scoped while real High risk was retain
 <!-- student-achievement:start -->
 ## What You Achieved
 
-After the four checks and matching gate evidence, you can explain why a release was blocked using the filtered report and actual process exit. You can separate a reviewed exception from blanket suppression and a security gate decision from an infrastructure failure.
+You can now explain each learning objective with the evidence you captured:
 
-**Your final check:** Explain the result using your own captured evidence. A README example, missing result or earlier run does not satisfy this exercise.
+1. **(EO3c) You applied a scoped exception, not a blanket suppression.** The alert filter set rule `10021` to `False Positive` scoped to `/greet.*`, and the step asserted `newRisk == "False Positive"` rather than disabling the rule everywhere.
+2. **(EO3c) You made the release decision from final evidence.** With the jobs in the correct order, the gate exited `1` on a real HIGH finding (reflected XSS `40012`), while `10021` stayed `False Positive` in the same report — a security decision, not an infrastructure failure.
+
+**Your final check:** Explain each numbered outcome using your own captured evidence from this run. A README example, a missing result or an earlier run does not satisfy this exercise.
 <!-- student-achievement:end -->
 
 ## Finish Your Lab
