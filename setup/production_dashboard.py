@@ -165,16 +165,18 @@ def step_html(root: Path, demo: str, step: int, block: str, command: str, batch_
     else:
         verified = available
     summary = "<span class='ready'>REAL TERMINAL PROOF</span>" if verified else "<span class='hold'>HOLD — NO VERIFIED STEP PROOF</span>"
-    problem = segment(block, "The small problem to solve") or segment(block, "The specific problem")
-    screen = segment(block, "Where to go") or segment(block, "Which application and screen?")
+    problem = segment(block, "Learning Goal") or segment(block, "The small problem to solve") or segment(block, "The specific problem")
+    screen = segment(block, "Demo Workspace") or segment(block, "Where to go") or segment(block, "Which application and screen?")
     if not problem:
-        m = re.search(r"### (?:The small problem to solve|The specific problem)\s*\n\s*([^\n]+)", block)
+        m = re.search(r"### (?:Learning Goal|The small problem to solve|The specific problem)\s*\n\s*([^\n]+)", block)
         problem = m.group(1) if m else "Review the approved playbook for the step's security question."
     if not screen:
         screen = "See the Recorder instructions for the exact application, source file and pane."
     lab = LAB_DIRS[demo]
     cue = screen_action(demo, step)
     cd_command = f'cd "$HOME/pluralsight-script-development-with-zap/{lab}"'
+    branch_command = ('cd "$HOME/pluralsight-script-development-with-zap"' + "\n" +
+                      f"git switch {demo}-before" + "\n" + cd_command)
     source_url = f"{REPO_URL}/blob/{demo}-before/{lab}/steps/{command.removeprefix('./steps/')}"
     src_path = cue['source'] if cue['source'].startswith(('runtime/','docs/','.github/')) else lab+'/'+cue['source']
     # Source files authored during a learner exercise can be absent on *-before.
@@ -184,13 +186,16 @@ def step_html(root: Path, demo: str, step: int, block: str, command: str, batch_
                      f"{REPO_URL}/blob/{demo}-before/{src_path}")
     source_link_caption = ('Open starter folder; create the approved source if missing'
                            if creates_source else 'Open existing starter source context')
-    nav_html = (f"<section class='location-guide'><h3>Where to go · exact pane and exact directory</h3>"
+    nav_html = (f"<section class='location-guide'><h3>Demo workspace · app, branch and terminal</h3>"
                 f"<p><b>Step A · open application manually:</b> {h(cue['application'])}. "
                 f"<b>Required on-screen source/pane:</b> <code>{h(cue['source'])}</code> "
                 f"→ {h(cue['pane'])}.</p>"
                 f"<p><b>Step B · open terminal:</b> Use VS Code → Terminal → New Terminal "
                 f"when the application includes VS Code; otherwise open macOS Terminal. "
                 f"No manual folder browsing. Paste the following shell command:</p>"
+                f"<p><b>Off-camera branch setup:</b> Preserve local edits before switching, then paste:</p>"
+                f"<pre class='nav-command'>{h(branch_command)}</pre><button type='button' class='copy-nav' data-cd='{h(branch_command)}'>Copy branch and folder commands</button>"
+                f"<p><b>Already on the approved branch?</b> Use this directory command only:</p>"
                 f"<pre class='nav-command'>{h(cd_command)}</pre><button type='button' class='copy-nav' data-cd='{h(cd_command)}'>Copy cd command</button>"
                 f"<p><b>Step C · prepare source and perform the approved action:</b> {h(cue['preparation'])}. "
                 f"Then run the concept-named command below, from <code>{h(lab)}</code>. "
@@ -331,7 +336,7 @@ def render_demo(root: Path, row: dict, author_dir: Path) -> str:
             'step':n, 'title':block.splitlines()[0].replace('## Step ', 'Step ').strip(),
             'working_directory': LAB_DIRS[demo], 'navigate':f'cd "$HOME/pluralsight-script-development-with-zap/{LAB_DIRS[demo]}"',
             'command':cmd, 'source_file':screen_action(demo,n)['source'], 'screen_action':screen_action(demo,n),
-            'screen':segment(block,'Where to go') or segment(block,'Which application and screen?'),
+            'screen':segment(block,'Demo Workspace') or segment(block,'Where to go') or segment(block,'Which application and screen?'),
             'draft_beats':beats,'editor_targets':dict(zip(('region','first_field','second_field','arrow','gist_callout'),PLAN[demo][n-1])),
             'observed_fields':rows_from_terminal(transcript,raw_text),
             'terminal_log':f'logs/preflight-step-{n:02}.log',
