@@ -11,6 +11,14 @@
 
 </div>
 
+<!-- demo-navigation:start -->
+<p align="center"><b>Student exercise · Demo 5 of 6</b></p>
+<p align="center">
+  <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo1-before/demos/module2-demos/m2-demo1-authenticated-zap-github-actions/README.md"><img alt="Previous student demo: Module 2 Demo 1 — Authenticated ZAP in GitHub Actions" src="https://img.shields.io/badge/%E2%86%90_Previous-M2_Demo_1-130F25?style=for-the-badge"></a>
+  <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo3-before/demos/module2-demos/m2-demo3-security-quality-gates/README.md"><img alt="Next student demo: Module 2 Demo 3 — Security quality gates" src="https://img.shields.io/badge/Next_%E2%86%92-M2_Demo_3-FF1675?style=for-the-badge"></a>
+</p>
+<!-- demo-navigation:end -->
+
 ## The problem you are solving
 
 Maya has a completed security scan but needs a machine-readable status, precise custom alert, archived report, and scan-quality evidence. A screenshot or arbitrary alert total is insufficient for a release pipeline.
@@ -239,5 +247,13 @@ From the same demo directory, stop the local services:
 The `m2-demo2-after` branch contains the completed example or reference behavior. Preserve student changes before switching branches. For a safe comparison run `git diff m2-demo2-before..m2-demo2-after -- demos/module2-demos/m2-demo2-zap-api-scan-evidence` from the repository root; operational-only exercises may have no source diff.
 
 **One batch validation command for the course:** `./setup/run-all-demo-preflights.sh` from the repository root. This checks all six finished branches and creates real evidence bundles for the production team. There are no separate per-demo preflight commands.
+
+<!-- demo-navigation:start -->
+<p align="center"><b>Student exercise · Demo 5 of 6</b></p>
+<p align="center">
+  <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo1-before/demos/module2-demos/m2-demo1-authenticated-zap-github-actions/README.md"><img alt="Previous student demo: Module 2 Demo 1 — Authenticated ZAP in GitHub Actions" src="https://img.shields.io/badge/%E2%86%90_Previous-M2_Demo_1-130F25?style=for-the-badge"></a>
+  <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo3-before/demos/module2-demos/m2-demo3-security-quality-gates/README.md"><img alt="Next student demo: Module 2 Demo 3 — Security quality gates" src="https://img.shields.io/badge/Next_%E2%86%92-M2_Demo_3-FF1675?style=for-the-badge"></a>
+</p>
+<!-- demo-navigation:end -->
 
 [← Module 2 catalog](../README.md) · [← Course home](../../../README.md)

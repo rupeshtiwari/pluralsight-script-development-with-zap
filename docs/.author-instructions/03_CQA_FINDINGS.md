@@ -4,7 +4,7 @@ These are source-level findings, **not authorization to alter frozen demo code**
 
 | Demo / step | Finding | Required visible proof |
 |---|---|---|
-| M1 Demo 1 / 4 | Normal ping output on `/admin/ping?host=127.0.0.1` alone cannot prove shell-command injection | Actual injected parameter plus response or ZAP's alert request/response |
+| M1 Demo 1 / 4 | **Source corrected:** ordinary ping was not sufficient; the existing Step 4 now sends a harmless injected shell marker to the authorized training app and fails if that marker is absent. Runtime remains UNVERIFIED | Show the actual `ZAP_CMD_PROOF` response and its original injected host request, then reconcile the ZAP alert |
 | M1 Demo 1 / 2 | Reflecting input does not automatically demonstrate browser execution of XSS | Real context-specific payload with request/response; do not claim a browser execution was observed if not shown |
 | M1 Demo 2 / 3 | Terminal preflight validates source `print` and proxied request, not ZAP's Script Console stream | Real `[globo-marker]` line visibly emitted in Script Console for the fresh request |
 | M1 Demo 3 / 2 | Training login takes username without realistic password flow | Label as deliberate lab simplification, not a secure production auth recipe |
