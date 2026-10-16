@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Capture the exact four public named-step outputs for parallel narration work.
+# Run one demo's four named steps in order and save each step's visible output.
 # Same execution path as individual recording: steps/0N-*.sh -> _run_step.sh.
 # Each step's canonical visible output is saved as logs/preflight-step-0N.log.
 set -uo pipefail
@@ -27,7 +27,7 @@ for i in 0 1 2 3; do
     fi
 done
 main() {
-    echo "PREFLIGHT · four actual demo steps, same commands as the Recorder"
+    echo "PREFLIGHT · four actual demo steps, the same commands a learner runs"
     echo "Evidence is restricted to the authorized local Globomantics application."
     echo
     passed=1   # environmental readiness is checked by the real step engines
@@ -47,7 +47,7 @@ main() {
     done
     echo "RESULT: ${passed} checks passed, 0 failed"
     echo "REFERENCE: logs/preflight-step-01.log through logs/preflight-step-04.log"
-    echo "CHECK: compare the Recorder's same-output steps; separate ZAP GUI or Actions proof is still required."
+    echo "CHECK: these are the named-step outputs from this run; separate ZAP GUI or Actions proof is still required."
 }
 # Full preflight keeps its high-level headings; per-step logs are byte-identical
 # to the recording-mode terminal display when the proof is unchanged.
