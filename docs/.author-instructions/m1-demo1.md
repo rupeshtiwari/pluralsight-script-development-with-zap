@@ -1,55 +1,147 @@
-# M1-DEMO1 · Injection, XSS and CSRF — Production Playbook
+# M1-DEMO1 · Injection, XSS and CSRF — Author Production Playbook
 
 <div align="center">
 
-![Recorder](https://img.shields.io/badge/RECORDER-Precise_Screens-0284c7?style=for-the-badge)
-![Narrator](https://img.shields.io/badge/NARRATOR-ElevenLabs-d946ef?style=for-the-badge)
-![Editor](https://img.shields.io/badge/EDITOR-One_Focus-16a34a?style=for-the-badge)
+![Recorder](https://img.shields.io/badge/Recorder-Exact_Screen-0284c7?style=for-the-badge)
+![Narrator](https://img.shields.io/badge/Narrator-Verified_Script-9333ea?style=for-the-badge)
+![Editor](https://img.shields.io/badge/Editor-Timed_Highlights-16a34a?style=for-the-badge)
 
-<img src="../learner-diagrams/m1-demo1-architecture.svg" width="100%" alt="Globomantics Injection, XSS and CSRF architecture"/>
+<img src="../learner-diagrams/m1-demo1-architecture.svg" alt="Illustrative Injection, XSS and CSRF workflow" width="100%"/>
 
-<sub>Illustrative diagram · Generated using ChatGPT · Production instructions are temporarily public here</sub>
+<sub>Generated using ChatGPT · Temporary PUBLIC author guidance</sub>
 
 </div>
 
-## Why This Demonstration Exists
+[← **All Six Production Playbooks**](README.md) · [**Student Starter README ↗**](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo1-before/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/README.md) · [**Completed README ↗**](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo1-after/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/README.md)
 
-Maya must decide which Globomantics security findings are real and how the observed requests support each disposition. The target is the authorized local training application.
+## Recording Assignment
 
-**Approved objective(s):** EO1a — targeted SQL, NoSQL and command injection; EO1b — context-specific reflected XSS; EO1c — CSRF token bypass and session-binding checks
+<table>
+<tr><th>Field</th><th>Exact Value</th></tr>
+<tr><td>Demonstration</td><td><b>Injection, XSS and CSRF</b> · m1-demo1</td></tr>
+<tr><td>Approved Objectives</td><td>EO1a · EO1b · EO1c — check the complete wording in the linked learner README</td></tr>
+<tr><td>Reference branch</td><td><code>m1-demo1-after</code> — completed source for preflight</td></tr>
+<tr><td>Recording branch</td><td><code>m1-demo1-before</code> — follow the student workflow</td></tr>
+<tr><td>Demo directory</td><td><code>demos/module1-demos/m1-demo1-targeted-injection-xss-csrf</code></td></tr>
+<tr><td>Student exercise state</td><td>Run-only; no completed script is missing from the starter</td></tr>
+</table>
 
-**Audience:** Developers and security testers learning to make operator decisions through real HTTP evidence.
+## Start Here — One Clone, Two Branches, One Demo
 
-## Start Here — Preflight Before Narration Or Recording
+**Do not clone this repository separately for every demo.** Each recorder clones the course once, then switches to the specific demo's `after` branch for preflight and `before` branch for recording. Before switching, stop the old demo environment and preserve the narration references.
 
-The **completed** branch is the authoritative source for a successful preflight. A starter branch intentionally lacks authored assets where that exercise requires them. The narrator can work in parallel, while the recorder later completes the starter exercise to the same final source state.
+<details open>
+<summary><b><font color="#0284c7">A · Clone Once and Prepare the Mac</font></b></summary>
+
+Use this step only for your first assigned demo. For second and third demos, keep the same repository folder and skip the clone/setup if already complete.
 
 ```bash
-git clone -b m1-demo1-after https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git ~/zap-producer-m1-demo1-reference
-cd ~/zap-producer-m1-demo1-reference
+cd ~
+git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
+cd pluralsight-script-development-with-zap
 ./setup/setup-macos.sh
+git fetch origin
+```
+
+**Where is the folder?** It is `~/pluralsight-script-development-with-zap` by default. `git switch` does not create a second or third folder; it changes the checked-out branch in the same directory.
+
+</details>
+
+<details open>
+<summary><b><font color="#9333ea">B · Run Preflight From the Completed Branch FIRST</font></b></summary>
+
+This is the **narration evidence source**. It executes all four real named commands, saves raw live proof, and produces stable per-step reference logs so the Narrator can start while footage is still being recorded.
+
+```bash
+cd ~/pluralsight-script-development-with-zap
+git status --short
+git fetch origin
+git switch m1-demo1-after
+git rev-parse HEAD
 cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
 ./scripts/demo_reset.sh
 ./scripts/preflight_check.sh
-ls logs/preflight-step-0[1-4].log
+ls -l logs/preflight-step-0[1-4].log
 ```
 
-The preflight **actually executes all four named step scripts** using the same step engine the Recorder will run. It saves the combined timestamped log, four per-step narration baselines, and unchanged raw proof under `logs/.producer/`. Expect **5 checks passed, 0 failed** only after all four return PASS. Run `./scripts/demo_down.sh` after evidence capture.
+**Only proceed when preflight exits 0 and prints the actual summary below** (this is the expected format, not a fabricated test run):
 
-**Recorder's independent starting branch:** `m1-demo1-before` — [open the correct GitHub branch](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/tree/m1-demo1-before/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf). Clone that branch into a *separate* directory, prepare the required code or configuration to match the approved finished state, and transfer the four `preflight-step-0N.log` reference files into its demo `logs/` directory. **Do not execute the starter branch preflight before authoring its missing solution.** Keep recording and reference environments separate; do not run both Docker stacks at once on the same ports.
+```text
+RESULT: 5 checks passed, 0 failed
+REFERENCE: logs/preflight-step-01.log through logs/preflight-step-04.log
+```
 
-Before filming, in the Recorder's terminal **off-camera**:
+**Proof stays real:** `logs/preflight-step-01.log` through `04.log` are the Narrator's four outputs. `logs/.producer/` holds untouched raw details. Separate ZAP GUI / GitHub Actions evidence must be checked independently when a terminal command cannot observe it.
+
+**Optional but strongly recommended repeatability check:** after successful preflight, set `DEMO_SYNC_MODE=1` and `DEMO_SYNC_PHASE=compare` off-camera, then execute the same four named steps while still on this completed reference. Each must match its baseline; a material mismatch blocks recording.
+
+**Archive the references and stop the stack before switching:**
 
 ```bash
+mkdir -p ~/zap-production-evidence/m1-demo1
+cp logs/preflight-step-0[1-4].log ~/zap-production-evidence/m1-demo1/
+./scripts/demo_down.sh
+cd ~/pluralsight-script-development-with-zap
+git status --short
+```
+
+Never delete the reference logs with a destructive Git cleanup.
+
+</details>
+
+<details open>
+<summary><b><font color="#0284c7">C · Switch to the Student Starting Branch and Record</font></b></summary>
+
+```bash
+cd ~/pluralsight-script-development-with-zap
+git switch m1-demo1-before
+git rev-parse HEAD
+cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
+cp ~/zap-production-evidence/m1-demo1/preflight-step-0[1-4].log logs/
+./scripts/demo_reset.sh
+
+# Off-camera recording parity settings
 export DEMO_SYNC_MODE=1
 export DEMO_SYNC_PHASE=compare
 ```
 
-Now each named step executes live, retains the unaltered raw proof, displays a normalized stable transcript, and **exits nonzero on a material mismatch** against its preflight reference. A different request ID or scan count can be normalized; the actual values remain in raw logs. **Risk, parameter, alert identity, HTTP status and gate decisions must not be fabricated or normalized away.** The matching visible transcript, not two unrelated raw runs, is the narration synchronization contract.
+**Run-only; no completed script is missing from the starter.** Follow the [student README on this exact starter branch](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo1-before/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/README.md) to complete any required source writing, then record the four exact commands listed below. The starter branch may be intentionally incomplete and **must not** be expected to pass its final checks before the work has been done.
 
-**Primary recording UI:** VS Code integrated terminal; source runtime/app/main.py; optional ZAP GUI at http://localhost:8080/zap/. Full-screen capture, readable text on a phone, no browser tabs. Editing handles: hold command **8 seconds before Enter**; show each meaningful proof region **6–8 seconds**, never exceed **10 seconds of idle final footage**. For important GUI clicks provide roughly **8 seconds before** and **8 seconds after** in the raw take; trim for the final video. Do not linger through scanner waits; make a clean edit.
+After the four named commands, capture the GUI/CI proof, then:
 
-## Four Fixed Teaching Steps
+```bash
+./scripts/demo_down.sh
+cd ~/pluralsight-script-development-with-zap
+git status --short
+```
+
+**If Git refuses the next branch switch:** preserve the changed code on a task branch or in a deliberate backup before switching. Do not use force/reset to discard recorded work.
+
+</details>
+
+<details><summary><b><font color="#16a34a">D · Recording More Demos From This Same Clone</font></b></summary>
+
+```bash
+cd ~/pluralsight-script-development-with-zap
+git status --short
+git fetch origin
+# Example: select another assigned demo (replace as needed):
+git switch m1-demo2-after
+```
+
+For a different demo, replace the branch and folder with the corresponding entry on the [six-demo author dashboard](README.md). Repeat preflight → archive logs → cleanup → branch switch → record. One local repository is sufficient for sequential recordings. A separate worktree is optional when you need two branches open concurrently.
+
+</details>
+
+## Camera, Narration and Edit Contract
+
+<table>
+<tr><td width="18%"><img src="https://img.shields.io/badge/RECORDER-Blue-0284c7"/></td><td>Record full-screen at readable zoom. Open the source/GUI pane specified in the relevant step, then hold the complete named command ~8 seconds before Enter. Hold each actual output focus 6–8 seconds. On significant UI clicks provide 8-second pre-click and post-click handles in raw footage for the editor.</td></tr>
+<tr><td><img src="https://img.shields.io/badge/NARRATOR-Purple-9333ea"/></td><td>Use the real `preflight-step-0N.log` plus the corresponding filmed GUI/CI evidence. The step tables below give exact ElevenLabs lines with word counts, one mechanism and one operator consequence per reveal. Do not narrate sample placeholders.</td></tr>
+<tr><td><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/></td><td>Cut cleanly at source/terminal/GUI transitions and scanning waits. Highlight one field using a small square, arrow or callout; remove it immediately as the focus changes. Match voice to the same take, not a historic preflight value from a different implementation.</td></tr>
+</table>
+
+## Four Fixed Teaching Steps — Follow In Order
 
 ## Step 1: Prove Three Injection Classes With One Focused Policy
 
