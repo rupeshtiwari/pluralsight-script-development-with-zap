@@ -42,7 +42,7 @@ echo
 
 case "${N}" in
     1) step1_headless_run ;;
-    2) step2_context_config ;;
+    2) prime_if_needed; step2_context_config ;;
     3) prime_if_needed; step3_script_job ;;
     4) prime_if_needed; step4_custom_alert ;;
 esac
