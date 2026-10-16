@@ -47,7 +47,7 @@ def main():
             if run(['git','diff','--name-only','--diff-filter=U'],checkout).stdout.strip():
                 raise RuntimeError('Unresolved paths remain')
             validate(checkout,BRANCH)
-            run(['python3','-m','unittest','discover','-s','setup','-p','test_*.py','-v'],checkout)
+            run(['python3','-m','unittest','discover','-s','runtime/scripts','-p','test_recording_step.py','-v'],checkout)
             run(['git','commit','-m','merge: reconcile retired learner paths and retain current validated quality checks'],checkout)
             new=run(['git','rev-parse','HEAD'],checkout).stdout.strip()
             if not ancestor(root,OLD,new) or not ancestor(root,main_sha,new):

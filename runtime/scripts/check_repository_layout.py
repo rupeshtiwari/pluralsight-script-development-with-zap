@@ -22,6 +22,15 @@ SOLUTIONS = {
     "m2-demo1": ["demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci/af-plan.yaml"],
     "m2-demo3": ["demos/module2-demos/m2-demo3-security-quality-gates/ci/gate-plan.yaml"],
 }
+# Production material lives in the private production repository. Fail if any of it
+# reappears here (copied back, regenerated, or restored by a merge).
+PRIVATE_ONLY = [
+    "docs/.author-instructions", "docs/author-instructions", "docs/course-outline.md", "docs/maintainer",
+    "setup/run-all-demo-preflights.sh", "setup/run_all_demo_preflights.py", "setup/preflight_process.py",
+    "setup/evidence_report.py", "setup/narration_handoff.py", "setup/production_dashboard.py",
+    "setup/production_plan.py", "setup/serve-production-deliverables.sh",
+    "setup/refresh-production-deliverables.sh", "runtime/scripts/guide_refresh_v36.py",
+]
 failures = []
 
 def must(cond, description):
@@ -30,6 +39,8 @@ def must(cond, description):
 
 for folder in ("setup", "demos", "runtime", "docs"):
     must((ROOT / folder).is_dir(), f"missing directory: {folder}")
+for rel in PRIVATE_ONLY:
+    must(not (ROOT / rel).exists(), f"production-only path belongs in the private production repository: {rel}")
 for name in ("README.md", "CLAUDE.md", ".gitignore", ".env", "docker-compose.yaml"):
     must((ROOT / name).is_file(), f"missing root entry point: {name}")
 for old in ("before-running-demo-run-this", "app", "data", "zap", "scripts", "module1", "module2", "env-setup"):
@@ -56,7 +67,8 @@ for lab, rel in LABS.items():
         body = (path / "README.md").read_text(encoding="utf-8")
         for step in steps:
             must(step.name in body, f"{lab}: README missing named command {step.name}")
-        must("run-all-demo-preflights.sh" in body, f"{lab}: README missing batch preflight instructions")
+        must("run-all-demo-preflights.sh" not in body, f"{lab}: README names the private production batch command")
+        must("author-instructions" not in body, f"{lab}: README points at private author guides")
         must("demo_down.sh" in body, f"{lab}: README missing teardown instructions")
 
 branch = os.environ.get("GITHUB_REF_NAME", "").strip() or subprocess.run(
