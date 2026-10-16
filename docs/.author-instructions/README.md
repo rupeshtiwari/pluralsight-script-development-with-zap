@@ -75,6 +75,8 @@ The script checks dependencies, fetches the completed branches, creates and remo
 
 A failed demo retains diagnostic logs and its failure status; it does **not** receive a falsely successful guide or narration. The script also creates a ZIP beside the folder so the Narrator can upload it for evidence-grounded finalization.
 
+**Locally served production cockpit.** After the recording Mac actually generates the batch output, open its timestamped folder and run `./serve.sh`. It opens `http://127.0.0.1:8765/index.html` using a local-only HTTP server. Alternatively run `./setup/serve-production-deliverables.sh ~/zap-course-deliverables/batch-YYYYMMDD-HHMMSS` from the course repo (substitute the real timestamp). The navigable dashboard covers all six demos with Developer, Recorder, Editor, Narrator and Technical CQA views. Each step shows the exact named command, field/value table built from the real terminal transcript, the captured unmodified raw log, and spoken words mapped to the current screen. Missing or failed evidence stays on HOLD. Stop the server with Ctrl+C. No dependencies beyond Python 3 and the Mac's default browser.
+
 **The recording team receives the deliverables package plus the current source SHAs before filming.** The individual demo playbooks below do not rerun preflight.
 
 </details>
