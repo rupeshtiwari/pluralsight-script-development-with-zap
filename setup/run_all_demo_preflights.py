@@ -82,10 +82,8 @@ def write_documents(demo,sha,lab,out):
     draft+=["## Finalize with ChatGPT after recording","",
             "Upload this batch ZIP with real GUI/CI screenshots or run links. Ask ChatGPT to validate each output and produce frozen exact ElevenLabs narration without inventing values.",""]
     (out/"narration-draft.md").write_text("\n".join(draft),encoding="utf-8")
-    from setup.evidence_report import render
-    render(demo,sha,lab,out)
-    from setup.evidence_report import render
-    render(demo,sha,lab,out)
+    from evidence_report import render
+    render(demo, sha, lab, out)
 
 def batch(ids,output,skip_setup):
     if sys.platform!="darwin":
