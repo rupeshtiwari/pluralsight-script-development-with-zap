@@ -28,7 +28,6 @@
 <details open>
 <summary><b>Open step 1 — where, command, output and production roles</b></summary>
 
-<summary><b>Step 1 — Inspect the False Positive filter</b> · Review scoped filter</summary>
 
 ### The specific problem
 
@@ -112,7 +111,6 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 <details>
 <summary><b>Open step 2 — where, command, output and production roles</b></summary>
 
-<summary><b>Step 2 — Verify scan and gate order</b> · Inspect job order</summary>
 
 ### The specific problem
 
@@ -196,7 +194,6 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 <details>
 <summary><b>Open step 3 — where, command, output and production roles</b></summary>
 
-<summary><b>Step 3 — Run the gate and read its actual exit code</b> · Prove blocked build</summary>
 
 ### The specific problem
 
@@ -281,7 +278,6 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 <details>
 <summary><b>Open step 4 — where, command, output and production roles</b></summary>
 
-<summary><b>Step 4 — Reconcile filtered and remaining findings</b> · Verify final report</summary>
 
 ### The specific problem
 

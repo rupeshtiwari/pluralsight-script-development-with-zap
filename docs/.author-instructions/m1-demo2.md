@@ -28,7 +28,6 @@
 <details open>
 <summary><b>Open step 1 — command, real expected fields and role instructions</b></summary>
 
-<summary><b>Step 1: Load the JavaScript HTTP Sender script</b> — Register HTTP Sender</summary>
 
 ### The small problem to solve
 
@@ -121,7 +120,6 @@ Only record a statement after the matching evidence is visible in the take. The 
 <details>
 <summary><b>Open step 2 — command, real expected fields and role instructions</b></summary>
 
-<summary><b>Step 2: Prove the marker on an outbound request</b> — Inspect modified request</summary>
 
 ### The small problem to solve
 
@@ -213,7 +211,6 @@ Only record a statement after the matching evidence is visible in the take. The 
 <details>
 <summary><b>Open step 3 — command, real expected fields and role instructions</b></summary>
 
-<summary><b>Step 3: Verify the live Script Console output</b> — Inspect Script Console</summary>
 
 ### The small problem to solve
 
@@ -305,7 +302,6 @@ Only record a statement after the matching evidence is visible in the take. The 
 <details>
 <summary><b>Open step 4 — command, real expected fields and role instructions</b></summary>
 
-<summary><b>Step 4: Verify the script registration</b> — Check saved script</summary>
 
 ### The small problem to solve
 
