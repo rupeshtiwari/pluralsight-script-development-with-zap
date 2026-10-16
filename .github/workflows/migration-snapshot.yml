@@ -1,0 +1,36 @@
+name: Migration source snapshot
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/migration-snapshot.yml']
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Snapshot existing tracked source and branch comparisons
+        run: |
+          mkdir -p "$RUNNER_TEMP/migration"
+          git archive --format=zip HEAD -o "$RUNNER_TEMP/migration/source.zip"
+          OUT="$RUNNER_TEMP/migration/branches.json" python3 - <<'PY'
+          import json, os, subprocess
+          def git(*args): return subprocess.check_output(['git',*args],text=True).strip()
+          refs=git('for-each-ref','--format=%(refname:short)','refs/remotes/origin').splitlines()
+          rows=[]
+          for ref in refs:
+            if ref in ('origin/HEAD','origin/main'): continue
+            rows.append({'branch':ref.removeprefix('origin/'),'sha':git('rev-parse',ref),
+                         'behind':int(git('rev-list','--count',ref+'..origin/main')),
+                         'tree_changes':git('diff','--name-status','origin/main',ref).splitlines()})
+          json.dump({'main_sha':git('rev-parse','origin/main'),'branches':rows},open(os.environ['OUT'],'w'),indent=2)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: migration-source
+          path: ${{ runner.temp }}/migration/
+          retention-days: 1
