@@ -77,8 +77,8 @@ class DashboardTests(unittest.TestCase):
         proc=subprocess.run([sys.executable,str(formatter),"star","Rule identity","40012","focus"],
                             text=True,capture_output=True,env=env,check=True)
         self.assertIn("\x1b[38;2;255;22;117m",proc.stdout)
-        fields=d.rows_from_terminal(proc.stdout)
-        self.assertEqual(fields,[{"label":"Rule identity","value":"40012"}])
+        fields=d.rows_from_terminal(proc.stdout, proc.stdout)
+        self.assertEqual(fields,[{"label":"Rule identity","value":"40012","focus":True}])
         self.assertIn("│",proc.stdout)
 
     def test_invalid_empty_manifest(self):
