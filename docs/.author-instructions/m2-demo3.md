@@ -31,6 +31,26 @@
 
 ## Recording Steps
 
+<!-- demo-readiness:start -->
+## Demo Readiness
+
+**Approved duration:** 6 minutes. **Execution steps:** four, unchanged. **Acceptance target:** overall review score at least 98/100.
+
+| Step | Current evidence-backed score | Blocking review |
+|---|---|---|
+| 1 | Not assessed | Matching Mac take, required GUI/Actions proof and final spoken coverage |
+| 2 | Not assessed | Matching Mac take, required GUI/Actions proof and final spoken coverage |
+| 3 | Not assessed | Matching Mac take, required GUI/Actions proof and final spoken coverage |
+| 4 | Not assessed | Matching Mac take, required GUI/Actions proof and final spoken coverage |
+
+**Overall confidence:** NOT ASSESSED. Once all four step scores are supported, calculate `(step1 + step2 + step3 + step4) / 4`; do not average only the reviewed steps. A missing critical proof keeps release on HOLD even when the average reaches 98.
+
+**Speech budget:** current short-form draft 207 whitespace words; final 6-minute target 774 spoken words under the owner contract. Remaining before final audio validation: 567 words. This draft is not a complete timed recording script. Expand useful source/action/result teaching within the same four steps; do not fill time with invented stories.
+
+**Recording budget:** approximately 90 seconds per step, including source work, execution and proof. This is an editing plan, not a measured duration or a reason to leave a static screen.
+
+**Review method:** assess LO and outline coverage, technical correctness, example quality, learner clarity, operator decision-making and recorded proof against the exact source SHA. Record the reviewer, rationale and evidence for every numeric score. Old 88–96% source estimates lacked a documented common rubric and are retired, not promoted.
+<!-- demo-readiness:end -->
 ## Step 1 — Inspect the False Positive filter
 
 <details open>
@@ -85,6 +105,10 @@ The filter records a reviewed disposition for one class of benign finding on a s
 
 **How the investigation advances:** Make sure the filter applies before scans create alerts.
 
+<!-- capture-location:start -->
+<table><tr><th>Capture moment</th><th>Exact action and result location</th></tr><tr><td>Before Enter</td><td>Use VS Code integrated Terminal. Show the named step command already provided below/above; keep its full filename readable for about eight seconds. Directory and branch setup are off camera.</td></tr><tr><td>After Enter</td><td>Stay in VS Code with ci/gate-plan.yaml and the terminal fields. Frame alertFilter, ruleId, newRisk and scoped URL.</td></tr><tr><td>Evidence to record</td><td>Configured 10021 False Positive exception and exact scope; whether it took effect is proved in the report. Hold each meaningful field for six to eight seconds; retain the matching raw log and take ID.</td></tr><tr><td>Meaning and decision</td><td>Use the Spoken Narration for this exact field, then explain whether the evidence is enough to proceed. If it is absent, stop: neither a source declaration nor an expected output is an observed result.</td></tr><tr><td>Editor handoff</td><td>Mark the result region, then the actual value being explained. Clear old overlays on pane change. During an otherwise still explanation beyond 12 seconds, use one relevant 6–8-second takeaway callout; never invent a successful result.</td></tr></table>
+<!-- capture-location:end -->
+
 ### Recorder Shots
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Screen_%26_Scroll-0284c7"/></summary>
@@ -133,11 +157,9 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 
 - **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo3/logs/preflight-step-01.log`, plus the matching live GUI or GitHub Actions artifact
 - **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
-- **Source review:** Source-review confidence: 95%. Do not inflate scores simply because documentation exists; release requires actua
-- **Final release:** Do not invent an alert or inflate confidence. Unsupported GUI/CI steps remain explicitly NOT VERIFIED until corrected
+- **Release:** HOLD until evidence review; target overall score 98/100, never automatic approval
 
 </details>
-
 ## Step 2 — Verify scan and gate order
 
 <details>
@@ -192,6 +214,10 @@ The filter must exist when ZAP discovers alerts; the report follows scanning and
 
 **How the investigation advances:** Run the actual gate and distinguish expected policy failure from infrastructure errors.
 
+<!-- capture-location:start -->
+<table><tr><th>Capture moment</th><th>Exact action and result location</th></tr><tr><td>Before Enter</td><td>Use VS Code integrated Terminal. Show the named step command already provided below/above; keep its full filename readable for about eight seconds. Directory and branch setup are off camera.</td></tr><tr><td>After Enter</td><td>Stay in VS Code and the integrated terminal; scroll only to the ordered YAML jobs.</td></tr><tr><td>Evidence to record</td><td>alertFilter before scanning, report before exitStatus and exitStatus last for this plan. Hold each meaningful field for six to eight seconds; retain the matching raw log and take ID.</td></tr><tr><td>Meaning and decision</td><td>Use the Spoken Narration for this exact field, then explain whether the evidence is enough to proceed. If it is absent, stop: neither a source declaration nor an expected output is an observed result.</td></tr><tr><td>Editor handoff</td><td>Mark the result region, then the actual value being explained. Clear old overlays on pane change. During an otherwise still explanation beyond 12 seconds, use one relevant 6–8-second takeaway callout; never invent a successful result.</td></tr></table>
+<!-- capture-location:end -->
+
 ### Recorder Shots
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Screen_%26_Scroll-0284c7"/></summary>
@@ -240,11 +266,9 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 
 - **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo3/logs/preflight-step-02.log`, plus the matching live GUI or GitHub Actions artifact
 - **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
-- **Source review:** Source-review confidence: 96%. Do not inflate scores simply because documentation exists; release requires actua
-- **Final release:** Do not invent an alert or inflate confidence. Unsupported GUI/CI steps remain explicitly NOT VERIFIED until corrected
+- **Release:** HOLD until evidence review; target overall score 98/100, never automatic approval
 
 </details>
-
 ## Step 3 — Run the gate and read its actual exit code
 
 <details>
@@ -300,6 +324,10 @@ The gate should block only when the configured risk threshold encounters a genui
 
 **How the investigation advances:** Read the actual alert records to verify that the False Positive and High findings were both handled correctly.
 
+<!-- capture-location:start -->
+<table><tr><th>Capture moment</th><th>Exact action and result location</th></tr><tr><td>Before Enter</td><td>Use VS Code integrated Terminal. Show the named step command already provided below/above; keep its full filename readable for about eight seconds. Directory and branch setup are off camera.</td></tr><tr><td>After Enter</td><td>Show local High count and process exit. Then open https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/actions/workflows/zap-quality-gate.yml, select the matching run, quality-gate job and execution log.</td></tr><tr><td>Evidence to record</td><td>Real High finding plus exit 1 and the corresponding blocked hosted step; distinguish scanner errors. Hold each meaningful field for six to eight seconds; retain the matching raw log and take ID.</td></tr><tr><td>Meaning and decision</td><td>Use the Spoken Narration for this exact field, then explain whether the evidence is enough to proceed. If it is absent, stop: neither a source declaration nor an expected output is an observed result.</td></tr><tr><td>Editor handoff</td><td>Mark the result region, then the actual value being explained. Clear old overlays on pane change. During an otherwise still explanation beyond 12 seconds, use one relevant 6–8-second takeaway callout; never invent a successful result.</td></tr></table>
+<!-- capture-location:end -->
+
 ### Recorder Shots
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Screen_%26_Scroll-0284c7"/></summary>
@@ -348,11 +376,9 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 
 - **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo3/logs/preflight-step-03.log`, plus the matching live GUI or GitHub Actions artifact
 - **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
-- **Source review:** Source-review confidence: 84%. Do not inflate scores simply because documentation exists; release requires actua
-- **Final release:** Do not invent an alert or inflate confidence. Unsupported GUI/CI steps remain explicitly NOT VERIFIED until corrected
+- **Release:** HOLD until evidence review; target overall score 98/100, never automatic approval
 
 </details>
-
 ## Step 4 — Reconcile filtered and remaining findings
 
 <details>
@@ -407,6 +433,10 @@ The JSON report confirms benign noise was scoped while real High risk was retain
 
 **How the investigation advances:** This completes the security decision and gives another engineer an auditable release-block rationale.
 
+<!-- capture-location:start -->
+<table><tr><th>Capture moment</th><th>Exact action and result location</th></tr><tr><td>Before Enter</td><td>Use VS Code integrated Terminal. Show the named step command already provided below/above; keep its full filename readable for about eight seconds. Directory and branch setup are off camera.</td></tr><tr><td>After Enter</td><td>Show local report fields. For hosted proof, open the same Actions run, Artifacts, globo-gate-report; download and open the JSON in VS Code.</td></tr><tr><td>Evidence to record</td><td>Actual 10021 False Positive and 40012 High from the same report, aligned with the gate exit. Hold each meaningful field for six to eight seconds; retain the matching raw log and take ID.</td></tr><tr><td>Meaning and decision</td><td>Use the Spoken Narration for this exact field, then explain whether the evidence is enough to proceed. If it is absent, stop: neither a source declaration nor an expected output is an observed result.</td></tr><tr><td>Editor handoff</td><td>Mark the result region, then the actual value being explained. Clear old overlays on pane change. During an otherwise still explanation beyond 12 seconds, use one relevant 6–8-second takeaway callout; never invent a successful result.</td></tr></table>
+<!-- capture-location:end -->
+
 ### Recorder Shots
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Screen_%26_Scroll-0284c7"/></summary>
@@ -455,8 +485,7 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 
 - **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo3/logs/preflight-step-04.log`, plus the matching live GUI or GitHub Actions artifact
 - **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
-- **Source review:** Source-review confidence: 78%. Do not inflate scores simply because documentation exists; release requires actua
-- **Final release:** Do not invent an alert or inflate confidence. Unsupported GUI/CI steps remain explicitly NOT VERIFIED until corrected
+- **Release:** HOLD until evidence review; target overall score 98/100, never automatic approval
 
 </details>
 
