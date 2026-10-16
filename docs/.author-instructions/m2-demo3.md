@@ -21,7 +21,7 @@
 </p>
 <!-- demo-navigation:end -->
 
-## Recording assignment
+## Prepare Recording
 
 **Record the `m2-demo3-before` branch**, completing the missing plan where applicable, and keep source changes traceable. The Developer runs the **one combined batch preflight before the recording team starts** and distributes `deliverables/m2-demo3/`: commands, verified logs, generated HTML and narration drafts.
 
@@ -29,7 +29,7 @@
 
 **Recording sequence:** show code or GUI context, display exact command and its key parameters for about 8 seconds, execute once, then reveal real output in 6–8-second proof windows; show real GitHub Actions job and report where the LO requires hosted proof. The Editor cuts waiting and focus changes cleanly.
 
-## Four fixed teaching steps
+## Recording Steps
 
 ## Step 1 — Inspect the False Positive filter
 
@@ -37,26 +37,29 @@
 <summary><b>Open step 1 — where, command, output and production roles</b></summary>
 
 
-### The specific problem
+### Learning Goal
 
 A global ignore list can hide risk elsewhere in the application.
 
 **What you are learning:** Configure risk disposition without suppressing unrelated findings *(EO3c)*
 
-### Which application and screen?
+### Demo Workspace
 
 
-**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+**Off-camera terminal setup:** Open VS Code integrated Terminal. Preserve any uncommitted work before changing branches. Paste these commands exactly; they select the demo starter and working folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
+cd "$HOME/pluralsight-script-development-with-zap"
+git switch m2-demo3-before
+cd "demos/module2-demos/m2-demo3-security-quality-gates"
 ```
 
-**Branch:** `m2-demo3-before` (complete any deliberately missing student source first). The separate `./steps/01-*.sh` command below is the only on-camera execution for this step.
+**Actual screen and browser check:** Verify http://localhost:8000/ off camera. Show ci/gate-plan.yaml alertFilter in VS Code with rule 10021, scoped URL and newRisk value.
+
 
 **Open VS Code**, inspect `ci/gate-plan.yaml` at `alertFilter`, and keep rule ID, URL and new disposition visible in the editor. Run the command in VS Code Terminal.
 
-### Run this exact command
+### Run Command
 
 **Where:** the VS Code integrated Terminal. **Current folder:** `demos/module2-demos/m2-demo3-security-quality-gates`.
 
@@ -64,7 +67,7 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-s
 ./steps/01-inspect-false-positive-filter.sh
 ```
 
-### Expected output and what it means
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -76,13 +79,13 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Operator Decision
 
 The filter records a reviewed disposition for one class of benign finding on a specific path. Static YAML proves configuration, not that the report actually applied it.
 
 **How the investigation advances:** Make sure the filter applies before scans create alerts.
 
-### Recorder — screen and timing
+### Recorder Shots
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Screen_%26_Scroll-0284c7"/></summary>
 <table><tr><th>Time Handle</th><th>Required Screen Action</th></tr>
@@ -93,9 +96,9 @@ The filter records a reviewed disposition for one class of benign finding on a s
 <tr><td>Result · 6–8s</td><td>Keep the actual verified PASS or report result in view. Click handles are filmed for 8s before/after but trimmed; long scan waits are edited out.</td></tr>
 </table></details>
 
-### Narrator — spoken lines
+### Spoken Narration
 
-<details><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
+<details open><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
 <table><tr><th>Visible Focus</th><th>ElevenLabs Spoken Words</th><th>Word Count</th></tr>
 <tr><td>Named command</td><td>Reclassify only the reviewed benign header finding. A blanket filter would conceal unrelated security risks.</td><td>15</td></tr>
 <tr><td>Actual output A</td><td>Rule ten thousand twenty-one receives the False Positive disposition specifically for the greeting endpoint.</td><td>14</td></tr>
@@ -104,7 +107,7 @@ The filter records a reviewed disposition for one class of benign finding on a s
 These spoken lines teach only the visible evidence. Never say placeholder values aloud or claim a GUI/API fact a different command did not establish.
 </details>
 
-### Editor — highlights and cuts
+### Editor Actions
 
 <details><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
 <p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
@@ -126,7 +129,7 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 <tr><td>Sync artifact</td><td>Compare `logs/preflight-step-01.log` and `logs/recorded-step-01.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
 </table></details>
 
-### Validation and confidence
+### Proof Review
 
 - **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo3/logs/preflight-step-01.log`, plus the matching live GUI or GitHub Actions artifact
 - **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
@@ -141,26 +144,29 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 <summary><b>Open step 2 — where, command, output and production roles</b></summary>
 
 
-### The specific problem
+### Learning Goal
 
 Applying the filter after scanning can leave earlier alerts unaffected.
 
 **What you are learning:** Put filtering and reporting in a defensible pipeline sequence *(EO3c)*
 
-### Which application and screen?
+### Demo Workspace
 
 
-**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+**Off-camera terminal setup:** Open VS Code integrated Terminal. Preserve any uncommitted work before changing branches. Paste these commands exactly; they select the demo starter and working folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
+cd "$HOME/pluralsight-script-development-with-zap"
+git switch m2-demo3-before
+cd "demos/module2-demos/m2-demo3-security-quality-gates"
 ```
 
-**Branch:** `m2-demo3-before` (complete any deliberately missing student source first). The separate `./steps/02-*.sh` command below is the only on-camera execution for this step.
+**Actual screen and browser check:** Show the Automation Framework jobs list in ci/gate-plan.yaml, including alertFilter before scan, then report and exitStatus. No browser required for this config step.
+
 
 **Remain in VS Code**, scroll within `ci/gate-plan.yaml` to the jobs list. Show `alertFilter`, `requestor`, `activeScan`, `report`, and `exitStatus` in order.
 
-### Run this exact command
+### Run Command
 
 **Where:** the VS Code integrated Terminal. **Current folder:** `demos/module2-demos/m2-demo3-security-quality-gates`.
 
@@ -168,7 +174,7 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-s
 ./steps/02-check-automation-job-order.sh
 ```
 
-### Expected output and what it means
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -180,13 +186,13 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Operator Decision
 
 The filter must exist when ZAP discovers alerts; the report follows scanning and exit status comes last.
 
 **How the investigation advances:** Run the actual gate and distinguish expected policy failure from infrastructure errors.
 
-### Recorder — screen and timing
+### Recorder Shots
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Screen_%26_Scroll-0284c7"/></summary>
 <table><tr><th>Time Handle</th><th>Required Screen Action</th></tr>
@@ -197,9 +203,9 @@ The filter must exist when ZAP discovers alerts; the report follows scanning and
 <tr><td>Result · 6–8s</td><td>Keep the actual verified PASS or report result in view. Click handles are filmed for 8s before/after but trimmed; long scan waits are edited out.</td></tr>
 </table></details>
 
-### Narrator — spoken lines
+### Spoken Narration
 
-<details><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
+<details open><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
 <table><tr><th>Visible Focus</th><th>ElevenLabs Spoken Words</th><th>Word Count</th></tr>
 <tr><td>Named command</td><td>Confirm the Automation Framework job order before running the gate. The filter must exist when the scan creates findings.</td><td>19</td></tr>
 <tr><td>Actual output A</td><td>The report follows scanning, and exit status evaluates the resulting alert set at the end.</td><td>15</td></tr>
@@ -208,7 +214,7 @@ The filter must exist when ZAP discovers alerts; the report follows scanning and
 These spoken lines teach only the visible evidence. Never say placeholder values aloud or claim a GUI/API fact a different command did not establish.
 </details>
 
-### Editor — highlights and cuts
+### Editor Actions
 
 <details><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
 <p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
@@ -230,7 +236,7 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 <tr><td>Sync artifact</td><td>Compare `logs/preflight-step-02.log` and `logs/recorded-step-02.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
 </table></details>
 
-### Validation and confidence
+### Proof Review
 
 - **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo3/logs/preflight-step-02.log`, plus the matching live GUI or GitHub Actions artifact
 - **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
@@ -245,26 +251,29 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 <summary><b>Open step 3 — where, command, output and production roles</b></summary>
 
 
-### The specific problem
+### Learning Goal
 
 An arbitrary nonzero process code could mean the runner failed, not that a security rule blocked release.
 
 **What you are learning:** Enforce High-risk threshold in a build pipeline *(EO3c)*
 
-### Which application and screen?
+### Demo Workspace
 
 
-**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+**Off-camera terminal setup:** Open VS Code integrated Terminal. Preserve any uncommitted work before changing branches. Paste these commands exactly; they select the demo starter and working folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
+cd "$HOME/pluralsight-script-development-with-zap"
+git switch m2-demo3-before
+cd "demos/module2-demos/m2-demo3-security-quality-gates"
 ```
 
-**Branch:** `m2-demo3-before` (complete any deliberately missing student source first). The separate `./steps/03-*.sh` command below is the only on-camera execution for this step.
+**Actual screen and browser check:** Show gate command and actual process exit in Terminal, then the matching GitHub Actions workflow at https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/actions/workflows/zap-quality-gate.yml. A failed job must be caused by the report's real High finding.
+
 
 **Open VS Code** at `ci/gate-plan.yaml` on `exitStatus`, then run the step in integrated Terminal. Also inspect **GitHub → Actions → quality-gate job** for the matching commit.
 
-### Run this exact command
+### Run Command
 
 **Where:** the VS Code integrated Terminal; Actions for hosted evidence. **Current folder:** `demos/module2-demos/m2-demo3-security-quality-gates`.
 
@@ -272,7 +281,7 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-s
 ./steps/03-run-security-quality-gate.sh
 ```
 
-### Expected output and what it means
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -285,13 +294,13 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Operator Decision
 
 The gate should block only when the configured risk threshold encounters a genuine remaining High finding. Exit code 1 and a positive High count need the report as corroboration.
 
 **How the investigation advances:** Read the actual alert records to verify that the False Positive and High findings were both handled correctly.
 
-### Recorder — screen and timing
+### Recorder Shots
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Screen_%26_Scroll-0284c7"/></summary>
 <table><tr><th>Time Handle</th><th>Required Screen Action</th></tr>
@@ -302,9 +311,9 @@ The gate should block only when the configured risk threshold encounters a genui
 <tr><td>Result · 6–8s</td><td>Keep the actual verified PASS or report result in view. Click handles are filmed for 8s before/after but trimmed; long scan waits are edited out.</td></tr>
 </table></details>
 
-### Narrator — spoken lines
+### Spoken Narration
 
-<details><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
+<details open><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
 <table><tr><th>Visible Focus</th><th>ElevenLabs Spoken Words</th><th>Word Count</th></tr>
 <tr><td>Named command</td><td>Set High as the error threshold and Medium as the warning threshold. Then run the actual headless gate.</td><td>18</td></tr>
 <tr><td>Actual output A</td><td>At least one High-risk finding remains. That real finding must explain the build decision rather than an arbitrary failure.</td><td>19</td></tr>
@@ -313,7 +322,7 @@ The gate should block only when the configured risk threshold encounters a genui
 These spoken lines teach only the visible evidence. Never say placeholder values aloud or claim a GUI/API fact a different command did not establish.
 </details>
 
-### Editor — highlights and cuts
+### Editor Actions
 
 <details><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
 <p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
@@ -335,7 +344,7 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 <tr><td>Sync artifact</td><td>Compare `logs/preflight-step-03.log` and `logs/recorded-step-03.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
 </table></details>
 
-### Validation and confidence
+### Proof Review
 
 - **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo3/logs/preflight-step-03.log`, plus the matching live GUI or GitHub Actions artifact
 - **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
@@ -350,26 +359,29 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 <summary><b>Open step 4 — where, command, output and production roles</b></summary>
 
 
-### The specific problem
+### Learning Goal
 
 A job failure alone cannot prove the scoped False Positive and the remaining High were handled correctly.
 
 **What you are learning:** Confirm the policy decision against official alert disposition *(EO3c)*
 
-### Which application and screen?
+### Demo Workspace
 
 
-**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+**Off-camera terminal setup:** Open VS Code integrated Terminal. Preserve any uncommitted work before changing branches. Paste these commands exactly; they select the demo starter and working folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
+cd "$HOME/pluralsight-script-development-with-zap"
+git switch m2-demo3-before
+cd "demos/module2-demos/m2-demo3-security-quality-gates"
 ```
 
-**Branch:** `m2-demo3-before` (complete any deliberately missing student source first). The separate `./steps/04-*.sh` command below is the only on-camera execution for this step.
+**Actual screen and browser check:** Open current Actions run report artifact or inspect local JSON evidence and show rules 10021 False Positive and 40012 High, plus the same gate decision.
+
 
 **In GitHub Actions**, open the matching run's report artifact (not an old run). Inspect rules 10021 and 40012 in the JSON report. Run the terminal step for local evidence.
 
-### Run this exact command
+### Run Command
 
 **Where:** the VS Code integrated Terminal; Actions artifact for CI proof. **Current folder:** `demos/module2-demos/m2-demo3-security-quality-gates`.
 
@@ -377,7 +389,7 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-s
 ./steps/04-verify-filtered-alert-report.sh
 ```
 
-### Expected output and what it means
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -389,13 +401,13 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Operator Decision
 
 The JSON report confirms benign noise was scoped while real High risk was retained. Only then does the failed build represent an evidence-backed security gate.
 
 **How the investigation advances:** This completes the security decision and gives another engineer an auditable release-block rationale.
 
-### Recorder — screen and timing
+### Recorder Shots
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Screen_%26_Scroll-0284c7"/></summary>
 <table><tr><th>Time Handle</th><th>Required Screen Action</th></tr>
@@ -406,18 +418,18 @@ The JSON report confirms benign noise was scoped while real High risk was retain
 <tr><td>Result · 6–8s</td><td>Keep the actual verified PASS or report result in view. Click handles are filmed for 8s before/after but trimmed; long scan waits are edited out.</td></tr>
 </table></details>
 
-### Narrator — spoken lines
+### Spoken Narration
 
-<details><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
+<details open><summary><img src="https://img.shields.io/badge/NARRATOR-Exact_Spoken_Lines-d946ef"/></summary>
 <table><tr><th>Visible Focus</th><th>ElevenLabs Spoken Words</th><th>Word Count</th></tr>
 <tr><td>Named command</td><td>Read the JSON report to confirm the scoped header alert received its False Positive disposition.</td><td>15</td></tr>
-<tr><td>Actual output A</td><td>The reflected XSS finding remains High, with Medium confidence. Filtering the benign alert did not weaken the risk policy.</td><td>19</td></tr>
+<tr><td>Actual output A</td><td>The reflected XSS finding remains High in the current report. Its risk survives the benign filter, so the gate must still block.</td><td>22</td></tr>
 <tr><td>Actual output B</td><td>Those two records explain the blocked build. The report and process exit must represent the same run.</td><td>17</td></tr>
 </table>
 These spoken lines teach only the visible evidence. Never say placeholder values aloud or claim a GUI/API fact a different command did not establish.
 </details>
 
-### Editor — highlights and cuts
+### Editor Actions
 
 <details><summary><img src="https://img.shields.io/badge/EDITOR-Precise_Callouts-16a34a"/></summary>
 <p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
@@ -439,7 +451,7 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 <tr><td>Sync artifact</td><td>Compare `logs/preflight-step-04.log` and `logs/recorded-step-04.log` with the same branch SHA and raw `logs/.producer/` proof. A mismatch is a retake, never a cosmetic correction.</td></tr>
 </table></details>
 
-### Validation and confidence
+### Proof Review
 
 - **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo3/logs/preflight-step-04.log`, plus the matching live GUI or GitHub Actions artifact
 - **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective

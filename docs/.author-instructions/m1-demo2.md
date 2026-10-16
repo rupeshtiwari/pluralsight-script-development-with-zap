@@ -21,7 +21,7 @@
 </p>
 <!-- demo-navigation:end -->
 
-## Recorder assignment
+## Prepare Recording
 
 **Work only on `m1-demo2-before`**, completing missing exercise source where applicable. The Recorder must receive the Developer's **actually successful** batch proof, four real reference transcripts, and timestamped `~/zap-course-deliverables/batch-YYYYMMDD-HHMMSS/m1-demo2/` package before filming. Do not assume that a package exists before the Developer verifies it. **Do not rerun Mac setup or batch preflight as part of filming.** Read the [one-time setup and Developer responsibilities](README.md) on the author dashboard.
 
@@ -29,7 +29,7 @@
 
 **Recording order:** show source/context → display exact command for approximately 8 seconds → Enter once → show real output in 6–8-second proof windows → switch screens only as the current claim requires. The Editor trims long waits. A mismatched recording transcript is a retake, not a chance to create a fake PASS.
 
-## Follow these four steps
+## Recording Steps
 
 ## Step 1 — Load the JavaScript HTTP Sender script
 
@@ -37,26 +37,29 @@
 <summary><b>Open step 1 — command, real expected fields and role instructions</b></summary>
 
 
-### The small problem to solve
+### Learning Goal
 
 A JavaScript file cannot modify traffic merely by existing in the repository.
 
 **Learning focus:** Develop a JavaScript extension at the request-sending boundary *(EO2a)*
 
-### Where to go
+### Demo Workspace
 
 
-**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+**Off-camera terminal setup:** Open VS Code integrated Terminal. Preserve any uncommitted work before changing branches. Paste these commands exactly; they select the demo starter and working folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
+cd "$HOME/pluralsight-script-development-with-zap"
+git switch m1-demo2-before
+cd "demos/module1-demos/m1-demo2-javascript-http-sender"
 ```
 
-**Branch:** `m1-demo2-before` (complete any deliberately missing student source first). The separate `./steps/01-*.sh` command below is the only on-camera execution for this step.
+**Actual screen and browser check:** Verify app at http://localhost:8000/ off camera. In VS Code show JavaScript HTTP Sender source, and in http://localhost:8080/zap/ open Scripts → HTTP Sender registration.
+
 
 **Open VS Code.** Create or inspect `zap-scripts/globomantics-marker.js` in the demo directory. Locate `sendingRequest()`, `MARKER_HEADER`, `MARKER_VALUE` and `setHeader()`. Then open the VS Code integrated Terminal in this demo directory.
 
-### Run this exact command
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
@@ -64,7 +67,7 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-j
 ./steps/01-load-javascript-http-sender.sh
 ```
 
-### What the script prints
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -79,13 +82,13 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Operator Decision
 
 Loading and enabling a script is separate from sending an HTTP message. The output establishes script identity, type and intended modification only.
 
 **How this connects:** Send a fresh request through ZAP to prove the hook executed.
 
-### Recorder — execute and show
+### Recorder Shots
 
 <details open>
 <summary><img src="https://img.shields.io/badge/RECORDER-Exact_Shots-0284c7"/></summary>
@@ -99,9 +102,9 @@ Loading and enabling a script is separate from sending an HTTP message. The outp
 </table>
 </details>
 
-### Narrator — spoken evidence
+### Spoken Narration
 
-<details>
+<details open>
 <summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
 <table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
 <tr><td>Command shown</td><td>Load the JavaScript HTTP Sender script. Its sending request hook can change a message only after ZAP registers and enables it.</td><td>21</td></tr>
@@ -111,7 +114,7 @@ Loading and enabling a script is separate from sending an HTTP message. The outp
 Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
 </details>
 
-### Editor — callouts and cut plan
+### Editor Actions
 
 <details>
 <summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
@@ -135,7 +138,7 @@ Only record a statement after the matching evidence is visible in the take. The 
 </table>
 </details>
 
-### Technical approval
+### Proof Review
 
 - **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo2/logs/preflight-step-01.log` and the same-take GUI evidence
 - **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
@@ -150,26 +153,29 @@ Only record a statement after the matching evidence is visible in the take. The 
 <summary><b>Open step 2 — command, real expected fields and role instructions</b></summary>
 
 
-### The small problem to solve
+### Learning Goal
 
 Script registration does not prove that an HTTP request actually passed through the hook.
 
 **Learning focus:** Verify observable request modification *(EO2a)*
 
-### Where to go
+### Demo Workspace
 
 
-**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+**Off-camera terminal setup:** Open VS Code integrated Terminal. Preserve any uncommitted work before changing branches. Paste these commands exactly; they select the demo starter and working folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
+cd "$HOME/pluralsight-script-development-with-zap"
+git switch m1-demo2-before
+cd "demos/module1-demos/m1-demo2-javascript-http-sender"
 ```
 
-**Branch:** `m1-demo2-before` (complete any deliberately missing student source first). The separate `./steps/02-*.sh` command below is the only on-camera execution for this step.
+**Actual screen and browser check:** After command, open http://localhost:8080/zap/ → History → latest /greet request → Request. Highlight the actual added marker header.
+
 
 **Open ZAP GUI** at `http://localhost:8080/zap/` in a browser. Select **History**, then the newest `/greet?name=marker-...` request, and open its **Request** panel. Use the VS Code integrated Terminal for the command.
 
-### Run this exact command
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
@@ -177,7 +183,7 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-j
 ./steps/02-prove-outbound-marker-header.sh
 ```
 
-### What the script prints
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -191,13 +197,13 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Operator Decision
 
 The header in the actual ZAP-captured request proves the JavaScript hook modified traffic. Request identifiers may vary, while the marker name and value remain stable.
 
 **How this connects:** Now establish that the script also printed its named console message.
 
-### Recorder — execute and show
+### Recorder Shots
 
 <details open>
 <summary><img src="https://img.shields.io/badge/RECORDER-Exact_Shots-0284c7"/></summary>
@@ -211,9 +217,9 @@ The header in the actual ZAP-captured request proves the JavaScript hook modifie
 </table>
 </details>
 
-### Narrator — spoken evidence
+### Spoken Narration
 
-<details>
+<details open>
 <summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
 <table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
 <tr><td>Command shown</td><td>Send a fresh request through ZAP instead of directly to the store. The HTTP Sender hook runs only on proxied messages.</td><td>21</td></tr>
@@ -223,7 +229,7 @@ The header in the actual ZAP-captured request proves the JavaScript hook modifie
 Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
 </details>
 
-### Editor — callouts and cut plan
+### Editor Actions
 
 <details>
 <summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
@@ -247,7 +253,7 @@ Only record a statement after the matching evidence is visible in the take. The 
 </table>
 </details>
 
-### Technical approval
+### Proof Review
 
 - **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo2/logs/preflight-step-02.log` and the same-take GUI evidence
 - **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
@@ -262,26 +268,29 @@ Only record a statement after the matching evidence is visible in the take. The 
 <summary><b>Open step 3 — command, real expected fields and role instructions</b></summary>
 
 
-### The small problem to solve
+### Learning Goal
 
 A terminal can show a predicted console string without actually observing ZAP's Script Console.
 
 **Learning focus:** Validate the script's emitted diagnostic output *(EO2a)*
 
-### Where to go
+### Demo Workspace
 
 
-**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+**Off-camera terminal setup:** Open VS Code integrated Terminal. Preserve any uncommitted work before changing branches. Paste these commands exactly; they select the demo starter and working folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
+cd "$HOME/pluralsight-script-development-with-zap"
+git switch m1-demo2-before
+cd "demos/module1-demos/m1-demo2-javascript-http-sender"
 ```
 
-**Branch:** `m1-demo2-before` (complete any deliberately missing student source first). The separate `./steps/03-*.sh` command below is the only on-camera execution for this step.
+**Actual screen and browser check:** Open http://localhost:8080/zap/ → Scripts → Script Console. Record the newly emitted marker line and matching URL; terminal only shows expected format.
+
 
 **Keep ZAP GUI open** at `http://localhost:8080/zap/`. Open **Scripts → Script Console** and inspect fresh lines after the command. The command itself runs in the integrated Terminal.
 
-### Run this exact command
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
@@ -289,7 +298,7 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-j
 ./steps/03-check-live-script-console.sh
 ```
 
-### What the script prints
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -303,13 +312,13 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Operator Decision
 
 Compare the expected print format with the new line that actually appears in ZAP Script Console. Do not confuse the shell's expected format with live script execution proof.
 
 **How this connects:** Confirm the script remains registered and enabled in this ZAP session.
 
-### Recorder — execute and show
+### Recorder Shots
 
 <details open>
 <summary><img src="https://img.shields.io/badge/RECORDER-Exact_Shots-0284c7"/></summary>
@@ -323,9 +332,9 @@ Compare the expected print format with the new line that actually appears in ZAP
 </table>
 </details>
 
-### Narrator — spoken evidence
+### Spoken Narration
 
-<details>
+<details open>
 <summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
 <table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
 <tr><td>Command shown</td><td>Trigger a new request to make the JavaScript print its marker. The terminal displays the expected format, not the console itself.</td><td>21</td></tr>
@@ -335,7 +344,7 @@ Compare the expected print format with the new line that actually appears in ZAP
 Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
 </details>
 
-### Editor — callouts and cut plan
+### Editor Actions
 
 <details>
 <summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
@@ -359,7 +368,7 @@ Only record a statement after the matching evidence is visible in the take. The 
 </table>
 </details>
 
-### Technical approval
+### Proof Review
 
 - **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo2/logs/preflight-step-03.log` and the same-take GUI evidence
 - **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
@@ -374,26 +383,29 @@ Only record a statement after the matching evidence is visible in the take. The 
 <summary><b>Open step 4 — command, real expected fields and role instructions</b></summary>
 
 
-### The small problem to solve
+### Learning Goal
 
 Reusable automation needs a stable named script and a verifiable enabled state.
 
 **Learning focus:** Confirm configured JavaScript extension state *(EO2a)*
 
-### Where to go
+### Demo Workspace
 
 
-**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+**Off-camera terminal setup:** Open VS Code integrated Terminal. Preserve any uncommitted work before changing branches. Paste these commands exactly; they select the demo starter and working folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
+cd "$HOME/pluralsight-script-development-with-zap"
+git switch m1-demo2-before
+cd "demos/module1-demos/m1-demo2-javascript-http-sender"
 ```
 
-**Branch:** `m1-demo2-before` (complete any deliberately missing student source first). The separate `./steps/04-*.sh` command below is the only on-camera execution for this step.
+**Actual screen and browser check:** In http://localhost:8080/zap/ → Scripts → HTTP Sender → globomantics-marker, show actual name, engine and enabled state; compare to terminal fields.
+
 
 **Open ZAP GUI** → **Scripts → HTTP Sender → globomantics-marker**. Keep its name/type/engine visible. Then return to VS Code Terminal for the command.
 
-### Run this exact command
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
@@ -401,7 +413,7 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-j
 ./steps/04-verify-enabled-script-registration.sh
 ```
 
-### What the script prints
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -417,13 +429,13 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Operator Decision
 
 The script has a stable source path, a valid HTTP Sender type, and enabled registration. This is not a claim it persists after the container is destroyed.
 
 **How this connects:** The demo finishes with source, modified request, console message and registration all independently observed.
 
-### Recorder — execute and show
+### Recorder Shots
 
 <details open>
 <summary><img src="https://img.shields.io/badge/RECORDER-Exact_Shots-0284c7"/></summary>
@@ -437,9 +449,9 @@ The script has a stable source path, a valid HTTP Sender type, and enabled regis
 </table>
 </details>
 
-### Narrator — spoken evidence
+### Spoken Narration
 
-<details>
+<details open>
 <summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
 <table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
 <tr><td>Command shown</td><td>A reusable automation needs a stable script identity, not just one marked request. Inspect its registration before depending on it.</td><td>20</td></tr>
@@ -449,7 +461,7 @@ The script has a stable source path, a valid HTTP Sender type, and enabled regis
 Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
 </details>
 
-### Editor — callouts and cut plan
+### Editor Actions
 
 <details>
 <summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
@@ -473,7 +485,7 @@ Only record a statement after the matching evidence is visible in the take. The 
 </table>
 </details>
 
-### Technical approval
+### Proof Review
 
 - **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo2/logs/preflight-step-04.log` and the same-take GUI evidence
 - **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed

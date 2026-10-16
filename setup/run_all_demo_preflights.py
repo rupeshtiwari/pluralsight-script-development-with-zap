@@ -104,7 +104,9 @@ def show_next_steps(output,archive,rows,exit_code):
     print()
     print("  Browser: http://127.0.0.1:8765/index.html")
     print("  Stop the viewer with Ctrl+C.")
-    print("  New run after any fix: ./setup/run-all-demo-preflights.sh from repo root")
+    print("  After fixing a failure, start a NEW batch from the repo root:")
+    print('  cd "$HOME/pluralsight-script-development-with-zap"')
+    print("  ./setup/run-all-demo-preflights.sh")
     print("  Every run creates a NEW timestamped folder. Previous proof stays intact.")
     if exit_code:
         print(color("  ATTENTION: Some demos failed. Open the logs in this batch; do not record from a failed preflight.","185;0;75"))

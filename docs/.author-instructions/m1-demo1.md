@@ -21,7 +21,7 @@
 </p>
 <!-- demo-navigation:end -->
 
-## Recorder assignment
+## Prepare Recording
 
 **Work only on `m1-demo1-before`**, completing missing exercise source where applicable. The Recorder must receive the Developer's **actually successful** batch proof, four real reference transcripts, and timestamped `~/zap-course-deliverables/batch-YYYYMMDD-HHMMSS/m1-demo1/` package before filming. Do not assume that a package exists before the Developer verifies it. **Do not rerun Mac setup or batch preflight as part of filming.** Read the [one-time setup and Developer responsibilities](README.md) on the author dashboard.
 
@@ -29,7 +29,7 @@
 
 **Recording order:** show source/context → display exact command for approximately 8 seconds → Enter once → show real output in 6–8-second proof windows → switch screens only as the current claim requires. The Editor trims long waits. A mismatched recording transcript is a retake, not a chance to create a fake PASS.
 
-## Follow these four steps
+## Recording Steps
 
 ## Step 1 — Run one targeted injection scan
 
@@ -37,26 +37,29 @@
 <summary><b>Open step 1 — command, real expected fields and role instructions</b></summary>
 
 
-### The small problem to solve
+### Learning Goal
 
 The search, account and administrative endpoints reach three different execution boundaries; a generic alert total hides those differences.
 
 **Learning focus:** Configure specialized SQL, NoSQL and command-injection checks *(EO1a)*
 
-### Where to go
+### Demo Workspace
 
 
-**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+**Off-camera terminal setup:** Open VS Code integrated Terminal. Preserve any uncommitted work before changing branches. Paste these commands exactly; they select the demo starter and working folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
+cd "$HOME/pluralsight-script-development-with-zap"
+git switch m1-demo1-before
+cd "demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
 ```
 
-**Branch:** `m1-demo1-before` (complete any deliberately missing student source first). The separate `./steps/01-*.sh` command below is the only on-camera execution for this step.
+**Actual screen and browser check:** Open http://localhost:8000/ to verify Globomantics off camera. Show search, account and admin sinks in VS Code, run scan, then show matching live findings in http://localhost:8080/zap/ → Alerts.
+
 
 **Open VS Code.** Use File → Open Folder to open the repository. In the editor open `runtime/app/main.py`. In the integrated Terminal, inspect the three prepared views by running `./scripts/show_code.sh sqli`, `./scripts/show_code.sh nosql` and `./scripts/show_code.sh cmd`. Keep source functions `search`, `account` and `admin_ping` accessible.
 
-### Run this exact command
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo1-targeted-injection-xss-csrf`.
 
@@ -64,7 +67,7 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-t
 ./steps/01-run-targeted-injection-scan.sh
 ```
 
-### What the script prints
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -80,13 +83,13 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Operator Decision
 
 Three different request parameters are now associated with targeted ZAP findings. The risk/confidence fields report the current engine's result; the mere presence of an alert is not yet a defensible confirmation of all three defects.
 
 **How this connects:** Now validate the page-output context rather than treating every reflected input as XSS.
 
-### Recorder — execute and show
+### Recorder Shots
 
 <details open>
 <summary><img src="https://img.shields.io/badge/RECORDER-Blue-0284c7"/> Exact Screen And Timing</summary>
@@ -100,9 +103,9 @@ Three different request parameters are now associated with targeted ZAP findings
 </table>
 </details>
 
-### Narrator — spoken evidence
+### Spoken Narration
 
-<details>
+<details open>
 <summary><img src="https://img.shields.io/badge/NARRATOR-Purple-d946ef"/> Exact ElevenLabs Narration</summary>
 <table><tr><th>Visual Reveal</th><th>Spoken Words — Copy Exactly After Verifying Proof</th><th>Count</th></tr>
 <tr><td>00:00–00:08 · command</td><td>Run this focused ZAP policy against the store’s search, account, and administrative endpoints. Each input reaches a different vulnerable boundary.</td><td>20 spoken words</td></tr>
@@ -112,7 +115,7 @@ Three different request parameters are now associated with targeted ZAP findings
 The lines are spoken sentences, not production notes. The second and third lines are recorded only if the named evidence is actually visible. If observed values change, revalidate the claims against the filmed take rather than adding invented numbers.
 </details>
 
-### Editor — callouts and cut plan
+### Editor Actions
 
 <details>
 <summary><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/> Callouts, Cuts And Sync</summary>
@@ -136,7 +139,7 @@ The lines are spoken sentences, not production notes. The second and third lines
 </table>
 </details>
 
-### Technical approval
+### Proof Review
 
 - **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo1/logs/preflight-step-01.log` and the same-take GUI evidence
 - **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
@@ -151,26 +154,29 @@ The lines are spoken sentences, not production notes. The second and third lines
 <summary><b>Open step 2 — command, real expected fields and role instructions</b></summary>
 
 
-### The small problem to solve
+### Learning Goal
 
 The `name` input appears in an HTML element, an attribute and a JavaScript string. The right test changes with the output context.
 
 **Learning focus:** Test context-specific reflected XSS *(EO1b)*
 
-### Where to go
+### Demo Workspace
 
 
-**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+**Off-camera terminal setup:** Open VS Code integrated Terminal. Preserve any uncommitted work before changing branches. Paste these commands exactly; they select the demo starter and working folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
+cd "$HOME/pluralsight-script-development-with-zap"
+git switch m1-demo1-before
+cd "demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
 ```
 
-**Branch:** `m1-demo1-before` (complete any deliberately missing student source first). The separate `./steps/02-*.sh` command below is the only on-camera execution for this step.
+**Actual screen and browser check:** Open http://localhost:8000/ to verify the app; use VS Code greet source, then http://localhost:8080/zap/ → History → /greet → Request and Response. Show actual payload and reflection; do not claim browser execution without proof.
+
 
 **Remain in VS Code.** Open `runtime/app/main.py` at the `greet` endpoint (approximately lines 257–277). In its integrated Terminal run `./scripts/show_code.sh xss` to see the source fragment.
 
-### Run this exact command
+### Run Command
 
 **Where to type it:** the same VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo1-targeted-injection-xss-csrf`.
 
@@ -178,7 +184,7 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-t
 ./steps/02-verify-reflected-xss-contexts.sh
 ```
 
-### What the script prints
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -196,13 +202,13 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Operator Decision
 
 The first three lines map the input to three output contexts. ZAP then attempts a context-specific payload and reports the affected parameter and evidence; raw reflection alone is not proof of executable script in a browser.
 
 **How this connects:** Next, move from output encoding to a state-changing request that depends on CSRF session ownership.
 
-### Recorder — execute and show
+### Recorder Shots
 
 <details open>
 <summary><img src="https://img.shields.io/badge/RECORDER-Blue-0284c7"/> Exact Screen And Timing</summary>
@@ -216,9 +222,9 @@ The first three lines map the input to three output contexts. ZAP then attempts 
 </table>
 </details>
 
-### Narrator — spoken evidence
+### Spoken Narration
 
-<details>
+<details open>
 <summary><img src="https://img.shields.io/badge/NARRATOR-Purple-d946ef"/> Exact ElevenLabs Narration</summary>
 <table><tr><th>Visual Reveal</th><th>Spoken Words — Copy Exactly After Verifying Proof</th><th>Count</th></tr>
 <tr><td>00:00–00:08 · command</td><td>The name value appears in HTML, an attribute, and JavaScript. Each context changes the characters an attacker needs to escape.</td><td>20 spoken words</td></tr>
@@ -228,7 +234,7 @@ The first three lines map the input to three output contexts. ZAP then attempts 
 The lines are spoken sentences, not production notes. The second and third lines are recorded only if the named evidence is actually visible. If observed values change, revalidate the claims against the filmed take rather than adding invented numbers.
 </details>
 
-### Editor — callouts and cut plan
+### Editor Actions
 
 <details>
 <summary><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/> Callouts, Cuts And Sync</summary>
@@ -252,7 +258,7 @@ The lines are spoken sentences, not production notes. The second and third lines
 </table>
 </details>
 
-### Technical approval
+### Proof Review
 
 - **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo1/logs/preflight-step-02.log` and the same-take GUI evidence
 - **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
@@ -267,26 +273,29 @@ The lines are spoken sentences, not production notes. The second and third lines
 <summary><b>Open step 3 — command, real expected fields and role instructions</b></summary>
 
 
-### The small problem to solve
+### Learning Goal
 
 A token check can exist yet fail if the server accepts a token from one person's session with another person's cookie.
 
 **Learning focus:** Exercise CSRF bypass conditions in the email-change workflow *(EO1c)*
 
-### Where to go
+### Demo Workspace
 
 
-**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+**Off-camera terminal setup:** Open VS Code integrated Terminal. Preserve any uncommitted work before changing branches. Paste these commands exactly; they select the demo starter and working folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
+cd "$HOME/pluralsight-script-development-with-zap"
+git switch m1-demo1-before
+cd "demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
 ```
 
-**Branch:** `m1-demo1-before` (complete any deliberately missing student source first). The separate `./steps/03-*.sh` command below is the only on-camera execution for this step.
+**Actual screen and browser check:** Open http://localhost:8000/account/email to identify the CSRF form. Show source, then terminal 200/403/200 and real changed-email result; ZAP History is optional only if captured.
+
 
 **Remain in VS Code.** Open `runtime/app/main.py` at `change_email` and the token-issuing helper. In the integrated Terminal run `./scripts/show_code.sh csrf` before running the security step.
 
-### Run this exact command
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo1-targeted-injection-xss-csrf`.
 
@@ -294,7 +303,7 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-t
 ./steps/03-test-cross-session-csrf-token.sh
 ```
 
-### What the script prints
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -311,13 +320,13 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Operator Decision
 
 Controls show the application is checking for a token. The cross-session request nevertheless succeeds and changes the victim's stored email, showing the token is not adequately associated with its issuing session.
 
 **How this connects:** The final step reconciles these observations with the alerts and records an actionable disposition.
 
-### Recorder — execute and show
+### Recorder Shots
 
 <details open>
 <summary><img src="https://img.shields.io/badge/RECORDER-Blue-0284c7"/> Exact Screen And Timing</summary>
@@ -331,9 +340,9 @@ Controls show the application is checking for a token. The cross-session request
 </table>
 </details>
 
-### Narrator — spoken evidence
+### Spoken Narration
 
-<details>
+<details open>
 <summary><img src="https://img.shields.io/badge/NARRATOR-Purple-d946ef"/> Exact ElevenLabs Narration</summary>
 <table><tr><th>Visual Reveal</th><th>Spoken Words — Copy Exactly After Verifying Proof</th><th>Count</th></tr>
 <tr><td>00:00–00:08 · command</td><td>Alice’s own token succeeds, while the missing-token request is denied. Those two controls establish that token checking is enabled.</td><td>19 spoken words</td></tr>
@@ -343,7 +352,7 @@ Controls show the application is checking for a token. The cross-session request
 The lines are spoken sentences, not production notes. The second and third lines are recorded only if the named evidence is actually visible. If observed values change, revalidate the claims against the filmed take rather than adding invented numbers.
 </details>
 
-### Editor — callouts and cut plan
+### Editor Actions
 
 <details>
 <summary><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/> Callouts, Cuts And Sync</summary>
@@ -367,7 +376,7 @@ The lines are spoken sentences, not production notes. The second and third lines
 </table>
 </details>
 
-### Technical approval
+### Proof Review
 
 - **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo1/logs/preflight-step-03.log` and the same-take GUI evidence
 - **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
@@ -382,26 +391,29 @@ The lines are spoken sentences, not production notes. The second and third lines
 <summary><b>Open step 4 — command, real expected fields and role instructions</b></summary>
 
 
-### The small problem to solve
+### Learning Goal
 
 The team must not ship an alert list that lacks reproducible evidence for each stated vulnerability.
 
 **Learning focus:** Apply the three security checks to a final engineering disposition *(EO1a · EO1b · EO1c)*
 
-### Where to go
+### Demo Workspace
 
 
-**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+**Off-camera terminal setup:** Open VS Code integrated Terminal. Preserve any uncommitted work before changing branches. Paste these commands exactly; they select the demo starter and working folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
+cd "$HOME/pluralsight-script-development-with-zap"
+git switch m1-demo1-before
+cd "demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
 ```
 
-**Branch:** `m1-demo1-before` (complete any deliberately missing student source first). The separate `./steps/04-*.sh` command below is the only on-camera execution for this step.
+**Actual screen and browser check:** Show terminal disposition and ZAP GUI Alerts. For command injection require a real injected shell marker ZAP_CMD_PROOF from the authorized local endpoint, never a normal ping response.
+
 
 **Use VS Code with integrated Terminal.** Keep `runtime/app/main.py` open. Read the student disposition template at `docs/alert-disposition-template.md` from the repository root. Return to the demo Terminal before running the step.
 
-### Run this exact command
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo1-targeted-injection-xss-csrf`.
 
@@ -409,7 +421,7 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-t
 ./steps/04-reconcile-security-alerts.sh
 ```
 
-### What the script prints
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -418,20 +430,20 @@ The table shows the actual **field names and expected type of evidence** produce
 <tbody>
 <tr><td><b>SQL injection 40018 · /search</b></td><td><code>confirmed — DB error: &lt;actual SQL error&gt;</code></td><td>Request/response supports SQL issue</td></tr>
 <tr><td><b>NoSQL injection 40033 · /api/account</b></td><td><code>confirmed — accounts &lt;before&gt; → &lt;after&gt;</code></td><td>Operator injection affects record count</td></tr>
-<tr><td><b>Command injection 90020/90037 · /admin/ping</b></td><td><code>confirmed — OS command ran: &lt;actual bytes&gt;</code></td><td>Also inspect the injected host request; a normal ping is insufficient</td></tr>
+<tr><td><b>Command injection 90020/90037 · /admin/ping</b></td><td><code>injected shell marker: ZAP_CMD_PROOF (only when observed)</code></td><td>Also inspect the injected host request; a normal ping is insufficient</td></tr>
 <tr><td><b>XSS reflected · /greet</b></td><td><code>confirmed — unencoded reflection</code></td><td>Confirm actual injected payload and response evidence</td></tr>
 <tr><td><b>Result</b></td><td><code>✔ PASS all four findings reconciled with app behavior</code></td><td>Check the evidence before disposition</td></tr>
 </tbody></table>
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Operator Decision
 
 A raw rule ID is a lead; its actual request and application effect support the engineer's final decision. Do not use routine ping output alone as proof of shell-command injection.
 
 **How this connects:** The investigation closes with documented findings that can be reviewed rather than mere scanner severity labels.
 
-### Recorder — execute and show
+### Recorder Shots
 
 <details open>
 <summary><img src="https://img.shields.io/badge/RECORDER-Blue-0284c7"/> Exact Screen And Timing</summary>
@@ -440,24 +452,24 @@ A raw rule ID is a lead; its actual request and application effect support the e
 <tr><td>Source context · 00:00–00:08</td><td>VS Code: inspect runtime/app/main.py for search, account, admin_ping and greet. Open docs/alert-disposition-template.md for the student record. Run the named step in integrated terminal.</td></tr>
 <tr><td>Command · next 8 seconds</td><td>Show the full command above from `demos/module1-demos/m1-demo1-targeted-injection-xss-csrf` at readable zoom, keep the pointer away from key text and press Enter once.</td></tr>
 <tr><td>Proof A · 6–8 seconds</td><td>Show SQL parse error and NoSQL count difference; these are independent effects.</td></tr>
-<tr><td>Proof B · 6–8 seconds</td><td>Show the XSS reflection and command rule. The script's normal ping evidence is insufficient alone; open the original injected request if narrating command execution.</td></tr>
+<tr><td>Proof B · 6–8 seconds</td><td>Show the XSS reflection and command rule. The final result must include the observed harmless shell marker and its matching request. Routine ping output cannot prove injection.</td></tr>
 <tr><td>Completion · 6–8 seconds</td><td>Hold the actual PASS line or stop on FAIL. Capture the exact console output and screen/take timestamp. Do not leave any single proof frame static more than 10 seconds.</td></tr>
 </table>
 </details>
 
-### Narrator — spoken evidence
+### Spoken Narration
 
-<details>
+<details open>
 <summary><img src="https://img.shields.io/badge/NARRATOR-Purple-d946ef"/> Exact ElevenLabs Narration</summary>
 <table><tr><th>Visual Reveal</th><th>Spoken Words — Copy Exactly After Verifying Proof</th><th>Count</th></tr>
 <tr><td>00:00–00:08 · command</td><td>The SQL error and changing MongoDB account count show two different unsafe data paths, beyond merely reading scanner labels.</td><td>19 spoken words</td></tr>
-<tr><td>After execution · proof A</td><td>The reflected marker confirms unencoded output. A normal ping does not prove shell injection, so inspect the original injected host request.</td><td>21 spoken words</td></tr>
-<tr><td>After execution · proof B</td><td>Record only findings whose observed behavior supports the diagnosis. An alert disposition must be defensible when another engineer reviews it.</td><td>20 spoken words</td></tr>
+<tr><td>After execution · proof A</td><td>A harmless injected shell marker proves execution beyond routine ping. Match that marker with the original host request before confirming this finding.</td><td>22 spoken words</td></tr>
+<tr><td>After execution · proof B</td><td>Tie each disposition to the database error, account-count change, injected shell marker or reflected response. Another engineer must be able to repeat your reasoning.</td><td>24 spoken words</td></tr>
 </table>
 The lines are spoken sentences, not production notes. The second and third lines are recorded only if the named evidence is actually visible. If observed values change, revalidate the claims against the filmed take rather than adding invented numbers.
 </details>
 
-### Editor — callouts and cut plan
+### Editor Actions
 
 <details>
 <summary><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/> Callouts, Cuts And Sync</summary>
@@ -481,7 +493,7 @@ The lines are spoken sentences, not production notes. The second and third lines
 </table>
 </details>
 
-### Technical approval
+### Proof Review
 
 - **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo1/logs/preflight-step-04.log` and the same-take GUI evidence
 - **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed

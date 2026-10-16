@@ -240,7 +240,7 @@ The table shows the actual **field names and expected type of evidence** produce
 <tbody>
 <tr><td><b>SQL injection 40018 · /search</b></td><td><code>confirmed — DB error: &lt;actual SQL error&gt;</code></td><td>Request/response supports SQL issue</td></tr>
 <tr><td><b>NoSQL injection 40033 · /api/account</b></td><td><code>confirmed — accounts &lt;before&gt; → &lt;after&gt;</code></td><td>Operator injection affects record count</td></tr>
-<tr><td><b>Command injection 90020/90037 · /admin/ping</b></td><td><code>confirmed — OS command ran: &lt;actual bytes&gt;</code></td><td>Also inspect the injected host request; a normal ping is insufficient</td></tr>
+<tr><td><b>Command injection 90020/90037 · /admin/ping</b></td><td><code>injected shell marker: ZAP_CMD_PROOF (only when observed)</code></td><td>Also inspect the injected host request; a normal ping is insufficient</td></tr>
 <tr><td><b>XSS reflected · /greet</b></td><td><code>confirmed — unencoded reflection</code></td><td>Confirm actual injected payload and response evidence</td></tr>
 <tr><td><b>Result</b></td><td><code>✔ PASS all four findings reconciled with app behavior</code></td><td>Check the evidence before disposition</td></tr>
 </tbody></table>

@@ -124,6 +124,34 @@ class BatchContractTests(unittest.TestCase):
             self.assertEqual(captured.getvalue(),"")
             self.assertIn("sensitive line",raw.read_text())
 
+    def test_author_playbooks_expose_exact_workspaces_and_spoken_beats(self):
+        import re
+        for demo,folder,_ in MODULE.DEMOS:
+            author=(ROOT/"docs/.author-instructions"/(demo+".md")).read_text()
+            steps=re.split(r"(?=^## Step [1-4]\\b)",author,flags=re.M)[1:]
+            self.assertEqual(len(steps),4,demo)
+            self.assertIn("http://localhost:8000",author, demo)
+            for i,step in enumerate(steps,1):
+                for heading in ("Learning Goal","Demo Workspace","Run Command",
+                                "Expected Results","Operator Decision","Spoken Narration"):
+                    self.assertIn("### "+heading,step,(demo,i))
+                self.assertIn("git switch "+demo+"-before",step,(demo,i))
+                self.assertIn("cd \""+folder+"\"",step,(demo,i))
+                self.assertIn("**Actual screen and browser check:**",step,(demo,i))
+                self.assertIn("<details open>",step,(demo,i))
+                narrator=MODULE.narrator_groups("## Step "+str(i)+" — fixture\\n"+step)[0]
+                self.assertEqual(len(narrator),3,(demo,i))
+                self.assertTrue(all(0 < len(words.split()) <= 27 for _,words,_ in narrator))
+
+    def test_command_disposition_requires_injected_evidence_not_a_normal_ping(self):
+        source=(ROOT/"demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/"
+                "scripts/_steps.sh").read_text()
+        final=source[source.index("step4_disposition() {"):]
+        self.assertIn("ZAP_CMD_PROOF",final)
+        self.assertIn("--data-urlencode",final)
+        self.assertIn("injected shell marker",final)
+        self.assertNotIn("bytes from [0-9.]+",final)
+
     def test_dry_run_does_not_create_evidence(self):
         with tempfile.TemporaryDirectory() as t:
             output=Path(t)/"not-created"
