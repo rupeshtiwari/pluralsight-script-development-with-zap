@@ -19,13 +19,13 @@
 </p>
 <!-- demo-navigation:end -->
 
-## The problem you are solving
+## Your Scenario
 
-Maya has a completed security scan but needs a machine-readable status, precise custom alert, archived report, and scan-quality evidence. A screenshot or arbitrary alert total is insufficient for a release pipeline.
+You need machine-readable evidence from a completed authenticated Store scan. An alert count or screenshot cannot tell your release process whether it is reading the right engine, finding and report.
 
-**What success looks like:** API status, named alert, official JSON report, and actual Insights reconciled to one scan. All four steps address parts of this same engineering problem.
+**Your practical goal:** I will guide you through four API evidence checks: runtime and scan status, the named custom alert, the official JSON report and report-owned Insights. You will compare the actual fields rather than assume different artifacts agree.
 
-## What you will learn in this demonstration
+## Your Learning Goals
 
 You will retrieve four kinds of evidence from ZAP programmatically:
 
@@ -34,7 +34,7 @@ You will retrieve four kinds of evidence from ZAP programmatically:
 
 You do not need the separate course outline to understand the objective or follow the exercises.
 
-## From setup to a defensible decision
+## Your Evidence Path
 
 ```mermaid
 flowchart LR
@@ -47,7 +47,7 @@ flowchart LR
   S3 --> S4
 ```
 
-## Start the demo's application
+## Start Your Lab
 
 Mac dependencies are prepared **once for the course** using `setup/setup-macos.sh`, as shown in the [course README](../../../README.md). Each demo must then start its **own local training stack**:
 
@@ -57,6 +57,7 @@ Mac dependencies are prepared **once for the course** using `setup/setup-macos.s
 **Where:** macOS Terminal or VS Code integrated Terminal, from the root of your existing Git checkout.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap"
 git fetch origin
 git switch m2-demo2-before
 cd demos/module2-demos/m2-demo2-zap-api-scan-evidence
@@ -69,22 +70,30 @@ cd demos/module2-demos/m2-demo2-zap-api-scan-evidence
 
 </details>
 
-## Complete the four demo steps
+## Your Four Steps
 
 <details open>
 <summary><b>Step 1 — Ask the API whether the scan finished</b> · Check completion</summary>
 
-### The specific problem
+### Learning Goal
 
 The API can be available while the active scan is incomplete.
 
 **What you are learning:** Query machine-readable scan status *(EO3b)*
 
-### Which application and screen?
+### Demo Workspace
 
 **Open macOS Terminal**, enter the demo folder, and inspect ZAP API endpoints used by `scripts/_steps.sh` when needed. No GUI is required for this step.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** macOS Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo2-zap-api-scan-evidence"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where:** macOS Terminal. **Current folder:** `demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
 
@@ -92,7 +101,13 @@ The API can be available while the active scan is incomplete.
 ./steps/01-check-zap-scan-status.sh
 ```
 
-### Expected output and what it means
+<!-- student-proof:start -->
+**Where your result appears:** Stay in the same terminal after the command. No ZAP GUI switch is required for the API status proof.
+
+**Inspect this evidence:** Current engine version, active scan identity and actual completed progress/state.
+<!-- student-proof:end -->
+
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -104,7 +119,7 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Interpret Results
 
 The version confirms which engine generated the findings. Progress and finished status tell an automated consumer when scan results are ready.
 
@@ -115,17 +130,25 @@ The version confirms which engine generated the findings. Progress and finished 
 <details>
 <summary><b>Step 2 — Query the custom rule's risk and confidence</b> · Inspect custom alert</summary>
 
-### The specific problem
+### Learning Goal
 
 A count of twenty alerts is not actionable without rule identity and affected parameter.
 
 **What you are learning:** Retrieve a specific scanner finding through the API *(EO3b)*
 
-### Which application and screen?
+### Demo Workspace
 
 **Remain in macOS Terminal**. The command queries `core/view/alerts` using the authenticated profile URL. Inspect the response fields printed by the step.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** macOS Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo2-zap-api-scan-evidence"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where:** macOS Terminal. **Current folder:** `demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
 
@@ -133,7 +156,13 @@ A count of twenty alerts is not actionable without rule identity and affected pa
 ./steps/02-query-custom-rule-alert.sh
 ```
 
-### Expected output and what it means
+<!-- student-proof:start -->
+**Where your result appears:** Stay in the same terminal. Show the API query context and custom alert fields; inspect raw JSON only when teaching its structure.
+
+**Inspect this evidence:** Custom plugin identity, affected parameter, risk and confidence as distinct fields.
+<!-- student-proof:end -->
+
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -145,7 +174,7 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Interpret Results
 
 Rule ID and name distinguish the application-specific Jython finding from built-in XSS. Risk and confidence are separate fields that a pipeline can reason about.
 
@@ -156,17 +185,25 @@ Rule ID and name distinguish the application-specific Jython finding from built-
 <details>
 <summary><b>Step 3 — Compare the JSON report with the API result</b> · Reconcile JSON</summary>
 
-### The specific problem
+### Learning Goal
 
 If the stored JSON disagrees with the current API, it cannot support a reliable release decision.
 
 **What you are learning:** Generate and reconcile an official security report *(EO3b)*
 
-### Which application and screen?
+### Demo Workspace
 
 **Remain in macOS Terminal**. Inspect the official `reports/action/generate` request and `traditional-json` report type used by the script.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** macOS Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo2-zap-api-scan-evidence"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where:** macOS Terminal. **Current folder:** `demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
 
@@ -174,7 +211,13 @@ If the stored JSON disagrees with the current API, it cannot support a reliable 
 ./steps/03-reconcile-json-report.sh
 ```
 
-### Expected output and what it means
+<!-- student-proof:start -->
+**Where your result appears:** Stay in the terminal for the generated report fields; show official report JSON when comparing nested fields. Compare to the API result already captured in this take.
+
+**Inspect this evidence:** Same custom identity, scope and rating; investigate any mismatch rather than assuming freshness.
+<!-- student-proof:end -->
+
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -186,7 +229,7 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Interpret Results
 
 The generated report preserves the named custom finding in a shareable format. Matching its identity and rating against the API prevents stale-report assumptions.
 
@@ -197,17 +240,25 @@ The generated report preserves the named custom finding in a shareable format. M
 <details>
 <summary><b>Step 4 — Read the report's scan-effectiveness Insights</b> · Check Insights</summary>
 
-### The specific problem
+### Learning Goal
 
 A scan might appear clean because it encountered an authentication, scope or execution problem.
 
 **What you are learning:** Interpret operational findings exposed with the scan report *(EO3b)*
 
-### Which application and screen?
+### Demo Workspace
 
 **Remain in macOS Terminal**. Locate the actual `insights[]` entries returned by the report extraction, with the key and explanation readable.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** macOS Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo2-zap-api-scan-evidence"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where:** macOS Terminal. **Current folder:** `demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
 
@@ -215,7 +266,13 @@ A scan might appear clean because it encountered an authentication, scope or exe
 ./steps/04-read-zap-insights.sh
 ```
 
-### Expected output and what it means
+<!-- student-proof:start -->
+**Where your result appears:** Stay in the terminal and show actual report insights[] entries with their explanations. No browser tour is required.
+
+**Inspect this evidence:** Real insight key, statistic and meaning, including operational failures; empty Insights is HOLD.
+<!-- student-proof:end -->
+
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -226,7 +283,7 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Interpret Results
 
 Insights describe scan behavior and confidence in coverage, not only vulnerability risk. A missing Insights section is a reason to investigate, not something to invent or ignore.
 
@@ -234,7 +291,15 @@ Insights describe scan behavior and confidence in coverage, not only vulnerabili
 
 </details>
 
-## Complete the exercise
+<!-- student-achievement:start -->
+## What You Achieved
+
+After the four checks, you can inspect ZAP programmatically, distinguish risk from confidence, and reconcile a report with the API. You can use actual Insights to discuss scan effectiveness, including operational failures, without replacing missing Insights with unrelated counters.
+
+**Your final check:** Explain the result using your own captured evidence. A README example, missing result or earlier run does not satisfy this exercise.
+<!-- student-achievement:end -->
+
+## Finish Your Lab
 
 A report is trustworthy only when its custom finding, rating and scan-quality context match the current API evidence.
 
