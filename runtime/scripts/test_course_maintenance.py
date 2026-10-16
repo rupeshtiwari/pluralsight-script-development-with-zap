@@ -14,25 +14,8 @@ def load(name):
     obj=importlib.util.module_from_spec(spec);spec.loader.exec_module(obj)
     return obj
 
-guides=load('guide_refresh_v36');sync=load('sync_all_branches')
-
-class GuideTests(unittest.TestCase):
-    def test_no_confidence_from_missing_scores(self):
-        self.assertIsNone(guides.overall([98,None,99,100]))
-        self.assertEqual(guides.overall([98,99,98,99]),98.5)
-        with self.assertRaises(ValueError):guides.overall([100,100,100,101])
-    def test_managed_section_idempotent(self):
-        once=guides.managed('INTRO\n\n### Run Command\n','x','content','### Run Command')
-        self.assertEqual(guides.managed(once,'x','content','### Run Command'),once)
-    def test_all_four_locations_known_and_durations_outline_bound(self):
-        self.assertEqual(set(guides.STORIES),set(guides.PROOF))
-        for demo in guides.STORIES:
-            self.assertEqual(len(guides.PROOF[demo]),4)
-            for terminal,location,evidence in guides.PROOF[demo]:
-                self.assertIn('Terminal',terminal)
-                self.assertGreater(len(location),60)
-                self.assertGreater(len(evidence),40)
-        self.assertEqual([x[3] for x in guides.STORIES.values()],[6,5,6,5,5,6])
+# The author-guide generator and its tests moved to the private production repository.
+sync=load('sync_all_branches')
 
 class SyncTests(unittest.TestCase):
     def setUp(self):

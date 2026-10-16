@@ -30,6 +30,4 @@ The Globomantics Store has several distinct input boundaries. Maya must test the
 
 Prepare your Mac **once** using `./setup/setup-macos.sh` from the repository root. Follow the chosen demo README to select its starter branch, start its local app and ZAP with `./scripts/demo_up.sh` or `demo_reset.sh`, and run its four concept-named steps in order.
 
-The Developer's one-command complete-course validation is `./setup/run-all-demo-preflights.sh` from the root. It is separate from the student's step-by-step exercise.
-
 [← Course home](../../README.md)
