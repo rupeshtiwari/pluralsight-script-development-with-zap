@@ -67,7 +67,7 @@ ensure_ready() {
     command -v docker >/dev/null 2>&1 || { fail "docker is not available" "the demo runs the gate in a container" "install/start Docker (Colima) and retry"; return 1; }
     [ -n "$(zap_container)" ] || { fail "the ZAP stack is not running" "no zap container found" "run scripts/demo_up.sh, wait for 'Up', then retry"; return 1; }
     [ -f "${GATE_PLAN_HOST}" ] || { fail "gate plan not found" "ci/gate-plan.yaml is missing" "restore the file from the repo"; return 1; }
-    ensure_gate || return 1
+    # Gate execution belongs to named Step 3, not hidden readiness.
     return 0
 }
 
@@ -149,15 +149,15 @@ print(n)')"
     fm star "Process exit code  (echo \$?)" "${code}"
     local verdict; verdict="BLOCKED"; [ "${code}" = "0" ] && verdict="passed"
     fm star "Build decision" "exit ${code} → the gate ${verdict} the build"
-    if [ -n "${code}" ] && [ "${code}" != "0" ]; then
-        pass "the gate blocked the build (non-zero exit) on the High-risk alert"
+    if [ "${code}" = "1" ] && [[ "${highs}" =~ ^[0-9]+$ ]] && [ "${highs}" -gt 0 ]; then
+        pass "the gate exited 1 with at least one remaining High-risk alert"
     elif [ "${code}" = "0" ]; then
         fail "the gate did not block the build" \
              "exit code was 0 though a High-risk alert was expected (highs=${highs})" \
              "ask: 'the gate exited 0; confirm /greet still has the reflected-XSS High and errorLevel=HIGH in gate-plan.yaml'"
     else
-        fail "no exit code was captured from the gate run" \
-             "the headless run did not return a process result" \
+        fail "the gate did not prove the expected exit=1 High-risk decision" \
+             "expected exit 1 with at least one High finding, got exit=${code:-<missing>}, high_count=${highs:-<missing>}" \
              "ask: 'the gate run produced no exit code; read logs/.gate/run.log'"
     fi
     return "${STEP_RC}"
@@ -190,14 +190,14 @@ for s in d.get("site",[]):
 print("|")')"
     IFS='|' read -r fpn fpr <<<"${fp}"
     IFS='|' read -r xn xr <<<"${xss}"
-    fm star "Benign finding  (rule ${FP_RULE})" "${fpn:-not present} — ${fpr:-filtered to False Positive}" focus
-    fm star "Real finding  (rule ${XSS_RULE})" "${xn:-Cross Site Scripting (Reflected)} — ${xr:-High}"
+    fm star "Benign finding  (rule ${FP_RULE})" "${fpn:-not present} — ${fpr:-not present}" focus
+    fm star "Real finding  (rule ${XSS_RULE})" "${xn:-not present} — ${xr:-not present}"
     fm star "Gate outcome" "benign filtered out, High kept → build blocked"
-    if [ -n "${xn}" ] || [ -n "${xr}" ]; then
+    if [ -n "${fpn}" ] && [[ "${fpr}" == *"False Positive"* ]] && [ -n "${xn}" ] && [[ "${xr}" == High* ]]; then
         pass "the filtered report shows the benign finding disposed and the High kept"
     else
-        fail "the report did not show the expected findings" \
-             "neither the filtered benign finding nor the High was found" \
+        fail "the report did not prove both the scoped False Positive and remaining High-risk alert" \
+             "expected rule 10021 False Positive and rule 40012 High, with no fallback placeholders" \
              "ask: 'the gate report is missing expected alerts; confirm the scan reached /greet and the filter rule id'"
     fi
     return "${STEP_RC}"
