@@ -21,9 +21,9 @@ SCAN_ID = re.compile(r"\bid=\d+\b")
 # These metrics are recorded exactly in the raw audit log, but are intentionally
 # not safe for narrator scripts because a fresh scan can yield a different count.
 LIVE_COUNTER = re.compile(
-    r"((?:Requests the scan sent|Probe requests the scan sent):\s*)\d+"
+    r"((?:Requests the scan sent|Probe requests the scan sent)(?::\s*|\s+│\s*))\d+"
 )
-INSIGHT_STAT = re.compile(r"(Statistic · meaning:\s*)\d+(?=\s|$)")
+INSIGHT_STAT = re.compile(r"(Statistic · meaning(?::\s*|\s+│\s*))\d+(?=\s|$)")
 
 
 def canonical(line: str) -> str:

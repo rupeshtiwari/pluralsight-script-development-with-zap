@@ -47,7 +47,8 @@ def output_table(proof: str) -> str:
     """Create readable label/value rows ONLY from observed star output lines."""
     rows = []
     for line in proof.splitlines():
-        match = re.match(r"^\s*★\s*(.+?):\s+(.+)$", line)
+        match = (re.match(r"^\s*★\s*│\s*(.+?)\s*│\s*(.*)$", line)
+                 or re.match(r"^\s*★\s*(.+?):\s+(.+)$", line))
         if not match:
             continue
         label, value = match.groups()
