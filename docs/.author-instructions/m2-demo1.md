@@ -37,6 +37,15 @@ A security test needing manual clicks is not a repeatable CI control.
 
 ### Which application and screen?
 
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
+```
+
+**Branch:** `m2-demo1-before` (complete any deliberately missing student source first). The separate `./steps/01-*.sh` command below is the only on-camera execution for this step.
+
 **Open VS Code.** Inspect `ci/af-plan.yaml` and the `.github/workflows/zap-authenticated-scan.yml` workflow. Open **GitHub → Actions → authenticated-scan** for hosted proof of the exact current commit.
 
 ### Run this exact command
@@ -76,16 +85,6 @@ The Automation Framework plan moves the scan configuration into versioned code. 
 <tr><td>Completion · 6–8s</td><td>Hold the actual PASS and/or hosted evidence; on an important GUI click provide 8s before and 8s after in the source take.</td></tr>
 </table></details>
 
-### Editor — highlights and cuts
-
-<details><summary><img src="https://img.shields.io/badge/EDITOR-Single_Focus_Cuts-16a34a"/></summary>
-<table><tr><th>Beat</th><th>Camtasia Action</th></tr>
-<tr><td>Source → command</td><td>Cut on pane switch. Thin square on the exact file/function, then clear it when the command appears.</td></tr>
-<tr><td>First and second proof</td><td>Use a square on `-autorun`, an arrow to Actions' scan step, then a separate short callout around the matching SHA. Hold each focus 6–8s, then remove it immediately when switching.</td></tr>
-<tr><td>Final PASS/report</td><td>Show the correct same-run output, not a static illustration. Align narrator line 3 with the actual decision field.</td></tr>
-<tr><td>Evidence files</td><td>Compare `preflight-step-01.log` and `recorded-step-01.log`, retain raw proof and Actions run ID/SHA in the take manifest. Mismatch requires a retake.</td></tr>
-</table></details>
-
 ### Narrator — spoken lines
 
 <details><summary><img src="https://img.shields.io/badge/NARRATOR-Final_Spoken_Words-d946ef"/></summary>
@@ -96,6 +95,28 @@ The Automation Framework plan moves the scan configuration into versioned code. 
 </table>
 The voice must match actual displayed evidence. Never read a sample result as an observed finding.
 </details>
+
+### Editor — highlights and cuts
+
+<details><summary><img src="https://img.shields.io/badge/EDITOR-Single_Focus_Cuts-16a34a"/></summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>GitHub Actions workflow job and autorun command</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>Runner (CI)</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>Command</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>A hosted run is distinct from a local YAML plan</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Beat</th><th>Camtasia Action</th></tr>
+<tr><td>Source → command</td><td>Cut on pane switch. Thin square on the exact file/function, then clear it when the command appears.</td></tr>
+<tr><td>First and second proof</td><td>Use a square on `-autorun`, an arrow to Actions' scan step, then a separate short callout around the matching SHA. Hold each focus 6–8s, then remove it immediately when switching.</td></tr>
+<tr><td>Final PASS/report</td><td>Show the correct same-run output, not a static illustration. Align narrator line 3 with the actual decision field.</td></tr>
+<tr><td>Evidence files</td><td>Compare `preflight-step-01.log` and `recorded-step-01.log`, retain raw proof and Actions run ID/SHA in the take manifest. Mismatch requires a retake.</td></tr>
+</table></details>
 
 ### Validation and confidence
 
@@ -119,6 +140,15 @@ A headless job can silently scan only the login page without valid context or id
 **What you are learning:** Specify an authenticated context and bounded targets *(EO3a)*
 
 ### Which application and screen?
+
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
+```
+
+**Branch:** `m2-demo1-before` (complete any deliberately missing student source first). The separate `./steps/02-*.sh` command below is the only on-camera execution for this step.
 
 **In VS Code**, scroll through `ci/af-plan.yaml` to `env.contexts`, authentication script, `alice` user, and `includePaths`. Keep the relevant YAML keys visible.
 
@@ -161,16 +191,6 @@ The context specifies how ZAP logs in and where it is allowed to scan. This is t
 <tr><td>Completion · 6–8s</td><td>Hold the actual PASS and/or hosted evidence; on an important GUI click provide 8s before and 8s after in the source take.</td></tr>
 </table></details>
 
-### Editor — highlights and cuts
-
-<details><summary><img src="https://img.shields.io/badge/EDITOR-Single_Focus_Cuts-16a34a"/></summary>
-<table><tr><th>Beat</th><th>Camtasia Action</th></tr>
-<tr><td>Source → command</td><td>Cut on pane switch. Thin square on the exact file/function, then clear it when the command appears.</td></tr>
-<tr><td>First and second proof</td><td>Sequential boxes for authentication, users and includePaths; clear earlier boxes at each scroll or pane change. Hold each focus 6–8s, then remove it immediately when switching.</td></tr>
-<tr><td>Final PASS/report</td><td>Show the correct same-run output, not a static illustration. Align narrator line 3 with the actual decision field.</td></tr>
-<tr><td>Evidence files</td><td>Compare `preflight-step-02.log` and `recorded-step-02.log`, retain raw proof and Actions run ID/SHA in the take manifest. Mismatch requires a retake.</td></tr>
-</table></details>
-
 ### Narrator — spoken lines
 
 <details><summary><img src="https://img.shields.io/badge/NARRATOR-Final_Spoken_Words-d946ef"/></summary>
@@ -181,6 +201,28 @@ The context specifies how ZAP logs in and where it is allowed to scan. This is t
 </table>
 The voice must match actual displayed evidence. Never read a sample result as an observed finding.
 </details>
+
+### Editor — highlights and cuts
+
+<details><summary><img src="https://img.shields.io/badge/EDITOR-Single_Focus_Cuts-16a34a"/></summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>Automation Framework authentication configuration</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>Context</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>Authentication</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>Correct context determines covered endpoints</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Beat</th><th>Camtasia Action</th></tr>
+<tr><td>Source → command</td><td>Cut on pane switch. Thin square on the exact file/function, then clear it when the command appears.</td></tr>
+<tr><td>First and second proof</td><td>Sequential boxes for authentication, users and includePaths; clear earlier boxes at each scroll or pane change. Hold each focus 6–8s, then remove it immediately when switching.</td></tr>
+<tr><td>Final PASS/report</td><td>Show the correct same-run output, not a static illustration. Align narrator line 3 with the actual decision field.</td></tr>
+<tr><td>Evidence files</td><td>Compare `preflight-step-02.log` and `recorded-step-02.log`, retain raw proof and Actions run ID/SHA in the take manifest. Mismatch requires a retake.</td></tr>
+</table></details>
 
 ### Validation and confidence
 
@@ -204,6 +246,15 @@ Rewriting the same script in CI introduces drift and makes the reported result h
 **What you are learning:** Reuse configured custom security scripts in automation *(EO3a)*
 
 ### Which application and screen?
+
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
+```
+
+**Branch:** `m2-demo1-before` (complete any deliberately missing student source first). The separate `./steps/03-*.sh` command below is the only on-camera execution for this step.
 
 **In VS Code**, inspect the plan's script-loading jobs, requestor, and active scan. Then inspect the protected profile request or report in the same hosted GitHub Actions run.
 
@@ -244,16 +295,6 @@ The plan loads the original extensions and targets the authenticated profile. Th
 <tr><td>Completion · 6–8s</td><td>Hold the actual PASS and/or hosted evidence; on an important GUI click provide 8s before and 8s after in the source take.</td></tr>
 </table></details>
 
-### Editor — highlights and cuts
-
-<details><summary><img src="https://img.shields.io/badge/EDITOR-Single_Focus_Cuts-16a34a"/></summary>
-<table><tr><th>Beat</th><th>Camtasia Action</th></tr>
-<tr><td>Source → command</td><td>Cut on pane switch. Thin square on the exact file/function, then clear it when the command appears.</td></tr>
-<tr><td>First and second proof</td><td>One square around script list followed by a distinct arrow to the authenticated URL; never manufacture an unshown header result. Hold each focus 6–8s, then remove it immediately when switching.</td></tr>
-<tr><td>Final PASS/report</td><td>Show the correct same-run output, not a static illustration. Align narrator line 3 with the actual decision field.</td></tr>
-<tr><td>Evidence files</td><td>Compare `preflight-step-03.log` and `recorded-step-03.log`, retain raw proof and Actions run ID/SHA in the take manifest. Mismatch requires a retake.</td></tr>
-</table></details>
-
 ### Narrator — spoken lines
 
 <details><summary><img src="https://img.shields.io/badge/NARRATOR-Final_Spoken_Words-d946ef"/></summary>
@@ -264,6 +305,28 @@ The plan loads the original extensions and targets the authenticated profile. Th
 </table>
 The voice must match actual displayed evidence. Never read a sample result as an observed finding.
 </details>
+
+### Editor — highlights and cuts
+
+<details><summary><img src="https://img.shields.io/badge/EDITOR-Single_Focus_Cuts-16a34a"/></summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>Plan script jobs and authenticated request</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>Loaded by the plan</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>Ran authenticated against</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>A loaded script does not prove an observed side effect</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Beat</th><th>Camtasia Action</th></tr>
+<tr><td>Source → command</td><td>Cut on pane switch. Thin square on the exact file/function, then clear it when the command appears.</td></tr>
+<tr><td>First and second proof</td><td>One square around script list followed by a distinct arrow to the authenticated URL; never manufacture an unshown header result. Hold each focus 6–8s, then remove it immediately when switching.</td></tr>
+<tr><td>Final PASS/report</td><td>Show the correct same-run output, not a static illustration. Align narrator line 3 with the actual decision field.</td></tr>
+<tr><td>Evidence files</td><td>Compare `preflight-step-03.log` and `recorded-step-03.log`, retain raw proof and Actions run ID/SHA in the take manifest. Mismatch requires a retake.</td></tr>
+</table></details>
 
 ### Validation and confidence
 
@@ -287,6 +350,15 @@ A successful job could still omit the application-specific finding it was suppos
 **What you are learning:** Validate authenticated security results in a CI report *(EO3a)*
 
 ### Which application and screen?
+
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
+```
+
+**Branch:** `m2-demo1-before` (complete any deliberately missing student source first). The separate `./steps/04-*.sh` command below is the only on-camera execution for this step.
 
 **Open GitHub → Actions → latest matching authenticated scan run → Artifacts / scan report**. Keep the run's branch and SHA visible. Run the terminal step in VS Code.
 
@@ -328,16 +400,6 @@ The report's named custom finding, risk and affected parameter connect the headl
 <tr><td>Completion · 6–8s</td><td>Hold the actual PASS and/or hosted evidence; on an important GUI click provide 8s before and 8s after in the source take.</td></tr>
 </table></details>
 
-### Editor — highlights and cuts
-
-<details><summary><img src="https://img.shields.io/badge/EDITOR-Single_Focus_Cuts-16a34a"/></summary>
-<table><tr><th>Beat</th><th>Camtasia Action</th></tr>
-<tr><td>Source → command</td><td>Cut on pane switch. Thin square on the exact file/function, then clear it when the command appears.</td></tr>
-<tr><td>First and second proof</td><td>Move a square from custom name to risk and parameter, then cut to the corresponding successful assertion in Actions. Hold each focus 6–8s, then remove it immediately when switching.</td></tr>
-<tr><td>Final PASS/report</td><td>Show the correct same-run output, not a static illustration. Align narrator line 3 with the actual decision field.</td></tr>
-<tr><td>Evidence files</td><td>Compare `preflight-step-04.log` and `recorded-step-04.log`, retain raw proof and Actions run ID/SHA in the take manifest. Mismatch requires a retake.</td></tr>
-</table></details>
-
 ### Narrator — spoken lines
 
 <details><summary><img src="https://img.shields.io/badge/NARRATOR-Final_Spoken_Words-d946ef"/></summary>
@@ -348,6 +410,28 @@ The report's named custom finding, risk and affected parameter connect the headl
 </table>
 The voice must match actual displayed evidence. Never read a sample result as an observed finding.
 </details>
+
+### Editor — highlights and cuts
+
+<details><summary><img src="https://img.shields.io/badge/EDITOR-Single_Focus_Cuts-16a34a"/></summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>Authenticated scan report custom alert</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>Alert</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>Parameter</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>A built-in alert does not replace the Python custom finding</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Beat</th><th>Camtasia Action</th></tr>
+<tr><td>Source → command</td><td>Cut on pane switch. Thin square on the exact file/function, then clear it when the command appears.</td></tr>
+<tr><td>First and second proof</td><td>Move a square from custom name to risk and parameter, then cut to the corresponding successful assertion in Actions. Hold each focus 6–8s, then remove it immediately when switching.</td></tr>
+<tr><td>Final PASS/report</td><td>Show the correct same-run output, not a static illustration. Align narrator line 3 with the actual decision field.</td></tr>
+<tr><td>Evidence files</td><td>Compare `preflight-step-04.log` and `recorded-step-04.log`, retain raw proof and Actions run ID/SHA in the take manifest. Mismatch requires a retake.</td></tr>
+</table></details>
 
 ### Validation and confidence
 
