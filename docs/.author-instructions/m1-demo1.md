@@ -37,6 +37,15 @@ The search, account and administrative endpoints reach three different execution
 
 ### Where to go
 
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
+```
+
+**Branch:** `m1-demo1-before` (complete any deliberately missing student source first). The separate `./steps/01-*.sh` command below is the only on-camera execution for this step.
+
 **Open VS Code.** Use File → Open Folder to open the repository. In the editor open `runtime/app/main.py`. In the integrated Terminal, inspect the three prepared views by running `./scripts/show_code.sh sqli`, `./scripts/show_code.sh nosql` and `./scripts/show_code.sh cmd`. Keep source functions `search`, `account` and `admin_ping` accessible.
 
 ### Run this exact command
@@ -83,18 +92,6 @@ Three different request parameters are now associated with targeted ZAP findings
 </table>
 </details>
 
-### Editor — callouts and cut plan
-
-<details>
-<summary><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/> Callouts, Cuts And Sync</summary>
-<table><tr><th>Edit Point</th><th>Exact Action</th></tr>
-<tr><td>Command entrance</td><td>Clean cut after source context; frame the entire named command with a subtle square or underline for ≤8 seconds. Narration line 1 accompanies this command.</td></tr>
-<tr><td>First output</td><td>Use one square callout around the policy-rule line, then separate arrows to q, username and host with their actual alert IDs. One focus per eight-second proof window. Attach narration line 2 when the proof is fully displayed.</td></tr>
-<tr><td>Decision / completion</td><td>Attach narration line 3 to the proof B or verified PASS frame; remove previous arrows immediately on screen or pane changes. Trim UI click handles and scanning waits.</td></tr>
-<tr><td>Synchronization</td><td>Use `logs/preflight-step-01.log`, `logs/recorded-step-01.log`, raw proof, the actual take ID and editor timecodes. A normalized mismatch is a retake, not an edit-away problem.</td></tr>
-</table>
-</details>
-
 ### Narrator — spoken evidence
 
 <details>
@@ -105,6 +102,30 @@ Three different request parameters are now associated with targeted ZAP findings
 <tr><td>After execution · proof B</td><td>The command rule targets host. Three parameter-specific alerts establish where to investigate; the real requests and responses determine disposition.</td><td>19 spoken words</td></tr>
 </table>
 The lines are spoken sentences, not production notes. The second and third lines are recorded only if the named evidence is actually visible. If observed values change, revalidate the claims against the filmed take rather than adding invented numbers.
+</details>
+
+### Editor — callouts and cut plan
+
+<details>
+<summary><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/> Callouts, Cuts And Sync</summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>Targeted injection results</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>SQL injection · /search (q)</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>NoSQL injection · /api/account (username)</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>Different inputs cross different execution boundaries</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Edit Point</th><th>Exact Action</th></tr>
+<tr><td>Command entrance</td><td>Clean cut after source context; frame the entire named command with a subtle square or underline for ≤8 seconds. Narration line 1 accompanies this command.</td></tr>
+<tr><td>First output</td><td>Use one square callout around the policy-rule line, then separate arrows to q, username and host with their actual alert IDs. One focus per eight-second proof window. Attach narration line 2 when the proof is fully displayed.</td></tr>
+<tr><td>Decision / completion</td><td>Attach narration line 3 to the proof B or verified PASS frame; remove previous arrows immediately on screen or pane changes. Trim UI click handles and scanning waits.</td></tr>
+<tr><td>Synchronization</td><td>Use `logs/preflight-step-01.log`, `logs/recorded-step-01.log`, raw proof, the actual take ID and editor timecodes. A normalized mismatch is a retake, not an edit-away problem.</td></tr>
+</table>
 </details>
 
 ### Technical approval
@@ -129,6 +150,15 @@ The `name` input appears in an HTML element, an attribute and a JavaScript strin
 **Learning focus:** Test context-specific reflected XSS *(EO1b)*
 
 ### Where to go
+
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
+```
+
+**Branch:** `m1-demo1-before` (complete any deliberately missing student source first). The separate `./steps/02-*.sh` command below is the only on-camera execution for this step.
 
 **Remain in VS Code.** Open `runtime/app/main.py` at the `greet` endpoint (approximately lines 257–277). In its integrated Terminal run `./scripts/show_code.sh xss` to see the source fragment.
 
@@ -178,18 +208,6 @@ The first three lines map the input to three output contexts. ZAP then attempts 
 </table>
 </details>
 
-### Editor — callouts and cut plan
-
-<details>
-<summary><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/> Callouts, Cuts And Sync</summary>
-<table><tr><th>Edit Point</th><th>Exact Action</th></tr>
-<tr><td>Command entrance</td><td>Clean cut after source context; frame the entire named command with a subtle square or underline for ≤8 seconds. Narration line 1 accompanies this command.</td></tr>
-<tr><td>First output</td><td>Three short squares for body, attribute and JavaScript, then cut to a two-column callout over payload and evidence. Never highlight all fields simultaneously. Attach narration line 2 when the proof is fully displayed.</td></tr>
-<tr><td>Decision / completion</td><td>Attach narration line 3 to the proof B or verified PASS frame; remove previous arrows immediately on screen or pane changes. Trim UI click handles and scanning waits.</td></tr>
-<tr><td>Synchronization</td><td>Use `logs/preflight-step-02.log`, `logs/recorded-step-02.log`, raw proof, the actual take ID and editor timecodes. A normalized mismatch is a retake, not an edit-away problem.</td></tr>
-</table>
-</details>
-
 ### Narrator — spoken evidence
 
 <details>
@@ -200,6 +218,30 @@ The first three lines map the input to three output contexts. ZAP then attempts 
 <tr><td>After execution · proof B</td><td>Now compare that payload with the reflected response evidence. Reflection alone is insufficient; the alert supplies the security finding.</td><td>19 spoken words</td></tr>
 </table>
 The lines are spoken sentences, not production notes. The second and third lines are recorded only if the named evidence is actually visible. If observed values change, revalidate the claims against the filmed take rather than adding invented numbers.
+</details>
+
+### Editor — callouts and cut plan
+
+<details>
+<summary><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/> Callouts, Cuts And Sync</summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>XSS context and ZAP request/response</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>Payload ZAP injected</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>Evidence (reflected in the response)</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>Reflection alone is not browser execution</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Edit Point</th><th>Exact Action</th></tr>
+<tr><td>Command entrance</td><td>Clean cut after source context; frame the entire named command with a subtle square or underline for ≤8 seconds. Narration line 1 accompanies this command.</td></tr>
+<tr><td>First output</td><td>Three short squares for body, attribute and JavaScript, then cut to a two-column callout over payload and evidence. Never highlight all fields simultaneously. Attach narration line 2 when the proof is fully displayed.</td></tr>
+<tr><td>Decision / completion</td><td>Attach narration line 3 to the proof B or verified PASS frame; remove previous arrows immediately on screen or pane changes. Trim UI click handles and scanning waits.</td></tr>
+<tr><td>Synchronization</td><td>Use `logs/preflight-step-02.log`, `logs/recorded-step-02.log`, raw proof, the actual take ID and editor timecodes. A normalized mismatch is a retake, not an edit-away problem.</td></tr>
+</table>
 </details>
 
 ### Technical approval
@@ -224,6 +266,15 @@ A token check can exist yet fail if the server accepts a token from one person's
 **Learning focus:** Exercise CSRF bypass conditions in the email-change workflow *(EO1c)*
 
 ### Where to go
+
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
+```
+
+**Branch:** `m1-demo1-before` (complete any deliberately missing student source first). The separate `./steps/03-*.sh` command below is the only on-camera execution for this step.
 
 **Remain in VS Code.** Open `runtime/app/main.py` at `change_email` and the token-issuing helper. In the integrated Terminal run `./scripts/show_code.sh csrf` before running the security step.
 
@@ -272,18 +323,6 @@ Controls show the application is checking for a token. The cross-session request
 </table>
 </details>
 
-### Editor — callouts and cut plan
-
-<details>
-<summary><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/> Callouts, Cuts And Sync</summary>
-<table><tr><th>Edit Point</th><th>Exact Action</th></tr>
-<tr><td>Command entrance</td><td>Clean cut after source context; frame the entire named command with a subtle square or underline for ≤8 seconds. Narration line 1 accompanies this command.</td></tr>
-<tr><td>First output</td><td>Blue rectangles over two control status lines, then one high-contrast rectangle over cross-session 200 and an arrow to the email mutation. Cut before values become stale. Attach narration line 2 when the proof is fully displayed.</td></tr>
-<tr><td>Decision / completion</td><td>Attach narration line 3 to the proof B or verified PASS frame; remove previous arrows immediately on screen or pane changes. Trim UI click handles and scanning waits.</td></tr>
-<tr><td>Synchronization</td><td>Use `logs/preflight-step-03.log`, `logs/recorded-step-03.log`, raw proof, the actual take ID and editor timecodes. A normalized mismatch is a retake, not an edit-away problem.</td></tr>
-</table>
-</details>
-
 ### Narrator — spoken evidence
 
 <details>
@@ -294,6 +333,30 @@ Controls show the application is checking for a token. The cross-session request
 <tr><td>After execution · proof B</td><td>Alice’s stored email then changes. The server checked token existence, not session ownership, so the cross-session forgery succeeded.</td><td>18 spoken words</td></tr>
 </table>
 The lines are spoken sentences, not production notes. The second and third lines are recorded only if the named evidence is actually visible. If observed values change, revalidate the claims against the filmed take rather than adding invented numbers.
+</details>
+
+### Editor — callouts and cut plan
+
+<details>
+<summary><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/> Callouts, Cuts And Sync</summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>CSRF session state and changed email</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>token from session A, submitted with session B's cookie</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>session B's email after the cross-session request</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>CSRF token must be tied to session ownership</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Edit Point</th><th>Exact Action</th></tr>
+<tr><td>Command entrance</td><td>Clean cut after source context; frame the entire named command with a subtle square or underline for ≤8 seconds. Narration line 1 accompanies this command.</td></tr>
+<tr><td>First output</td><td>Blue rectangles over two control status lines, then one high-contrast rectangle over cross-session 200 and an arrow to the email mutation. Cut before values become stale. Attach narration line 2 when the proof is fully displayed.</td></tr>
+<tr><td>Decision / completion</td><td>Attach narration line 3 to the proof B or verified PASS frame; remove previous arrows immediately on screen or pane changes. Trim UI click handles and scanning waits.</td></tr>
+<tr><td>Synchronization</td><td>Use `logs/preflight-step-03.log`, `logs/recorded-step-03.log`, raw proof, the actual take ID and editor timecodes. A normalized mismatch is a retake, not an edit-away problem.</td></tr>
+</table>
 </details>
 
 ### Technical approval
@@ -318,6 +381,15 @@ The team must not ship an alert list that lacks reproducible evidence for each s
 **Learning focus:** Apply the three security checks to a final engineering disposition *(EO1a · EO1b · EO1c)*
 
 ### Where to go
+
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
+```
+
+**Branch:** `m1-demo1-before` (complete any deliberately missing student source first). The separate `./steps/04-*.sh` command below is the only on-camera execution for this step.
 
 **Use VS Code with integrated Terminal.** Keep `runtime/app/main.py` open. Read the student disposition template at `docs/alert-disposition-template.md` from the repository root. Return to the demo Terminal before running the step.
 
@@ -365,18 +437,6 @@ A raw rule ID is a lead; its actual request and application effect support the e
 </table>
 </details>
 
-### Editor — callouts and cut plan
-
-<details>
-<summary><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/> Callouts, Cuts And Sync</summary>
-<table><tr><th>Edit Point</th><th>Exact Action</th></tr>
-<tr><td>Command entrance</td><td>Clean cut after source context; frame the entire named command with a subtle square or underline for ≤8 seconds. Narration line 1 accompanies this command.</td></tr>
-<tr><td>First output</td><td>Highlight SQL error, MongoDB count, XSS reflection and the injected-command proof in separate eight-second cuts. Never add a simulated shell payload to the screen. Attach narration line 2 when the proof is fully displayed.</td></tr>
-<tr><td>Decision / completion</td><td>Attach narration line 3 to the proof B or verified PASS frame; remove previous arrows immediately on screen or pane changes. Trim UI click handles and scanning waits.</td></tr>
-<tr><td>Synchronization</td><td>Use `logs/preflight-step-04.log`, `logs/recorded-step-04.log`, raw proof, the actual take ID and editor timecodes. A normalized mismatch is a retake, not an edit-away problem.</td></tr>
-</table>
-</details>
-
 ### Narrator — spoken evidence
 
 <details>
@@ -387,6 +447,30 @@ A raw rule ID is a lead; its actual request and application effect support the e
 <tr><td>After execution · proof B</td><td>Record only findings whose observed behavior supports the diagnosis. An alert disposition must be defensible when another engineer reviews it.</td><td>20 spoken words</td></tr>
 </table>
 The lines are spoken sentences, not production notes. The second and third lines are recorded only if the named evidence is actually visible. If observed values change, revalidate the claims against the filmed take rather than adding invented numbers.
+</details>
+
+### Editor — callouts and cut plan
+
+<details>
+<summary><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/> Callouts, Cuts And Sync</summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>Final alert disposition with supporting application evidence</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>40018 SQL injection · /search</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>40033 NoSQL injection · /api/account</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>No disposition from alert count alone</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Edit Point</th><th>Exact Action</th></tr>
+<tr><td>Command entrance</td><td>Clean cut after source context; frame the entire named command with a subtle square or underline for ≤8 seconds. Narration line 1 accompanies this command.</td></tr>
+<tr><td>First output</td><td>Highlight SQL error, MongoDB count, XSS reflection and the injected-command proof in separate eight-second cuts. Never add a simulated shell payload to the screen. Attach narration line 2 when the proof is fully displayed.</td></tr>
+<tr><td>Decision / completion</td><td>Attach narration line 3 to the proof B or verified PASS frame; remove previous arrows immediately on screen or pane changes. Trim UI click handles and scanning waits.</td></tr>
+<tr><td>Synchronization</td><td>Use `logs/preflight-step-04.log`, `logs/recorded-step-04.log`, raw proof, the actual take ID and editor timecodes. A normalized mismatch is a retake, not an edit-away problem.</td></tr>
+</table>
 </details>
 
 ### Technical approval
