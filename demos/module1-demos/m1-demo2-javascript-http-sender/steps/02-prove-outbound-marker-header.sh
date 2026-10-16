@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
-# prove outbound marker header — demonstration step 2 of 4
-# Run from the demo directory. The named command delegates to the frozen step engine.
+# prove outbound marker header.
+# This public command calls the same real ZAP step engine in preflight and recording.
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ "${DEMO_SYNC_MODE:-0}" = "1" ]; then
+    ROOT="$(cd "${HERE}/../../../.." && pwd)"
+    exec python3 "${ROOT}/runtime/scripts/recording_step.py" "${HERE}/.." 2 "${HERE}/../scripts/_run_step.sh" 2
+fi
 exec "${HERE}/../scripts/_run_step.sh" 2
