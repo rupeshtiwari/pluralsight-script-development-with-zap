@@ -31,6 +31,26 @@
 
 ## Recording Steps
 
+<!-- demo-readiness:start -->
+## Demo Readiness
+
+**Approved duration:** 6 minutes. **Execution steps:** four, unchanged. **Acceptance target:** overall review score at least 98/100.
+
+| Step | Current evidence-backed score | Blocking review |
+|---|---|---|
+| 1 | Not assessed | Matching Mac take, required GUI/Actions proof and final spoken coverage |
+| 2 | Not assessed | Matching Mac take, required GUI/Actions proof and final spoken coverage |
+| 3 | Not assessed | Matching Mac take, required GUI/Actions proof and final spoken coverage |
+| 4 | Not assessed | Matching Mac take, required GUI/Actions proof and final spoken coverage |
+
+**Overall confidence:** NOT ASSESSED. Once all four step scores are supported, calculate `(step1 + step2 + step3 + step4) / 4`; do not average only the reviewed steps. A missing critical proof keeps release on HOLD even when the average reaches 98.
+
+**Speech budget:** current short-form draft 239 whitespace words; final 6-minute target 774 spoken words under the owner contract. Remaining before final audio validation: 535 words. This draft is not a complete timed recording script. Expand useful source/action/result teaching within the same four steps; do not fill time with invented stories.
+
+**Recording budget:** approximately 90 seconds per step, including source work, execution and proof. This is an editing plan, not a measured duration or a reason to leave a static screen.
+
+**Review method:** assess LO and outline coverage, technical correctness, example quality, learner clarity, operator decision-making and recorded proof against the exact source SHA. Record the reviewer, rationale and evidence for every numeric score. Old 88–96% source estimates lacked a documented common rubric and are retired, not promoted.
+<!-- demo-readiness:end -->
 ## Step 1 — Run one targeted injection scan
 
 <details open>
@@ -89,6 +109,10 @@ Three different request parameters are now associated with targeted ZAP findings
 
 **How this connects:** Now validate the page-output context rather than treating every reflected input as XSS.
 
+<!-- capture-location:start -->
+<table><tr><th>Capture moment</th><th>Exact action and result location</th></tr><tr><td>Before Enter</td><td>Use VS Code integrated Terminal. Show the named step command already provided below/above; keep its full filename readable for about eight seconds. Directory and branch setup are off camera.</td></tr><tr><td>After Enter</td><td>Stay in the same terminal for the scan table. Then open the browser at http://localhost:8080/zap/; select Alerts and each current SQL, MongoDB and command finding. Open its Request and Response views.</td></tr><tr><td>Evidence to record</td><td>Rule identity and the corresponding q, username or host parameter; capture the actual risk and confidence plus affected URL. Hold each meaningful field for six to eight seconds; retain the matching raw log and take ID.</td></tr><tr><td>Meaning and decision</td><td>Use the Spoken Narration for this exact field, then explain whether the evidence is enough to proceed. If it is absent, stop: neither a source declaration nor an expected output is an observed result.</td></tr><tr><td>Editor handoff</td><td>Mark the result region, then the actual value being explained. Clear old overlays on pane change. During an otherwise still explanation beyond 12 seconds, use one relevant 6–8-second takeaway callout; never invent a successful result.</td></tr></table>
+<!-- capture-location:end -->
+
 ### Recorder Shots
 
 <details open>
@@ -143,11 +167,9 @@ The lines are spoken sentences, not production notes. The second and third lines
 
 - **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo1/logs/preflight-step-01.log` and the same-take GUI evidence
 - **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
-- **Source confidence:** Source-review confidence: 94%. This is not a claimed runtime pass; a completed same-evidence take and corre
-- **Release:** Missing or contradictory proof remains NOT VERIFIED; do not increase a score to 94% without evidence
+- **Release:** HOLD until evidence review; target overall score 98/100, never automatic approval
 
 </details>
-
 ## Step 2 — Validate reflected XSS in the correct context
 
 <details>
@@ -208,6 +230,10 @@ The first three lines map the input to three output contexts. ZAP then attempts 
 
 **How this connects:** Next, move from output encoding to a state-changing request that depends on CSRF session ownership.
 
+<!-- capture-location:start -->
+<table><tr><th>Capture moment</th><th>Exact action and result location</th></tr><tr><td>Before Enter</td><td>Use VS Code integrated Terminal. Show the named step command already provided below/above; keep its full filename readable for about eight seconds. Directory and branch setup are off camera.</td></tr><tr><td>After Enter</td><td>After the terminal context check, switch to http://localhost:8080/zap/; select History, the matching /greet request, then Request and Response. Match the injected name value to the output context.</td></tr><tr><td>Evidence to record</td><td>Exact injected payload, name parameter and reflected response; do not call reflection browser execution. Hold each meaningful field for six to eight seconds; retain the matching raw log and take ID.</td></tr><tr><td>Meaning and decision</td><td>Use the Spoken Narration for this exact field, then explain whether the evidence is enough to proceed. If it is absent, stop: neither a source declaration nor an expected output is an observed result.</td></tr><tr><td>Editor handoff</td><td>Mark the result region, then the actual value being explained. Clear old overlays on pane change. During an otherwise still explanation beyond 12 seconds, use one relevant 6–8-second takeaway callout; never invent a successful result.</td></tr></table>
+<!-- capture-location:end -->
+
 ### Recorder Shots
 
 <details open>
@@ -262,11 +288,9 @@ The lines are spoken sentences, not production notes. The second and third lines
 
 - **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo1/logs/preflight-step-02.log` and the same-take GUI evidence
 - **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
-- **Source confidence:** Source-review confidence: 93%. This is not a claimed runtime pass; a completed same-evidence take and corre
-- **Release:** Missing or contradictory proof remains NOT VERIFIED; do not increase a score to 94% without evidence
+- **Release:** HOLD until evidence review; target overall score 98/100, never automatic approval
 
 </details>
-
 ## Step 3 — Replay a CSRF token across two sessions
 
 <details>
@@ -326,6 +350,10 @@ Controls show the application is checking for a token. The cross-session request
 
 **How this connects:** The final step reconciles these observations with the alerts and records an actionable disposition.
 
+<!-- capture-location:start -->
+<table><tr><th>Capture moment</th><th>Exact action and result location</th></tr><tr><td>Before Enter</td><td>Use VS Code integrated Terminal. Show the named step command already provided below/above; keep its full filename readable for about eight seconds. Directory and branch setup are off camera.</td></tr><tr><td>After Enter</td><td>Stay in the same terminal. Keep the valid-token control, missing-token control, cross-session request and before/after email rows visible together. The browser form at http://localhost:8000/account/email is context, not proof of the shell session.</td></tr><tr><td>Evidence to record</td><td>Actual HTTP states and account email mutation from the same test; explain session ownership rather than claiming a single-use-token test. Hold each meaningful field for six to eight seconds; retain the matching raw log and take ID.</td></tr><tr><td>Meaning and decision</td><td>Use the Spoken Narration for this exact field, then explain whether the evidence is enough to proceed. If it is absent, stop: neither a source declaration nor an expected output is an observed result.</td></tr><tr><td>Editor handoff</td><td>Mark the result region, then the actual value being explained. Clear old overlays on pane change. During an otherwise still explanation beyond 12 seconds, use one relevant 6–8-second takeaway callout; never invent a successful result.</td></tr></table>
+<!-- capture-location:end -->
+
 ### Recorder Shots
 
 <details open>
@@ -380,11 +408,9 @@ The lines are spoken sentences, not production notes. The second and third lines
 
 - **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo1/logs/preflight-step-03.log` and the same-take GUI evidence
 - **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
-- **Source confidence:** Source-review confidence: 96%. This is not a claimed runtime pass; a completed same-evidence take and corre
-- **Release:** Missing or contradictory proof remains NOT VERIFIED; do not increase a score to 94% without evidence
+- **Release:** HOLD until evidence review; target overall score 98/100, never automatic approval
 
 </details>
-
 ## Step 4 — Reconcile the findings with application behavior
 
 <details>
@@ -443,6 +469,10 @@ A raw rule ID is a lead; its actual request and application effect support the e
 
 **How this connects:** The investigation closes with documented findings that can be reviewed rather than mere scanner severity labels.
 
+<!-- capture-location:start -->
+<table><tr><th>Capture moment</th><th>Exact action and result location</th></tr><tr><td>Before Enter</td><td>Use VS Code integrated Terminal. Show the named step command already provided below/above; keep its full filename readable for about eight seconds. Directory and branch setup are off camera.</td></tr><tr><td>After Enter</td><td>Stay in the same terminal for the disposition rows. Use http://localhost:8080/zap/ Alerts and the corresponding Request/Response to corroborate the current finding; open docs/alert-disposition-template.md in VS Code to record the reviewed decision.</td></tr><tr><td>Evidence to record</td><td>Database error, changed account count, harmless injected shell marker and XSS request/response; normal ping is not injection proof. Hold each meaningful field for six to eight seconds; retain the matching raw log and take ID.</td></tr><tr><td>Meaning and decision</td><td>Use the Spoken Narration for this exact field, then explain whether the evidence is enough to proceed. If it is absent, stop: neither a source declaration nor an expected output is an observed result.</td></tr><tr><td>Editor handoff</td><td>Mark the result region, then the actual value being explained. Clear old overlays on pane change. During an otherwise still explanation beyond 12 seconds, use one relevant 6–8-second takeaway callout; never invent a successful result.</td></tr></table>
+<!-- capture-location:end -->
+
 ### Recorder Shots
 
 <details open>
@@ -497,8 +527,7 @@ The lines are spoken sentences, not production notes. The second and third lines
 
 - **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo1/logs/preflight-step-04.log` and the same-take GUI evidence
 - **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
-- **Source confidence:** Source-review confidence: 88%. This is not a claimed runtime pass; a completed same-evidence take and corre
-- **Release:** Missing or contradictory proof remains NOT VERIFIED; do not increase a score to 94% without evidence
+- **Release:** HOLD until evidence review; target overall score 98/100, never automatic approval
 
 </details>
 

@@ -19,13 +19,13 @@
 </p>
 <!-- demo-navigation:end -->
 
-## The problem you are solving
+## Your Scenario
 
-Maya needs the same scripted security checks to run on every change without a desktop GUI. A passing hosted job is not meaningful unless it authenticates, targets the protected profile, runs the intended scripts, and produces the expected custom alert.
+Your team needs the Store security checks on a hosted build runner. A successful local scan or a green workflow badge alone does not establish that the intended authenticated custom check ran.
 
-**What success looks like:** An authenticated Automation Framework scan with verified report evidence on GitHub Actions. All four steps address parts of this same engineering problem.
+**Your practical goal:** I will guide you through headless ZAP execution, the authenticated context, reuse of the existing scripts and the named custom alert. You will link the hosted job and report to the exact source commit.
 
-## What you will learn in this demonstration
+## Your Learning Goals
 
 You will turn interactive ZAP checks into an unattended security run:
 
@@ -34,7 +34,7 @@ You will turn interactive ZAP checks into an unattended security run:
 
 You do not need the separate course outline to understand the objective or follow the exercises.
 
-## From setup to a defensible decision
+## Your Evidence Path
 
 ```mermaid
 flowchart LR
@@ -47,7 +47,7 @@ flowchart LR
   S3 --> S4
 ```
 
-## Start the demo's application
+## Start Your Lab
 
 Mac dependencies are prepared **once for the course** using `setup/setup-macos.sh`, as shown in the [course README](../../../README.md). Each demo must then start its **own local training stack**:
 
@@ -57,6 +57,7 @@ Mac dependencies are prepared **once for the course** using `setup/setup-macos.s
 **Where:** macOS Terminal or VS Code integrated Terminal, from the root of your existing Git checkout.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap"
 git fetch origin
 git switch m2-demo1-before
 cd demos/module2-demos/m2-demo1-authenticated-zap-github-actions
@@ -69,22 +70,30 @@ cd demos/module2-demos/m2-demo1-authenticated-zap-github-actions
 
 </details>
 
-## Complete the four demo steps
+## Your Four Steps
 
 <details open>
 <summary><b>Step 1 — Run ZAP from the Automation Framework plan</b> · Execute headless plan</summary>
 
-### The specific problem
+### Learning Goal
 
 A security test needing manual clicks is not a repeatable CI control.
 
 **What you are learning:** Configure headless ZAP in CI/CD *(EO3a)*
 
-### Which application and screen?
+### Demo Workspace
 
 **Open VS Code.** Inspect `ci/af-plan.yaml` and the `.github/workflows/zap-authenticated-scan.yml` workflow. Open **GitHub → Actions → authenticated-scan** for hosted proof of the exact current commit.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where:** VS Code integrated Terminal for the local check; GitHub Actions page for CI evidence. **Current folder:** `demos/module2-demos/m2-demo1-authenticated-zap-github-actions`.
 
@@ -92,7 +101,13 @@ A security test needing manual clicks is not a repeatable CI control.
 ./steps/01-run-headless-automation-plan.sh
 ```
 
-### Expected output and what it means
+<!-- student-proof:start -->
+**Where your result appears:** The local result stays in Terminal. For required hosted proof, open https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/actions/workflows/zap-authenticated-scan.yml, select the matching branch/SHA run, authenticated-scan job, and headless execution step.
+
+**Inspect this evidence:** Actual hosted runner log, launch command and exact commit; a printed local Runner (CI) label is only configuration.
+<!-- student-proof:end -->
+
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -103,7 +118,7 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Interpret Results
 
 The Automation Framework plan moves the scan configuration into versioned code. The local step proves that plan can execute headlessly; a hosted run must be verified separately against the same plan revision.
 
@@ -114,17 +129,25 @@ The Automation Framework plan moves the scan configuration into versioned code. 
 <details>
 <summary><b>Step 2 — Inspect the authenticated scan context</b> · Authorize scope and login</summary>
 
-### The specific problem
+### Learning Goal
 
 A headless job can silently scan only the login page without valid context or identity.
 
 **What you are learning:** Specify an authenticated context and bounded targets *(EO3a)*
 
-### Which application and screen?
+### Demo Workspace
 
 **In VS Code**, scroll through `ci/af-plan.yaml` to `env.contexts`, authentication script, `alice` user, and `includePaths`. Keep the relevant YAML keys visible.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where:** the VS Code integrated Terminal. **Current folder:** `demos/module2-demos/m2-demo1-authenticated-zap-github-actions`.
 
@@ -132,7 +155,13 @@ A headless job can silently scan only the login page without valid context or id
 ./steps/02-inspect-authenticated-scan-context.sh
 ```
 
-### Expected output and what it means
+<!-- student-proof:start -->
+**Where your result appears:** Stay in VS Code with ci/af-plan.yaml and the integrated terminal. Show env.contexts, script authentication, user alice and included paths.
+
+**Inspect this evidence:** Context, authentication method, user and target scope; configuration alone is not a login success.
+<!-- student-proof:end -->
+
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -145,7 +174,7 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Interpret Results
 
 The context specifies how ZAP logs in and where it is allowed to scan. This is the foundation for meaningful authenticated coverage.
 
@@ -156,17 +185,25 @@ The context specifies how ZAP logs in and where it is allowed to scan. This is t
 <details>
 <summary><b>Step 3 — Verify the scripts run in the authenticated scope</b> · Reuse security scripts</summary>
 
-### The specific problem
+### Learning Goal
 
 Rewriting the same script in CI introduces drift and makes the reported result harder to trust.
 
 **What you are learning:** Reuse configured custom security scripts in automation *(EO3a)*
 
-### Which application and screen?
+### Demo Workspace
 
 **In VS Code**, inspect the plan's script-loading jobs, requestor, and active scan. Then inspect the protected profile request or report in the same hosted GitHub Actions run.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where:** the VS Code integrated Terminal. **Current folder:** `demos/module2-demos/m2-demo1-authenticated-zap-github-actions`.
 
@@ -174,7 +211,13 @@ Rewriting the same script in CI introduces drift and makes the reported result h
 ./steps/03-verify-reused-security-scripts.sh
 ```
 
-### Expected output and what it means
+<!-- student-proof:start -->
+**Where your result appears:** Show local fields, then the same hosted authenticated-scan run and protected-profile request/report. Keep the script jobs and requestor configuration accessible in VS Code.
+
+**Inspect this evidence:** Reused script names and authenticated coverage; a loaded sender needs separate header evidence to prove its mutation.
+<!-- student-proof:end -->
+
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -185,7 +228,7 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Interpret Results
 
 The plan loads the original extensions and targets the authenticated profile. This confirms script reuse and coverage, not every possible side effect of the HTTP Sender script.
 
@@ -196,17 +239,25 @@ The plan loads the original extensions and targets the authenticated profile. Th
 <details>
 <summary><b>Step 4 — Confirm the custom Python alert in the report</b> · Verify named alert</summary>
 
-### The specific problem
+### Learning Goal
 
 A successful job could still omit the application-specific finding it was supposed to prove.
 
 **What you are learning:** Validate authenticated security results in a CI report *(EO3a)*
 
-### Which application and screen?
+### Demo Workspace
 
 **Open GitHub → Actions → latest matching authenticated scan run → Artifacts / scan report**. Keep the run's branch and SHA visible. Run the terminal step in VS Code.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where:** the VS Code integrated Terminal; inspect the actual GitHub Actions artifact separately. **Current folder:** `demos/module2-demos/m2-demo1-authenticated-zap-github-actions`.
 
@@ -214,7 +265,13 @@ A successful job could still omit the application-specific finding it was suppos
 ./steps/04-confirm-authenticated-custom-alert.sh
 ```
 
-### Expected output and what it means
+<!-- student-proof:start -->
+**Where your result appears:** After the local check, open the same hosted run, Artifacts, globo-ci-report; download and open the JSON in VS Code. Keep the run SHA available, not a historical report.
+
+**Inspect this evidence:** Named custom finding, protected URL, note parameter and actual rating in that hosted report.
+<!-- student-proof:end -->
+
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -226,7 +283,7 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Interpret Results
 
 The report's named custom finding, risk and affected parameter connect the headless job to the original application-specific security check. A historical successful job does not prove a newer commit.
 
@@ -234,7 +291,15 @@ The report's named custom finding, risk and affected parameter connect the headl
 
 </details>
 
-## Complete the exercise
+<!-- student-achievement:start -->
+## What You Achieved
+
+After the local checks and matching hosted run, you can explain how the Automation Framework binds user, authentication and scope, then prove the pipeline produced the intended custom finding. You can reject a stale report or a built-in alert offered as a substitute.
+
+**Your final check:** Explain the result using your own captured evidence. A README example, missing result or earlier run does not satisfy this exercise.
+<!-- student-achievement:end -->
+
+## Finish Your Lab
 
 A headless scan is useful only when its reported target, authentication and custom finding are real.
 
