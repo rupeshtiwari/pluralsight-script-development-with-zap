@@ -158,17 +158,28 @@ def batch(ids,output,skip_setup):
         "Upload this ZIP to ChatGPT with your recorded GUI/CI proof and request final per-step ElevenLabs narration. Never invent output.",""]
     (output/"README.md").write_text("\n".join(summary),encoding="utf-8")
     (output/"manifest.json").write_text(json.dumps(results,indent=2)+"\n",encoding="utf-8")
-    # Build a browsable offline-first view from genuine on-disk step captures.
-    # It is a presentation of current evidence, never a simulation of ZAP.
+    # Assemble a portable, locally hosted author portal from the ACTUAL outputs.
+    # Includes renderer and playbooks so a separate Narrator can import final
+    # speech by ./refresh.sh without network access or rerunning ZAP.
     dashboard_ok=True
     try:
         from production_dashboard import render_dashboard
-        render_dashboard(output,results,ROOT/"docs/.author-instructions")
-        shutil.copy2(ROOT/"setup/serve-production-deliverables.sh",output/"serve.sh")
-        (output/"serve.sh").chmod(0o755)
-    except (OSError,ValueError,KeyError) as exc:
+        tools_dir=output/"tools"
+        tools_dir.mkdir(parents=True,exist_ok=True)
+        for source in ("production_dashboard.py","production_plan.py","narration_handoff.py"):
+            shutil.copy2(ROOT/"setup"/source,tools_dir/source)
+        author_sources=ROOT/"docs/.author-instructions"
+        shutil.copytree(author_sources,output/"author-playbooks",dirs_exist_ok=True)
+        for source,destination in (("serve-production-deliverables.sh","serve.sh"),
+                                   ("refresh-production-deliverables.sh","refresh.sh")):
+            shutil.copy2(ROOT/"setup"/source,output/destination)
+            (output/destination).chmod(0o755)
+        for source in ("PRODUCTION_PORTAL_GUIDE.md","NARRATOR_NEXT_SESSION_PROMPT.md"):
+            shutil.copy2(author_sources/source,output/source)
+        render_dashboard(output,results,output/"author-playbooks")
+    except (OSError,ValueError,KeyError,ImportError) as exc:
         dashboard_ok=False
-        (output/"dashboard-error.txt").write_text(str(exc)+"\\n",encoding="utf-8")
+        (output/"dashboard-error.txt").write_text(str(exc)+"\n",encoding="utf-8")
         print("ERROR: production HTML dashboard generation failed: "+str(exc),file=sys.stderr)
     archive=output.with_suffix(".zip")
     with zipfile.ZipFile(archive,"w",zipfile.ZIP_DEFLATED) as z:
