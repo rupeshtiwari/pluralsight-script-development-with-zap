@@ -28,7 +28,6 @@
 <details open>
 <summary><b>Open step 1 — command, real expected fields and role instructions</b></summary>
 
-<summary><b>Step 1: Run one targeted injection scan</b> — Three injection targets</summary>
 
 ### The small problem to solve
 
@@ -122,7 +121,6 @@ The lines are spoken sentences, not production notes. The second and third lines
 <details>
 <summary><b>Open step 2 — command, real expected fields and role instructions</b></summary>
 
-<summary><b>Step 2: Validate reflected XSS in the correct context</b> — XSS output contexts</summary>
 
 ### The small problem to solve
 
@@ -218,7 +216,6 @@ The lines are spoken sentences, not production notes. The second and third lines
 <details>
 <summary><b>Open step 3 — command, real expected fields and role instructions</b></summary>
 
-<summary><b>Step 3: Replay a CSRF token across two sessions</b> — CSRF across sessions</summary>
 
 ### The small problem to solve
 
@@ -313,7 +310,6 @@ The lines are spoken sentences, not production notes. The second and third lines
 <details>
 <summary><b>Open step 4 — command, real expected fields and role instructions</b></summary>
 
-<summary><b>Step 4: Reconcile the findings with application behavior</b> — Evidence-based disposition</summary>
 
 ### The small problem to solve
 

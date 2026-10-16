@@ -28,7 +28,6 @@
 <details open>
 <summary><b>Open step 1 — command, real expected fields and role instructions</b></summary>
 
-<summary><b>Step 1: Register a custom Jython active-scan rule</b> — Load custom rule</summary>
 
 ### The small problem to solve
 
@@ -120,7 +119,6 @@ Only record a statement after the matching evidence is visible in the take. The 
 <details>
 <summary><b>Open step 2 — command, real expected fields and role instructions</b></summary>
 
-<summary><b>Step 2: Register the login script</b> — Script authentication</summary>
 
 ### The small problem to solve
 
@@ -212,7 +210,6 @@ Only record a statement after the matching evidence is visible in the take. The 
 <details>
 <summary><b>Open step 3 — command, real expected fields and role instructions</b></summary>
 
-<summary><b>Step 3: Compare unauthenticated and scripted access</b> — Prove protected access</summary>
 
 ### The small problem to solve
 
@@ -305,7 +302,6 @@ Only record a statement after the matching evidence is visible in the take. The 
 <details>
 <summary><b>Open step 4 — command, real expected fields and role instructions</b></summary>
 
-<summary><b>Step 4: Confirm a fresh custom scan alert</b> — Prove custom alert</summary>
 
 ### The small problem to solve
 
