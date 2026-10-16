@@ -289,16 +289,19 @@ step4_disposition() {
               | python3 -c 'import html,sys;print(html.unescape(sys.stdin.read().strip()))')"
     b="$(curl -s -x "${PROXY}" "${APP_INTERNAL}/api/account?username=alice"     | python3 -c 'import json,sys;print(json.load(sys.stdin).get("count","?"))')"
     i="$(curl -s -x "${PROXY}" "${APP_INTERNAL}/api/account?username%5B%24ne%5D=" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("count","?"))')"
-    ping="$(curl -s -x "${PROXY}" "${APP_INTERNAL}/admin/ping?host=127.0.0.1"    | grep -oE 'bytes from [0-9.]+' | head -1)"
+    # A routine ping proves the endpoint works, NOT command injection.
+    # Exercise only the authorized local training app with a harmless shell
+    # marker appended to the host parameter, then verify its actual output.
+    ping="$(curl -s -x "${PROXY}" -G --data-urlencode 'host=127.0.0.1; printf ZAP_CMD_PROOF' "${APP_INTERNAL}/admin/ping" | grep -o 'ZAP_CMD_PROOF' | head -1)"
     if curl -s -x "${PROXY}" "${APP_INTERNAL}/greet?name=zzMARKzz" | grep -q '<p>Hello zzMARKzz'; then xss="reflected unescaped"; else xss="encoded"; fi
 
     fm star "40018 SQL injection · /search" "confirmed — DB error: ${sqlerr:-none}" focus
     fm star "40033 NoSQL injection · /api/account" "confirmed — accounts ${b} → ${i} under operator injection" focus
-    fm star "90020/90037 Command injection · /admin/ping" "confirmed — OS command ran: ${ping:-none}" focus
+    fm star "90020/90037 Command injection · /admin/ping" "injected shell marker: ${ping:-none}" focus
     fm star "XSS reflected · /greet" "confirmed — ${xss}" focus
 
     if [ -n "${sqlerr}" ] && [ "${i}" != "${b}" ] && [ -n "${ping}" ] && [ "${xss}" = "reflected unescaped" ]; then
-        pass "all four findings reconciled with app behavior and recorded as confirmed"
+        pass "injection and reflected-XSS dispositions tied to observed behavior; injected shell marker verified"
     else
         fail "a finding could not be reconciled with app behavior" \
              "the app behaved differently than the disposition expects" \
