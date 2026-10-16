@@ -1,57 +1,35 @@
+# Module 2 — Automate authenticated security decisions
+
 <div align="center">
 
-# Module 2 · Automate ZAP Security Decisions
+![CI](https://img.shields.io/badge/Module_2-DevSecOps_Automation-FF1675?style=for-the-badge)
 
-### Convert an authenticated scan into traceable API evidence and a meaningful CI gate
+<img src="../../docs/learner-diagrams/m2-demo1-architecture.svg" width="100%" alt="Headless ZAP workflow and GitHub Actions"/>
 
-![Headless ZAP](https://img.shields.io/badge/Automation_Framework-Headless-0284c7?style=for-the-badge)
-![GitHub Actions](https://img.shields.io/badge/CI-GitHub_Actions-238636?style=for-the-badge&logo=githubactions)
-
-<img src="../../docs/learner-diagrams/m2-demo1-architecture.svg" width="100%" alt="Authenticated headless ZAP workflow in GitHub Actions"/>
-
-<sub>Illustrative architecture · Generated using ChatGPT</sub>
+<sub>Illustrative diagram · Generated using ChatGPT</sub>
 
 </div>
 
-## Why Does This Matter?
+The Globomantics release team needs repeatable security checks in CI. Its pipeline must authenticate, retrieve the right custom finding, and enforce a risk policy that ignores only reviewed benign noise.
 
-An interactive scan does not scale across pull requests, and a red CI job does not necessarily mean a vulnerability has been proven. The release team needs an authenticated scan that runs consistently, a report that agrees with the API, and an explicit policy for when a finding blocks delivery.
+## What you will learn
 
-## Learning Objectives You Can Practice
+**Demo 1 — Run authenticated ZAP in GitHub Actions.** Define an Automation Framework plan, authenticate as the right user, reuse JavaScript and Jython scripts, and prove the custom finding in a hosted report *(EO3a)*.
 
-| Objective | What You Will Learn | Demo |
-|---|---|---|
-| **EO3a** | Configure ZAP for headless execution in CI/CD environments | [Authenticated CI Scan](m2-demo1-authenticated-zap-github-actions/README.md) |
-| **EO3b** | Implement ZAP API for programmatic security testing | [ZAP API & Insights](m2-demo2-zap-api-scan-evidence/README.md) |
-| **EO3c** | Apply threshold-based quality gates for security findings in build pipelines | [Security Quality Gate](m2-demo3-security-quality-gates/README.md) |
+[Open Module 2 Demo 1 →](m2-demo1-authenticated-zap-github-actions/README.md)
 
-## Choose One Independent Exercise
+**Demo 2 — Query the ZAP API and inspect evidence.** Confirm the scan finished, retrieve a named alert, reconcile its risk against the official JSON report, and interpret operational Insights *(EO3b)*.
 
-<table>
-<tr><th>Demo</th><th>Real Question</th><th>Evidence You Will Inspect</th><th>Guide</th></tr>
-<tr><td><b>1 · Authenticated GitHub Actions</b></td><td>Did ZAP actually run our scripts under the correct logged-in user?</td><td>Automation Framework plan, job log, authenticated custom alert</td><td><a href="m2-demo1-authenticated-zap-github-actions/README.md">Open Demo 1 →</a></td></tr>
-<tr><td><b>2 · ZAP API and Insights</b></td><td>Do machine-readable findings match the archived report, and was the scan effective?</td><td>Scan status, script-generated alert, official JSON report, real Insights</td><td><a href="m2-demo2-zap-api-scan-evidence/README.md">Open Demo 2 →</a></td></tr>
-<tr><td><b>3 · Security quality gate</b></td><td>Can the build ignore a scoped benign finding while still blocking real High risk?</td><td><code>alertFilter</code>, job order, final alert risks and process exit code</td><td><a href="m2-demo3-security-quality-gates/README.md">Open Demo 3 →</a></td></tr>
-</table>
+[Open Module 2 Demo 2 →](m2-demo2-zap-api-scan-evidence/README.md)
 
-## How The Decision Travels
+**Demo 3 — Enforce a security quality gate.** Scope a False Positive filter, verify job order, then prove a remaining High finding caused the intended build-blocking process exit *(EO3c)*.
 
-```mermaid
-flowchart LR
-  P["Authorized authenticated scope"] --> S["Headless scan"]
-  S --> A["ZAP API / alerts"]
-  A --> J["JSON report + Insights"]
-  J --> F["Scoped alert filter"]
-  F --> G["exitStatus quality gate"]
-  G --> C["GitHub Actions verdict"]
-```
+[Open Module 2 Demo 3 →](m2-demo3-security-quality-gates/README.md)
 
-## How To Start
+## Start an exercise
 
-Run `./setup/setup-macos.sh` from the repository root, choose the appropriate `m2-demoN-before` branch, and follow the demo-specific README. The Module 2 starter branches include their required earlier script assets, so you do **not** need to execute Module 1 first.
+Use the one-time Mac prerequisites described on the [course landing page](../../README.md). Each demo has independent prerequisites in its starter branch; no prior exercise needs to be executed. Start its local training stack from the specified demo folder, run the four named commands, inspect actual API/CI proof, then stop the lab.
 
-For a hosted demo, open the GitHub Actions link from its README and verify that the run belongs to the branch you selected. For a quality gate, an intentionally failing job is valid only when its actual report and exit code establish the expected security decision.
+The Developer's production batch check is `./setup/run-all-demo-preflights.sh`, separate from learner exercise execution.
 
-Test only the supplied authorized Globomantics training application.
-
-[← Return To Course Home](../../README.md)
+[← Course home](../../README.md)
