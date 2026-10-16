@@ -11,6 +11,14 @@
 
 </div>
 
+<!-- demo-navigation:start -->
+<p align="center"><b>Student exercise · Demo 4 of 6</b></p>
+<p align="center">
+  <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo3-before/demos/module1-demos/m1-demo3-python-scanning-authentication/README.md"><img alt="Previous student demo: Module 1 Demo 3 — Python scanning and authentication" src="https://img.shields.io/badge/%E2%86%90_Previous-M1_Demo_3-130F25?style=for-the-badge"></a>
+  <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo2-before/demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md"><img alt="Next student demo: Module 2 Demo 2 — ZAP API and reports" src="https://img.shields.io/badge/Next_%E2%86%92-M2_Demo_2-FF1675?style=for-the-badge"></a>
+</p>
+<!-- demo-navigation:end -->
+
 ## The problem you are solving
 
 Maya needs the same scripted security checks to run on every change without a desktop GUI. A passing hosted job is not meaningful unless it authenticates, targets the protected profile, runs the intended scripts, and produces the expected custom alert.
@@ -239,5 +247,13 @@ From the same demo directory, stop the local services:
 The `m2-demo1-after` branch contains the completed example or reference behavior. Preserve student changes before switching branches. For a safe comparison run `git diff m2-demo1-before..m2-demo1-after -- demos/module2-demos/m2-demo1-authenticated-zap-github-actions` from the repository root; operational-only exercises may have no source diff.
 
 **One batch validation command for the course:** `./setup/run-all-demo-preflights.sh` from the repository root. This checks all six finished branches and creates real evidence bundles for the production team. There are no separate per-demo preflight commands.
+
+<!-- demo-navigation:start -->
+<p align="center"><b>Student exercise · Demo 4 of 6</b></p>
+<p align="center">
+  <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo3-before/demos/module1-demos/m1-demo3-python-scanning-authentication/README.md"><img alt="Previous student demo: Module 1 Demo 3 — Python scanning and authentication" src="https://img.shields.io/badge/%E2%86%90_Previous-M1_Demo_3-130F25?style=for-the-badge"></a>
+  <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo2-before/demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md"><img alt="Next student demo: Module 2 Demo 2 — ZAP API and reports" src="https://img.shields.io/badge/Next_%E2%86%92-M2_Demo_2-FF1675?style=for-the-badge"></a>
+</p>
+<!-- demo-navigation:end -->
 
 [← Module 2 catalog](../README.md) · [← Course home](../../../README.md)

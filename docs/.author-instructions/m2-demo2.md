@@ -13,6 +13,14 @@
 
 [← Production dashboard](README.md) · [Open student's Module 2 demo README](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo2-before/demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md)
 
+<!-- demo-navigation:start -->
+<p align="center"><b>Author production guide · Demo 5 of 6</b></p>
+<p align="center">
+  <a href="m2-demo1.md"><img alt="Previous author guide: Module 2 Demo 1 — Authenticated ZAP in GitHub Actions" src="https://img.shields.io/badge/%E2%86%90_Previous-M2_Demo_1-130F25?style=for-the-badge"></a>
+  <a href="m2-demo3.md"><img alt="Next author guide: Module 2 Demo 3 — Security quality gates" src="https://img.shields.io/badge/Next_%E2%86%92-M2_Demo_3-FF1675?style=for-the-badge"></a>
+</p>
+<!-- demo-navigation:end -->
+
 ## Recording assignment
 
 **Record the `m2-demo2-before` branch**, completing the missing plan where applicable, and keep source changes traceable. The Developer runs the **one combined batch preflight before the recording team starts** and distributes `deliverables/m2-demo2/`: commands, verified logs, generated HTML and narration drafts.
@@ -441,3 +449,11 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 ## End the production take
 
 Stop containers with `./scripts/demo_down.sh`, retain the before/after SHAs and proof, and deliver the take to the Editor. The Narrator uses the generated step transcripts plus the actual recorded output. Do not rerun the Developer's six-demo preflight in this per-demo process.
+
+<!-- demo-navigation:start -->
+<p align="center"><b>Author production guide · Demo 5 of 6</b></p>
+<p align="center">
+  <a href="m2-demo1.md"><img alt="Previous author guide: Module 2 Demo 1 — Authenticated ZAP in GitHub Actions" src="https://img.shields.io/badge/%E2%86%90_Previous-M2_Demo_1-130F25?style=for-the-badge"></a>
+  <a href="m2-demo3.md"><img alt="Next author guide: Module 2 Demo 3 — Security quality gates" src="https://img.shields.io/badge/Next_%E2%86%92-M2_Demo_3-FF1675?style=for-the-badge"></a>
+</p>
+<!-- demo-navigation:end -->

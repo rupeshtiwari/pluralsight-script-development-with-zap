@@ -13,6 +13,14 @@
 
 [← Production dashboard](README.md) · [Open student's Module 1 demo README](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo1-before/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/README.md)
 
+<!-- demo-navigation:start -->
+<p align="center"><b>Author production guide · Demo 1 of 6</b></p>
+<p align="center">
+  <a href="README.md"><img alt="All author production guides" src="https://img.shields.io/badge/%E2%86%90_Back_to-All_Demos-585FA2?style=for-the-badge"></a>
+  <a href="m1-demo2.md"><img alt="Next author guide: Module 1 Demo 2 — JavaScript HTTP Sender" src="https://img.shields.io/badge/Next_%E2%86%92-M1_Demo_2-FF1675?style=for-the-badge"></a>
+</p>
+<!-- demo-navigation:end -->
+
 ## Recorder assignment
 
 **Work only on `m1-demo1-before`**, completing missing exercise source where applicable. The Recorder must receive the Developer's **actually successful** batch proof, four real reference transcripts, and timestamped `~/zap-course-deliverables/batch-YYYYMMDD-HHMMSS/m1-demo1/` package before filming. Do not assume that a package exists before the Developer verifies it. **Do not rerun Mac setup or batch preflight as part of filming.** Read the [one-time setup and Developer responsibilities](README.md) on the author dashboard.
@@ -489,3 +497,10 @@ The lines are spoken sentences, not production notes. The second and third lines
 3. Hand the video takes to the Editor and the Developer's generated narration draft and logs to the Narrator
 4. Leave the developer-wide batch validation and its configuration in the landing page, not in this per-demo recording page
 
+<!-- demo-navigation:start -->
+<p align="center"><b>Author production guide · Demo 1 of 6</b></p>
+<p align="center">
+  <a href="README.md"><img alt="All author production guides" src="https://img.shields.io/badge/%E2%86%90_Back_to-All_Demos-585FA2?style=for-the-badge"></a>
+  <a href="m1-demo2.md"><img alt="Next author guide: Module 1 Demo 2 — JavaScript HTTP Sender" src="https://img.shields.io/badge/Next_%E2%86%92-M1_Demo_2-FF1675?style=for-the-badge"></a>
+</p>
+<!-- demo-navigation:end -->

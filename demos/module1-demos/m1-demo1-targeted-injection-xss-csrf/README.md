@@ -11,6 +11,14 @@
 
 </div>
 
+<!-- demo-navigation:start -->
+<p align="center"><b>Student exercise · Demo 1 of 6</b></p>
+<p align="center">
+  <a href="../../../README.md"><img alt="All student demos" src="https://img.shields.io/badge/%E2%86%90_Back_to-All_Demos-585FA2?style=for-the-badge"></a>
+  <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo2-before/demos/module1-demos/m1-demo2-javascript-http-sender/README.md"><img alt="Next student demo: Module 1 Demo 2 — JavaScript HTTP Sender" src="https://img.shields.io/badge/Next_%E2%86%92-M1_Demo_2-FF1675?style=for-the-badge"></a>
+</p>
+<!-- demo-navigation:end -->
+
 ## The problem you are solving
 
 Maya is securing the Globomantics Store. A generic scan lists possible security issues but does not tell her which application input is unsafe, whether a reflection creates exploitable cross-site scripting, or whether a token belongs to its session. She needs a defensible finding with the request, response, and application behavior behind it.
@@ -260,6 +268,14 @@ After Step 4, you should be able to explain why a rule or alert deserves a confi
 To inspect the finished example, switch to `m1-demo1-after` **after preserving any exercise changes**. Compare without modifying files using `git diff m1-demo1-before..m1-demo1-after -- demos/module1-demos/m1-demo1-targeted-injection-xss-csrf`. For operational-only demos, the important difference may be live scan evidence rather than source code.
 
 **Course-wide validation:** The Developer can run `./setup/run-all-demo-preflights.sh` **once from the repository root** to validate all six completed demo branches and produce real evidence bundles. It is not another script to run after each step.
+
+<!-- demo-navigation:start -->
+<p align="center"><b>Student exercise · Demo 1 of 6</b></p>
+<p align="center">
+  <a href="../../../README.md"><img alt="All student demos" src="https://img.shields.io/badge/%E2%86%90_Back_to-All_Demos-585FA2?style=for-the-badge"></a>
+  <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo2-before/demos/module1-demos/m1-demo2-javascript-http-sender/README.md"><img alt="Next student demo: Module 1 Demo 2 — JavaScript HTTP Sender" src="https://img.shields.io/badge/Next_%E2%86%92-M1_Demo_2-FF1675?style=for-the-badge"></a>
+</p>
+<!-- demo-navigation:end -->
 
 [← Module 1 demo catalog](../README.md) · [← Course home](../../../README.md)
 
