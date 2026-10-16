@@ -19,13 +19,13 @@
 </p>
 <!-- demo-navigation:end -->
 
-## The problem you are solving
+## Your Scenario
 
-The team wants to disregard one reviewed benign header issue but still block a release on High-risk reflected XSS. The filter, report and actual process exit must show a real policy decision—not a generic red CI job.
+Your team has reviewed one benign header finding, but genuine High-risk reflected XSS must still stop the release. A failed build is not enough: the report must explain the policy decision.
 
-**What success looks like:** A scoped False Positive filter alongside a verified High-risk block and report evidence. All four steps address parts of this same engineering problem.
+**Your practical goal:** I will guide you through a narrowly scoped False Positive filter, job ordering, the real gate exit and the final report. You will preserve the genuine High-risk finding while checking the intended exception.
 
-## What you will learn in this demonstration
+## Your Learning Goals
 
 You will make a release decision from the final alert set instead of simply reacting to a red build:
 
@@ -34,7 +34,7 @@ You will make a release decision from the final alert set instead of simply reac
 
 You do not need the separate course outline to understand the objective or follow the exercises.
 
-## From setup to a defensible decision
+## Your Evidence Path
 
 ```mermaid
 flowchart LR
@@ -47,7 +47,7 @@ flowchart LR
   S3 --> S4
 ```
 
-## Start the demo's application
+## Start Your Lab
 
 Mac dependencies are prepared **once for the course** using `setup/setup-macos.sh`, as shown in the [course README](../../../README.md). Each demo must then start its **own local training stack**:
 
@@ -57,6 +57,7 @@ Mac dependencies are prepared **once for the course** using `setup/setup-macos.s
 **Where:** macOS Terminal or VS Code integrated Terminal, from the root of your existing Git checkout.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap"
 git fetch origin
 git switch m2-demo3-before
 cd demos/module2-demos/m2-demo3-security-quality-gates
@@ -69,22 +70,30 @@ cd demos/module2-demos/m2-demo3-security-quality-gates
 
 </details>
 
-## Complete the four demo steps
+## Your Four Steps
 
 <details open>
 <summary><b>Step 1 — Inspect the False Positive filter</b> · Review scoped filter</summary>
 
-### The specific problem
+### Learning Goal
 
 A global ignore list can hide risk elsewhere in the application.
 
 **What you are learning:** Configure risk disposition without suppressing unrelated findings *(EO3c)*
 
-### Which application and screen?
+### Demo Workspace
 
 **Open VS Code**, inspect `ci/gate-plan.yaml` at `alertFilter`, and keep rule ID, URL and new disposition visible in the editor. Run the command in VS Code Terminal.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where:** the VS Code integrated Terminal. **Current folder:** `demos/module2-demos/m2-demo3-security-quality-gates`.
 
@@ -92,7 +101,13 @@ A global ignore list can hide risk elsewhere in the application.
 ./steps/01-inspect-false-positive-filter.sh
 ```
 
-### Expected output and what it means
+<!-- student-proof:start -->
+**Where your result appears:** Stay in VS Code with ci/gate-plan.yaml and the terminal fields. Frame alertFilter, ruleId, newRisk and scoped URL.
+
+**Inspect this evidence:** Configured 10021 False Positive exception and exact scope; whether it took effect is proved in the report.
+<!-- student-proof:end -->
+
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -104,7 +119,7 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Interpret Results
 
 The filter records a reviewed disposition for one class of benign finding on a specific path. Static YAML proves configuration, not that the report actually applied it.
 
@@ -115,17 +130,25 @@ The filter records a reviewed disposition for one class of benign finding on a s
 <details>
 <summary><b>Step 2 — Verify scan and gate order</b> · Inspect job order</summary>
 
-### The specific problem
+### Learning Goal
 
 Applying the filter after scanning can leave earlier alerts unaffected.
 
 **What you are learning:** Put filtering and reporting in a defensible pipeline sequence *(EO3c)*
 
-### Which application and screen?
+### Demo Workspace
 
 **Remain in VS Code**, scroll within `ci/gate-plan.yaml` to the jobs list. Show `alertFilter`, `requestor`, `activeScan`, `report`, and `exitStatus` in order.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where:** the VS Code integrated Terminal. **Current folder:** `demos/module2-demos/m2-demo3-security-quality-gates`.
 
@@ -133,7 +156,13 @@ Applying the filter after scanning can leave earlier alerts unaffected.
 ./steps/02-check-automation-job-order.sh
 ```
 
-### Expected output and what it means
+<!-- student-proof:start -->
+**Where your result appears:** Stay in VS Code and the integrated terminal; scroll only to the ordered YAML jobs.
+
+**Inspect this evidence:** alertFilter before scanning, report before exitStatus and exitStatus last for this plan.
+<!-- student-proof:end -->
+
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -145,7 +174,7 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Interpret Results
 
 The filter must exist when ZAP discovers alerts; the report follows scanning and exit status comes last.
 
@@ -156,17 +185,25 @@ The filter must exist when ZAP discovers alerts; the report follows scanning and
 <details>
 <summary><b>Step 3 — Run the gate and read its actual exit code</b> · Prove blocked build</summary>
 
-### The specific problem
+### Learning Goal
 
 An arbitrary nonzero process code could mean the runner failed, not that a security rule blocked release.
 
 **What you are learning:** Enforce High-risk threshold in a build pipeline *(EO3c)*
 
-### Which application and screen?
+### Demo Workspace
 
 **Open VS Code** at `ci/gate-plan.yaml` on `exitStatus`, then run the step in integrated Terminal. Also inspect **GitHub → Actions → quality-gate job** for the matching commit.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where:** the VS Code integrated Terminal; Actions for hosted evidence. **Current folder:** `demos/module2-demos/m2-demo3-security-quality-gates`.
 
@@ -174,7 +211,13 @@ An arbitrary nonzero process code could mean the runner failed, not that a secur
 ./steps/03-run-security-quality-gate.sh
 ```
 
-### Expected output and what it means
+<!-- student-proof:start -->
+**Where your result appears:** Show local High count and process exit. Then open https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/actions/workflows/zap-quality-gate.yml, select the matching run, quality-gate job and execution log.
+
+**Inspect this evidence:** Real High finding plus exit 1 and the corresponding blocked hosted step; distinguish scanner errors.
+<!-- student-proof:end -->
+
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -187,7 +230,7 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Interpret Results
 
 The gate should block only when the configured risk threshold encounters a genuine remaining High finding. Exit code 1 and a positive High count need the report as corroboration.
 
@@ -198,17 +241,25 @@ The gate should block only when the configured risk threshold encounters a genui
 <details>
 <summary><b>Step 4 — Reconcile filtered and remaining findings</b> · Verify final report</summary>
 
-### The specific problem
+### Learning Goal
 
 A job failure alone cannot prove the scoped False Positive and the remaining High were handled correctly.
 
 **What you are learning:** Confirm the policy decision against official alert disposition *(EO3c)*
 
-### Which application and screen?
+### Demo Workspace
 
 **In GitHub Actions**, open the matching run's report artifact (not an old run). Inspect rules 10021 and 40012 in the JSON report. Run the terminal step for local evidence.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where:** the VS Code integrated Terminal; Actions artifact for CI proof. **Current folder:** `demos/module2-demos/m2-demo3-security-quality-gates`.
 
@@ -216,7 +267,13 @@ A job failure alone cannot prove the scoped False Positive and the remaining Hig
 ./steps/04-verify-filtered-alert-report.sh
 ```
 
-### Expected output and what it means
+<!-- student-proof:start -->
+**Where your result appears:** Show local report fields. For hosted proof, open the same Actions run, Artifacts, globo-gate-report; download and open the JSON in VS Code.
+
+**Inspect this evidence:** Actual 10021 False Positive and 40012 High from the same report, aligned with the gate exit.
+<!-- student-proof:end -->
+
+### Expected Results
 
 This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
 
@@ -228,7 +285,7 @@ This is the existing script's **output field contract**, not a manufactured scan
 
 **Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
 
-### How to interpret this result
+### Interpret Results
 
 The JSON report confirms benign noise was scoped while real High risk was retained. Only then does the failed build represent an evidence-backed security gate.
 
@@ -236,7 +293,15 @@ The JSON report confirms benign noise was scoped while real High risk was retain
 
 </details>
 
-## Complete the exercise
+<!-- student-achievement:start -->
+## What You Achieved
+
+After the four checks and matching gate evidence, you can explain why a release was blocked using the filtered report and actual process exit. You can separate a reviewed exception from blanket suppression and a security gate decision from an infrastructure failure.
+
+**Your final check:** Explain the result using your own captured evidence. A README example, missing result or earlier run does not satisfy this exercise.
+<!-- student-achievement:end -->
+
+## Finish Your Lab
 
 The gate blocks because real High risk remains after the benign alert was reviewed and filtered.
 
