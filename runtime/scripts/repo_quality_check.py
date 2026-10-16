@@ -3,11 +3,12 @@
 
 Reports, with actionable file paths and reasons:
   - production-only wording in learner-facing docs
-  - per-demo README: setup + cleanup + preflight references, before/after links
+  - per-demo README: setup + cleanup references, before/after links
+  - Markdown that GitHub would show as literal text (e.g. "## Step" right under </details>)
   - demo branch naming compliance / missing demo branches (if a remote is given)
 
 This is maintainers' tooling. It does NOT run ZAP or validate runtime behavior —
-use the single setup/run-all-demo-preflights.sh command on a Mac Docker host for that.
+run each demo's four named steps on a Mac Docker host for that.
 
 Usage:
   python3 runtime/scripts/repo_quality_check.py            # check the working tree
@@ -17,6 +18,9 @@ import os
 import re
 import subprocess
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from check_markdown_render import issues as markdown_issues  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -91,15 +95,25 @@ def check_demo_readmes():
         if "demo_down.sh" not in text:
             add("REQUIRED FIX", "%s/README.md" % folder,
                 "no cleanup reference (scripts/demo_down.sh)")
-        if "run-all-demo-preflights.sh" not in text:
-            add("OPTIONAL POLISH", "%s/README.md" % folder,
-                "no link to batch preflight (setup/run-all-demo-preflights.sh)")
         # setup / cleanup scripts present on disk
         for script in ("demo_up.sh", "demo_down.sh"):
             sp = os.path.join(ROOT, folder, "scripts", script)
             if not os.path.exists(sp):
                 add("REQUIRED FIX", "%s/scripts/%s" % (folder, script),
                     "expected demo script missing")
+
+
+def check_markdown_render():
+    for dirpath, _dirs, files in os.walk(ROOT):
+        if "/.git" in dirpath:
+            continue
+        for name in files:
+            if name.endswith(".md"):
+                path = os.path.join(dirpath, name)
+                for number, line, prev in markdown_issues(read(path)):
+                    add("REQUIRED FIX", "%s:%d" % (os.path.relpath(path, ROOT), number),
+                        "renders as literal text inside the HTML block above (%r): add a blank line before %r"
+                        % (prev[:30], line[:40]))
 
 
 def check_branches():
@@ -126,6 +140,7 @@ def check_branches():
 def main():
     check_production_wording()
     check_demo_readmes()
+    check_markdown_render()
     if "--branches" in sys.argv:
         check_branches()
 
