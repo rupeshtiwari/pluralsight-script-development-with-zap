@@ -30,7 +30,7 @@ services:
       retries: 20
 
   app:
-    build: ./app
+    build: ./runtime/app
     environment:
       APP_BUILD: ${APP_BUILD:-vulnerable}
       PG_DSN: "host=postgres port=5432 dbname=${POSTGRES_DB} user=${POSTGRES_USER} password=${POSTGRES_PASSWORD}"
@@ -55,13 +55,13 @@ services:
     environment:
       ZAP_API_KEY: ${ZAP_API_KEY}
     volumes:
-      - ./zap/entrypoint.sh:/zap-entrypoint.sh:ro
+      - ./runtime/zap/entrypoint.sh:/zap-entrypoint.sh:ro
       # Course ZAP scripts, read-only, so the demos can load them by path.
-      - ./module1/m1-c4/zap-scripts:/zap-scripts:ro
+      - ./demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts:/zap-scripts:ro
       # Clip 5 Python (Jython) scripts: custom active rule + authentication.
-      - ./module1/m1-c5/zap-scripts:/zap-scripts-py:ro
+      - ./demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts:/zap-scripts-py:ro
       # Module 2 Automation Framework plan (mounted so the author preflight can run it).
-      - ./module2/m2-c3/ci:/af:ro
+      - ./demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci:/af:ro
     ports:
       - "127.0.0.1:8080:8080"   # Webswing GUI
       - "127.0.0.1:8090:8090"   # ZAP proxy + API

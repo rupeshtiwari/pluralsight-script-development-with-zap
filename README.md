@@ -1,167 +1,256 @@
 <div align="center">
 
-# 🛡️ Script Development with ZAP
+# 🛡️ Script Development with OWASP ZAP
 
-### Hands-on labs for extending OWASP ZAP beyond default scans
+### Find The Real Risk. Prove The Result. Automate The Decision.
 
-_Targeted vulnerability validation · Custom scripting · DevSecOps automation_
+Learn to move beyond generic vulnerability scans in six practical Globomantics security exercises.
 
-<br/>
+![OWASP ZAP](https://img.shields.io/badge/OWASP_ZAP-2.17.0-d946ef?style=for-the-badge)
+![Hands-on Labs](https://img.shields.io/badge/Hands--on_Labs-6-0284c7?style=for-the-badge)
+![Mac Setup](https://img.shields.io/badge/Environment-macOS-334155?style=for-the-badge&logo=apple)
+![GitHub Actions](https://img.shields.io/badge/CI-GitHub_Actions-238636?style=for-the-badge&logo=githubactions)
 
-<img alt="OWASP ZAP 2.17.0" src="https://img.shields.io/badge/OWASP%20ZAP-2.17.0-E5522F?style=for-the-badge&logo=owasp&logoColor=white"/>
-<img alt="Docker" src="https://img.shields.io/badge/Docker%20Compose-1D63ED?style=for-the-badge&logo=docker&logoColor=white"/>
-<img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white"/>
-<img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white"/>
-<img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white"/>
+**Start a demo independently · Run four named steps · Inspect real evidence · Compare your result**
 
-<br/>
+<img src="docs/learner-diagrams/course-architecture.svg" alt="Illustrated Globomantics lab architecture showing Mac, containers, OWASP ZAP and the application" width="100%"/>
 
-<img alt="Platform: macOS" src="https://img.shields.io/badge/Platform-macOS-black?style=flat-square&logo=apple"/>
-<img alt="Level: Entry" src="https://img.shields.io/badge/Level-Entry--friendly-2EA043?style=flat-square"/>
-<img alt="Labs: 6" src="https://img.shields.io/badge/Labs-6-8957E5?style=flat-square"/>
-<img alt="Runs locally" src="https://img.shields.io/badge/Runs-100%25%20locally-0969DA?style=flat-square"/>
+<sub>Illustrative architecture · Generated using ChatGPT · The actual findings come from your lab</sub>
 
 </div>
 
----
+## Watch the course and follow along
 
-Every lab runs against **one deliberately vulnerable Globomantics training
-application** (Python / FastAPI + PostgreSQL + MongoDB) on **your own machine**.
-You start with focused scans, grow into writing your own ZAP scripts, and finish
-by wiring ZAP into a CI/CD pipeline as an automated security gate.
+<div align="center">
 
-> [!WARNING]
-> **Authorization and scope.** All techniques in these labs target **only** the
-> local Globomantics training app. Never point them at any system you are not
-> explicitly authorized to test.
+![Video course](https://img.shields.io/badge/Pluralsight-Video_Course-FF1675?style=for-the-badge)
+![Publication](https://img.shields.io/badge/Course_Link-Coming_After_Publication-130F25?style=for-the-badge)
 
----
+**Script Development with ZAP · Video course on Pluralsight**
 
-## 🚀 Set up your machine (once)
+Follow the video lessons, pause at each demonstrated step, and execute the matching scripts in this repository. Every demo README explains the commands and observations even without access to the course outline.
 
-```bash
-./env-setup/setup-macos.sh
-```
+**Course video link: To be added after Pluralsight publishes the course.** The repository Developer will replace this label with the verified direct course URL. No unpublished or guessed address is provided.
+
+</div>
+
+## Why Does This Project Exist?
+
+Imagine you're responsible for releasing the **Globomantics Store**. Its search endpoint accepts customer input, its accounts use two databases, its profile page requires login, and its build pipeline must not ship a serious vulnerability. A conventional scan can produce hundreds of alerts, but those alerts don't answer the questions a developer or application-security engineer must resolve.
 
 <table>
-<tr>
-<td>✅</td><td>Checks &amp; installs every dependency — Homebrew, Colima, Docker, Docker Compose, tmux, Python</td>
-</tr>
-<tr>
-<td>✅</td><td>Pulls the pinned ZAP image</td>
-</tr>
-<tr>
-<td>✅</td><td>Prints a readiness table and writes a full transcript to <code>env-setup/logs/</code></td>
-</tr>
+<tr><th>Real Engineering Problem</th><th>What You Need to Prove</th></tr>
+<tr><td>❓ An alert says <b>injection</b></td><td>Which input, query or shell boundary is unsafe, and what did the application actually do?</td></tr>
+<tr><td>❓ User input appears in an HTML response</td><td>Does the output context make a reflected-XSS payload dangerous, or is it merely reflected?</td></tr>
+<tr><td>❓ An endpoint accepts an anti-CSRF token</td><td>Does the token belong to the correct session, and is the state-changing request rejected when it should be?</td></tr>
+<tr><td>❓ A scan reports no problems on a profile page</td><td>Did the scanner log in successfully, or did it only test the login wall?</td></tr>
+<tr><td>❓ The CI build passed or failed</td><td>Which actual finding and threshold produced that decision? Was a known benign alert filtered correctly?</td></tr>
 </table>
 
-> [!TIP]
-> One script, one time. When it prints a green readiness table, you are ready
-> for every lab in the course.
+**The goal is not to generate more alerts. It is to connect the request, application behavior, security finding, and engineering decision with evidence you can reproduce.**
 
-> [!NOTE]
-> **You don't need to start Docker yourself.** Colima (the Docker engine on
-> macOS) stops when your Mac sleeps or restarts — so each lab's `demo_up.sh`
-> now **starts it automatically** if it's down and waits until it's ready.
-> Just run the lab; the stack comes up on its own.
+## What Is OWASP ZAP?
 
----
+**OWASP ZAP (Zed Attack Proxy)** is an open-source web application security-testing tool. It can intercept HTTP requests and responses, run passive and active checks, expose results through an API, and execute custom scripts. Its Automation Framework lets you run the same controlled security checks without a GUI—for example inside GitHub Actions.
 
-## 📚 Labs
+In these labs you'll use ZAP to:
+- test deliberately vulnerable application endpoints with *focused*, authorized scan rules
+- observe real HTTP requests and responses, rather than trusting an alert title alone
+- extend requests with JavaScript and create a Python/Jython scanning rule
+- authenticate to a protected page without manually copying a cookie
+- query scan evidence, generate JSON reports, and enforce a meaningful build gate
 
-Work through them in order — each one builds on the skills before it. Every lab
-is self-contained: open its runbook and follow along.
+The training target is local and purpose-built. **Use these techniques only against the supplied Globomantics application or other systems you're explicitly authorized to test.**
 
-Folders are named by their **outline clip** — `m<module>-c<clip>-<name>` — so each
-demo maps straight to the approved outline (clips 1–2 of each module are
-presentation clips; the demos are clips 3–5).
+## What you will learn — grouped by demonstration
 
-| Clip | Demo (runbook) | Learning objectives | Source |
-|:----:|----------------|:-------------------:|:------:|
-| **M1 · C3** | **[Validate injection, XSS, and CSRF with ZAP](module1/m1-c3/README.md)** — build a focused scan policy; prove SQL, NoSQL, and command injection; map reflected XSS to its three contexts; replay a CSRF token | EO1a · EO1b · EO1c | [code](module1/m1-c3) |
-| **M1 · C4** | **[Write a JavaScript security script in ZAP](module1/m1-c4/README.md)** — extend ZAP with an HTTP Sender script that marks every request | EO2a | [code](module1/m1-c4) |
-| **M1 · C5** | **[Write Python scan and authentication scripts in ZAP](module1/m1-c5/README.md)** — write a custom Python active-scan rule and a scripted login, then scan a login-only page | EO2b · EO2c | [code](module1/m1-c5) |
-| **M2 · C3** | **[Run authenticated ZAP scripts in GitHub Actions](module2/m2-c3/README.md)** — run your Module 1 scripts headless and authenticated in a GitHub Actions pipeline, via the ZAP Automation Framework | EO3a | [code](module2/m2-c3) |
-| **M2 · C4** | **[Query the ZAP API and inspect scan evidence](module2/m2-c4/README.md)** — query runtime + scan status, the finding's rule identity and disposition, the official JSON report, and ZAP 2.17.0 Insights, all over the HTTP API | EO3b | [code](module2/m2-c4) |
-| **M2 · C5** | **[Enforce ZAP quality gates in GitHub Actions](module2/m2-c5/README.md)** — mark a benign finding False Positive with `alertFilter`, confirm job order, then gate the build on the remaining risk via `exitStatus` exit codes | EO3c | [code](module2/m2-c5) |
+You don't need the separate course outline. The six demonstrations follow one engineering story: identify an application weakness, confirm it using HTTP evidence, then automate the security decision.
 
----
+### Module 1 · Demo 1 — Injection, XSS and CSRF
 
-## 🌿 Branches — per-demo isolation for distributed recording
+You will focus the scanner on the store's unsafe inputs and then validate each finding using the request, response and resulting application state.
 
-The course uses **per-demo `before`/`after` branches** so a team can record each demo
-independently, and so students see a clean starting point and a clean finished state.
+- Configure specialized SQL, NoSQL and command-injection checks *(EO1a)*
+- Test reflected cross-site scripting using the correct output context *(EO1b)*
+- Investigate CSRF tokens reused across authenticated sessions *(EO1c)*
 
-- **`main` = generic starter.** Shared app (vulnerable + remediated builds), compose,
-  ZAP entrypoint, shared scripts, and every demo's runbook + tooling — **but none of
-  the learner-authored solution files**. Clone this to begin any demo from scratch.
-- **`m<module>-demo<N>-before` = that demo's starting point.** Its prerequisites are
-  present (e.g. the Module 2 demos keep the Module 1 scripts they reuse), but the
-  demo's own authored work is not done yet — you perform it live.
-- **`m<module>-demo<N>-after` = that demo completed.** The authored artifact is present
-  and the demo is in its finished, verified state.
+[Start Module 1 Demo 1 →](demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/README.md)
 
-| Demo branch stem | Clip | Author-live artifact (absent in `before`, present in `after`) |
-|---|---|---|
-| `m1-demo1` | M1 C3 — Injection/XSS/CSRF | *(run-only: scans + disposition)* |
-| `m1-demo2` | M1 C4 — JavaScript HTTP Sender | `module1/m1-c4/zap-scripts/globomantics-marker.js` |
-| `m1-demo3` | M1 C5 — Python rule + auth | `module1/m1-c5/zap-scripts/globomantics-active-rule.py`, `…/globomantics-auth.py` |
-| `m2-demo1` | M2 C3 — Authenticated GitHub Actions | `module2/m2-c3/ci/af-plan.yaml` (keeps M1 scripts as prereqs) |
-| `m2-demo2` | M2 C4 — ZAP API | *(run-only: API queries over a finished scan)* |
-| `m2-demo3` | M2 C5 — Quality gates | `module2/m2-c5/ci/gate-plan.yaml` |
+### Module 1 · Demo 2 — JavaScript HTTP Sender
 
-> [!NOTE]
-> `claude/stoic-cannon-nbupjt` is the integration branch holding the full verified
-> solution (all demos + CI/validation fixes). The `…-after` branches are carved from
-> it so each shows only its own demo completed.
+You will write a JavaScript extension that adds a stable marker to an authorized HTTP request. You will confirm the change in ZAP History, verify the Script Console line, and check the reusable registration *(EO2a)*.
 
----
+[Start Module 1 Demo 2 →](demos/module1-demos/m1-demo2-javascript-http-sender/README.md)
 
-## 🗂️ Repository layout
+### Module 1 · Demo 3 — Python scanning and authentication
 
-```text
-env-setup/
-  setup-macos.sh          One-file dependency check + install (verbose log)
-scripts/
-  fmt.py                  Shared colored output formatter (one palette to swap)
-  lib.sh                  Shared shell helpers
-  demo_up.sh / demo_down.sh / preflight_check.sh   Shared stack engine
-app/                      Globomantics FastAPI app (vulnerable + remediated builds)
-zap/                      ZAP container entrypoint (Webswing GUI + add-on install)
-docker-compose.yaml       zap + app + postgres + mongo (bound to 127.0.0.1)
-data/payloads/            Per-lab step manifests
-docs/                     Gap report, preflight report, alert-disposition template
-module1/
-  README.md               Overview of the first set of labs
-  m1-c3-.../
-    README.md             The lab runbook
-    scripts/              demo_up · demo_down · demo_reset · capture · preflight_check
-    logs/                 Validation logs (git-ignored)
-module2/
-  README.md               Overview of the pipeline labs
+You will create an application-specific Jython active-scan rule *(EO2b)* and a separate scripted login *(EO2c)*. An authenticated request and a fresh named alert prove the two mechanisms work together.
+
+[Start Module 1 Demo 3 →](demos/module1-demos/m1-demo3-python-scanning-authentication/README.md)
+
+### Module 2 · Demo 1 — Authenticated CI scanning
+
+You will configure an Automation Framework plan that runs ZAP headlessly in GitHub Actions *(EO3a)*. The evidence is a correctly authenticated target, the original reused scripts, and the named custom finding in the report.
+
+[Start Module 2 Demo 1 →](demos/module2-demos/m2-demo1-authenticated-zap-github-actions/README.md)
+
+### Module 2 · Demo 2 — ZAP API and reporting
+
+You will query ZAP programmatically *(EO3b)*, confirm a completed scan, inspect the named alert, reconcile the official JSON report and interpret scan-effectiveness Insights.
+
+[Start Module 2 Demo 2 →](demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md)
+
+### Module 2 · Demo 3 — Security quality gates
+
+You will use a scoped alert filter and a threshold-based build gate *(EO3c)* to ensure a reviewed False Positive does not conceal a remaining High-risk issue. The final report and actual exit code explain the CI decision.
+
+[Start Module 2 Demo 3 →](demos/module2-demos/m2-demo3-security-quality-gates/README.md)
+
+## See The System Before Running It
+
+The **local lab** and the **hosted CI pipeline** are separate environments. ZAP talks only to the training application inside the chosen environment.
+
+```mermaid
+flowchart LR
+  subgraph LOCAL["Your Mac · Local Lab"]
+    B["Student browser or CLI"] --> Z["ZAP GUI :8080/zap/ and API/proxy :8090"]
+    Z --> A["Globomantics FastAPI :8000"]
+    A --> P[("PostgreSQL")]
+    A --> M[("MongoDB")]
+  end
+  subgraph CI["GitHub Actions · Ubuntu Runner"]
+    G["GitHub Actions workflow"] --> F["Headless ZAP Automation Framework"]
+    F --> C["Ephemeral Globomantics training stack"]
+    F --> R["JSON report and quality-gate result"]
+  end
 ```
 
----
+<details>
+<summary><b>How the security evidence flows</b></summary>
 
-## 🧰 Technology used
+```mermaid
+flowchart LR
+  I["Authorized input or request"] --> Z["ZAP scan rule or custom script"]
+  Z --> E["Request / response and alert"]
+  E --> D["Validate application behavior"]
+  D --> F["Risk / confidence and alert disposition"]
+  F --> J["JSON report"]
+  J --> G["CI quality-gate decision"]
+```
+
+An alert alone is a *signal*. Confirming the request and response turns it into evidence. A gate only becomes trustworthy when its report and actual process exit code agree.
+</details>
+
+## Start In Five Steps
+
+These instructions assume a Mac with internet access, and basic comfort with a terminal.
+
+<table>
+<tr><td width="50">①</td><td><b>Get the project</b><pre>git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
+cd pluralsight-script-development-with-zap</pre></td></tr>
+<tr><td>②</td><td><b>Prepare your Mac once</b><pre>./setup/setup-macos.sh</pre>The script checks or installs Homebrew, Docker CLI and Compose, Colima, Python, and pulls the pinned ZAP image. Check its readiness report before running a lab. Logs go into <code>setup/logs/</code>.</td></tr>
+<tr><td>③</td><td><b>Select the demo you want to learn</b><pre>git fetch origin
+git switch m1-demo1-before</pre>Each <code>*-before</code> branch is an independent exercise starter. You can choose any other demo from the table below.</td></tr>
+<tr><td>④</td><td><b>Run its four understandable commands</b><pre>cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
+./scripts/demo_reset.sh
+./steps/01-run-targeted-injection-scan.sh</pre>Follow that demo's README for Steps 2–4 and exactly what evidence should appear.</td></tr>
+<tr><td>⑤</td><td><b>Observe the result and clean up</b><pre>./scripts/demo_down.sh</pre>Record the actual displayed evidence. The author performs one complete-course preflight with <code>./setup/run-all-demo-preflights.sh</code> from the repository root instead of six individual preflight commands.</td></tr>
+</table>
+
+**Different demo?** Return to the repository root, save any personal changes, switch to its `*-before` branch, then follow its own README. Don't reuse scan history from another demo.
+
+## Your Six Hands-On Demos
+
+<table>
+<thead><tr><th>Demo</th><th>Scenario / Outcome</th><th>Objectives</th><th>Student Guide</th></tr></thead>
+<tbody>
+<tr><td><b>M1 · Demo 1</b></td><td>Validate SQL, MongoDB, command injection; investigate reflected XSS and cross-session CSRF</td><td>EO1a · EO1b · EO1c</td><td><a href="demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/README.md">Open Injection, XSS & CSRF Lab →</a></td></tr>
+<tr><td><b>M1 · Demo 2</b></td><td>Make a real outbound request carry a JavaScript-generated marker</td><td>EO2a</td><td><a href="demos/module1-demos/m1-demo2-javascript-http-sender/README.md">Open JavaScript HTTP Sender Lab →</a></td></tr>
+<tr><td><b>M1 · Demo 3</b></td><td>Use a custom Jython rule and scripted login to assess a protected page</td><td>EO2b · EO2c</td><td><a href="demos/module1-demos/m1-demo3-python-scanning-authentication/README.md">Open Python & Authentication Lab →</a></td></tr>
+<tr><td><b>M2 · Demo 1</b></td><td>Execute the authenticated ZAP plan on a GitHub Actions runner</td><td>EO3a</td><td><a href="demos/module2-demos/m2-demo1-authenticated-zap-github-actions/README.md">Open Authenticated CI Scan Lab →</a></td></tr>
+<tr><td><b>M2 · Demo 2</b></td><td>Query scan status and a custom alert; reconcile the JSON report and Insights</td><td>EO3b</td><td><a href="demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md">Open ZAP API & Evidence Lab →</a></td></tr>
+<tr><td><b>M2 · Demo 3</b></td><td>Filter a known benign alert and block a release on the remaining High risk</td><td>EO3c</td><td><a href="demos/module2-demos/m2-demo3-security-quality-gates/README.md">Open Security Quality Gate Lab →</a></td></tr>
+</tbody>
+</table>
 
 <div align="center">
-
-| Layer | Tech |
-|:-----:|------|
-| 🔎 **Scanner** | OWASP ZAP 2.17.0 (`ghcr.io/zaproxy/zaproxy`, pinned by digest = tag `20260807-stable`) + `ascanrules` / `ascanrulesBeta` add-ons |
-| 🌐 **App** | FastAPI (Python) — the Globomantics Store |
-| 🗄️ **Data** | PostgreSQL · MongoDB |
-| 🐳 **Runtime** | Docker Compose · Colima |
-
+<table><tr>
+<td width="50%"><a href="demos/module1-demos/README.md"><img src="docs/learner-diagrams/m1-demo1.svg" width="100%" alt="Four steps of the security validation demo"/></a><p align="center"><b>Module 1 · Validate and Extend</b></p></td>
+<td width="50%"><a href="demos/module2-demos/README.md"><img src="docs/learner-diagrams/m2-demo3.svg" width="100%" alt="Four steps of the CI quality-gate demo"/></a><p align="center"><b>Module 2 · Automate and Enforce</b></p></td>
+</tr></table>
 </div>
 
-Each lab uses the subset it needs; more of the stack appears as later labs land.
+<sub>The workflow illustrations above were generated using ChatGPT; they do not show real scan output.</sub>
 
----
+## Which Branch Do I Use?
 
-<div align="center">
+| Branch | Purpose |
+|---|---|
+| `main` | Generic course foundation and navigation, without completed exercise solutions |
+| `m1-demo1-before` … `m2-demo3-before` | Start the chosen exercise with its own prerequisites |
+| `m1-demo1-after` … `m2-demo3-after` | See the completed reference or compare your work without overwriting it |
 
-**Built by [Rupesh Tiwari](https://github.com/rupeshtiwari)** · Learn security testing by doing 🛡️
+Each demo's README lists the branch-specific source, commands, expected evidence, and comparison instructions. Some activities produce **runtime evidence rather than source-code changes**.
 
-</div>
+## Find Your Way Around The Repository
+
+<table>
+<thead><tr><th>Location</th><th>What Is There?</th><th>When To Use It</th></tr></thead>
+<tbody>
+<tr><td>🧰 <code>setup/</code></td><td>Mac preparation and prerequisite checks</td><td>Before your first demo or when diagnosing a missing tool</td></tr>
+<tr><td>🎯 <code>demos/module1-demos/</code></td><td>Targeted scanning, JavaScript, Python and authentication exercises</td><td>Learning to inspect and extend ZAP</td></tr>
+<tr><td>⚙️ <code>demos/module2-demos/</code></td><td>Headless automation, API evidence and CI quality gates</td><td>Learning repeatable security testing</td></tr>
+<tr><td>🧱 <code>runtime/app/</code></td><td>FastAPI training application and its intentionally vulnerable endpoints</td><td>Understanding the source of a finding</td></tr>
+<tr><td>🐳 <code>runtime/zap/</code> + <code>runtime/scripts/</code></td><td>ZAP entrypoint and shared start, reset and validation tools</td><td>Running or troubleshooting the local stack</td></tr>
+<tr><td>🗃️ <code>runtime/data/</code></td><td>Training inputs and sample payloads</td><td>Examining example test data</td></tr>
+<tr><td>📖 <code>docs/</code></td><td>Diagrams, learner references and course reference information</td><td>Understanding architecture or security terminology</td></tr>
+<tr><td>🔁 <code>.github/workflows/</code></td><td>GitHub Actions automation and validation workflows</td><td>Understanding hosted CI scans and results</td></tr>
+<tr><td>📄 <code>docker-compose.yaml</code> + <code>.env</code></td><td>Local lab's service configuration and training-only values</td><td>Investigating ports or startup issues</td></tr>
+</tbody>
+</table>
+
+<details>
+<summary><b>What lives inside each demo folder?</b></summary>
+
+| Path | Purpose |
+|---|---|
+| `README.md` | Exact student instructions and evidence to inspect |
+| `steps/01-*.sh` through `steps/04-*.sh` | Four short commands with meaningful, readable names |
+| `scripts/demo_up.sh`, `demo_reset.sh`, `demo_down.sh` | Start, reset and stop that demo's environment |
+| `setup/run-all-demo-preflights.sh` | Execute all six completed-demo checks and generate production evidence |
+| `scripts/_steps.sh` | Implementation used by both the named steps and preflight |
+| `logs/` | Locally generated validation logs |
+
+</details>
+
+## Common Problems And What To Check
+
+<details>
+<summary><b>Homebrew, Colima or Docker is missing</b></summary>
+
+From the repository root run `./setup/setup-macos.sh` again, read the readiness table, and follow the exact missing-component instruction. For the Docker daemon, try `docker info` and `colima status`. Never assume a successful install means the VM is running.
+</details>
+
+<details>
+<summary><b>The application, ZAP GUI or API is unavailable</b></summary>
+
+From the selected demo directory start with `./scripts/demo_up.sh` (or `demo_reset.sh` where its README specifies), wait for readiness, then check `docker compose ps` from the repository root. The local interfaces are the training app at <http://localhost:8000/>, ZAP GUI at <http://localhost:8080/zap/>, and ZAP API/proxy at <http://localhost:8090/>. Check for host-port conflicts before starting multiple demo stacks on one computer.
+</details>
+
+<details>
+<summary><b>A script, alert, report, or Insights result is missing</b></summary>
+
+Confirm you checked out the correct demo branch, completed the preceding step, and produced fresh traffic. The `before` branch may intentionally omit the completed script or plan—create it as the exercise directs. Run the demo preflight and read its actual failed assertion in `logs/`; do not substitute a screenshot, stale finding, or generic statistics. A ZAP Script Console message must be verified in the GUI.
+</details>
+
+<details>
+<summary><b>GitHub Actions has a failed run or no report</b></summary>
+
+Open the workflow on the corresponding `*-after` branch and check its commit SHA, job steps and artifact list. For quality-gate exercises a failed job can be **intentional**, but only if the report shows the expected remaining risk and the process exit code matches the configured gate. A startup or missing-plan failure is not a valid security gate result.
+</details>
+
+## Ready To Begin?
+
+Open [**Module 1 · Targeted Security Testing**](demos/module1-demos/README.md) or [**Module 2 · Security Automation**](demos/module2-demos/README.md), choose a single demo and follow its own commands. You do not need access to a separate outline.
+
+<div align="center"><sub>Maintained by <a href="https://github.com/rupeshtiwari">Rupesh Tiwari</a> · Authorized Globomantics practice only</sub></div>

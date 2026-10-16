@@ -1,0 +1,72 @@
+name: Synchronize all child branches
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      refresh_guides:
+        description: Apply the explicit v3.6 learner and recording-guide migration
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: all-child-branches
+  cancel-in-progress: false
+
+jobs:
+  synchronize:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GIT_AUTHOR_NAME: Rupesh Tiwari
+      GIT_AUTHOR_EMAIL: roopkt@gmail.com
+      GIT_COMMITTER_NAME: Rupesh Tiwari
+      GIT_COMMITTER_EMAIL: roopkt@gmail.com
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Apply explicitly requested guide refresh
+        if: inputs.refresh_guides == true || contains(github.event.head_commit.message, '[refresh-guides-v36]')
+        run: |
+          python3 runtime/scripts/guide_refresh_v36.py --apply
+          git add demos/module*-demos/*/README.md docs/.author-instructions/m*-demo*.md
+          if ! git diff --cached --quiet; then
+            git commit -m "docs: learner goals, precise capture locations and evidence-based demo review"
+            git push origin HEAD:main
+            gh workflow run validate-repository-layout.yml --ref main
+          fi
+      - name: Test maintenance and branch-isolation routines
+        run: python3 -m unittest discover -s runtime/scripts -p 'test_course_maintenance.py' -v
+      - name: Validate current main before propagation
+        run: |
+          python3 - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, 'runtime/scripts')
+          from sync_all_branches import validate
+          validate(Path.cwd(), 'main')
+          PY
+          python3 -m unittest discover -s setup -p 'test_*.py' -v
+          docker compose config --quiet
+      - name: Reconcile the exact reviewed legacy layout conflicts once
+        run: python3 runtime/scripts/reconcile_legacy_branch.py
+      - name: Discover, merge, validate and push every child branch
+        run: >-
+          python3 runtime/scripts/sync_all_branches.py
+          --apply --dispatch-ci --output "$RUNNER_TEMP/branch-sync-report.json"
+      - name: Preserve branch synchronization audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: branch-synchronization-audit
+          path: ${{ runner.temp }}/branch-sync-report.json
+          if-no-files-found: warn

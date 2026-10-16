@@ -15,7 +15,7 @@ jobs:
       APP_BUILD: vulnerable
       # Pinned to the same immutable multi-arch digest as .env (ZAP 2.17.0),
       # so the hosted amd64 runner and the local arm64 stack run the identical
-      # image. Re-verify the digest at recording time per the course outline.
+      # image. Verify the pinned digest when updating the ZAP dependency.
       ZAP_IMAGE: ghcr.io/zaproxy/zaproxy:stable@sha256:781a2bdaea47324e7bab583e2263f21d257b0aee61ed51521a5be45f5f5081ef
     steps:
       - name: Check out the repository
@@ -27,7 +27,7 @@ jobs:
       - name: Run the ZAP quality gate (exit code decides the build)
         run: |
           mkdir -p "${GITHUB_WORKSPACE}/wrk"
-          cp module2/m2-c5/ci/gate-plan.yaml "${GITHUB_WORKSPACE}/wrk/gate-plan.yaml"
+          cp demos/module2-demos/m2-demo3-security-quality-gates/ci/gate-plan.yaml "${GITHUB_WORKSPACE}/wrk/gate-plan.yaml"
           chmod -R 0777 "${GITHUB_WORKSPACE}/wrk"
           set +e
           docker run --rm \

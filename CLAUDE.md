@@ -33,23 +33,11 @@ Key constraints from the outline:
 - Keep demos **simple enough to follow** but **complex enough to prove the LO**.
 - **Vulnerable code is a teaching aid, kept as OPTIONAL repo reference** — pair each
   finding with the exact vulnerable line via `show_code.sh <finding>` (snippets are
-  read live from `app/main.py` so they never drift). It is NOT a recorded demo step
+  read live from `runtime/app/main.py` so they never drift). It is NOT a recorded demo step
   and must not pad a clip beyond its outline artifacts.
 - The training app is the **Globomantics Store** (real-world e-commerce), so it
   resonates with business audiences and students can apply it to their own projects.
   It is a cosmetic skin over the same endpoints; the LO behavior never changes.
-
-## Recording environment per clip (owner's rule)
-
-- Clip shows source code during the demo → **VS Code integrated terminal** (code +
-  terminal in one window).
-- Clip shows no code → **plain terminal** (clean, no editor clutter).
-- Clip has both code and terminal → **prefer VS Code**.
-- Exception set by the outline: the ZAP **scripting** clips (M1 C4 JavaScript, M1 C5
-  Python) author code in ZAP's **Script Console** (the outline's proof artifacts are
-  "Script console output", "Saved script registration", "Python active-rule source").
-  That code lives in the ZAP GUI, NOT VS Code — using VS Code there would break the
-  specified artifacts.
 
 ## Commit attribution (owner's rule)
 
@@ -61,5 +49,57 @@ Key constraints from the outline:
   starter** (shared app, infra, runbooks, demo tooling — NO learner-authored solution
   files). Each demo has `m<module>-demo<N>-before` (its starting point: prerequisites
   present, this demo's own work not yet done) and `m<module>-demo<N>-after` (this
-  demo completed). `claude/stoic-cannon-nbupjt` remains the integration branch holding
-  the full verified solution. Do not rewrite history unless explicitly asked.
+  demo completed). The independent `-after` branches contain each completed demonstration. Do not rewrite history unless explicitly asked.
+
+## Learner-facing structure
+- Root README is the navigation and macOS setup entry point.
+- Demos live in `demos/module1-demos/` and `demos/module2-demos/` with descriptive folder names.
+- Use `./steps/01-*.sh` through `./steps/04-*.sh` as the learner commands; internal engine scripts preserve approved behavior.
+- Never commit Recorder/Narrator/Editor production material to the public repository.
+- Keep all six branch pairs; `main` remains a generic starter without completed learner solutions.
+
+## Directory naming and temporary production pack
+- Canonical folders: `setup/`, `demos/`, `runtime/`, `docs/`; do not reintroduce clip-number-only folder names.
+- Root files `README.md`, `CLAUDE.md`, `.gitignore`, `.env`, `docker-compose.yaml` are tool entry points and remain at root.
+- Student documentation is readable and visual, with real evidence locations, GitHub-safe HTML, diagrams and semantic step executable filenames.
+- The author-only pack under `docs/.author-instructions/` is temporarily committed at the owner's express direction; it is PUBLIC until moved to a private repo and removed from public history. Never imply dotfolders or gitignore provide privacy.
+- Edit the course-approved source only for demonstrated technical defects. Keep before/after branch distinctions and CI path validation.
+
+## Learner Documentation Contract — Read Before Writing READMEs
+
+- Students receive the public GitHub repository as a standalone learning deliverable, **not the approved course outline**. The root and every demo README must state each relevant EO code **and its full approved plain-English learning-objective wording** from `docs/course-outline.md`. Do not show bare codes without explanation.
+- The root README opens with the real engineering problem, why this tool is required, and practical skills/outcomes, then a complete LO table, annotated local/CI architecture, quick-start and standalone demo catalog. Avoid claims about live findings without the actual evidence.
+- Each demo README opens with the situation and operator problem, complete EO description(s), the four named step commands, expected live proof and operator importance; include student-specific setup, branch role, safe comparison, preflight, cleanup and links/paths to real GUI/CI panels.
+- GitHub presentation: semantic headings, compact GitHub-compatible HTML tables and `details`, deliberate diagrams (Mermaid for architecture/flow, checked-in SVGs when useful), labels legible on mobile screens and limited badges. Prefer clear problem-first education to decorative elements.
+- **No large GitHub admonition alert boxes** (`[!WARNING]`, `[!TIP]`, `[!CAUTION]`, `[!NOTE]`, `[!IMPORTANT]`) in learner README pages. State authorized-use scope as a normal sentence. Do not suppress or misrepresent actual ZAP alert findings.
+- Use actual vendor/component labels and correct boundaries in diagrams; GitHub Actions is not on the learner's Mac. For AWS or cloud courses use real documented cloud components, not invented icons, services or architecture links. Add a readable `Generated using ChatGPT` caption to AI-generated visual assets.
+- Audit all Markdown and HTML links against the files on the relevant branch. A file intentionally absent in `*-before` must be identified as student-authored work; any reference image/source link must lead to a real file (possibly the explicitly labeled `*-after` solution), not a broken relative link.
+- When changes touch shared READMEs or folder organization, update all numbered `before` and `after` branches without copying completed solution assets to starters. Verify zero branches behind `main`, correct before→after ancestry, and hosted static checks. Student code remains frozen unless an actual failure is proven.
+
+## Author Hub And Clone-Once Recording Policy
+- One clone per engineer, then switch demo branches sequentially; use worktrees only for concurrent views or separate local state. Never require a new clone for each demo by default.
+- Preflight against the finished after branch first, save four verified step logs outside the checkout, clean up, then switch to before to author/record. A before branch with intentionally absent source cannot pass completed checks yet.
+- Author landing README must have direct URLs to all author playbooks, before/after learner READMEs, and GitHub branch paths, with simple copyable shell commands and GitHub-compatible color/badge/HTML card layouts.
+- Runtime values and GUI-only proof are not invented by normalization. Always check recording output against same source revision and matching preflight baselines.
+- Set GitHub About description and topics via connected administrative actions when available; release/publish a tag only for a verified milestone, and publish Packages only for a real maintained distributable. When account integration lacks settings or release actions, prepare exact metadata and explicitly state it was not published.
+
+## Current Student and Production Contract
+- The single public batch preflight entry point is `./setup/run-all-demo-preflights.sh`; it validates six completed branches, runs the real four named steps of each demo, and creates local `~/zap-course-deliverables/batch-*` evidence packages. No six per-demo `scripts/preflight_check.sh` wrappers should exist.
+- The shared internal source of execution remains `runtime/scripts/preflight_all_steps.sh` and each demo's existing `_run_step.sh` and `_steps.sh`; do not delete those engines.
+- Every student demo README is a human-centered, problem-first, prescriptive guide with an exact terminal/GUI location, demo-specific startup, four step commands, structured illustrative output fields, interpretation and LO purpose. Only Step 1 expanded; Steps 2–4 collapsed.
+- The student course README groups approved learning objectives under readable Module 1 / Module 2 demo names and includes the unlinked 'Watch the Pluralsight course' label to replace only after publication.
+- The temporary public author hub has personas in this sequence: Developer → Recorder → Editor → Narrator → CQA. Developer performs one Mac setup and one batch run; Recorder starts from the relevant `before` branch and does not rerun production preflight; generated `production-guide.html` embeds the actual passing step output, author role cards and narration draft.
+- Pluralsight palette for instructional graphics and console: Transform Pink #FF1675, Inky Blue #130F25, Blue #00A3FF, Purple #770EF7, Yellow #FFC942, Green #02E088. Reserve #B9004B for actual STOP/FAIL. AI-generated imagery must receive the readable credit 'Generated using ChatGPT'; avoid unsupported diagram claims and never treat expected values as live output.
+- Technical claims require same-run proof: request, response, alert/rule, risk/confidence, or gate report and exact process exit. Never raise source-review or production confidence to 95% through a prose rewrite alone.
+
+
+## Binding production rules (October 16, 2026)
+
+- **Proven worktree defect fix:** Every demo `scripts/demo_up.sh`, `demo_down.sh`, and `demo_reset.sh` must resolve the repository root from exactly four parent levels below `demos/moduleN-demos/<demo>/scripts/`, not five. Keep the offline executable-wrapper test; a GitHub layout check cannot detect a broken runtime path by itself.
+- **Developer batch:** Only `./setup/run-all-demo-preflights.sh` is the visible preflight entry point. Every invocation produces an isolated microsecond-timestamped folder, all real raw logs, per-demo manifests, the portable HTTP production portal and a ZIP. The console shows six concise PASS/HOLD rows, actual failure log paths, the fully quoted `cd` into that batch, `./serve.sh`, the localhost URL, and exact commands to create a new run after a fix. Do not flood the console with Git worktree messages or report anticipated results as actual.
+- **Author step headings:** `Learning Goal`, `Demo Workspace`, `Run Command`, `Expected Results`, `Operator Decision`, `Recorder Shots`, `Spoken Narration`, `Editor Actions`, `Proof Review`. Each step includes a paste-ready `git switch <demo>-before` and correct `cd` in its named terminal. Manual actions must name the exact app, pane and URL; the live Globomantics app is `http://localhost:8000/`, the ZAP GUI is `http://localhost:8080/zap/`, and the API uses `http://localhost:8090/`. Open each on camera only when the objective and requested proof support it; a terminal-only API clip need not wander into GUI.
+- **Spoken proof:** Show the three current per-step ElevenLabs-safe narration beats *open* in the author guide and within the portal. Narration must teach the displayed command, actual output parameter/value and operator consequence. No unsupported claim that a local terminal plan execution proves GitHub Actions; the same-run Actions job and alert report require separate evidence. Approved step order and source contracts remain frozen except for a demonstrated defect.
+- **Editor:** The editor follows Recorder then Narrator: one blue region box, pink exact current-value label, optional purple explanatory arrow, a yellow 6–8-second takeaway callout only for otherwise static >12-second narration. Clear stale annotations when the focus changes and keep meaningful screen movement. No faked success overlays.
+- **Navigation:** Provide previous/next linked badges at the top and bottom of all six student READMEs (targeting the appropriate `before` branch), and all six private/temporary author guide files, including the Module 1-to-Module 2 transition.
+- **Security evidence exception:** A routine ping of `/admin/ping` cannot establish command injection. The approved fourth step now confirms a harmless injected marker from the authorized training target. Preserve this genuine proof, not a speculative `✔ PASS`.
+- **Freeze:** The owner requires at least 95% evidence-backed content confidence **plus** actual local Mac preflight and current GUI/CI screenshots. Static CI confidence and completed documentation do not meet runtime/recording approval. The author hub is currently TEMPORARY PUBLIC and must move to private storage before learner release.
