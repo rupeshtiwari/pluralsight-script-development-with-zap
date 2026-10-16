@@ -14,6 +14,11 @@ if [[ ! -f "$ROOT/index.html" || ! -f "$ROOT/manifest.json" ]]; then
   echo 'Run ./setup/run-all-demo-preflights.sh on the recording Mac first.' >&2
   exit 1
 fi
+# The batch ZIP is portable: refresh uses bundled Python source and author notes.
+# A newer narration-final.json becomes visible on each server launch.
+if [[ -x "$ROOT/refresh.sh" ]]; then
+  "$ROOT/refresh.sh"
+fi
 URL="http://127.0.0.1:${PORT}/index.html"
 printf 'Serving local production proof only on %s\nSource folder: %s\nPress Ctrl+C to stop.\n' "$URL" "$ROOT"
 ( sleep 1; if command -v open >/dev/null 2>&1; then open "$URL" >/dev/null 2>&1 || true;

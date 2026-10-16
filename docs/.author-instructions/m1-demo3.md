@@ -37,6 +37,15 @@ A built-in scanner may not test the application's own unsafe reflection conditio
 
 ### Where to go
 
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
+```
+
+**Branch:** `m1-demo3-before` (complete any deliberately missing student source first). The separate `./steps/01-*.sh` command below is the only on-camera execution for this step.
+
 **Open VS Code.** Open `zap-scripts/globomantics-active-rule.py`. Inspect `scan` and `newAlert` / `raiseAlert`. Show **ZAP GUI → Scripts → Active Rules** if validating the loaded script.
 
 ### Run this exact command
@@ -81,18 +90,6 @@ The custom rule is now registered with ZAP's active scanning mechanism, where it
 </table>
 </details>
 
-### Editor — callouts and cut plan
-
-<details>
-<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
-<table><tr><th>Transition</th><th>Precise edit</th></tr>
-<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
-<tr><td>Command → proof</td><td>Highlight `_check()` and newAlert in source, then arrow to script name/alert in output. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
-<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
-<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-01.log</code> and <code>logs/recorded-step-01.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
-</table>
-</details>
-
 ### Narrator — spoken evidence
 
 <details>
@@ -103,6 +100,30 @@ The custom rule is now registered with ZAP's active scanning mechanism, where it
 <tr><td>Second output / decision</td><td>A successful load means the rule can participate in scans. The actual alert still needs to be raised and verified.</td><td>20</td></tr>
 </table>
 Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
+</details>
+
+### Editor — callouts and cut plan
+
+<details>
+<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>Jython active-rule source and registration</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>Alert it raises</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>Script name</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>A named rule must load before it raises a finding</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Transition</th><th>Precise edit</th></tr>
+<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
+<tr><td>Command → proof</td><td>Highlight `_check()` and newAlert in source, then arrow to script name/alert in output. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
+<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
+<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-01.log</code> and <code>logs/recorded-step-01.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
+</table>
 </details>
 
 ### Technical approval
@@ -127,6 +148,15 @@ Manual cookie copying is unreliable in repeatable automated scanning.
 **Learning focus:** Apply scripting to authentication sequence automation *(EO2c)*
 
 ### Where to go
+
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
+```
+
+**Branch:** `m1-demo3-before` (complete any deliberately missing student source first). The separate `./steps/02-*.sh` command below is the only on-camera execution for this step.
 
 **In VS Code**, inspect `zap-scripts/globomantics-auth.py`, focusing on `authenticate` and `getCredentialsParamsNames`. Use ZAP GUI → Scripts → Authentication for confirmation.
 
@@ -172,18 +202,6 @@ ZAP can now obtain a session by running a script rather than accepting an operat
 </table>
 </details>
 
-### Editor — callouts and cut plan
-
-<details>
-<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
-<table><tr><th>Transition</th><th>Precise edit</th></tr>
-<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
-<tr><td>Command → proof</td><td>Box `authenticate()` and POST login, then use a clean callout for submitted username. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
-<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
-<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-02.log</code> and <code>logs/recorded-step-02.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
-</table>
-</details>
-
 ### Narrator — spoken evidence
 
 <details>
@@ -194,6 +212,30 @@ ZAP can now obtain a session by running a script rather than accepting an operat
 <tr><td>Second output / decision</td><td>This registration gives ZAP a repeatable login mechanism, but the protected endpoint must still demonstrate authenticated access.</td><td>17</td></tr>
 </table>
 Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
+</details>
+
+### Editor — callouts and cut plan
+
+<details>
+<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>Separate Jython authentication source and registration</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>It submits</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>Script name</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>Authentication is separate from scanning</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Transition</th><th>Precise edit</th></tr>
+<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
+<tr><td>Command → proof</td><td>Box `authenticate()` and POST login, then use a clean callout for submitted username. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
+<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
+<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-02.log</code> and <code>logs/recorded-step-02.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
+</table>
 </details>
 
 ### Technical approval
@@ -218,6 +260,15 @@ A scan can incorrectly look clean if it never passes the login wall.
 **Learning focus:** Verify scripted authentication effectiveness *(EO2c)*
 
 ### Where to go
+
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
+```
+
+**Branch:** `m1-demo3-before` (complete any deliberately missing student source first). The separate `./steps/03-*.sh` command below is the only on-camera execution for this step.
 
 **In ZAP GUI**, inspect Globomantics context and user Alice. Then return to **VS Code Terminal** to run the comparison. No cookie is manually supplied by the shell probe.
 
@@ -264,18 +315,6 @@ HTTP 401 without login and HTTP 200 with ZAP's scripted user establish that the 
 </table>
 </details>
 
-### Editor — callouts and cut plan
-
-<details>
-<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
-<table><tr><th>Transition</th><th>Precise edit</th></tr>
-<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
-<tr><td>Command → proof</td><td>Place separate blue boxes on 401 and 200; arrow to auth trace, never claim only a login page was scanned. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
-<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
-<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-03.log</code> and <code>logs/recorded-step-03.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
-</table>
-</details>
-
 ### Narrator — spoken evidence
 
 <details>
@@ -286,6 +325,30 @@ HTTP 401 without login and HTTP 200 with ZAP's scripted user establish that the 
 <tr><td>Second output / decision</td><td>The authentication trace confirms ZAP ran the login script. A manual cookie would not prove this automated behavior.</td><td>18</td></tr>
 </table>
 Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
+</details>
+
+### Editor — callouts and cut plan
+
+<details>
+<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>Protected endpoint before/after authentication</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>Without login</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>ZAP forced-user (script auth)</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>Prove the authenticated session and HTTP status</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Transition</th><th>Precise edit</th></tr>
+<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
+<tr><td>Command → proof</td><td>Place separate blue boxes on 401 and 200; arrow to auth trace, never claim only a login page was scanned. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
+<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
+<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-03.log</code> and <code>logs/recorded-step-03.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
+</table>
 </details>
 
 ### Technical approval
@@ -310,6 +373,15 @@ A previous alert can make a new scan seem successful when the custom rule never 
 **Learning focus:** Demonstrate application-specific scanning proof *(EO2b)*
 
 ### Where to go
+
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
+```
+
+**Branch:** `m1-demo3-before` (complete any deliberately missing student source first). The separate `./steps/04-*.sh` command below is the only on-camera execution for this step.
 
 **Open ZAP GUI → Alerts** for the targeted profile. Run the command in **VS Code Terminal**, then return to the Alerts pane and inspect the newly produced named finding.
 
@@ -358,18 +430,6 @@ A new authenticated scan now produces the required custom alert tied to `note`. 
 </table>
 </details>
 
-### Editor — callouts and cut plan
-
-<details>
-<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
-<table><tr><th>Transition</th><th>Precise edit</th></tr>
-<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
-<tr><td>Command → proof</td><td>Use arrows from scan target to note parameter, then boxes on named custom alert and evidence marker. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
-<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
-<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-04.log</code> and <code>logs/recorded-step-04.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
-</table>
-</details>
-
 ### Narrator — spoken evidence
 
 <details>
@@ -380,6 +440,30 @@ A new authenticated scan now produces the required custom alert tied to `note`. 
 <tr><td>Second output / decision</td><td>This finding confirms the custom check executed under authentication. A built-in reflected XSS alert would not be equivalent.</td><td>18</td></tr>
 </table>
 Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
+</details>
+
+### Editor — callouts and cut plan
+
+<details>
+<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>Fresh ZAP Alerts custom rule</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>Alert</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>Evidence</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>A fresh custom finding needs a real named alert</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Transition</th><th>Precise edit</th></tr>
+<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
+<tr><td>Command → proof</td><td>Use arrows from scan target to note parameter, then boxes on named custom alert and evidence marker. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
+<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
+<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-04.log</code> and <code>logs/recorded-step-04.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
+</table>
 </details>
 
 ### Technical approval

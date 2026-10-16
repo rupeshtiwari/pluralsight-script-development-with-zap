@@ -37,6 +37,15 @@ A JavaScript file cannot modify traffic merely by existing in the repository.
 
 ### Where to go
 
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
+```
+
+**Branch:** `m1-demo2-before` (complete any deliberately missing student source first). The separate `./steps/01-*.sh` command below is the only on-camera execution for this step.
+
 **Open VS Code.** Create or inspect `zap-scripts/globomantics-marker.js` in the demo directory. Locate `sendingRequest()`, `MARKER_HEADER`, `MARKER_VALUE` and `setHeader()`. Then open the VS Code integrated Terminal in this demo directory.
 
 ### Run this exact command
@@ -82,18 +91,6 @@ Loading and enabling a script is separate from sending an HTTP message. The outp
 </table>
 </details>
 
-### Editor — callouts and cut plan
-
-<details>
-<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
-<table><tr><th>Transition</th><th>Precise edit</th></tr>
-<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
-<tr><td>Command → proof</td><td>Square `sendingRequest()` and `setHeader()`, then arrow to the marker-header value in the terminal. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
-<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
-<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-01.log</code> and <code>logs/recorded-step-01.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
-</table>
-</details>
-
 ### Narrator — spoken evidence
 
 <details>
@@ -104,6 +101,30 @@ Loading and enabling a script is separate from sending an HTTP message. The outp
 <tr><td>Second output / decision</td><td>The successful registration proves ZAP accepted the script. It does not yet prove an outbound request carried the header.</td><td>19</td></tr>
 </table>
 Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
+</details>
+
+### Editor — callouts and cut plan
+
+<details>
+<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>JS HTTP Sender registration</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>Marker header it adds</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>Named console line it prints</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>A file cannot modify traffic until enabled</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Transition</th><th>Precise edit</th></tr>
+<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
+<tr><td>Command → proof</td><td>Square `sendingRequest()` and `setHeader()`, then arrow to the marker-header value in the terminal. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
+<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
+<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-01.log</code> and <code>logs/recorded-step-01.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
+</table>
 </details>
 
 ### Technical approval
@@ -128,6 +149,15 @@ Script registration does not prove that an HTTP request actually passed through 
 **Learning focus:** Verify observable request modification *(EO2a)*
 
 ### Where to go
+
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
+```
+
+**Branch:** `m1-demo2-before` (complete any deliberately missing student source first). The separate `./steps/02-*.sh` command below is the only on-camera execution for this step.
 
 **Open ZAP GUI** at `http://localhost:8080/zap/` in a browser. Select **History**, then the newest `/greet?name=marker-...` request, and open its **Request** panel. Use the VS Code integrated Terminal for the command.
 
@@ -173,18 +203,6 @@ The header in the actual ZAP-captured request proves the JavaScript hook modifie
 </table>
 </details>
 
-### Editor — callouts and cut plan
-
-<details>
-<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
-<table><tr><th>Transition</th><th>Precise edit</th></tr>
-<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
-<tr><td>Command → proof</td><td>Separate rectangles on request URL and header. Never highlight an earlier History entry. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
-<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
-<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-02.log</code> and <code>logs/recorded-step-02.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
-</table>
-</details>
-
 ### Narrator — spoken evidence
 
 <details>
@@ -195,6 +213,30 @@ The header in the actual ZAP-captured request proves the JavaScript hook modifie
 <tr><td>Second output / decision</td><td>The request identifier changes on every execution, but the script's header and the technical result must remain consistent.</td><td>18</td></tr>
 </table>
 Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
+</details>
+
+### Editor — callouts and cut plan
+
+<details>
+<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>ZAP History Request pane</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>Header added by the script</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>Outbound request</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>An actual outbound request proves the hook ran</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Transition</th><th>Precise edit</th></tr>
+<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
+<tr><td>Command → proof</td><td>Separate rectangles on request URL and header. Never highlight an earlier History entry. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
+<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
+<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-02.log</code> and <code>logs/recorded-step-02.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
+</table>
 </details>
 
 ### Technical approval
@@ -219,6 +261,15 @@ A terminal can show a predicted console string without actually observing ZAP's 
 **Learning focus:** Validate the script's emitted diagnostic output *(EO2a)*
 
 ### Where to go
+
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
+```
+
+**Branch:** `m1-demo2-before` (complete any deliberately missing student source first). The separate `./steps/03-*.sh` command below is the only on-camera execution for this step.
 
 **Keep ZAP GUI open** at `http://localhost:8080/zap/`. Open **Scripts → Script Console** and inspect fresh lines after the command. The command itself runs in the integrated Terminal.
 
@@ -264,18 +315,6 @@ Compare the expected print format with the new line that actually appears in ZAP
 </table>
 </details>
 
-### Editor — callouts and cut plan
-
-<details>
-<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
-<table><tr><th>Transition</th><th>Precise edit</th></tr>
-<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
-<tr><td>Command → proof</td><td>Use a short arrow from expected-format label to the real Script Console pane, then a rectangle on the live marker line. Do not simulate output. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
-<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
-<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-03.log</code> and <code>logs/recorded-step-03.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
-</table>
-</details>
-
 ### Narrator — spoken evidence
 
 <details>
@@ -286,6 +325,30 @@ Compare the expected print format with the new line that actually appears in ZAP
 <tr><td>Second output / decision</td><td>The console proves the script reported a real action. A copied expected line would not establish that behavior.</td><td>18</td></tr>
 </table>
 Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
+</details>
+
+### Editor — callouts and cut plan
+
+<details>
+<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>ZAP Scripts → Script Console</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>Expected format (verify live ZAP Script Console)</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>This proof is in another application or GUI pane; capture it separately and never manufacture a terminal line.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>Live console proof is required; expected terminal format is insufficient</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Transition</th><th>Precise edit</th></tr>
+<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
+<tr><td>Command → proof</td><td>Use a short arrow from expected-format label to the real Script Console pane, then a rectangle on the live marker line. Do not simulate output. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
+<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
+<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-03.log</code> and <code>logs/recorded-step-03.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
+</table>
 </details>
 
 ### Technical approval
@@ -310,6 +373,15 @@ Reusable automation needs a stable named script and a verifiable enabled state.
 **Learning focus:** Confirm configured JavaScript extension state *(EO2a)*
 
 ### Where to go
+
+
+**Required directory navigation:** Open VS Code integrated Terminal manually. Do not browse through folders in Finder or type a relative path. Paste this complete command and press Enter before running the named step:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
+```
+
+**Branch:** `m1-demo2-before` (complete any deliberately missing student source first). The separate `./steps/04-*.sh` command below is the only on-camera execution for this step.
 
 **Open ZAP GUI** → **Scripts → HTTP Sender → globomantics-marker**. Keep its name/type/engine visible. Then return to VS Code Terminal for the command.
 
@@ -357,18 +429,6 @@ The script has a stable source path, a valid HTTP Sender type, and enabled regis
 </table>
 </details>
 
-### Editor — callouts and cut plan
-
-<details>
-<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
-<table><tr><th>Transition</th><th>Precise edit</th></tr>
-<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
-<tr><td>Command → proof</td><td>Sequential boxes on name, type and enabled, not all fields simultaneously. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
-<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
-<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-04.log</code> and <code>logs/recorded-step-04.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
-</table>
-</details>
-
 ### Narrator — spoken evidence
 
 <details>
@@ -379,6 +439,30 @@ The script has a stable source path, a valid HTTP Sender type, and enabled regis
 <tr><td>Second output / decision</td><td>The source path provides a stable reference for automation. It does not promise persistence after the container is destroyed.</td><td>19</td></tr>
 </table>
 Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
+</details>
+
+### Editor — callouts and cut plan
+
+<details>
+<summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
+<p><b>Concrete Camtasia shot map — use actual values from the current recording, never sample values</b></p>
+<table>
+<tr><th>Moment</th><th>Exact action</th></tr>
+<tr><td>Source then command</td><td>Cut code typing and corrections. Put one BLUE <code>#00A3FF</code> region box on the current source, then on the single named step command; remove the previous box on Enter. Source and command must be readable.</td></tr>
+<tr><td>Real output appears</td><td>Cut long scan waiting. Put one BLUE region box around <b>ZAP Scripts tree and script engine</b>. Keep the actual table readable for about 6–8 seconds, not the entire desktop.</td></tr>
+<tr><td>Primary evidence</td><td>Inside the box, use a small PINK <code>#FF1675</code> label/underline for the actual value of <code>Registered name</code>. Read the captured result first. Missing field → HOLD, never draw a hypothetical number.</td></tr>
+<tr><td>Cause/effect relationship</td><td>When both fields are visible in the same take, use a slim PURPLE <code>#770EF7</code> arrow toward the actual value of <code>Enabled</code>. Otherwise omit the arrow.</td></tr>
+<tr><td>Only if still frame exceeds 12 seconds</td><td>If the narrator continues without a meaningful highlight, box or arrow change, show a short YELLOW <code>#FFC942</code> callout with Inky Blue text for 6–8 seconds: <b>Reuse needs the correct enabled registration</b>. Omit this callout when focus already changes naturally.</td></tr>
+<tr><td>Final</td><td>Remove all old highlights on pane change. Align with the approved AFTER-result narration beat, hold the real result, preserve eight-second raw handles around important clicks, and trim idle footage.</td></tr>
+</table>
+<p><b>Synchronize to Narrator:</b> The narrator's three lines immediately above govern the edits: BEFORE the command, DURING visible result, AFTER operator decision. After `narration-final.json` is imported into the batch portal, use the updated spoken lines rather than the old draft timings.</p>
+
+<table><tr><th>Transition</th><th>Precise edit</th></tr>
+<tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
+<tr><td>Command → proof</td><td>Sequential boxes on name, type and enabled, not all fields simultaneously. Keep each separate proof region for 6–8 seconds; never leave a static frame more than ten seconds.</td></tr>
+<tr><td>Proof → conclusion</td><td>Move the callout to the PASS/alert confirmation and remove the prior one. Narration line 3 must accompany the verified result, not an example block.</td></tr>
+<tr><td>Evidence parity</td><td>Compare <code>logs/preflight-step-04.log</code> and <code>logs/recorded-step-04.log</code> plus untouched raw proof under <code>logs/.producer/</code>. Mismatch is a retake, never a visual cover-up.</td></tr>
+</table>
 </details>
 
 ### Technical approval
