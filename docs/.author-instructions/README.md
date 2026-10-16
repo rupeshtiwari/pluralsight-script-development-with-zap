@@ -4,8 +4,8 @@
 
 ![Developer](https://img.shields.io/badge/01-Developer-130F25?style=for-the-badge)
 ![Recorder](https://img.shields.io/badge/02-Recorder-00A3FF?style=for-the-badge)
-![Editor](https://img.shields.io/badge/03-Editor-02E088?style=for-the-badge)
-![Narrator](https://img.shields.io/badge/04-Narrator-770EF7?style=for-the-badge)
+![Narrator](https://img.shields.io/badge/03-Narrator-770EF7?style=for-the-badge)
+![Editor](https://img.shields.io/badge/04-Editor-02E088?style=for-the-badge)
 
 **One batch preflight · Six demo deliverables · One recording checkout per engineer**
 
@@ -110,6 +110,8 @@ cd "$HOME/zap-course-deliverables/batch-YYYYMMDD-HHMMSS"
 Replace the timestamp with the folder actually printed after batch execution. The command serves `http://127.0.0.1:8765/index.html` only on your Mac and opens the browser; stop with Ctrl+C. The portal has five ordered roles: **Developer → Recorder → Narrator → Editor → Technical CQA**. It provides 24 step-specific copyable `cd` commands, script commands, current output tables, capture/overlay decisions, and ElevenLabs speech. The **Narrator** hands its ZIP to a separate skill and returns `narration-final.json` plus `narration-final.md` to the corresponding demo folder; `./refresh.sh` imports those real reviewed lines without running ZAP again.
 
 The plain `docs/.author-instructions/mN-demoN.md` playbooks are mirrored into the portal and now show the actual folder-navigation command and concrete Camtasia overlays for every step. Do not treat `narration-draft.md` as final speech without same-take review.
+
+The Author's per-step panels use clear headings: **Learning Goal**, **Demo Workspace**, **Run Command**, **Expected Results**, **Operator Decision**, **Recorder Shots**, **Spoken Narration**, **Editor Actions**, and **Proof Review**. Every step includes a copyable three-command starter checkout and directory navigation, the exact application/pane/browser URL where proof is required, and three visible narrator beats. A terminal PASS alone does not prove a ZAP GUI Script Console message or a hosted Actions result.
 
 ## 2. Recorder — choose your Module and Demo
 

@@ -11,6 +11,14 @@
 
 </div>
 
+<!-- demo-navigation:start -->
+<p align="center"><b>Student exercise · Demo 6 of 6</b></p>
+<p align="center">
+  <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo2-before/demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md"><img alt="Previous student demo: Module 2 Demo 2 — ZAP API and reports" src="https://img.shields.io/badge/%E2%86%90_Previous-M2_Demo_2-130F25?style=for-the-badge"></a>
+  <a href="../../../README.md"><img alt="All student demos" src="https://img.shields.io/badge/Back_to-All_Demos_%E2%86%92-585FA2?style=for-the-badge"></a>
+</p>
+<!-- demo-navigation:end -->
+
 ## The problem you are solving
 
 The team wants to disregard one reviewed benign header issue but still block a release on High-risk reflected XSS. The filter, report and actual process exit must show a real policy decision—not a generic red CI job.
@@ -241,5 +249,13 @@ From the same demo directory, stop the local services:
 The `m2-demo3-after` branch contains the completed example or reference behavior. Preserve student changes before switching branches. For a safe comparison run `git diff m2-demo3-before..m2-demo3-after -- demos/module2-demos/m2-demo3-security-quality-gates` from the repository root; operational-only exercises may have no source diff.
 
 **One batch validation command for the course:** `./setup/run-all-demo-preflights.sh` from the repository root. This checks all six finished branches and creates real evidence bundles for the production team. There are no separate per-demo preflight commands.
+
+<!-- demo-navigation:start -->
+<p align="center"><b>Student exercise · Demo 6 of 6</b></p>
+<p align="center">
+  <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo2-before/demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md"><img alt="Previous student demo: Module 2 Demo 2 — ZAP API and reports" src="https://img.shields.io/badge/%E2%86%90_Previous-M2_Demo_2-130F25?style=for-the-badge"></a>
+  <a href="../../../README.md"><img alt="All student demos" src="https://img.shields.io/badge/Back_to-All_Demos_%E2%86%92-585FA2?style=for-the-badge"></a>
+</p>
+<!-- demo-navigation:end -->
 
 [← Module 2 catalog](../README.md) · [← Course home](../../../README.md)
