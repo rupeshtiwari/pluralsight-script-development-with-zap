@@ -52,7 +52,7 @@ def narrator_groups(source):
         m=re.search(r"<summary>[^<]*<img[^>]*NARRATOR[^>]*>.*?</summary>\s*<table>(.*?)</table>",block,re.S|re.I)
         rows=[]
         if m:
-            for shot,speech,n in re.findall(r"<tr>\s*<td>(.*?)</td>\s*<td>(.*?)</td>\s*<td>(\d+)</td>\s*</tr>",m.group(1),re.S|re.I):
+            for shot,speech,n in re.findall(r"<tr>\s*<td>(.*?)</td>\s*<td>(.*?)</td>\s*<td>(\d+)(?:\s+spoken\s+words)?</td>\s*</tr>",m.group(1),re.S|re.I):
                 clean=lambda x: html.unescape(re.sub(r"<[^>]+>","",x)).strip()
                 rows.append((clean(shot),clean(speech),int(n)))
         groups.append(rows)
