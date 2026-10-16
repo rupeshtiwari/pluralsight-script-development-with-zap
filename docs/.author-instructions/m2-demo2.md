@@ -28,7 +28,6 @@
 <details open>
 <summary><b>Open step 1 — where, command, output and production roles</b></summary>
 
-<summary><b>Step 1 — Ask the API whether the scan finished</b> · Check completion</summary>
 
 ### The specific problem
 
@@ -112,7 +111,6 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 <details>
 <summary><b>Open step 2 — where, command, output and production roles</b></summary>
 
-<summary><b>Step 2 — Query the custom rule's risk and confidence</b> · Inspect custom alert</summary>
 
 ### The specific problem
 
@@ -196,7 +194,6 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 <details>
 <summary><b>Open step 3 — where, command, output and production roles</b></summary>
 
-<summary><b>Step 3 — Compare the JSON report with the API result</b> · Reconcile JSON</summary>
 
 ### The specific problem
 
@@ -280,7 +277,6 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 <details>
 <summary><b>Open step 4 — where, command, output and production roles</b></summary>
 
-<summary><b>Step 4 — Read the report's scan-effectiveness Insights</b> · Check Insights</summary>
 
 ### The specific problem
 

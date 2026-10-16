@@ -28,7 +28,6 @@
 <details open>
 <summary><b>Open step 1 — where, command, output and production roles</b></summary>
 
-<summary><b>Step 1 — Run ZAP from the Automation Framework plan</b> · Execute headless plan</summary>
 
 ### The specific problem
 
@@ -112,7 +111,6 @@ The voice must match actual displayed evidence. Never read a sample result as an
 <details>
 <summary><b>Open step 2 — where, command, output and production roles</b></summary>
 
-<summary><b>Step 2 — Inspect the authenticated scan context</b> · Authorize scope and login</summary>
 
 ### The specific problem
 
@@ -198,7 +196,6 @@ The voice must match actual displayed evidence. Never read a sample result as an
 <details>
 <summary><b>Open step 3 — where, command, output and production roles</b></summary>
 
-<summary><b>Step 3 — Verify the scripts run in the authenticated scope</b> · Reuse security scripts</summary>
 
 ### The specific problem
 
@@ -282,7 +279,6 @@ The voice must match actual displayed evidence. Never read a sample result as an
 <details>
 <summary><b>Open step 4 — where, command, output and production roles</b></summary>
 
-<summary><b>Step 4 — Confirm the custom Python alert in the report</b> · Verify named alert</summary>
 
 ### The specific problem
 
