@@ -19,13 +19,13 @@
 </p>
 <!-- demo-navigation:end -->
 
-## The problem you are solving
+## Your Scenario
 
-Maya wants every authorized test request to be unmistakable in ZAP traffic. Writing JavaScript is not enough: she must register the HTTP Sender hook, prove a header was added to a real outgoing request, inspect the Script Console, and confirm the registration.
+You need to distinguish authorized security-test traffic from normal Store requests. Saving a JavaScript file does not prove ZAP modified a message. You must show the hook, the outgoing header and its live diagnostic line.
 
-**What success looks like:** A registered JavaScript HTTP Sender hook with actual request and console evidence. The four steps solve different parts of one problem. Read them in order: each adds evidence needed for the final decision.
+**Your practical goal:** I will guide you from the HTTP Sender template to a reusable request marker. You will write and register the hook, inspect a modified request, verify the live Script Console output, and confirm the enabled script identity.
 
-## What you will learn in this demonstration
+## Your Learning Goals
 
 You will extend ZAP through a real message hook and then verify it with observable effects:
 
@@ -34,7 +34,7 @@ You will extend ZAP through a real message hook and then verify it with observab
 
 No separate course outline is required to complete this lab.
 
-## Follow the evidence
+## Your Evidence Path
 
 ```mermaid
 flowchart LR
@@ -47,7 +47,7 @@ flowchart LR
   S3 --> S4
 ```
 
-## Start the local demo
+## Start Your Lab
 
 This step starts the actual vulnerable Globomantics web application and ZAP container. The Mac prerequisite installer, `setup/setup-macos.sh`, is a **one-time preparation task** explained in the [course README](../../../README.md). You do not need to reinstall tools for every demo.
 
@@ -57,6 +57,7 @@ This step starts the actual vulnerable Globomantics web application and ZAP cont
 **Where:** macOS Terminal or the VS Code integrated terminal, starting in the root of your existing local repository.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap"
 git fetch origin
 git switch m1-demo2-before
 cd demos/module1-demos/m1-demo2-javascript-http-sender
@@ -69,22 +70,30 @@ cd demos/module1-demos/m1-demo2-javascript-http-sender
 
 </details>
 
-## The four teaching steps
+## Your Four Steps
 
 <details open>
 <summary><b>Step 1: Load the JavaScript HTTP Sender script</b> — Register HTTP Sender</summary>
 
-### The small problem to solve
+### Learning Goal
 
 A JavaScript file cannot modify traffic merely by existing in the repository.
 
 **Learning focus:** Develop a JavaScript extension at the request-sending boundary *(EO2a)*
 
-### Where to go
+### Demo Workspace
 
 **Open VS Code.** Create or inspect `zap-scripts/globomantics-marker.js` in the demo directory. Locate `sendingRequest()`, `MARKER_HEADER`, `MARKER_VALUE` and `setHeader()`. Then open the VS Code integrated Terminal in this demo directory.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
@@ -92,7 +101,13 @@ A JavaScript file cannot modify traffic merely by existing in the repository.
 ./steps/01-load-javascript-http-sender.sh
 ```
 
-### What the script prints
+<!-- student-proof:start -->
+**Where your result appears:** Stay in the terminal for registration output. Then open http://localhost:8080/zap/ and select Scripts, HTTP Sender, globomantics-marker.
+
+**Inspect this evidence:** Actual name, detected JavaScript engine and enabled registration; declared marker format is not yet observed traffic.
+<!-- student-proof:end -->
+
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -107,7 +122,7 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Interpret Results
 
 Loading and enabling a script is separate from sending an HTTP message. The output establishes script identity, type and intended modification only.
 
@@ -118,17 +133,25 @@ Loading and enabling a script is separate from sending an HTTP message. The outp
 <details>
 <summary><b>Step 2: Prove the marker on an outbound request</b> — Inspect modified request</summary>
 
-### The small problem to solve
+### Learning Goal
 
 Script registration does not prove that an HTTP request actually passed through the hook.
 
 **Learning focus:** Verify observable request modification *(EO2a)*
 
-### Where to go
+### Demo Workspace
 
 **Open ZAP GUI** at `http://localhost:8080/zap/` in a browser. Select **History**, then the newest `/greet?name=marker-...` request, and open its **Request** panel. Use the VS Code integrated Terminal for the command.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
@@ -136,7 +159,13 @@ Script registration does not prove that an HTTP request actually passed through 
 ./steps/02-prove-outbound-marker-header.sh
 ```
 
-### What the script prints
+<!-- student-proof:start -->
+**Where your result appears:** Run in the terminal, then switch to http://localhost:8080/zap/. Select History, the newest /greet?name=marker- request matching this take, then Request.
+
+**Inspect this evidence:** Actual X-Globomantics-Marker header and its value in that captured request.
+<!-- student-proof:end -->
+
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -150,7 +179,7 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Interpret Results
 
 The header in the actual ZAP-captured request proves the JavaScript hook modified traffic. Request identifiers may vary, while the marker name and value remain stable.
 
@@ -161,17 +190,25 @@ The header in the actual ZAP-captured request proves the JavaScript hook modifie
 <details>
 <summary><b>Step 3: Verify the live Script Console output</b> — Inspect Script Console</summary>
 
-### The small problem to solve
+### Learning Goal
 
 A terminal can show a predicted console string without actually observing ZAP's Script Console.
 
 **Learning focus:** Validate the script's emitted diagnostic output *(EO2a)*
 
-### Where to go
+### Demo Workspace
 
 **Keep ZAP GUI open** at `http://localhost:8080/zap/`. Open **Scripts → Script Console** and inspect fresh lines after the command. The command itself runs in the integrated Terminal.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
@@ -179,7 +216,13 @@ A terminal can show a predicted console string without actually observing ZAP's 
 ./steps/03-check-live-script-console.sh
 ```
 
-### What the script prints
+<!-- student-proof:start -->
+**Where your result appears:** Trigger the request in the terminal; then switch to http://localhost:8080/zap/ and open Scripts, Script Console. Select the fresh line with the matching request URL.
+
+**Inspect this evidence:** Fresh [globo-marker] line from the GUI; the terminal EXPECTED-format line does not count as console proof.
+<!-- student-proof:end -->
+
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -193,7 +236,7 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Interpret Results
 
 Compare the expected print format with the new line that actually appears in ZAP Script Console. Do not confuse the shell's expected format with live script execution proof.
 
@@ -204,17 +247,25 @@ Compare the expected print format with the new line that actually appears in ZAP
 <details>
 <summary><b>Step 4: Verify the script registration</b> — Check saved script</summary>
 
-### The small problem to solve
+### Learning Goal
 
 Reusable automation needs a stable named script and a verifiable enabled state.
 
 **Learning focus:** Confirm configured JavaScript extension state *(EO2a)*
 
-### Where to go
+### Demo Workspace
 
 **Open ZAP GUI** → **Scripts → HTTP Sender → globomantics-marker**. Keep its name/type/engine visible. Then return to VS Code Terminal for the command.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
@@ -222,7 +273,13 @@ Reusable automation needs a stable named script and a verifiable enabled state.
 ./steps/04-verify-enabled-script-registration.sh
 ```
 
-### What the script prints
+<!-- student-proof:start -->
+**Where your result appears:** Inspect terminal registration fields; then return to http://localhost:8080/zap/, Scripts, HTTP Sender, globomantics-marker.
+
+**Inspect this evidence:** Registered name, type, engine and enabled state from the same live ZAP session.
+<!-- student-proof:end -->
+
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -238,7 +295,7 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Interpret Results
 
 The script has a stable source path, a valid HTTP Sender type, and enabled registration. This is not a claim it persists after the container is destroyed.
 
@@ -246,7 +303,15 @@ The script has a stable source path, a valid HTTP Sender type, and enabled regis
 
 </details>
 
-## Finish and clean up
+<!-- student-achievement:start -->
+## What You Achieved
+
+After all four checks and the live Script Console inspection, you can extend ZAP at the HTTP Sender hook and prove an actual message was changed. You can reuse the saved script name and path without confusing current registration with persistence after container teardown.
+
+**Your final check:** Explain the result using your own captured evidence. A README example, missing result or earlier run does not satisfy this exercise.
+<!-- student-achievement:end -->
+
+## Finish Your Lab
 
 After Step 4, you should be able to explain how the JavaScript hook affected a real proxied request from real evidence rather than only recalling a command.
 
