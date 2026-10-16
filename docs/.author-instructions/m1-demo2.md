@@ -15,7 +15,7 @@
 
 ## Recorder assignment
 
-**Work only on `m1-demo2-before`**, completing missing exercise source where applicable. The Developer has already generated the batch preflight, saved four approved baseline transcripts and made the `deliverables/m1-demo2/` package available. **Do not rerun Mac setup or batch preflight as part of filming.** Read the [one-time setup and Developer responsibilities](README.md) on the author dashboard.
+**Work only on `m1-demo2-before`**, completing missing exercise source where applicable. The Recorder must receive the Developer's **actually successful** batch proof, four real reference transcripts, and timestamped `~/zap-course-deliverables/batch-YYYYMMDD-HHMMSS/m1-demo2/` package before filming. Do not assume that a package exists before the Developer verifies it. **Do not rerun Mac setup or batch preflight as part of filming.** Read the [one-time setup and Developer responsibilities](README.md) on the author dashboard.
 
 **Start privately before recording:** from repository root, `git switch m1-demo2-before`, then `cd demos/module1-demos/m1-demo2-javascript-http-sender`; start the vulnerable lab with `./scripts/demo_up.sh`. Confirm the app is reachable at `http://localhost:8000/`, and preserve all intended authored changes. Run commands from the specified VS Code integrated Terminal or macOS Terminal in the appropriate step.
 
