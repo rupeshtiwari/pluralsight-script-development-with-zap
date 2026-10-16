@@ -31,6 +31,26 @@
 
 ## Recording Steps
 
+<!-- demo-readiness:start -->
+## Demo Readiness
+
+**Approved duration:** 5 minutes. **Execution steps:** four, unchanged. **Acceptance target:** overall review score at least 98/100.
+
+| Step | Current evidence-backed score | Blocking review |
+|---|---|---|
+| 1 | Not assessed | Matching Mac take, required GUI/Actions proof and final spoken coverage |
+| 2 | Not assessed | Matching Mac take, required GUI/Actions proof and final spoken coverage |
+| 3 | Not assessed | Matching Mac take, required GUI/Actions proof and final spoken coverage |
+| 4 | Not assessed | Matching Mac take, required GUI/Actions proof and final spoken coverage |
+
+**Overall confidence:** NOT ASSESSED. Once all four step scores are supported, calculate `(step1 + step2 + step3 + step4) / 4`; do not average only the reviewed steps. A missing critical proof keeps release on HOLD even when the average reaches 98.
+
+**Speech budget:** current short-form draft 217 whitespace words; final 5-minute target 644 spoken words under the owner contract. Remaining before final audio validation: 427 words. This draft is not a complete timed recording script. Expand useful source/action/result teaching within the same four steps; do not fill time with invented stories.
+
+**Recording budget:** approximately 75 seconds per step, including source work, execution and proof. This is an editing plan, not a measured duration or a reason to leave a static screen.
+
+**Review method:** assess LO and outline coverage, technical correctness, example quality, learner clarity, operator decision-making and recorded proof against the exact source SHA. Record the reviewer, rationale and evidence for every numeric score. Old 88–96% source estimates lacked a documented common rubric and are retired, not promoted.
+<!-- demo-readiness:end -->
 ## Step 1 — Ask the API whether the scan finished
 
 <details open>
@@ -85,6 +105,10 @@ The version confirms which engine generated the findings. Progress and finished 
 
 **How the investigation advances:** Retrieve the one custom alert rather than treating every scanner finding as equivalent.
 
+<!-- capture-location:start -->
+<table><tr><th>Capture moment</th><th>Exact action and result location</th></tr><tr><td>Before Enter</td><td>Use macOS Terminal. Show the named step command already provided below/above; keep its full filename readable for about eight seconds. Directory and branch setup are off camera.</td></tr><tr><td>After Enter</td><td>Stay in the same terminal after the command. No ZAP GUI switch is required for the API status proof.</td></tr><tr><td>Evidence to record</td><td>Current engine version, active scan identity and actual completed progress/state. Hold each meaningful field for six to eight seconds; retain the matching raw log and take ID.</td></tr><tr><td>Meaning and decision</td><td>Use the Spoken Narration for this exact field, then explain whether the evidence is enough to proceed. If it is absent, stop: neither a source declaration nor an expected output is an observed result.</td></tr><tr><td>Editor handoff</td><td>Mark the result region, then the actual value being explained. Clear old overlays on pane change. During an otherwise still explanation beyond 12 seconds, use one relevant 6–8-second takeaway callout; never invent a successful result.</td></tr></table>
+<!-- capture-location:end -->
+
 ### Recorder Shots
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Screen_%26_Scroll-0284c7"/></summary>
@@ -133,11 +157,9 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 
 - **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo2/logs/preflight-step-01.log`, plus the matching live GUI or GitHub Actions artifact
 - **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
-- **Source review:** Source-review confidence: 95%. Do not inflate scores simply because documentation exists; release requires actua
-- **Final release:** Do not invent an alert or inflate confidence. Unsupported GUI/CI steps remain explicitly NOT VERIFIED until corrected
+- **Release:** HOLD until evidence review; target overall score 98/100, never automatic approval
 
 </details>
-
 ## Step 2 — Query the custom rule's risk and confidence
 
 <details>
@@ -192,6 +214,10 @@ Rule ID and name distinguish the application-specific Jython finding from built-
 
 **How the investigation advances:** Verify the officially generated report contains that same finding.
 
+<!-- capture-location:start -->
+<table><tr><th>Capture moment</th><th>Exact action and result location</th></tr><tr><td>Before Enter</td><td>Use macOS Terminal. Show the named step command already provided below/above; keep its full filename readable for about eight seconds. Directory and branch setup are off camera.</td></tr><tr><td>After Enter</td><td>Stay in the same terminal. Show the API query context and custom alert fields; inspect raw JSON only when teaching its structure.</td></tr><tr><td>Evidence to record</td><td>Custom plugin identity, affected parameter, risk and confidence as distinct fields. Hold each meaningful field for six to eight seconds; retain the matching raw log and take ID.</td></tr><tr><td>Meaning and decision</td><td>Use the Spoken Narration for this exact field, then explain whether the evidence is enough to proceed. If it is absent, stop: neither a source declaration nor an expected output is an observed result.</td></tr><tr><td>Editor handoff</td><td>Mark the result region, then the actual value being explained. Clear old overlays on pane change. During an otherwise still explanation beyond 12 seconds, use one relevant 6–8-second takeaway callout; never invent a successful result.</td></tr></table>
+<!-- capture-location:end -->
+
 ### Recorder Shots
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Screen_%26_Scroll-0284c7"/></summary>
@@ -240,11 +266,9 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 
 - **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo2/logs/preflight-step-02.log`, plus the matching live GUI or GitHub Actions artifact
 - **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
-- **Source review:** Source-review confidence: 95%. Do not inflate scores simply because documentation exists; release requires actua
-- **Final release:** Do not invent an alert or inflate confidence. Unsupported GUI/CI steps remain explicitly NOT VERIFIED until corrected
+- **Release:** HOLD until evidence review; target overall score 98/100, never automatic approval
 
 </details>
-
 ## Step 3 — Compare the JSON report with the API result
 
 <details>
@@ -299,6 +323,10 @@ The generated report preserves the named custom finding in a shareable format. M
 
 **How the investigation advances:** Inspect the scan's operational quality in addition to the vulnerability result.
 
+<!-- capture-location:start -->
+<table><tr><th>Capture moment</th><th>Exact action and result location</th></tr><tr><td>Before Enter</td><td>Use macOS Terminal. Show the named step command already provided below/above; keep its full filename readable for about eight seconds. Directory and branch setup are off camera.</td></tr><tr><td>After Enter</td><td>Stay in the terminal for the generated report fields; show official report JSON when comparing nested fields. Compare to the API result already captured in this take.</td></tr><tr><td>Evidence to record</td><td>Same custom identity, scope and rating; investigate any mismatch rather than assuming freshness. Hold each meaningful field for six to eight seconds; retain the matching raw log and take ID.</td></tr><tr><td>Meaning and decision</td><td>Use the Spoken Narration for this exact field, then explain whether the evidence is enough to proceed. If it is absent, stop: neither a source declaration nor an expected output is an observed result.</td></tr><tr><td>Editor handoff</td><td>Mark the result region, then the actual value being explained. Clear old overlays on pane change. During an otherwise still explanation beyond 12 seconds, use one relevant 6–8-second takeaway callout; never invent a successful result.</td></tr></table>
+<!-- capture-location:end -->
+
 ### Recorder Shots
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Screen_%26_Scroll-0284c7"/></summary>
@@ -347,11 +375,9 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 
 - **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo2/logs/preflight-step-03.log`, plus the matching live GUI or GitHub Actions artifact
 - **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
-- **Source review:** Source-review confidence: 95%. Do not inflate scores simply because documentation exists; release requires actua
-- **Final release:** Do not invent an alert or inflate confidence. Unsupported GUI/CI steps remain explicitly NOT VERIFIED until corrected
+- **Release:** HOLD until evidence review; target overall score 98/100, never automatic approval
 
 </details>
-
 ## Step 4 — Read the report's scan-effectiveness Insights
 
 <details>
@@ -405,6 +431,10 @@ Insights describe scan behavior and confidence in coverage, not only vulnerabili
 
 **How the investigation advances:** The four fields now support a programmatic, evidence-backed scan assessment.
 
+<!-- capture-location:start -->
+<table><tr><th>Capture moment</th><th>Exact action and result location</th></tr><tr><td>Before Enter</td><td>Use macOS Terminal. Show the named step command already provided below/above; keep its full filename readable for about eight seconds. Directory and branch setup are off camera.</td></tr><tr><td>After Enter</td><td>Stay in the terminal and show actual report insights[] entries with their explanations. No browser tour is required.</td></tr><tr><td>Evidence to record</td><td>Real insight key, statistic and meaning, including operational failures; empty Insights is HOLD. Hold each meaningful field for six to eight seconds; retain the matching raw log and take ID.</td></tr><tr><td>Meaning and decision</td><td>Use the Spoken Narration for this exact field, then explain whether the evidence is enough to proceed. If it is absent, stop: neither a source declaration nor an expected output is an observed result.</td></tr><tr><td>Editor handoff</td><td>Mark the result region, then the actual value being explained. Clear old overlays on pane change. During an otherwise still explanation beyond 12 seconds, use one relevant 6–8-second takeaway callout; never invent a successful result.</td></tr></table>
+<!-- capture-location:end -->
+
 ### Recorder Shots
 
 <details open><summary><img src="https://img.shields.io/badge/RECORDER-Screen_%26_Scroll-0284c7"/></summary>
@@ -453,8 +483,7 @@ These spoken lines teach only the visible evidence. Never say placeholder values
 
 - **Proof:** Compare filmed output against the Developer's actual `deliverables/m2-demo2/logs/preflight-step-04.log`, plus the matching live GUI or GitHub Actions artifact
 - **Learning:** Validate the purpose and mechanism above; a command-only video does not meet the objective
-- **Source review:** Source-review confidence: 90%. Do not inflate scores simply because documentation exists; release requires actua
-- **Final release:** Do not invent an alert or inflate confidence. Unsupported GUI/CI steps remain explicitly NOT VERIFIED until corrected
+- **Release:** HOLD until evidence review; target overall score 98/100, never automatic approval
 
 </details>
 

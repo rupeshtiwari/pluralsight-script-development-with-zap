@@ -19,13 +19,13 @@
 </p>
 <!-- demo-navigation:end -->
 
-## The problem you are solving
+## Your Scenario
 
-Maya is securing the Globomantics Store. A generic scan lists possible security issues but does not tell her which application input is unsafe, whether a reflection creates exploitable cross-site scripting, or whether a token belongs to its session. She needs a defensible finding with the request, response, and application behavior behind it.
+You are reviewing a security scan for the Globomantics Store. A long alert list does not tell you which input is unsafe or whether a finding is reproducible. Your team needs a request, response and application effect it can investigate.
 
-**What success looks like:** A focused injection scan, context-specific XSS evidence, a cross-session CSRF check, and a final alert disposition. The four steps solve different parts of one problem. Read them in order: each adds evidence needed for the final decision.
+**Your practical goal:** I will guide you through one focused investigation. You will narrow SQL, MongoDB and command-injection checks, inspect XSS output contexts, test CSRF session ownership, and record evidence-backed dispositions.
 
-## What you will learn in this demonstration
+## Your Learning Goals
 
 You will follow a single investigation from selecting focused scan rules through checking actual application responses:
 
@@ -35,7 +35,7 @@ You will follow a single investigation from selecting focused scan rules through
 
 No separate course outline is required to complete this lab.
 
-## Follow the evidence
+## Your Evidence Path
 
 ```mermaid
 flowchart LR
@@ -48,7 +48,7 @@ flowchart LR
   S3 --> S4
 ```
 
-## Start the local demo
+## Start Your Lab
 
 This step starts the actual vulnerable Globomantics web application and ZAP container. The Mac prerequisite installer, `setup/setup-macos.sh`, is a **one-time preparation task** explained in the [course README](../../../README.md). You do not need to reinstall tools for every demo.
 
@@ -58,6 +58,7 @@ This step starts the actual vulnerable Globomantics web application and ZAP cont
 **Where:** macOS Terminal or the VS Code integrated terminal, starting in the root of your existing local repository.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap"
 git fetch origin
 git switch m1-demo1-before
 cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
@@ -70,22 +71,30 @@ cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
 
 </details>
 
-## The four teaching steps
+## Your Four Steps
 
 <details open>
 <summary><b>Step 1: Run one targeted injection scan</b> — Three injection targets</summary>
 
-### The small problem to solve
+### Learning Goal
 
 The search, account and administrative endpoints reach three different execution boundaries; a generic alert total hides those differences.
 
 **Learning focus:** Configure specialized SQL, NoSQL and command-injection checks *(EO1a)*
 
-### Where to go
+### Demo Workspace
 
 **Open VS Code.** Use File → Open Folder to open the repository. In the editor open `runtime/app/main.py`. In the integrated Terminal, inspect the three prepared views by running `./scripts/show_code.sh sqli`, `./scripts/show_code.sh nosql` and `./scripts/show_code.sh cmd`. Keep source functions `search`, `account` and `admin_ping` accessible.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo1-targeted-injection-xss-csrf`.
 
@@ -93,7 +102,13 @@ The search, account and administrative endpoints reach three different execution
 ./steps/01-run-targeted-injection-scan.sh
 ```
 
-### What the script prints
+<!-- student-proof:start -->
+**Where your result appears:** Stay in the same terminal for the scan table. Then open the browser at http://localhost:8080/zap/; select Alerts and each current SQL, MongoDB and command finding. Open its Request and Response views.
+
+**Inspect this evidence:** Rule identity and the corresponding q, username or host parameter; capture the actual risk and confidence plus affected URL.
+<!-- student-proof:end -->
+
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -109,7 +124,7 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Interpret Results
 
 Three different request parameters are now associated with targeted ZAP findings. The risk/confidence fields report the current engine's result; the mere presence of an alert is not yet a defensible confirmation of all three defects.
 
@@ -120,17 +135,25 @@ Three different request parameters are now associated with targeted ZAP findings
 <details>
 <summary><b>Step 2: Validate reflected XSS in the correct context</b> — XSS output contexts</summary>
 
-### The small problem to solve
+### Learning Goal
 
 The `name` input appears in an HTML element, an attribute and a JavaScript string. The right test changes with the output context.
 
 **Learning focus:** Test context-specific reflected XSS *(EO1b)*
 
-### Where to go
+### Demo Workspace
 
 **Remain in VS Code.** Open `runtime/app/main.py` at the `greet` endpoint (approximately lines 257–277). In its integrated Terminal run `./scripts/show_code.sh xss` to see the source fragment.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where to type it:** the same VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo1-targeted-injection-xss-csrf`.
 
@@ -138,7 +161,13 @@ The `name` input appears in an HTML element, an attribute and a JavaScript strin
 ./steps/02-verify-reflected-xss-contexts.sh
 ```
 
-### What the script prints
+<!-- student-proof:start -->
+**Where your result appears:** After the terminal context check, switch to http://localhost:8080/zap/; select History, the matching /greet request, then Request and Response. Match the injected name value to the output context.
+
+**Inspect this evidence:** Exact injected payload, name parameter and reflected response; do not call reflection browser execution.
+<!-- student-proof:end -->
+
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -156,7 +185,7 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Interpret Results
 
 The first three lines map the input to three output contexts. ZAP then attempts a context-specific payload and reports the affected parameter and evidence; raw reflection alone is not proof of executable script in a browser.
 
@@ -167,17 +196,25 @@ The first three lines map the input to three output contexts. ZAP then attempts 
 <details>
 <summary><b>Step 3: Replay a CSRF token across two sessions</b> — CSRF across sessions</summary>
 
-### The small problem to solve
+### Learning Goal
 
 A token check can exist yet fail if the server accepts a token from one person's session with another person's cookie.
 
 **Learning focus:** Exercise CSRF bypass conditions in the email-change workflow *(EO1c)*
 
-### Where to go
+### Demo Workspace
 
 **Remain in VS Code.** Open `runtime/app/main.py` at `change_email` and the token-issuing helper. In the integrated Terminal run `./scripts/show_code.sh csrf` before running the security step.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo1-targeted-injection-xss-csrf`.
 
@@ -185,7 +222,13 @@ A token check can exist yet fail if the server accepts a token from one person's
 ./steps/03-test-cross-session-csrf-token.sh
 ```
 
-### What the script prints
+<!-- student-proof:start -->
+**Where your result appears:** Stay in the same terminal. Keep the valid-token control, missing-token control, cross-session request and before/after email rows visible together. The browser form at http://localhost:8000/account/email is context, not proof of the shell session.
+
+**Inspect this evidence:** Actual HTTP states and account email mutation from the same test; explain session ownership rather than claiming a single-use-token test.
+<!-- student-proof:end -->
+
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -202,7 +245,7 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Interpret Results
 
 Controls show the application is checking for a token. The cross-session request nevertheless succeeds and changes the victim's stored email, showing the token is not adequately associated with its issuing session.
 
@@ -213,17 +256,25 @@ Controls show the application is checking for a token. The cross-session request
 <details>
 <summary><b>Step 4: Reconcile the findings with application behavior</b> — Evidence-based disposition</summary>
 
-### The small problem to solve
+### Learning Goal
 
 The team must not ship an alert list that lacks reproducible evidence for each stated vulnerability.
 
 **Learning focus:** Apply the three security checks to a final engineering disposition *(EO1a · EO1b · EO1c)*
 
-### Where to go
+### Demo Workspace
 
 **Use VS Code with integrated Terminal.** Keep `runtime/app/main.py` open. Read the student disposition template at `docs/alert-disposition-template.md` from the repository root. Return to the demo Terminal before running the step.
 
-### Run this exact command
+<!-- student-location:start -->
+**Run in:** VS Code integrated Terminal.
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
+```
+<!-- student-location:end -->
+
+### Run Command
 
 **Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo1-targeted-injection-xss-csrf`.
 
@@ -231,7 +282,13 @@ The team must not ship an alert list that lacks reproducible evidence for each s
 ./steps/04-reconcile-security-alerts.sh
 ```
 
-### What the script prints
+<!-- student-proof:start -->
+**Where your result appears:** Stay in the same terminal for the disposition rows. Use http://localhost:8080/zap/ Alerts and the corresponding Request/Response to corroborate the current finding; open docs/alert-disposition-template.md in VS Code to record the reviewed decision.
+
+**Inspect this evidence:** Database error, changed account count, harmless injected shell marker and XSS request/response; normal ping is not injection proof.
+<!-- student-proof:end -->
+
+### Expected Results
 
 The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
@@ -247,7 +304,7 @@ The table shows the actual **field names and expected type of evidence** produce
 
 **Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-### What you should understand
+### Interpret Results
 
 A raw rule ID is a lead; its actual request and application effect support the engineer's final decision. Do not use routine ping output alone as proof of shell-command injection.
 
@@ -255,7 +312,15 @@ A raw rule ID is a lead; its actual request and application effect support the e
 
 </details>
 
-## Finish and clean up
+<!-- student-achievement:start -->
+## What You Achieved
+
+After completing the four checks and inspecting the required evidence, you can explain which input crosses each unsafe boundary. You can distinguish an alert from confirmation, show the token/session failure, and support a disposition with the actual request and response.
+
+**Your final check:** Explain the result using your own captured evidence. A README example, missing result or earlier run does not satisfy this exercise.
+<!-- student-achievement:end -->
+
+## Finish Your Lab
 
 After Step 4, you should be able to explain why a rule or alert deserves a confirmed disposition from real evidence rather than only recalling a command.
 
