@@ -1,165 +1,74 @@
-# M1-DEMO3 · Python Scanning and Authentication — Author Production Playbook
+# Module 1 · Demo 3 — Python scanning and authentication · Production guide
 
 <div align="center">
 
-![Recorder](https://img.shields.io/badge/Recorder-Exact_Screen-0284c7?style=for-the-badge)
-![Narrator](https://img.shields.io/badge/Narrator-Verified_Script-9333ea?style=for-the-badge)
-![Editor](https://img.shields.io/badge/Editor-Timed_Highlights-16a34a?style=for-the-badge)
+![Recorder](https://img.shields.io/badge/RECORDER-Show_Real_Evidence-00A3FF?style=for-the-badge)
+![Editor](https://img.shields.io/badge/EDITOR-One_Highlight-02E088?style=for-the-badge)
+![Narrator](https://img.shields.io/badge/NARRATOR-ElevenLabs_Words-770EF7?style=for-the-badge)
 
-<img src="../learner-diagrams/m1-demo3-architecture.svg" alt="Illustrative Python Scanning and Authentication workflow" width="100%"/>
-
-<sub>Generated using ChatGPT · Temporary PUBLIC author guidance</sub>
+<img src="../learner-diagrams/m1-demo3-architecture.svg" width="100%" alt="Training evidence flow for m1-demo3"/>
+<sub>Illustrative architecture · Generated using ChatGPT · Temporary PUBLIC production material</sub>
 
 </div>
 
-[← **All Six Production Playbooks**](README.md) · [**Student Starter README ↗**](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo3-before/demos/module1-demos/m1-demo3-python-scanning-authentication/README.md) · [**Completed README ↗**](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo3-after/demos/module1-demos/m1-demo3-python-scanning-authentication/README.md)
+[← Production dashboard](README.md) · [Open student's Module 1 demo README](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo3-before/demos/module1-demos/m1-demo3-python-scanning-authentication/README.md)
 
-## Recording Assignment
+## Recorder assignment
 
-<table>
-<tr><th>Field</th><th>Exact Value</th></tr>
-<tr><td>Demonstration</td><td><b>Python Scanning and Authentication</b> · m1-demo3</td></tr>
-<tr><td>Approved Objectives</td><td>EO2b · EO2c — check the complete wording in the linked learner README</td></tr>
-<tr><td>Reference branch</td><td><code>m1-demo3-after</code> — completed source for preflight</td></tr>
-<tr><td>Recording branch</td><td><code>m1-demo3-before</code> — follow the student workflow</td></tr>
-<tr><td>Demo directory</td><td><code>demos/module1-demos/m1-demo3-python-scanning-authentication</code></td></tr>
-<tr><td>Student exercise state</td><td>The starter intentionally lacks the completed Jython active rule and authentication scripts</td></tr>
-</table>
+**Work only on `m1-demo3-before`**, completing missing exercise source where applicable. The Developer has already generated the batch preflight, saved four approved baseline transcripts and made the `deliverables/m1-demo3/` package available. **Do not rerun Mac setup or batch preflight as part of filming.** Read the [one-time setup and Developer responsibilities](README.md) on the author dashboard.
 
-## Start Here — One Clone, Two Branches, One Demo
+**Start privately before recording:** from repository root, `git switch m1-demo3-before`, then `cd demos/module1-demos/m1-demo3-python-scanning-authentication`; start the vulnerable lab with `./scripts/demo_reset.sh`. Confirm the app is reachable at `http://localhost:8000/`, and preserve all intended authored changes. Run commands from the specified VS Code integrated Terminal or macOS Terminal in the appropriate step.
 
-**Do not clone this repository separately for every demo.** Each recorder clones the course once, then switches to the specific demo's `after` branch for preflight and `before` branch for recording. Before switching, stop the old demo environment and preserve the narration references.
+**Recording order:** show source/context → display exact command for approximately 8 seconds → Enter once → show real output in 6–8-second proof windows → switch screens only as the current claim requires. The Editor trims long waits. A mismatched recording transcript is a retake, not a chance to create a fake PASS.
+
+## Follow these four steps
+
+## Step 1 — Register a custom Jython active-scan rule
 
 <details open>
-<summary><b><font color="#0284c7">A · Clone Once and Prepare the Mac</font></b></summary>
+<summary><b>Open step 1 — command, real expected fields and role instructions</b></summary>
 
-Use this step only for your first assigned demo. For second and third demos, keep the same repository folder and skip the clone/setup if already complete.
+<summary><b>Step 1: Register a custom Jython active-scan rule</b> — Load custom rule</summary>
 
-```bash
-cd ~
-git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
-cd pluralsight-script-development-with-zap
-./setup/setup-macos.sh
-git fetch origin
-```
+### The small problem to solve
 
-**Where is the folder?** It is `~/pluralsight-script-development-with-zap` by default. `git switch` does not create a second or third folder; it changes the checked-out branch in the same directory.
+A built-in scanner may not test the application's own unsafe reflection condition.
 
-</details>
+**Learning focus:** Implement a custom Python scanning rule *(EO2b)*
 
-<details open>
-<summary><b><font color="#9333ea">B · Run Preflight From the Completed Branch FIRST</font></b></summary>
+### Where to go
 
-This is the **narration evidence source**. It executes all four real named commands, saves raw live proof, and produces stable per-step reference logs so the Narrator can start while footage is still being recorded.
+**Open VS Code.** Open `zap-scripts/globomantics-active-rule.py`. Inspect `scan` and `newAlert` / `raiseAlert`. Show **ZAP GUI → Scripts → Active Rules** if validating the loaded script.
 
-```bash
-cd ~/pluralsight-script-development-with-zap
-git status --short
-git fetch origin
-git switch m1-demo3-after
-git rev-parse HEAD
-cd demos/module1-demos/m1-demo3-python-scanning-authentication
-./scripts/demo_reset.sh
-./scripts/preflight_check.sh
-ls -l logs/preflight-step-0[1-4].log
-```
+### Run this exact command
 
-**Only proceed when preflight exits 0 and prints the actual summary below** (this is the expected format, not a fabricated test run):
-
-```text
-RESULT: 5 checks passed, 0 failed
-REFERENCE: logs/preflight-step-01.log through logs/preflight-step-04.log
-```
-
-**Proof stays real:** `logs/preflight-step-01.log` through `04.log` are the Narrator's four outputs. `logs/.producer/` holds untouched raw details. Separate ZAP GUI / GitHub Actions evidence must be checked independently when a terminal command cannot observe it.
-
-**Optional but strongly recommended repeatability check:** after successful preflight, set `DEMO_SYNC_MODE=1` and `DEMO_SYNC_PHASE=compare` off-camera, then execute the same four named steps while still on this completed reference. Each must match its baseline; a material mismatch blocks recording.
-
-**Archive the references and stop the stack before switching:**
-
-```bash
-mkdir -p ~/zap-production-evidence/m1-demo3
-cp logs/preflight-step-0[1-4].log ~/zap-production-evidence/m1-demo3/
-./scripts/demo_down.sh
-cd ~/pluralsight-script-development-with-zap
-git status --short
-```
-
-Never delete the reference logs with a destructive Git cleanup.
-
-</details>
-
-<details open>
-<summary><b><font color="#0284c7">C · Switch to the Student Starting Branch and Record</font></b></summary>
-
-```bash
-cd ~/pluralsight-script-development-with-zap
-git switch m1-demo3-before
-git rev-parse HEAD
-cd demos/module1-demos/m1-demo3-python-scanning-authentication
-cp ~/zap-production-evidence/m1-demo3/preflight-step-0[1-4].log logs/
-./scripts/demo_reset.sh
-
-# Off-camera recording parity settings
-export DEMO_SYNC_MODE=1
-export DEMO_SYNC_PHASE=compare
-```
-
-**The starter intentionally lacks the completed Jython active rule and authentication scripts.** Follow the [student README on this exact starter branch](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo3-before/demos/module1-demos/m1-demo3-python-scanning-authentication/README.md) to complete any required source writing, then record the four exact commands listed below. The starter branch may be intentionally incomplete and **must not** be expected to pass its final checks before the work has been done.
-
-After the four named commands, capture the GUI/CI proof, then:
-
-```bash
-./scripts/demo_down.sh
-cd ~/pluralsight-script-development-with-zap
-git status --short
-```
-
-**If Git refuses the next branch switch:** preserve the changed code on a task branch or in a deliberate backup before switching. Do not use force/reset to discard recorded work.
-
-</details>
-
-<details><summary><b><font color="#16a34a">D · Recording More Demos From This Same Clone</font></b></summary>
-
-```bash
-cd ~/pluralsight-script-development-with-zap
-git status --short
-git fetch origin
-# Example: select another assigned demo (replace as needed):
-git switch m2-demo1-after
-```
-
-For a different demo, replace the branch and folder with the corresponding entry on the [six-demo author dashboard](README.md). Repeat preflight → archive logs → cleanup → branch switch → record. One local repository is sufficient for sequential recordings. A separate worktree is optional when you need two branches open concurrently.
-
-</details>
-
-## Camera, Narration and Edit Contract
-
-<table>
-<tr><td width="18%"><img src="https://img.shields.io/badge/RECORDER-Blue-0284c7"/></td><td>Record full-screen at readable zoom. Open the source/GUI pane specified in the relevant step, then hold the complete named command ~8 seconds before Enter. Hold each actual output focus 6–8 seconds. On significant UI clicks provide 8-second pre-click and post-click handles in raw footage for the editor.</td></tr>
-<tr><td><img src="https://img.shields.io/badge/NARRATOR-Purple-9333ea"/></td><td>Use the real `preflight-step-0N.log` plus the corresponding filmed GUI/CI evidence. The step tables below give exact ElevenLabs lines with word counts, one mechanism and one operator consequence per reveal. Do not narrate sample placeholders.</td></tr>
-<tr><td><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/></td><td>Cut cleanly at source/terminal/GUI transitions and scanning waits. Highlight one field using a small square, arrow or callout; remove it immediately as the focus changes. Match voice to the same take, not a historic preflight value from a different implementation.</td></tr>
-</table>
-
-## Four Fixed Teaching Steps — Follow In Order
-
-## Step 1 — Load A Jython Active Scan Rule
-
-**Why it matters:** Built-in scanning does not demonstrate application-specific reflection checks.
-
-**Exact on-screen command**, executed in `demos/module1-demos/m1-demo3-python-scanning-authentication`:
+**Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo3-python-scanning-authentication`.
 
 ```bash
 ./steps/01-load-python-active-scan-rule.sh
 ```
 
-**Expected output format from the real step engine (ILLUSTRATIVE; replace with the current preflight log):**
+### What the script prints
 
-```text
-Script name: globomantics-active-rule (type: active · engine: <Jython engine>)
-Alert it raises: Globomantics unsafe reflection (custom rule)
-✔ PASS active-rule script is valid and loaded into ZAP as an active rule
-```
+The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
+
+<table>
+<thead><tr><th>Displayed field</th><th>Example or expected value</th><th>What to check</th></tr></thead>
+<tbody>
+<tr><td><b>Script name</b></td><td><code>globomantics-active-rule (active · Jython)</code></td><td>Correct script type and engine</td></tr>
+<tr><td><b>Alert it raises</b></td><td><code>Globomantics unsafe reflection (custom rule)</code></td><td>Named finding, not generic built-in XSS</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS custom active rule loaded</code></td><td>Loading alone is not a fired alert</td></tr>
+</tbody></table>
+
+**Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
+
+### What you should understand
+
+The custom rule is now registered with ZAP's active scanning mechanism, where it can inspect application-specific parameters.
+
+**How this connects:** Provide the authentication sequence so the rule can reach the protected profile.
+
+### Recorder — execute and show
 
 <details open>
 <summary><img src="https://img.shields.io/badge/RECORDER-Exact_Shots-0284c7"/></summary>
@@ -173,17 +82,9 @@ Alert it raises: Globomantics unsafe reflection (custom rule)
 </table>
 </details>
 
-<details open>
-<summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
-<table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
-<tr><td>Command shown</td><td>Load a Jython active rule for the profile's note parameter. The rule clones requests and looks for unencoded reflection.</td><td>19</td></tr>
-<tr><td>First actual output</td><td>The rule declares a named custom alert so teams can distinguish it from ZAP's built-in reflected XSS findings.</td><td>18</td></tr>
-<tr><td>Second output / decision</td><td>A successful load means the rule can participate in scans. The actual alert still needs to be raised and verified.</td><td>20</td></tr>
-</table>
-Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
-</details>
+### Editor — callouts and cut plan
 
-<details open>
+<details>
 <summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
 <table><tr><th>Transition</th><th>Precise edit</th></tr>
 <tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
@@ -193,27 +94,73 @@ Only record a statement after the matching evidence is visible in the take. The 
 </table>
 </details>
 
-**Source-review confidence 95%**, before live rehearsal. An estimate below the owner's release threshold cannot be increased without a matching real proof and reviewer approval.
+### Narrator — spoken evidence
 
----
+<details>
+<summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
+<table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
+<tr><td>Command shown</td><td>Load a Jython active rule for the profile's note parameter. The rule clones requests and looks for unencoded reflection.</td><td>19</td></tr>
+<tr><td>First actual output</td><td>The rule declares a named custom alert so teams can distinguish it from ZAP's built-in reflected XSS findings.</td><td>18</td></tr>
+<tr><td>Second output / decision</td><td>A successful load means the rule can participate in scans. The actual alert still needs to be raised and verified.</td><td>20</td></tr>
+</table>
+Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
+</details>
 
-## Step 2 — Register A Script-Based Login
+### Technical approval
 
-**Why it matters:** Automated security scanning cannot rely on a manually pasted session cookie.
+- **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo3/logs/preflight-step-01.log` and the same-take GUI evidence
+- **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
+- **Source confidence:** Source-review confidence 95%, before live rehearsal. An estimate below the owner's release threshold cannot
+- **Release:** Missing or contradictory proof remains NOT VERIFIED; do not increase a score to 94% without evidence
 
-**Exact on-screen command**, executed in `demos/module1-demos/m1-demo3-python-scanning-authentication`:
+</details>
+
+## Step 2 — Register the login script
+
+<details>
+<summary><b>Open step 2 — command, real expected fields and role instructions</b></summary>
+
+<summary><b>Step 2: Register the login script</b> — Script authentication</summary>
+
+### The small problem to solve
+
+Manual cookie copying is unreliable in repeatable automated scanning.
+
+**Learning focus:** Apply scripting to authentication sequence automation *(EO2c)*
+
+### Where to go
+
+**In VS Code**, inspect `zap-scripts/globomantics-auth.py`, focusing on `authenticate` and `getCredentialsParamsNames`. Use ZAP GUI → Scripts → Authentication for confirmation.
+
+### Run this exact command
+
+**Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo3-python-scanning-authentication`.
 
 ```bash
 ./steps/02-register-scripted-authentication.sh
 ```
 
-**Expected output format from the real step engine (ILLUSTRATIVE; replace with the current preflight log):**
+### What the script prints
 
-```text
-Script name: globomantics-auth (type: authentication · engine: <Jython engine>)
-It submits: username=alice to POST /login, then ZAP reuses the session cookie
-✔ PASS authentication script is valid and registered in ZAP
-```
+The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
+
+<table>
+<thead><tr><th>Displayed field</th><th>Example or expected value</th><th>What to check</th></tr></thead>
+<tbody>
+<tr><td><b>Script name</b></td><td><code>globomantics-auth (authentication · Jython)</code></td><td>Authentication script identity</td></tr>
+<tr><td><b>It submits</b></td><td><code>username=alice to POST /login</code></td><td>Training-only simplified login</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS authentication script registered</code></td><td>The protected endpoint remains to be tested</td></tr>
+</tbody></table>
+
+**Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
+
+### What you should understand
+
+ZAP can now obtain a session by running a script rather than accepting an operator's copied cookie. The course's simplified username-only login is not a production security model.
+
+**How this connects:** Prove the script really changes access to the protected page.
+
+### Recorder — execute and show
 
 <details open>
 <summary><img src="https://img.shields.io/badge/RECORDER-Exact_Shots-0284c7"/></summary>
@@ -227,17 +174,9 @@ It submits: username=alice to POST /login, then ZAP reuses the session cookie
 </table>
 </details>
 
-<details open>
-<summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
-<table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
-<tr><td>Command shown</td><td>Register a separate authentication script. It sends the login form so ZAP obtains a session without manually copied cookies.</td><td>19</td></tr>
-<tr><td>First actual output</td><td>The training login submits username Alice to the login endpoint. A real production login would also enforce credential security.</td><td>19</td></tr>
-<tr><td>Second output / decision</td><td>This registration gives ZAP a repeatable login mechanism, but the protected endpoint must still demonstrate authenticated access.</td><td>17</td></tr>
-</table>
-Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
-</details>
+### Editor — callouts and cut plan
 
-<details open>
+<details>
 <summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
 <table><tr><th>Transition</th><th>Precise edit</th></tr>
 <tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
@@ -247,28 +186,74 @@ Only record a statement after the matching evidence is visible in the take. The 
 </table>
 </details>
 
-**Source-review confidence 95%**, before live rehearsal. An estimate below the owner's release threshold cannot be increased without a matching real proof and reviewer approval.
+### Narrator — spoken evidence
 
----
+<details>
+<summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
+<table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
+<tr><td>Command shown</td><td>Register a separate authentication script. It sends the login form so ZAP obtains a session without manually copied cookies.</td><td>19</td></tr>
+<tr><td>First actual output</td><td>The training login submits username Alice to the login endpoint. A real production login would also enforce credential security.</td><td>19</td></tr>
+<tr><td>Second output / decision</td><td>This registration gives ZAP a repeatable login mechanism, but the protected endpoint must still demonstrate authenticated access.</td><td>17</td></tr>
+</table>
+Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
+</details>
 
-## Step 3 — Prove Authenticated Profile Access
+### Technical approval
 
-**Why it matters:** A scanner may report a clean site simply because it could not pass the login wall.
+- **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo3/logs/preflight-step-02.log` and the same-take GUI evidence
+- **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
+- **Source confidence:** Source-review confidence 95%, before live rehearsal. An estimate below the owner's release threshold cannot
+- **Release:** Missing or contradictory proof remains NOT VERIFIED; do not increase a score to 94% without evidence
 
-**Exact on-screen command**, executed in `demos/module1-demos/m1-demo3-python-scanning-authentication`:
+</details>
+
+## Step 3 — Compare unauthenticated and scripted access
+
+<details>
+<summary><b>Open step 3 — command, real expected fields and role instructions</b></summary>
+
+<summary><b>Step 3: Compare unauthenticated and scripted access</b> — Prove protected access</summary>
+
+### The small problem to solve
+
+A scan can incorrectly look clean if it never passes the login wall.
+
+**Learning focus:** Verify scripted authentication effectiveness *(EO2c)*
+
+### Where to go
+
+**In ZAP GUI**, inspect Globomantics context and user Alice. Then return to **VS Code Terminal** to run the comparison. No cookie is manually supplied by the shell probe.
+
+### Run this exact command
+
+**Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo3-python-scanning-authentication`.
 
 ```bash
 ./steps/03-confirm-authenticated-profile-access.sh
 ```
 
-**Expected output format from the real step engine (ILLUSTRATIVE; replace with the current preflight log):**
+### What the script prints
 
-```text
-Without login: /account/profile -> HTTP 401 (gated)
-ZAP forced-user (script auth): /account/profile -> HTTP 200 (reachable)
-Auth script ran: authenticate: response=200
-✔ PASS ZAP executed the authentication script and holds the session
-```
+The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
+
+<table>
+<thead><tr><th>Displayed field</th><th>Example or expected value</th><th>What to check</th></tr></thead>
+<tbody>
+<tr><td><b>Without login</b></td><td><code>/account/profile → HTTP 401</code></td><td>Endpoint truly protected</td></tr>
+<tr><td><b>ZAP forced-user script auth</b></td><td><code>/account/profile → HTTP 200</code></td><td>ZAP obtains valid session</td></tr>
+<tr><td><b>Auth script ran</b></td><td><code>authenticate: &lt;actual trace&gt;</code></td><td>Trace must prove script invocation</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS ZAP executed authentication script</code></td><td>Both HTTP status and auth trace required</td></tr>
+</tbody></table>
+
+**Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
+
+### What you should understand
+
+HTTP 401 without login and HTTP 200 with ZAP's scripted user establish that the scanner can access the authenticated resource.
+
+**How this connects:** Run the custom rule against the authenticated page, and reject stale findings.
+
+### Recorder — execute and show
 
 <details open>
 <summary><img src="https://img.shields.io/badge/RECORDER-Exact_Shots-0284c7"/></summary>
@@ -282,17 +267,9 @@ Auth script ran: authenticate: response=200
 </table>
 </details>
 
-<details open>
-<summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
-<table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
-<tr><td>Command shown</td><td>First access the protected profile without login. The server returns unauthorized, confirming that the page is genuinely restricted.</td><td>18</td></tr>
-<tr><td>First actual output</td><td>Enable ZAP's scripted user and repeat the request. The successful response shows the scanner reached the authenticated page.</td><td>18</td></tr>
-<tr><td>Second output / decision</td><td>The authentication trace confirms ZAP ran the login script. A manual cookie would not prove this automated behavior.</td><td>18</td></tr>
-</table>
-Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
-</details>
+### Editor — callouts and cut plan
 
-<details open>
+<details>
 <summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
 <table><tr><th>Transition</th><th>Precise edit</th></tr>
 <tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
@@ -302,32 +279,76 @@ Only record a statement after the matching evidence is visible in the take. The 
 </table>
 </details>
 
-**Source-review confidence 93%**, before live rehearsal. An estimate below the owner's release threshold cannot be increased without a matching real proof and reviewer approval.
+### Narrator — spoken evidence
 
----
+<details>
+<summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
+<table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
+<tr><td>Command shown</td><td>First access the protected profile without login. The server returns unauthorized, confirming that the page is genuinely restricted.</td><td>18</td></tr>
+<tr><td>First actual output</td><td>Enable ZAP's scripted user and repeat the request. The successful response shows the scanner reached the authenticated page.</td><td>18</td></tr>
+<tr><td>Second output / decision</td><td>The authentication trace confirms ZAP ran the login script. A manual cookie would not prove this automated behavior.</td><td>18</td></tr>
+</table>
+Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
+</details>
 
-## Step 4 — Raise The Fresh Custom Finding
+### Technical approval
 
-**Why it matters:** Existing alerts can falsely suggest a custom rule worked during the current authenticated scan.
+- **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo3/logs/preflight-step-03.log` and the same-take GUI evidence
+- **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
+- **Source confidence:** Source-review confidence 93%, before live rehearsal. An estimate below the owner's release threshold cannot
+- **Release:** Missing or contradictory proof remains NOT VERIFIED; do not increase a score to 94% without evidence
 
-**Exact on-screen command**, executed in `demos/module1-demos/m1-demo3-python-scanning-authentication`:
+</details>
+
+## Step 4 — Confirm a fresh custom scan alert
+
+<details>
+<summary><b>Open step 4 — command, real expected fields and role instructions</b></summary>
+
+<summary><b>Step 4: Confirm a fresh custom scan alert</b> — Prove custom alert</summary>
+
+### The small problem to solve
+
+A previous alert can make a new scan seem successful when the custom rule never ran.
+
+**Learning focus:** Demonstrate application-specific scanning proof *(EO2b)*
+
+### Where to go
+
+**Open ZAP GUI → Alerts** for the targeted profile. Run the command in **VS Code Terminal**, then return to the Alerts pane and inspect the newly produced named finding.
+
+### Run this exact command
+
+**Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo3-python-scanning-authentication`.
 
 ```bash
 ./steps/04-confirm-custom-scan-alert.sh
 ```
 
-**Expected output format from the real step engine (ILLUSTRATIVE; replace with the current preflight log):**
+### What the script prints
 
-```text
-Before scan (store cleared): absent
-Scan target: http://app:8000/account/profile?note=seed (param: note, as user alice)
-Probe requests the scan sent: <live-count>
-Alert: Globomantics unsafe reflection (custom rule)
-Risk: Medium
-Parameter: note
-Evidence: GLOBOxss7marker
-✔ PASS the custom rule RAISED its named alert on this scan
-```
+The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
+
+<table>
+<thead><tr><th>Displayed field</th><th>Example or expected value</th><th>What to check</th></tr></thead>
+<tbody>
+<tr><td><b>Before scan</b></td><td><code>absent</code></td><td>Cleared alert store</td></tr>
+<tr><td><b>Scan target</b></td><td><code>/account/profile?note=seed (as alice)</code></td><td>Authorized authenticated parameter</td></tr>
+<tr><td><b>Alert</b></td><td><code>Globomantics unsafe reflection (custom rule)</code></td><td>Exact custom finding</td></tr>
+<tr><td><b>Risk / Parameter</b></td><td><code>&lt;actual risk&gt; / note</code></td><td>Current result, not placeholder</td></tr>
+<tr><td><b>Evidence</b></td><td><code>&lt;actual reflected marker&gt;</code></td><td>Evidence from real request</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS named alert raised on current scan</code></td><td>Absent before and present after</td></tr>
+</tbody></table>
+
+**Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
+
+### What you should understand
+
+A new authenticated scan now produces the required custom alert tied to `note`. Built-in XSS alerts are not substitutes.
+
+**How this connects:** The demo closes with repeatable authentication and an application-specific finding supported by a fresh scan.
+
+### Recorder — execute and show
 
 <details open>
 <summary><img src="https://img.shields.io/badge/RECORDER-Exact_Shots-0284c7"/></summary>
@@ -341,17 +362,9 @@ Evidence: GLOBOxss7marker
 </table>
 </details>
 
-<details open>
-<summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
-<table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
-<tr><td>Command shown</td><td>Clear earlier alerts so a stale result cannot satisfy the check. Then scan the protected profile as authenticated user Alice.</td><td>20</td></tr>
-<tr><td>First actual output</td><td>The fresh alert names the custom rule and the note parameter. Read the risk and marker evidence actually returned.</td><td>19</td></tr>
-<tr><td>Second output / decision</td><td>This finding confirms the custom check executed under authentication. A built-in reflected XSS alert would not be equivalent.</td><td>18</td></tr>
-</table>
-Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
-</details>
+### Editor — callouts and cut plan
 
-<details open>
+<details>
 <summary><img src="https://img.shields.io/badge/EDITOR-Highlight_Map-16a34a"/></summary>
 <table><tr><th>Transition</th><th>Precise edit</th></tr>
 <tr><td>Code → command</td><td>Clean cut or clear pane switch; square over the important function or parameter, remove it immediately when focus moves to the full named command.</td></tr>
@@ -361,10 +374,31 @@ Only record a statement after the matching evidence is visible in the take. The 
 </table>
 </details>
 
-**Source-review confidence 94%**, before live rehearsal. An estimate below the owner's release threshold cannot be increased without a matching real proof and reviewer approval.
+### Narrator — spoken evidence
 
----
+<details>
+<summary><img src="https://img.shields.io/badge/NARRATOR-ElevenLabs_Script-d946ef"/></summary>
+<table><tr><th>Match To Screen</th><th>Exact words to speak</th><th>Words</th></tr>
+<tr><td>Command shown</td><td>Clear earlier alerts so a stale result cannot satisfy the check. Then scan the protected profile as authenticated user Alice.</td><td>20</td></tr>
+<tr><td>First actual output</td><td>The fresh alert names the custom rule and the note parameter. Read the risk and marker evidence actually returned.</td><td>19</td></tr>
+<tr><td>Second output / decision</td><td>This finding confirms the custom check executed under authentication. A built-in reflected XSS alert would not be equivalent.</td><td>18</td></tr>
+</table>
+Only record a statement after the matching evidence is visible in the take. The script is written for natural ElevenLabs speech, not technical notes; do not read placeholder values or substitute terminal expectations for real GUI proof.
+</details>
 
-## Delivery Gate
+### Technical approval
 
-Deliver both branch refs and SHA, full preflight plus step logs, normalized parity result, untouched raw proof, GUI screenshots with timestamps, exact ElevenLabs script or audio, and Editor timeline. Record each live step from the authorized training target only. Never call an old scan or estimated screenshot actual evidence.
+- **Operator proof:** Match the actual field values against the Developer's `deliverables/m1-demo3/logs/preflight-step-04.log` and the same-take GUI evidence
+- **Learning objective:** Confirm the specific problem and outcome described above were demonstrated, not just a command executed
+- **Source confidence:** Source-review confidence 94%, before live rehearsal. An estimate below the owner's release threshold cannot
+- **Release:** Missing or contradictory proof remains NOT VERIFIED; do not increase a score to 94% without evidence
+
+</details>
+
+## Finish the recording
+
+1. Capture all four real step outcomes, their matching raw logs and GUI/CI evidence; preserve the recorded branch SHA
+2. Stop the lab from the same demo folder: `./scripts/demo_down.sh`
+3. Hand the video takes to the Editor and the Developer's generated narration draft and logs to the Narrator
+4. Leave the developer-wide batch validation and its configuration in the landing page, not in this per-demo recording page
+

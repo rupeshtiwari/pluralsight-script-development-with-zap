@@ -44,6 +44,17 @@ class BatchContractTests(unittest.TestCase):
             (logs/"preflight-step-04.log").write_text("✘ FAIL missing live alert")
             self.assertFalse(MODULE.references_ready(logs))
 
+    def test_offline_generated_html_has_real_roles(self):
+        from setup.evidence_report import section_html,narrator_rows
+        for id_,_,_ in MODULE.DEMOS:
+            source=(ROOT/"docs/.author-instructions"/(id_+".md")).read_text()
+            steps=__import__("re").split(r"(?=^## Step [1-4]\b)",source,flags=__import__("re").M)
+            self.assertEqual(len(steps),5,id_)
+            for i,step in enumerate(steps[1:],1):
+                self.assertGreater(len(section_html(step,"RECORDER")),120)
+                self.assertGreater(len(section_html(step,"EDITOR")),100)
+                self.assertEqual(len(narrator_rows(step)),3,(id_,i))
+
     def test_dry_run_does_not_create_evidence(self):
         with tempfile.TemporaryDirectory() as t:
             output=Path(t)/"not-created"
