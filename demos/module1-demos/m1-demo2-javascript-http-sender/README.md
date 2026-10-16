@@ -323,8 +323,6 @@ After Step 4, you should be able to explain how the JavaScript hook affected a r
 
 To inspect the finished example, switch to `m1-demo2-after` **after preserving any exercise changes**. Compare without modifying files using `git diff m1-demo2-before..m1-demo2-after -- demos/module1-demos/m1-demo2-javascript-http-sender`. For operational-only demos, the important difference may be live scan evidence rather than source code.
 
-**Course-wide validation:** The Developer can run `./setup/run-all-demo-preflights.sh` **once from the repository root** to validate all six completed demo branches and produce real evidence bundles. It is not another script to run after each step.
-
 <!-- demo-navigation:start -->
 <p align="center"><b>Student exercise · Demo 2 of 6</b></p>
 <p align="center">
