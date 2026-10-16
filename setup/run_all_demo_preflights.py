@@ -25,14 +25,90 @@ DEMOS=[
 INDEX={k:(p,u) for k,p,u in DEMOS}
 FENCE=chr(96)*3
 
-def execute(command,cwd,log):
-    with log.open("w",encoding="utf-8") as f:
-        proc=subprocess.Popen(command,cwd=cwd,stdout=subprocess.PIPE,
-                              stderr=subprocess.STDOUT,text=True,errors="replace")
-        for line in proc.stdout:
-            print(line,end="",flush=True)
-            f.write(line)
-        return proc.wait()
+def execute(command,cwd,log,verbose=False,heartbeat_label=None):
+    """Capture every raw line, but keep the operator console concise."""
+    import threading
+    log.parent.mkdir(parents=True,exist_ok=True)
+    stop=threading.Event()
+    def pulse():
+        while not stop.wait(25):
+            if heartbeat_label:
+                print("  … "+heartbeat_label+" still running; full output is being saved",flush=True)
+    if heartbeat_label:
+        threading.Thread(target=pulse,daemon=True).start()
+    try:
+        with log.open("w",encoding="utf-8") as f:
+            proc=subprocess.Popen(command,cwd=cwd,stdout=subprocess.PIPE,
+                                  stderr=subprocess.STDOUT,text=True,errors="replace")
+            for line in proc.stdout:
+                f.write(line)
+                f.flush()
+                if verbose:
+                    print(line,end="",flush=True)
+            return proc.wait()
+    finally:
+        stop.set()
+
+
+def color(text,code):
+    """Pluralsight brand palette, disabled in redirected/file output."""
+    if not sys.stdout.isatty() or os.environ.get("NO_COLOR"):
+        return text
+    return "\033[38;2;"+code+"m"+text+"\033[0m"
+
+
+def heading(text):
+    print()
+    print(color("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━","0;163;255"))
+    print(color(text,"255;22;117"))
+    print(color("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━","0;163;255"))
+
+
+def show_result(index,total,row,out):
+    status=row["status"]
+    passed=status.startswith("PREFLIGHT PASSED") and row["cleanup_exit"]==0
+    icon=color("✓","2;224;136") if passed else color("✗","185;0;75")
+    label="PASS • GUI/CI review pending" if passed else status
+    print(f"  {icon} {index:>2}/{total}  {row['demo']:<9}  {label}")
+    if not passed:
+        hint={"STARTUP FAILED":"startup.log","PREFLIGHT FAILED":"preflight-console.log",
+              "CLEANUP FAILED":"cleanup.log","BRANCH MISSING":"ref.log",
+              "WORKTREE FAILED":"worktree.log"}.get(status,"error.txt")
+        log_path=out/hint
+        print("       Diagnose: "+str(log_path))
+        if log_path.is_file():
+            last=[t.strip() for t in log_path.read_text(errors="replace").splitlines()
+                  if t.strip() and any(k in t.lower() for k in
+                  ("no such file","not found","failed","error","fatal","missing"))]
+            for line in last[-2:]:
+                print("       "+line[:145])
+
+
+def show_next_steps(output,archive,rows,exit_code):
+    heading("BATCH COMPLETE • "+str(len(rows))+" demos checked")
+    print("  Demo         Result")
+    print("  ─────────────────────────────────────────────────────────")
+    for row in rows:
+        ok=row["status"].startswith("PREFLIGHT PASSED") and row["cleanup_exit"]==0
+        word="PASS • evidence review pending" if ok else "HOLD • "+row["status"]
+        print(f"  {row['demo']:<12} {color(word,'2;224;136' if ok else '185;0;75')}")
+    print()
+    print("  Evidence folder: "+str(output))
+    print("  Complete ZIP:    "+str(archive))
+    heading("NEXT • OPEN THE PRODUCTION PORTAL")
+    print("  Open macOS Terminal and run these TWO exact commands:")
+    print()
+    print('  cd "'+str(output)+'"')
+    print("  ./serve.sh")
+    print()
+    print("  Browser: http://127.0.0.1:8765/index.html")
+    print("  Stop the viewer with Ctrl+C.")
+    print("  New run after any fix: ./setup/run-all-demo-preflights.sh from repo root")
+    print("  Every run creates a NEW timestamped folder. Previous proof stays intact.")
+    if exit_code:
+        print(color("  ATTENTION: Some demos failed. Open the logs in this batch; do not record from a failed preflight.","185;0;75"))
+    else:
+        print(color("  Terminal preflight passed. GUI, Actions and same-take CQA still required.","2;224;136"))
 
 def references_ready(logs):
     parts=[logs/("preflight-step-%02d.log"%i) for i in range(1,5)]
@@ -93,15 +169,20 @@ def batch(ids,output,skip_setup):
         print("ERROR: run from a local Git checkout.",file=sys.stderr)
         return 2
     output.mkdir(parents=True)
-    if not skip_setup and execute(["bash","./setup/setup-macos.sh"],ROOT,output/"setup.log"):
+    heading("SCRIPT DEVELOPMENT WITH ZAP • DEVELOPER PREFLIGHT")
+    print("  Validating "+str(len(ids))+" completed branches in isolated temporary worktrees")
+    print("  Every attempt preserves raw logs in its unique batch folder")
+    print("  Batch folder: "+str(output))
+    if not skip_setup and execute(["bash","./setup/setup-macos.sh"],ROOT,output/"setup.log",verbose=True):
         return 1
     if execute(["docker","info"],ROOT,output/"docker.log"):
         return 1
     if execute(["git","fetch","origin"],ROOT,output/"fetch.log"):
         return 1
     results=[]
-    for demo in ids:
+    for index,demo in enumerate(ids,1):
         folder,startup=INDEX[demo]
+        heading(f"DEMO {index}/{len(ids)} • {demo} • {demo}-after")
         out=output/demo
         out.mkdir()
         row={"demo":demo,"branch":demo+"-after","sha":"","status":"NOT VERIFIED","startup_exit":None,"preflight_exit":None,"cleanup_exit":None,"narration":"NOT GENERATED","step_commands":[]}
@@ -149,6 +230,7 @@ def batch(ids,output,skip_setup):
                         execute(["git","worktree","remove","--force",str(worktree)],ROOT,out/"worktree-remove.log")
                 (out/"manifest.json").write_text(json.dumps(row,indent=2)+"\n",encoding="utf-8")
                 results.append(row)
+                show_result(index,len(ids),row,out)
     summary=["# Six-Demo Preflight Batch","",
         "Real completed-branch execution. A terminal PASS does not validate external GUI or CI footage.","",
         "| Demo | Source SHA | Execution | Narration |","|---|---|---|---|"]
@@ -186,8 +268,9 @@ def batch(ids,output,skip_setup):
         for file in sorted(output.rglob("*")):
             if file.is_file():
                 z.write(file,Path(output.name)/file.relative_to(output))
-    print("\nEVIDENCE: "+str(output)+"\nUPLOAD THIS ZIP: "+str(archive))
-    return 0 if dashboard_ok and all(r["status"].startswith("PREFLIGHT PASSED") for r in results) else 1
+    final_exit=0 if dashboard_ok and all(r["status"].startswith("PREFLIGHT PASSED") and r["cleanup_exit"]==0 for r in results) else 1
+    show_next_steps(output,archive,results,final_exit)
+    return final_exit
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
@@ -199,7 +282,7 @@ def main():
     ids=a.only.split(",") if a.only else [d[0] for d in DEMOS]
     if not ids or len(ids)!=len(set(ids)) or any(x not in INDEX for x in ids):
         p.error("unknown or duplicate demo ID")
-    output=(a.output or (Path.home()/"zap-course-deliverables"/("batch-"+datetime.now().strftime("%Y%m%d-%H%M%S")))).expanduser().resolve()
+    output=(a.output or (Path.home()/"zap-course-deliverables"/("batch-"+datetime.now().strftime("%Y%m%d-%H%M%S-%f")))).expanduser().resolve()
     if a.dry_run:
         print("DRY RUN: No Docker, Git, setup or file writes.")
         for demo in ids:

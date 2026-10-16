@@ -92,6 +92,38 @@ class BatchContractTests(unittest.TestCase):
                     self.assertEqual(run.stdout.count("SHARED:"), expected,
                                      f"{demo}/{name}: did not call correct shared runtime")
 
+    def test_console_summary_gives_exact_folder_browser_steps_and_failed_evidence(self):
+        import contextlib
+        import io
+        target=Path("/tmp/zap-course-deliverables/batch-20261016-180200-123456")
+        rows=[{"demo":"m1-demo1","status":"STARTUP FAILED","sha":"",
+               "cleanup_exit":None,"narration":"NOT GENERATED"},
+              {"demo":"m2-demo3","status":"PREFLIGHT PASSED; GUI/CI REVIEW PENDING",
+               "sha":"test-only","cleanup_exit":0,"narration":"DRAFT CREATED; NOT FROZEN"}]
+        capture=io.StringIO()
+        with contextlib.redirect_stdout(capture):
+            MODULE.show_next_steps(target,target.with_suffix(".zip"),rows,1)
+        text=capture.getvalue()
+        self.assertIn('cd "'+str(target)+'"',text)
+        self.assertIn("./serve.sh",text)
+        self.assertIn("http://127.0.0.1:8765/index.html",text)
+        self.assertIn("STARTUP FAILED",text)
+        self.assertIn("GUI/CI",text)
+
+    def test_raw_console_output_is_saved_without_noisy_stream(self):
+        import contextlib
+        import io
+        with tempfile.TemporaryDirectory() as temp:
+            raw=Path(temp)/"raw.log"
+            captured=io.StringIO()
+            with contextlib.redirect_stdout(captured):
+                code=MODULE.execute([sys.executable,"-c",
+                                     "print('A sensitive line of real raw output')"],
+                                    ROOT,raw)
+            self.assertEqual(code,0)
+            self.assertEqual(captured.getvalue(),"")
+            self.assertIn("sensitive line",raw.read_text())
+
     def test_dry_run_does_not_create_evidence(self):
         with tempfile.TemporaryDirectory() as t:
             output=Path(t)/"not-created"
