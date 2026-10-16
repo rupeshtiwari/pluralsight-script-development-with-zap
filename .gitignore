@@ -4,8 +4,13 @@
 # Local gate-run artifacts (headless report + plan copy) — regenerated each run
 **/logs/.gate/
 
-# Private production playbooks stay outside public Git history
+# Production material lives in the private production repository; never re-add it here
 /docs/author-instructions/
+/docs/.author-instructions/
+/docs/maintainer/
+/docs/course-outline.md
+/author-instructions/
+batch-*/
 
 # Local Mac setup logs and training evidence
 setup/logs/
