@@ -1,42 +1,147 @@
-# M2-DEMO3 — Security Quality Gates · Recorder, Narrator And Editor
+# M2-DEMO3 · Security Quality Gates — Author Production Playbook
 
 <div align="center">
-![Recorder](https://img.shields.io/badge/RECORDER-Capture-0284c7?style=for-the-badge)
-![Narrator](https://img.shields.io/badge/NARRATOR-ElevenLabs-d946ef?style=for-the-badge)
-![Editor](https://img.shields.io/badge/EDITOR-Camtasia-16a34a?style=for-the-badge)
 
-<img src="../learner-diagrams/m2-demo3-architecture.svg" width="100%" alt="Illustrative architecture of Security Quality Gates"/>
+![Recorder](https://img.shields.io/badge/Recorder-Exact_Screen-0284c7?style=for-the-badge)
+![Narrator](https://img.shields.io/badge/Narrator-Verified_Script-9333ea?style=for-the-badge)
+![Editor](https://img.shields.io/badge/Editor-Timed_Highlights-16a34a?style=for-the-badge)
 
-<sub>Illustration · Generated using ChatGPT · Author guidance is temporarily PUBLIC</sub>
+<img src="../learner-diagrams/m2-demo3-architecture.svg" alt="Illustrative Security Quality Gates workflow" width="100%"/>
+
+<sub>Generated using ChatGPT · Temporary PUBLIC author guidance</sub>
+
 </div>
 
-## Operator Goal And Approved Objective
+[← **All Six Production Playbooks**](README.md) · [**Student Starter README ↗**](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo3-before/demos/module2-demos/m2-demo3-security-quality-gates/README.md) · [**Completed README ↗**](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo3-after/demos/module2-demos/m2-demo3-security-quality-gates/README.md)
 
-The Globomantics release gate must reclassify one scoped benign header finding while blocking real High-risk reflected XSS. The filter, scan order, actual report, and process exit must reconcile.
+## Recording Assignment
 
-**Learning objective:** EO3c — Apply threshold-based quality gates for security findings in build pipelines
+<table>
+<tr><th>Field</th><th>Exact Value</th></tr>
+<tr><td>Demonstration</td><td><b>Security Quality Gates</b> · m2-demo3</td></tr>
+<tr><td>Approved Objectives</td><td>EO3c — check the complete wording in the linked learner README</td></tr>
+<tr><td>Reference branch</td><td><code>m2-demo3-after</code> — completed source for preflight</td></tr>
+<tr><td>Recording branch</td><td><code>m2-demo3-before</code> — follow the student workflow</td></tr>
+<tr><td>Demo directory</td><td><code>demos/module2-demos/m2-demo3-security-quality-gates</code></td></tr>
+<tr><td>Student exercise state</td><td>The starter intentionally omits ci/gate-plan.yaml; create the finished plan before testing</td></tr>
+</table>
 
-## Preflight FIRST — Enable Parallel Narration Work
+## Start Here — One Clone, Two Branches, One Demo
 
-Create a clean reference clone from the completed branch. **The starting branch is the Recorder's student exercise; it may intentionally omit the completed plan.** Use independent checkouts.
+**Do not clone this repository separately for every demo.** Each recorder clones the course once, then switches to the specific demo's `after` branch for preflight and `before` branch for recording. Before switching, stop the old demo environment and preserve the narration references.
+
+<details open>
+<summary><b><font color="#0284c7">A · Clone Once and Prepare the Mac</font></b></summary>
+
+Use this step only for your first assigned demo. For second and third demos, keep the same repository folder and skip the clone/setup if already complete.
 
 ```bash
-git clone -b m2-demo3-after https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git ~/zap-m2-demo3-reference
-cd ~/zap-m2-demo3-reference
+cd ~
+git clone https://github.com/rupeshtiwari/pluralsight-script-development-with-zap.git
+cd pluralsight-script-development-with-zap
 ./setup/setup-macos.sh
+git fetch origin
+```
+
+**Where is the folder?** It is `~/pluralsight-script-development-with-zap` by default. `git switch` does not create a second or third folder; it changes the checked-out branch in the same directory.
+
+</details>
+
+<details open>
+<summary><b><font color="#9333ea">B · Run Preflight From the Completed Branch FIRST</font></b></summary>
+
+This is the **narration evidence source**. It executes all four real named commands, saves raw live proof, and produces stable per-step reference logs so the Narrator can start while footage is still being recorded.
+
+```bash
+cd ~/pluralsight-script-development-with-zap
+git status --short
+git fetch origin
+git switch m2-demo3-after
+git rev-parse HEAD
 cd demos/module2-demos/m2-demo3-security-quality-gates
 ./scripts/demo_up.sh
 ./scripts/preflight_check.sh
-ls logs/preflight-step-0[1-4].log
+ls -l logs/preflight-step-0[1-4].log
 ```
 
-Expect `5 checks passed, 0 failed` only if all four real named steps passed; narration references must **never** be produced from a failed run. Each named command uses the same actual step engine, with immutable evidence retained in `logs/.producer/`. This transcript is authoritative for **terminal fields**, not an observation of a separate GitHub Actions run or ZAP Script Console. Send the four step-specific logs and the corresponding GitHub/GUI proof to the Narrator. Teardown after evidence capture.
+**Only proceed when preflight exits 0 and prints the actual summary below** (this is the expected format, not a fabricated test run):
 
-The Recorder clones [`m2-demo3-before`](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/tree/m2-demo3-before/demos/module2-demos/m2-demo3-security-quality-gates) independently, follows the demo README, completes missing source if required, and places the four approved preflight reference logs in the matching `logs/` folder before recording.
+```text
+RESULT: 5 checks passed, 0 failed
+REFERENCE: logs/preflight-step-01.log through logs/preflight-step-04.log
+```
 
-Set `DEMO_SYNC_MODE=1` and `DEMO_SYNC_PHASE=compare` off-camera. The visible terminal transcript can normalize live request IDs or request counts while saving raw values. **Risk, confidence, alert identity, HTTP status and process exit are never invented or normalized away.** A material mismatch stops the take rather than being hidden in Camtasia.
+**Proof stays real:** `logs/preflight-step-01.log` through `04.log` are the Narrator's four outputs. `logs/.producer/` holds untouched raw details. Separate ZAP GUI / GitHub Actions evidence must be checked independently when a terminal command cannot observe it.
 
-**Primary screens:** VS Code gate-plan.yaml and integrated Terminal; GitHub Actions quality-gate job and report artifact. Full screen only; use readable zoom. Hold each complete named command for **8 seconds** before Enter. Hold one evidence region for **6–8 seconds**; no idle final shot longer than ten seconds. Position pointer for ~8 seconds before and hold ~8 seconds after a major click in source footage, then trim in editing. Cut lengthy scanning waits cleanly.
+**Optional but strongly recommended repeatability check:** after successful preflight, set `DEMO_SYNC_MODE=1` and `DEMO_SYNC_PHASE=compare` off-camera, then execute the same four named steps while still on this completed reference. Each must match its baseline; a material mismatch blocks recording.
+
+**Archive the references and stop the stack before switching:**
+
+```bash
+mkdir -p ~/zap-production-evidence/m2-demo3
+cp logs/preflight-step-0[1-4].log ~/zap-production-evidence/m2-demo3/
+./scripts/demo_down.sh
+cd ~/pluralsight-script-development-with-zap
+git status --short
+```
+
+Never delete the reference logs with a destructive Git cleanup.
+
+</details>
+
+<details open>
+<summary><b><font color="#0284c7">C · Switch to the Student Starting Branch and Record</font></b></summary>
+
+```bash
+cd ~/pluralsight-script-development-with-zap
+git switch m2-demo3-before
+git rev-parse HEAD
+cd demos/module2-demos/m2-demo3-security-quality-gates
+cp ~/zap-production-evidence/m2-demo3/preflight-step-0[1-4].log logs/
+./scripts/demo_up.sh
+
+# Off-camera recording parity settings
+export DEMO_SYNC_MODE=1
+export DEMO_SYNC_PHASE=compare
+```
+
+**The starter intentionally omits ci/gate-plan.yaml; create the finished plan before testing.** Follow the [student README on this exact starter branch](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m2-demo3-before/demos/module2-demos/m2-demo3-security-quality-gates/README.md) to complete any required source writing, then record the four exact commands listed below. The starter branch may be intentionally incomplete and **must not** be expected to pass its final checks before the work has been done.
+
+After the four named commands, capture the GUI/CI proof, then:
+
+```bash
+./scripts/demo_down.sh
+cd ~/pluralsight-script-development-with-zap
+git status --short
+```
+
+**If Git refuses the next branch switch:** preserve the changed code on a task branch or in a deliberate backup before switching. Do not use force/reset to discard recorded work.
+
+</details>
+
+<details><summary><b><font color="#16a34a">D · Recording More Demos From This Same Clone</font></b></summary>
+
+```bash
+cd ~/pluralsight-script-development-with-zap
+git status --short
+git fetch origin
+# Example: select another assigned demo (replace as needed):
+git switch m1-demo1-after
+```
+
+For a different demo, replace the branch and folder with the corresponding entry on the [six-demo author dashboard](README.md). Repeat preflight → archive logs → cleanup → branch switch → record. One local repository is sufficient for sequential recordings. A separate worktree is optional when you need two branches open concurrently.
+
+</details>
+
+## Camera, Narration and Edit Contract
+
+<table>
+<tr><td width="18%"><img src="https://img.shields.io/badge/RECORDER-Blue-0284c7"/></td><td>Record full-screen at readable zoom. Open the source/GUI pane specified in the relevant step, then hold the complete named command ~8 seconds before Enter. Hold each actual output focus 6–8 seconds. On significant UI clicks provide 8-second pre-click and post-click handles in raw footage for the editor.</td></tr>
+<tr><td><img src="https://img.shields.io/badge/NARRATOR-Purple-9333ea"/></td><td>Use the real `preflight-step-0N.log` plus the corresponding filmed GUI/CI evidence. The step tables below give exact ElevenLabs lines with word counts, one mechanism and one operator consequence per reveal. Do not narrate sample placeholders.</td></tr>
+<tr><td><img src="https://img.shields.io/badge/EDITOR-Green-16a34a"/></td><td>Cut cleanly at source/terminal/GUI transitions and scanning waits. Highlight one field using a small square, arrow or callout; remove it immediately as the focus changes. Match voice to the same take, not a historic preflight value from a different implementation.</td></tr>
+</table>
+
+## Four Fixed Teaching Steps — Follow In Order
 
 ## Step 1 — Inspect A Scoped False Positive Filter
 

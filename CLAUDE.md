@@ -75,3 +75,10 @@ Key constraints from the outline:
 - Use actual vendor/component labels and correct boundaries in diagrams; GitHub Actions is not on the learner's Mac. For AWS or cloud courses use real documented cloud components, not invented icons, services or architecture links. Add a readable `Generated using ChatGPT` caption to AI-generated visual assets.
 - Audit all Markdown and HTML links against the files on the relevant branch. A file intentionally absent in `*-before` must be identified as student-authored work; any reference image/source link must lead to a real file (possibly the explicitly labeled `*-after` solution), not a broken relative link.
 - When changes touch shared READMEs or folder organization, update all numbered `before` and `after` branches without copying completed solution assets to starters. Verify zero branches behind `main`, correct before→after ancestry, and hosted static checks. Student code remains frozen unless an actual failure is proven.
+
+## Author Hub And Clone-Once Recording Policy
+- One clone per engineer, then switch demo branches sequentially; use worktrees only for concurrent views or separate local state. Never require a new clone for each demo by default.
+- Preflight against the finished after branch first, save four verified step logs outside the checkout, clean up, then switch to before to author/record. A before branch with intentionally absent source cannot pass completed checks yet.
+- Author landing README must have direct URLs to all author playbooks, before/after learner READMEs, and GitHub branch paths, with simple copyable shell commands and GitHub-compatible color/badge/HTML card layouts.
+- Runtime values and GUI-only proof are not invented by normalization. Always check recording output against same source revision and matching preflight baselines.
+- Set GitHub About description and topics via connected administrative actions when available; release/publish a tag only for a verified milestone, and publish Packages only for a real maintained distributable. When account integration lacks settings or release actions, prepare exact metadata and explicitly state it was not published.
