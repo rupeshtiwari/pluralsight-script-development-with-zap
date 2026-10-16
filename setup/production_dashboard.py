@@ -39,11 +39,25 @@ def h(text: object) -> str:
     return html.escape(str(text), quote=True)
 
 
-def rows_from_terminal(proof: str) -> list[dict]:
-    """Parse both the original star lines and 2026 aligned table rows.
+def focused_labels(raw: str) -> set[str]:
+    """Recognize the primary pink focus chosen by the real terminal formatter.
 
-    Preserve whole, untruncated values. The raw transcript remains authoritative.
+    The raw log is required; never invent an editor highlight when absent.
     """
+    names = set()
+    for line in raw.splitlines():
+        if "\x1b[38;2;255;22;117m" not in line:
+            continue
+        match = FIELD.match(ANSI.sub("", line))
+        if match:
+            label = match.group(1) if match.group(1) is not None else match.group(3)
+            names.add(label.strip().removesuffix(":"))
+    return names
+
+
+def rows_from_terminal(proof: str, raw: str = "") -> list[dict]:
+    """Parse original or new star rows without changing any value or label."""
+    focus = focused_labels(raw)
     rows = []
     for line in ANSI.sub("", proof).splitlines():
         m = FIELD.match(line)
@@ -52,26 +66,36 @@ def rows_from_terminal(proof: str) -> list[dict]:
         label, value = (m.group(1), m.group(2)) if m.group(1) is not None else (m.group(3), m.group(4))
         if not (label and value):
             continue
-        rows.append({"label": label.strip().removesuffix(":"), "value": value.strip()})
+        name = label.strip().removesuffix(":")
+        rows.append({"label": name, "value": value.strip(), "focus": name in focus})
     return rows
 
 
-def style_terminal(text: str) -> str:
-    """Escape literal source and preserve lines; apply UI focus only to parsed values.
+def style_terminal(text: str, focus: set[str] | None = None) -> str:
+    """Mirror captured terminal text and its primary-focus semantics in HTML.
 
-    Any run-specific IDs/counts shown here are exactly the normalized Mac terminal
-    transcript; original unmodified raw proof is separately accessible.
+    Formatting spans are display-only; removing markup yields the identical
+    normalized stdout text with line order and whitespace preserved.
     """
+    focus = focus or set()
     lines = []
+    table_line = re.compile(r"^(\s*★\s*│\s*)(.+?)(\s*│\s*)(.*)$")
     for line in ANSI.sub("", text).splitlines():
         escaped = h(line)
         if "✘ FAIL" in line or "SYNC MISMATCH" in line:
             escaped = f'<span class="stopline">{escaped}</span>'
         elif "✔ PASS" in line:
             escaped = f'<span class="passline">{escaped}</span>'
+        elif (m := table_line.match(line)):
+            label = m.group(2).strip().removesuffix(":")
+            color = "focused-value" if label in focus else "ordinary-value"
+            escaped = (f'<span class="field-prefix">{h(m.group(1))}</span>'
+                       f'<span class="field-label">{h(m.group(2))}</span>'
+                       f'<span class="field-prefix">{h(m.group(3))}</span>'
+                       f'<span class="{color}">{h(m.group(4))}</span>')
         elif line.lstrip().startswith("★"):
             escaped = f'<span class="fieldline">{escaped}</span>'
-        elif line.lstrip().startswith(("WHAT:", "WHY:")):
+        elif "WHAT:" in line or "WHY:" in line:
             escaped = f'<span class="subline">{escaped}</span>'
         lines.append(escaped)
     return "\n".join(lines)
@@ -121,7 +145,9 @@ def step_html(root: Path, demo: str, step: int, block: str, command: str) -> str
     proof, raw = actual_paths(root, demo, step)
     available = proof.is_file()
     transcript = proof.read_text(encoding="utf-8", errors="replace") if available else ""
-    rows = rows_from_terminal(transcript)
+    raw_text = raw.read_text(encoding="utf-8", errors="replace") if raw.is_file() else ""
+    focus = focused_labels(raw_text)
+    rows = rows_from_terminal(transcript, raw_text)
     beats = beat_rows(block)
     if available and ("✔ PASS" not in transcript or "✘ FAIL" in transcript):
         # Never display a failed or incomplete capture as a verified success.
@@ -138,7 +164,7 @@ def step_html(root: Path, demo: str, step: int, block: str, command: str) -> str
         screen = "See the Recorder instructions for the exact application, source file and pane."
     fields = ("<table class='evidence-table'><thead><tr><th>Observed terminal field</th>"
               "<th>Exact displayed value</th></tr></thead><tbody>" + "".join(
-                f"<tr><th scope='row'>{h(r['label'])}</th><td class='actual'>{h(r['value'])}</td></tr>" for r in rows
+                f"<tr><th scope='row'>{h(r['label'])}</th><td class='actual {'focus' if r['focus'] else ''}'>{h(r['value'])}</td></tr>" for r in rows
               ) + "</tbody></table>") if rows else ("<p class='hold'>No parsed result fields in this capture. "
                                                     "Read the untouched terminal transcript below.</p>")
     timeline = []
@@ -162,7 +188,7 @@ def step_html(root: Path, demo: str, step: int, block: str, command: str) -> str
                   f"no prerecorded security evidence is substituted.</p></section>"
                   f"<section class='pane'><h3>Actual result fields</h3>{fields}</section></div>"
                   f"<details class='transcript' open><summary>Exact terminal transcript · captured data</summary>"
-                  f"<pre class='terminal'>{style_terminal(transcript) if available else h('NO REAL PRE-FLIGHT LOG FOR THIS STEP')}</pre></details>"
+                  f"<pre class='terminal'>{style_terminal(transcript, focus) if available else h('NO REAL PRE-FLIGHT LOG FOR THIS STEP')}</pre></details>"
                   f"<details class='transcript'><summary>Untouched raw audit evidence</summary>"
                   f"<pre class='terminal'>{h(raw.read_text(encoding='utf-8',errors='replace')) if raw.is_file() else h('No raw audit file captured; pending Mac preflight')}</pre></details>")
     return (f"<section class='step' data-step='{step}' id='{demo}-step-{step}'>"
@@ -173,11 +199,11 @@ def step_html(root: Path, demo: str, step: int, block: str, command: str) -> str
             f"<h3>After the command</h3>{fields if verified else '<p class="hold">Real output not verified</p>'}</div>"
             f"<div><h3>Exact ElevenLabs wording · three spoken beats</h3>{''.join(timeline)}</div></div>"
             f"<details class='transcript'><summary>View exact captured terminal transcript</summary>"
-            f"<pre class='terminal'>{style_terminal(transcript) if available else h('Not captured')}</pre></details></div>"
+            f"<pre class='terminal'>{style_terminal(transcript, focus) if available else h('Not captured')}</pre></details></div>"
             f"<div class='role-panel' data-role='recorder'><h3>Recorder · exact actions and holds</h3>"
             f"<p>Reference command: <code>{h(command)}</code></p>{role_source(block, 'RECORDER')}"
             f"<details class='transcript'><summary>Verified terminal output for the take comparison</summary>"
-            f"<pre class='terminal'>{style_terminal(transcript) if available else h('Not captured')}</pre></details></div>"
+            f"<pre class='terminal'>{style_terminal(transcript, focus) if available else h('Not captured')}</pre></details></div>"
             f"<div class='role-panel' data-role='editor'><h3>Editor · callouts, focus and cut choreography</h3>"
             f"<p>Never cover a failed output with a recorded PASS from another take.</p>{role_source(block, 'EDITOR')}</div>"
             f"<div class='role-panel' data-role='developer'><h3>Developer · executable contract and current proof</h3>"
@@ -186,7 +212,7 @@ def step_html(root: Path, demo: str, step: int, block: str, command: str) -> str
             f"<p><b>Security question:</b> {h(problem)}</p><p><b>Command:</b> <code>{h(command)}</code></p>"
             f"<p><b>Current proof status:</b> {'Terminal PASS observed; external GUI/CI unverified' if verified else 'HOLD — missing or failed preflight output'}</p>"
             f"<p>Require the actual application or ZAP result, source SHA and take ID. A terminal check is not evidence that a GUI pane or hosted runner displayed a result.</p>"
-            f"<details class='transcript'><summary>Review untouched proof</summary><pre class='terminal'>{style_terminal(transcript) if available else h('Not captured')}</pre></details>"
+            f"<details class='transcript'><summary>Review untouched proof</summary><pre class='terminal'>{style_terminal(transcript, focus) if available else h('Not captured')}</pre></details>"
             f"</div></section>")
 
 
@@ -240,8 +266,8 @@ aside{position:sticky;top:12px;align-self:start;background:#fff;border:1px solid
 .status{font-size:.86rem;font-weight:750;background:#FFC942;color:#130F25;border-radius:8px;padding:8px 12px}.demo{display:none}.demo.active{display:block}.demo-heading{background:#fff;border-radius:14px;border:1px solid #ccd4e2;padding:22px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}.demo-heading h1{font-size:clamp(1.5rem,2vw,2.3rem);margin:5px 0}.sha{max-width:360px;overflow-wrap:anywhere;font-size:.88rem;text-align:right}
 .eyebrow{font-weight:850;letter-spacing:.06em;text-transform:uppercase;color:#770EF7;font-size:.75rem}.role-panel{display:none}.role-panel.active{display:block}.step{display:none;background:#fff;border:1px solid #cfd7e9;border-radius:14px;padding:24px;margin:16px 0;overflow:hidden}.step.active{display:block}.stephead{display:flex;align-items:center;gap:12px;margin-bottom:18px}.stephead h2{margin:0;font-size:1.3rem}.stepn{background:#FF1675;color:#fff;padding:8px;border-radius:7px;font-weight:750;white-space:nowrap}
 .step-nav{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.columns{display:grid;grid-template-columns:1fr 1.05fr;gap:16px}.columns>div,.columns>.pane{min-width:0;background:#f7f8fb;border-radius:10px;padding:16px;border:1px solid #d6deed}.pane h3,.role-panel h3{margin-top:4px}.notice{padding:12px 16px;background:#fff6df;border-left:4px solid #FFC942;border-radius:7px;margin:12px 0 20px}.subtle{color:#464c70;font-size:.92rem}.hold{font-weight:700;color:#9f0041}.ready{font-weight:800;color:#166c4b}.statusline{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding:12px;border-bottom:1px solid #d4dcec;margin-bottom:12px}
-.evidence-table{border-collapse:collapse;width:100%;font-size:.9rem;table-layout:fixed}.evidence-table th,.evidence-table td{border:1px solid #cfd9ee;padding:10px;vertical-align:top;overflow-wrap:anywhere;text-align:left}.evidence-table thead th{color:#fff;background:#130F25}.evidence-table tbody th{width:48%;background:#edeafb;color:#36225b}.evidence-table tbody .actual{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:750;color:#FF1675;background:#130F25}
-pre,.terminal{max-width:100%;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#130F25;color:#f6f6fa;border-radius:10px;padding:18px;font:0.89rem/1.75 ui-monospace,SFMono-Regular,Menlo,monospace}.command{font-size:1rem;font-weight:700;border-left:6px solid #FF1675;color:#FFC942}.terminal{min-height:80px}.fieldline{color:#FF1675}.passline{color:#02E088}.stopline{background:#B9004B;color:#fff;padding:1px 3px}.subline{color:#00A3FF}
+.evidence-table{border-collapse:collapse;width:100%;font-size:.9rem;table-layout:fixed}.evidence-table th,.evidence-table td{border:1px solid #cfd9ee;padding:10px;vertical-align:top;overflow-wrap:anywhere;text-align:left}.evidence-table thead th{color:#fff;background:#130F25}.evidence-table tbody th{width:48%;background:#edeafb;color:#36225b}.evidence-table tbody .actual{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:650;color:#130F25;background:#f7f8fc}.evidence-table tbody .actual.focus{font-weight:850;color:#FF1675;background:#130F25}
+pre,.terminal{max-width:100%;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#130F25;color:#f6f6fa;border-radius:10px;padding:18px;font:0.89rem/1.75 ui-monospace,SFMono-Regular,Menlo,monospace}.command{font-size:1rem;font-weight:700;border-left:6px solid #FF1675;color:#FFC942}.terminal{min-height:80px}.fieldline{color:#00A3FF}.field-prefix{color:#00A3FF}.field-label{color:#b792ff}.focused-value{color:#FF1675;font-weight:800}.ordinary-value{color:#f6f6fa}.passline{color:#02E088}.stopline{background:#B9004B;color:#fff;padding:1px 3px}.subline{color:#00A3FF}
 details.transcript{background:#f8f9fc;border:1px solid #d0d9e9;border-radius:10px;margin:14px 0;padding:0 14px}details.transcript summary{cursor:pointer;font-weight:750;padding:14px 0;color:#130F25}details.transcript pre{margin:0 0 14px}
 .beat{border:1px solid #d6dcec;border-left:5px solid #770EF7;display:grid;grid-template-columns:40px 1fr;gap:12px;border-radius:9px;padding:12px;background:#fff;margin:10px 0}.beat-index{font-weight:850;color:#FF1675;font-size:1.2rem}.beat p{margin:.35rem 0}.shot{font-size:.86rem;color:#565d7c}.speak{font-weight:650;font-size:1.07rem;line-height:1.58}.beat small{color:#555e7a}
 .role-panel table{border-collapse:collapse;width:100%;margin:12px 0}.role-panel th,.role-panel td{border:1px solid #d5dcea;padding:11px;text-align:left;vertical-align:top}.role-panel th{background:#130F25;color:#fff}.role-panel code{color:#ab0050;overflow-wrap:anywhere}.pill-row{display:flex;gap:8px;flex-wrap:wrap}.pill{border:1px solid #808abc;border-radius:18px;padding:7px 10px;font-size:.85rem}.footer{border-top:1px solid #bac5da;margin-top:22px;padding:16px;color:#434b66}
