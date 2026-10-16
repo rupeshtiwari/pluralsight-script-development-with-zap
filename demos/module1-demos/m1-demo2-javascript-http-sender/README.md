@@ -1,283 +1,256 @@
-# Extend ZAP with a JavaScript HTTP Sender Script
-
-<details><summary><b>Branch: m1-demo2-before — Student Starter</b></summary>
-
-This starter intentionally does not contain `zap-scripts/globomantics-marker.js`. Create the script during the exercise before expecting the load and preflight checks to pass.
-
-</details>
-
+# Module 1 · Demo 2 — Extend ZAP with JavaScript
 
 <div align="center">
 
-![ZAP](https://img.shields.io/badge/OWASP_ZAP-JavaScript_Extension-0284c7?style=for-the-badge)
-![Lab](https://img.shields.io/badge/Practice-m1-demo2-d946ef?style=for-the-badge)
+![Training](https://img.shields.io/badge/Globomantics-Authorized_Lab-130F25?style=for-the-badge)
+![ZAP](https://img.shields.io/badge/OWASP_ZAP-JavaScript_Sender-FF1675?style=for-the-badge)
 
-<img src="../../../docs/learner-diagrams/m1-demo2-architecture.svg" width="100%" alt="Extend ZAP with a JavaScript HTTP Sender Script: application, tool and evidence architecture"/>
+<img width="100%" src="../../../docs/learner-diagrams/m1-demo2-architecture.svg" alt="Module 1 · Demo 2 — Extend ZAP with JavaScript security architecture"/>
 
-<sub>Illustrative architecture · Generated using ChatGPT · Verify real results in your own lab</sub>
+<sub>Illustrative architecture · Generated using ChatGPT; only live requests and reports prove findings</sub>
 
 </div>
 
-## What Problem Are You Solving?
+## The problem you are solving
 
-The Globomantics team needs a recognizable request marker during security testing. Maya writes an HTTP Sender script, but saving JavaScript is not enough: she must prove that the hook ran on real traffic and verify the enabled script registration.
+Maya wants every authorized test request to be unmistakable in ZAP traffic. Writing JavaScript is not enough: she must register the HTTP Sender hook, prove a header was added to a real outgoing request, inspect the Script Console, and confirm the registration.
 
-**Your outcome:** Complete four practical checks and be able to explain both the actual evidence and the engineering decision it supports. This page is self-contained; you do not need access to a separate course outline.
+**What success looks like:** A registered JavaScript HTTP Sender hook with actual request and console evidence. The four steps solve different parts of one problem. Read them in order: each adds evidence needed for the final decision.
 
-## Learning Objectives Covered
+## What you will learn in this demonstration
 
-<table><thead><tr><th>Objective</th><th>What You Will Learn</th></tr></thead><tbody>
-<tr><td><code>EO2a</code></td><td>Develop JavaScript scripts to extend ZAP functionality</td></tr>
-</tbody></table>
+You will extend ZAP through a real message hook and then verify it with observable effects:
 
-## Your Four-Step Learning Path
+- Write and register an HTTP Sender JavaScript script in ZAP *(EO2a)*
+- Prove the outgoing header, live console output and enabled registration of that same script *(EO2a)*
+
+No separate course outline is required to complete this lab.
+
+## Follow the evidence
 
 ```mermaid
 flowchart LR
-  N0["JavaScript source"]
-  N1["HTTP Sender hook"]
-  N2["Marked request"]
-  N3["Console + registration"]
-  N0 --> N1 --> N2 --> N3
+  S1["Register HTTP Sender"]
+  S2["Inspect modified request"]
+  S3["Inspect Script Console"]
+  S4["Check saved script"]
+  S1 --> S2
+  S2 --> S3
+  S3 --> S4
 ```
 
-<table>
-<thead><tr><th>Step</th><th>Exact Command</th><th>What You Do</th><th>What To Verify</th><th>Why It Matters</th></tr></thead>
-<tbody><tr><td><b>1</b></td><td><code>./steps/01-load-javascript-http-sender.sh</code></td><td>Load the JavaScript HTTP Sender hook</td><td>Script name, engine and enabled type in ZAP</td><td>A script must be registered before it can act</td></tr>
-<tr><td><b>2</b></td><td><code>./steps/02-prove-outbound-marker-header.sh</code></td><td>Send a proxied request and inspect its headers</td><td>Real X-Globomantics-Marker: GLOBO-DEMO header</td><td>Traffic mutation proves the request hook ran</td></tr>
-<tr><td><b>3</b></td><td><code>./steps/03-check-live-script-console.sh</code></td><td>Trigger and inspect the named console output</td><td>Fresh [globo-marker] line in the actual ZAP Script Console</td><td>Terminal's expected format is not GUI console proof</td></tr>
-<tr><td><b>4</b></td><td><code>./steps/04-verify-enabled-script-registration.sh</code></td><td>Inspect the saved script identity</td><td>Actual name, type, engine and enabled=true state</td><td>Reusable registration matters for later automation</td></tr></tbody></table>
+## Start the local demo
 
-## Start This Exercise
+This step starts the actual vulnerable Globomantics web application and ZAP container. The Mac prerequisite installer, `setup/setup-macos.sh`, is a **one-time preparation task** explained in the [course README](../../../README.md). You do not need to reinstall tools for every demo.
 
-From the repository root:
+<details open>
+<summary><b>Start Module 1 Demo 2 — exact branch, folder and runtime</b></summary>
+
+**Where:** macOS Terminal or the VS Code integrated terminal, starting in the root of your existing local repository.
 
 ```bash
 git fetch origin
 git switch m1-demo2-before
-./setup/setup-macos.sh
 cd demos/module1-demos/m1-demo2-javascript-http-sender
 ./scripts/demo_up.sh
 ```
 
-If you already prepared your Mac, the one-time setup script can be skipped. Run **Steps 1–4 above** from this demo directory, in order. Then validate and stop:
+**Expected startup:** the script waits for the local services. For a reset it prints a clean-slate message and brings up the vulnerable build. Continue only after it reports readiness; a failed startup is not part of the four teaching steps.
 
-```bash
-./scripts/preflight_check.sh
-./scripts/demo_down.sh
-```
+**Open these actual interfaces:** [Globomantics app — localhost:8000](http://localhost:8000/) · [ZAP GUI — localhost:8080/zap/](http://localhost:8080/zap/) · [ZAP API/proxy — localhost:8090](http://localhost:8090/). Open only the interface called for by the current step. Use VS Code to author the script and ZAP's browser GUI to inspect its History and Script Console. The starter branch intentionally lacks the completed JavaScript; create it following the script example before expecting the verification commands to pass.
 
-The preflight writes a timestamped log to `logs/`; GUI-only evidence must also be verified in the real ZAP interface at <http://localhost:8080/zap/>. The app runs at <http://localhost:8000/> and ZAP's local API/proxy at <http://localhost:8090/>.
-
-**Compare with the completed version:** `git diff m1-demo2-before..m1-demo2-after -- demos/module1-demos/m1-demo2-javascript-http-sender`. This command does not overwrite your files. The `before` branch starts the exercise; the `after` branch provides its completed reference, where applicable.
-
-**Technical evidence note:** In the starter branch the completed JavaScript file is intentionally absent; create it during the exercise. The terminal Step 3 helper cannot read ZAP's Script Console; inspect the real console line in the GUI. A saved registration does not prove persistence after container teardown.
-
-All testing must stay within the authorized Globomantics training application.
-
----
-
-## Detailed Instructions And Expected Evidence
-
-<details><summary><b>View The Four Executable Steps</b></summary>
-
-```bash
-./steps/01-load-javascript-http-sender.sh
-./steps/02-prove-outbound-marker-header.sh
-./steps/03-check-live-script-console.sh
-./steps/04-verify-enabled-script-registration.sh
-```
-
-Run these commands in order from this demo's folder, then execute `./scripts/preflight_check.sh`. Inspect actual ZAP GUI or GitHub Actions evidence where indicated.
 </details>
 
+## The four teaching steps
 
-Use a JavaScript **HTTP Sender** script to add a request marker and print an identifiable console message. Prove the result in ZAP rather than relying only on a successful Terminal command.
+<details open>
+<summary><b>Step 1: Load the JavaScript HTTP Sender script</b> — Register HTTP Sender</summary>
 
-> **Authorized target:** Only the local Globomantics training application. Do not use this workflow against systems without authorization.
+### The small problem to solve
 
-## Applications and exact locations
+A JavaScript file cannot modify traffic merely by existing in the repository.
 
-| Application | Open / navigate | Why it is in the results |
-|---|---|---|
-| macOS Terminal | Repository root, then `demos/module1-demos/m1-demo2-javascript-http-sender` | Run the exact numbered commands and see the checks |
-| ZAP GUI (Webswing) | [http://localhost:8080/zap/](http://localhost:8080/zap/) | Show the **Scripts** tree, script editor and Script Console; inspect HTTP History / request details when available |
-| Local Globomantics app | [http://localhost:8000/](http://localhost:8000/) | Authorized target; the probe runs against its `/greet` endpoint through the ZAP proxy |
-| Script source file | [zap-scripts/globomantics-marker.js](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo2-after/demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/globomantics-marker.js) | Exact source used by the demo; optionally open in VS Code **only for showing source** |
+**Learning focus:** Develop a JavaScript extension at the request-sending boundary *(EO2a)*
 
-**Where things run:** Terminal + ZAP GUI are all you need; VS Code is optional, for viewing source. The GUI runs on port **8080**; the ZAP API / proxy the Terminal scripts use runs on port **8090** — both are the same ZAP container. An HTTP request generated in the Terminal may appear in ZAP's history; a console line must be checked in the **actual Script Console**, not inferred from a Terminal expectation.
+### Where to go
 
-## Setup
+**Open VS Code.** Create or inspect `zap-scripts/globomantics-marker.js` in the demo directory. Locate `sendingRequest()`, `MARKER_HEADER`, `MARKER_VALUE` and `setHeader()`. Then open the VS Code integrated Terminal in this demo directory.
 
-From the **repository root**, install the environment once if not already installed:
+### Run this exact command
 
-```bash
-./setup/setup-macos.sh
-```
-
-Then start this demo from the repository root:
-
-```bash
-cd demos/module1-demos/m1-demo2-javascript-http-sender
-./scripts/demo_up.sh
-```
-
-**Wait** for the healthy `Up` result. Open the [ZAP GUI](http://localhost:8080/zap/) and locate its **Scripts** area; keep a Terminal ready at `demos/module1-demos/m1-demo2-javascript-http-sender`. Each command block below is run **in this directory**, not from the repository root.
-
-## Learning-objective and proof map
-
-| Step | Objective | Terminal proof | ZAP GUI proof |
-|---|---|---|---|
-| 1 | EO2a | Script loaded successfully | Script named `globomantics-marker` appears under HTTP Sender, with source visible |
-| 2 | EO2a | Captured outgoing request includes marker | Request header shown in ZAP History/request view |
-| 3 | EO2a | Fresh proxied request triggers the script | Actual `[globo-marker]` line in Script Console output |
-| 4 | EO2a | Script registration type and enabled state | Registered script remains visible under HTTP Sender |
-
-**Source reference (VS Code, Step 1):** `zap-scripts/globomantics-marker.js` — `sendingRequest()` lines 16–20, `responseReceived()` lines 24–25.
-
-## Step 1: Load and inspect the HTTP Sender script (EO2a)
-
-**Goal:** Explain what the JavaScript hook does, then demonstrate that ZAP has loaded the exact script file.
-
-**Application and location:** Start in **ZAP GUI** at [http://localhost:8080/zap/](http://localhost:8080/zap/) → **Scripts** → **HTTP Sender**. Then switch focus to **Terminal** in `demos/module1-demos/m1-demo2-javascript-http-sender`.
-
-**Show before running (VS Code, source only):** Open [`zap-scripts/globomantics-marker.js`](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/blob/m1-demo2-after/demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/globomantics-marker.js) and focus on `sendingRequest(msg, initiator, helper)` (lines 16–20) — the `setHeader` call and the `print` statement — and the empty `responseReceived` (lines 24–25). This is the code to explain:
-
-```javascript
-var MARKER_HEADER = "X-Globomantics-Marker";
-var MARKER_VALUE  = "GLOBO-DEMO";
-var CONSOLE_TAG   = "[globo-marker]";
-
-function sendingRequest(msg, initiator, helper) {
-    msg.getRequestHeader().setHeader(MARKER_HEADER, MARKER_VALUE);
-    print(CONSOLE_TAG + " added " + MARKER_HEADER + ": " + MARKER_VALUE +
-          " to " + msg.getRequestHeader().getURI().toString());
-}
-
-function responseReceived(msg, initiator, helper) {
-}
-```
-
-**Execute in Terminal:**
+**Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
 ```bash
 ./steps/01-load-javascript-http-sender.sh
 ```
 
-**Expected Terminal evidence:** The command identifies `globomantics-marker`, the HTTP Sender type and detected JavaScript engine, the marker header `X-Globomantics-Marker: GLOBO-DEMO`, and a PASS confirming that it loaded in ZAP.
+### What the script prints
 
-**Switch back to ZAP GUI:** Expand **Scripts → HTTP Sender**, select `globomantics-marker`, and show the source/editor and enabled state. The actual tree wording may depend on the ZAP GUI version.
+The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
-**Explain to learners:** `sendingRequest` is invoked before ZAP sends a request. The header is attached to messages that pass through this active HTTP Sender script; it does **not** automatically modify requests made directly to the application without ZAP.
+<table>
+<thead><tr><th>Displayed field</th><th>Example or expected value</th><th>What to check</th></tr></thead>
+<tbody>
+<tr><td><b>Script name</b></td><td><code>globomantics-marker (HTTP Sender · &lt;detected JavaScript engine&gt;)</code></td><td>Script registered in ZAP</td></tr>
+<tr><td><b>Marker header it adds</b></td><td><code>X-Globomantics-Marker: GLOBO-DEMO</code></td><td>Exact header and value</td></tr>
+<tr><td><b>Named console line it prints</b></td><td><code>[globo-marker] added X-Globomantics-Marker ... to &lt;url&gt;</code></td><td>Expected script print format</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS script is a valid HTTP Sender action and loaded</code></td><td>Script registered; traffic not yet proven</td></tr>
+</tbody></table>
 
+**Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-**Proof:** Source file + successful load + script visible in ZAP. Do not stop at the Terminal PASS alone.
+### What you should understand
 
-## Step 2: Prove the marker on an outbound request (EO2a)
+Loading and enabling a script is separate from sending an HTTP message. The output establishes script identity, type and intended modification only.
 
-**Goal:** Show a request really passed through ZAP and acquired the marker header.
+**How this connects:** Send a fresh request through ZAP to prove the hook executed.
 
-**Application and location:** **Terminal** in `demos/module1-demos/m1-demo2-javascript-http-sender`; then **ZAP GUI** at [http://localhost:8080/zap/](http://localhost:8080/zap/) → **History** (or the equivalent request-message view).
+</details>
 
-**Execute in Terminal:**
+<details>
+<summary><b>Step 2: Prove the marker on an outbound request</b> — Inspect modified request</summary>
+
+### The small problem to solve
+
+Script registration does not prove that an HTTP request actually passed through the hook.
+
+**Learning focus:** Verify observable request modification *(EO2a)*
+
+### Where to go
+
+**Open ZAP GUI** at `http://localhost:8080/zap/` in a browser. Select **History**, then the newest `/greet?name=marker-...` request, and open its **Request** panel. Use the VS Code integrated Terminal for the command.
+
+### Run this exact command
+
+**Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
 ```bash
 ./steps/02-prove-outbound-marker-header.sh
 ```
 
-**Expected Terminal evidence:** A GET request to a unique `http://app:8000/greet?name=marker-...` URL and a captured request header:
+### What the script prints
 
-```text
-X-Globomantics-Marker: GLOBO-DEMO
-```
+The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
-**Switch to ZAP GUI:** Find the recent `/greet?name=marker-<unique-id>` request in **History**. Select it, open the **Request** message details, and show the `X-Globomantics-Marker` header. If the GUI history is crowded, locate the exact request by URL rather than selecting an unrelated message.
+<table>
+<thead><tr><th>Displayed field</th><th>Example or expected value</th><th>What to check</th></tr></thead>
+<tbody>
+<tr><td><b>Outbound request</b></td><td><code>GET /greet?name=marker-&lt;live ID&gt; ...</code></td><td>Fresh message, not a prior run</td></tr>
+<tr><td><b>Header added by the script</b></td><td><code>X-Globomantics-Marker: GLOBO-DEMO</code></td><td>Inspect Request panel and terminal</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS script added header to outgoing request</code></td><td>Real outbound traffic carries marker</td></tr>
+</tbody></table>
 
-**Explain to learners:** The header in the outgoing HTTP message demonstrates execution of the script on real proxied traffic. Merely seeing the source file or script registration does not establish that it ran.
+**Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
+### What you should understand
 
-**Proof:** Terminal-captured request header; ideally the identical header in ZAP's selected request. If that GUI message cannot be located, the Terminal check remains the recorded proof—do not claim a GUI proof you did not show.
+The header in the actual ZAP-captured request proves the JavaScript hook modified traffic. Request identifiers may vary, while the marker name and value remain stable.
 
-## Step 3: Verify actual Script Console output (EO2a)
+**How this connects:** Now establish that the script also printed its named console message.
 
-**Goal:** Confirm the script reports what it changed, with a recognizable marker and URL.
+</details>
 
-**Application and location:** **ZAP GUI** at [http://localhost:8080/zap/](http://localhost:8080/zap/) → **Scripts** → select `globomantics-marker` → **Script Console** output pane. Then **Terminal** in `demos/module1-demos/m1-demo2-javascript-http-sender`.
+<details>
+<summary><b>Step 3: Verify the live Script Console output</b> — Inspect Script Console</summary>
 
-**Before running:** Bring the ZAP Script Console into view and find or clear the old output where practical. This makes the next line clearly attributable to the new request.
+### The small problem to solve
 
-**Execute in Terminal:**
+A terminal can show a predicted console string without actually observing ZAP's Script Console.
+
+**Learning focus:** Validate the script's emitted diagnostic output *(EO2a)*
+
+### Where to go
+
+**Keep ZAP GUI open** at `http://localhost:8080/zap/`. Open **Scripts → Script Console** and inspect fresh lines after the command. The command itself runs in the integrated Terminal.
+
+### Run this exact command
+
+**Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
 ```bash
 ./steps/03-check-live-script-console.sh
 ```
 
-**Expected behavior:** The command sends a fresh, uniquely identified probe through ZAP. The script's `print` statement should emit a line like:
+### What the script prints
 
-```text
-[globo-marker] added X-Globomantics-Marker: GLOBO-DEMO to http://app:8000/greet?name=marker-<unique-id>
-```
+The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
-**Switch back to ZAP GUI:** Inspect the **actual** Script Console output and highlight the fresh `[globo-marker]` line. The exact URL in the line is determined by the request ZAP processed.
+<table>
+<thead><tr><th>Displayed field</th><th>Example or expected value</th><th>What to check</th></tr></thead>
+<tbody>
+<tr><td><b>Expected format (terminal)</b></td><td><code>[globo-marker] added X-Globomantics-Marker: GLOBO-DEMO to &lt;url&gt;</code></td><td>Terminal explicitly says expected format</td></tr>
+<tr><td><b>Real Script Console</b></td><td><code>[globo-marker] ... to &lt;actual fresh request URL&gt;</code></td><td>MUST inspect in GUI; not captured by shell</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS fresh marked request; verify live console</code></td><td>Terminal PASS alone does not prove GUI print</td></tr>
+</tbody></table>
 
-**Critical evidence distinction:** The Step 3 Terminal helper prints an **expected console-line format** and checks that the source contains `print` and a marked request exists. It does **not** independently retrieve the Script Console's live output. Only the visible ZAP console establishes that the log line was emitted.
+**Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
-**Explain to learners:** The fixed `[globo-marker]` prefix helps an operator distinguish this script's output from other console messages. The URL shows which request was marked.
+### What you should understand
 
+Compare the expected print format with the new line that actually appears in ZAP Script Console. Do not confuse the shell's expected format with live script execution proof.
 
-**Proof:** Actual Script Console line in ZAP. Do not assert console-output verification solely from the Terminal PASS.
+**How this connects:** Confirm the script remains registered and enabled in this ZAP session.
 
-## Step 4: Confirm saved script identity and enabled state (EO2a)
+</details>
 
-**Goal:** Confirm the script has a stable registration that can be reused in later automation.
+<details>
+<summary><b>Step 4: Verify the script registration</b> — Check saved script</summary>
 
-**Application and location:** **Terminal** in `demos/module1-demos/m1-demo2-javascript-http-sender`, then **ZAP GUI** → **Scripts → HTTP Sender**.
+### The small problem to solve
 
-**Execute in Terminal:**
+Reusable automation needs a stable named script and a verifiable enabled state.
+
+**Learning focus:** Confirm configured JavaScript extension state *(EO2a)*
+
+### Where to go
+
+**Open ZAP GUI** → **Scripts → HTTP Sender → globomantics-marker**. Keep its name/type/engine visible. Then return to VS Code Terminal for the command.
+
+### Run this exact command
+
+**Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
 ```bash
 ./steps/04-verify-enabled-script-registration.sh
 ```
 
-**Expected Terminal evidence:**
+### What the script prints
 
-| Registration field | Expected value |
-|---|---|
-| Name | `globomantics-marker` |
-| Type | `httpsender` |
-| Engine | Detected JavaScript engine; read the actual output |
-| Enabled | `true` |
-| Repository source path | `demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/globomantics-marker.js` |
-| Path mounted inside ZAP | `/zap-scripts/globomantics-marker.js` |
+The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
 
-**Switch back to ZAP GUI:** Select the registered script under **HTTP Sender** and show its name and enabled state. The script is loaded by the API from the mounted path; the helper's displayed repository path is not a separate API verification of the registration path.
+<table>
+<thead><tr><th>Displayed field</th><th>Example or expected value</th><th>What to check</th></tr></thead>
+<tbody>
+<tr><td><b>Registered name</b></td><td><code>globomantics-marker</code></td><td>Stable name reused by automation</td></tr>
+<tr><td><b>Type</b></td><td><code>httpsender</code></td><td>Correct hook category</td></tr>
+<tr><td><b>Enabled</b></td><td><code>true</code></td><td>Script active in current ZAP session</td></tr>
+<tr><td><b>Path (repo)</b></td><td><code>zap-scripts/globomantics-marker.js</code></td><td>Current script source</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS script registered and enabled</code></td><td>Registration is ready for reuse</td></tr>
+</tbody></table>
 
-**Explain to learners:** A stable script name, correct script type and enabled state make the script reusable. This step verifies the registration in the running ZAP instance; it does **not** prove persistence after destroying or rebuilding the container.
+**Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
 
+### What you should understand
 
-**Proof:** The live ZAP registration returned by the helper plus the visible script entry in the GUI.
+The script has a stable source path, a valid HTTP Sender type, and enabled registration. This is not a claim it persists after the container is destroyed.
 
-## Preflight and teardown (outside the four teaching beats)
+**How this connects:** The demo finishes with source, modified request, console message and registration all independently observed.
 
-From `demos/module1-demos/m1-demo2-javascript-http-sender`, run:
+</details>
 
-```bash
-./scripts/preflight_check.sh
-```
+## Finish and clean up
 
-**Expected result:** `5 checks passed, 0 failed`. A plain-text log is saved under `demos/module1-demos/m1-demo2-javascript-http-sender/logs/preflight-*.log`. The five checks include readiness and the four scripted checks. Steps 2 and 3 each use a fresh request ID; stale history entries cannot satisfy their header check. **This does not replace visually confirming the Script Console output in Step 3.**
+After Step 4, you should be able to explain how the JavaScript hook affected a real proxied request from real evidence rather than only recalling a command.
 
-When you're done, stop the demo stack:
+**Stop the demo's containers** from the same demo directory:
 
 ```bash
 ./scripts/demo_down.sh
 ```
 
-## What to remember
+To inspect the finished example, switch to `m1-demo2-after` **after preserving any exercise changes**. Compare without modifying files using `git diff m1-demo2-before..m1-demo2-after -- demos/module1-demos/m1-demo2-javascript-http-sender`. For operational-only demos, the important difference may be live scan evidence rather than source code.
 
-- The order that matters: **source and load → marked request → live console output → saved registration**.
-- The script only adds the header to traffic that passes **through ZAP**; it does not affect requests made directly to the app.
-- The Terminal check does not capture the live Script Console line — confirm that line in the **actual** ZAP Script Console (Step 3).
-- Everything here targets only the local Globomantics training app.
+**Course-wide validation:** The Developer can run `./setup/run-all-demo-preflights.sh` **once from the repository root** to validate all six completed demo branches and produce real evidence bundles. It is not another script to run after each step.
 
-**End state:** you have seen the exact JavaScript hook, a modified real request, the emitted console message, and the enabled HTTP Sender registration.
+[← Module 1 demo catalog](../README.md) · [← Course home](../../../README.md)
+
