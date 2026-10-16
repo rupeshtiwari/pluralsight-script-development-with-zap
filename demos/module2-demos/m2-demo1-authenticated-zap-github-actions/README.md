@@ -1,274 +1,243 @@
-# Run Authenticated ZAP in GitHub Actions
-
-<details><summary><b>Branch: m2-demo1-before — CI Exercise Starter</b></summary>
-
-The original JavaScript and Python prerequisites are supplied, but `ci/af-plan.yaml` is intentionally omitted. Add the plan during the exercise.
-
-</details>
-
+# Module 2 · Demo 1 — Run authenticated ZAP in GitHub Actions
 
 <div align="center">
 
-![ZAP](https://img.shields.io/badge/OWASP_ZAP-Headless_CI-0284c7?style=for-the-badge)
-![Lab](https://img.shields.io/badge/Practice-m2-demo1-d946ef?style=for-the-badge)
+![Training](https://img.shields.io/badge/Globomantics-Authorized_Lab-130F25?style=for-the-badge)
+![ZAP](https://img.shields.io/badge/OWASP_ZAP-Headless_CI-FF1675?style=for-the-badge)
 
-<img src="../../../docs/learner-diagrams/m2-demo1-architecture.svg" width="100%" alt="Run Authenticated ZAP in GitHub Actions architecture"/>
+<img src="../../../docs/learner-diagrams/m2-demo1-architecture.svg" width="100%" alt="Module 2 · Demo 1 — Run authenticated ZAP in GitHub Actions architecture"/>
 
-<sub>Illustrative architecture · Generated using ChatGPT · Verify the actual API, report or CI results</sub>
+<sub>Illustrative workflow · Generated using ChatGPT · Verify actual evidence in your own lab</sub>
 
 </div>
 
-## What Problem Are You Solving?
+## The problem you are solving
 
-A local scan can look convincing but fail on a hosted runner because scripts, scope, and login state are missing. Maya needs an Automation Framework plan that can authenticate as a Globomantics user, reuse the JavaScript and Jython scripts, and archive a named custom finding on GitHub Actions.
+Maya needs the same scripted security checks to run on every change without a desktop GUI. A passing hosted job is not meaningful unless it authenticates, targets the protected profile, runs the intended scripts, and produces the expected custom alert.
 
-**Your outcome:** Understand how the system behaves, run four meaningful commands, inspect the real output and explain the engineering decision. No external course outline is required.
+**What success looks like:** An authenticated Automation Framework scan with verified report evidence on GitHub Actions. All four steps address parts of this same engineering problem.
 
-## Learning Objective Covered
+## What you will learn in this demonstration
 
-<table><thead><tr><th>Objective</th><th>What You Will Learn</th></tr></thead><tbody>
-<tr><td><code>EO3a</code></td><td>Configure ZAP for headless execution in CI/CD environments</td></tr>
-</tbody></table>
+You will turn interactive ZAP checks into an unattended security run:
 
-## Your Four-Step Learning Path
+- Configure ZAP's Automation Framework plan for authenticated headless execution in CI/CD *(EO3a)*
+- Verify that the original custom scripts, authorized scope and expected finding actually reached the CI report *(EO3a)*
+
+You do not need the separate course outline to understand the objective or follow the exercises.
+
+## From setup to a defensible decision
 
 ```mermaid
 flowchart LR
-  N0["GitHub Actions"]
-  N1["Headless plan"]
-  N2["Authenticated scripts"]
-  N3["Custom alert + report"]
-  N0 --> N1 --> N2 --> N3
+  S1["Execute headless plan"]
+  S2["Authorize scope and login"]
+  S3["Reuse security scripts"]
+  S4["Verify named alert"]
+  S1 --> S2
+  S2 --> S3
+  S3 --> S4
 ```
 
-<table>
-<thead><tr><th>Step</th><th>Exact Command</th><th>What You Do</th><th>What To Verify</th><th>Why It Matters</th></tr></thead>
-<tbody><tr><td><b>1</b></td><td><code>./steps/01-run-headless-automation-plan.sh</code></td><td>Execute the Automation Framework plan without a GUI</td><td>Successful plan execution and GitHub Actions job log</td><td>CI cannot depend on manual desktop actions</td></tr>
-<tr><td><b>2</b></td><td><code>./steps/02-inspect-authenticated-scan-context.sh</code></td><td>Inspect context, login script, user and target scope</td><td>Context Globomantics, user alice and scoped profile</td><td>An authenticated scan requires explicit identity and boundaries</td></tr>
-<tr><td><b>3</b></td><td><code>./steps/03-verify-reused-security-scripts.sh</code></td><td>Run the original custom scripts against the protected page</td><td>Script job results plus authenticated request evidence</td><td>Reuse tested scripts instead of rewriting them in CI</td></tr>
-<tr><td><b>4</b></td><td><code>./steps/04-confirm-authenticated-custom-alert.sh</code></td><td>Inspect the custom finding in the headless result</td><td>Named alert on /account/profile, parameter note</td><td>A pipeline needs a fail-closed assertion on the intended finding</td></tr></tbody></table>
+## Start the demo's application
 
-## Start This Exercise
+Mac dependencies are prepared **once for the course** using `setup/setup-macos.sh`, as shown in the [course README](../../../README.md). Each demo must then start its **own local training stack**:
 
-From the repository root:
+<details open>
+<summary><b>Open the exact branch and start Module 2 Demo 1</b></summary>
+
+**Where:** macOS Terminal or VS Code integrated Terminal, from the root of your existing Git checkout.
 
 ```bash
 git fetch origin
 git switch m2-demo1-before
-./setup/setup-macos.sh
 cd demos/module2-demos/m2-demo1-authenticated-zap-github-actions
 ./scripts/demo_up.sh
 ```
 
-If the one-time Mac setup has already completed, you can skip that setup command. Execute Steps 1–4 above from this demo directory. Then run:
+**Expected start:** healthy Globomantics, Postgres, MongoDB, and ZAP services, reported by the startup script. If they are not ready, stop and inspect the actual output before proceeding.
+
+**URLs:** [Training application](http://localhost:8000/) · [ZAP GUI](http://localhost:8080/zap/) · [ZAP API and proxy](http://localhost:8090/). The starter branch has required original scripting assets but intentionally lacks the completed `ci/af-plan.yaml`. Author the plan using the approved example before expecting the headless plan check to pass. Hosted GitHub Actions proof is separate from local preflight.
+
+</details>
+
+## Complete the four demo steps
+
+<details open>
+<summary><b>Step 1 — Run ZAP from the Automation Framework plan</b> · Execute headless plan</summary>
+
+### The specific problem
+
+A security test needing manual clicks is not a repeatable CI control.
+
+**What you are learning:** Configure headless ZAP in CI/CD *(EO3a)*
+
+### Which application and screen?
+
+**Open VS Code.** Inspect `ci/af-plan.yaml` and the `.github/workflows/zap-authenticated-scan.yml` workflow. Open **GitHub → Actions → authenticated-scan** for hosted proof of the exact current commit.
+
+### Run this exact command
+
+**Where:** VS Code integrated Terminal for the local check; GitHub Actions page for CI evidence. **Current folder:** `demos/module2-demos/m2-demo1-authenticated-zap-github-actions`.
 
 ```bash
-./scripts/preflight_check.sh
+./steps/01-run-headless-automation-plan.sh
+```
+
+### Expected output and what it means
+
+This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
+
+<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
+<tbody><tr><td><b>Runner (CI)</b></td><td><code>ubuntu-24.04 · ZAP pinned container</code></td><td>Confirm correct hosted platform</td></tr>
+<tr><td><b>Command</b></td><td><code>zap.sh -cmd -autorun /zap/wrk/af-plan.yaml</code></td><td>No desktop UI required</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS plan ran headlessly to completion</code></td><td>Compare to hosted job for this SHA</td></tr></tbody></table>
+
+**Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
+
+### How to interpret this result
+
+The Automation Framework plan moves the scan configuration into versioned code. The local step proves that plan can execute headlessly; a hosted run must be verified separately against the same plan revision.
+
+**How the investigation advances:** Inspect the user and scope declared by that plan.
+
+</details>
+
+<details>
+<summary><b>Step 2 — Inspect the authenticated scan context</b> · Authorize scope and login</summary>
+
+### The specific problem
+
+A headless job can silently scan only the login page without valid context or identity.
+
+**What you are learning:** Specify an authenticated context and bounded targets *(EO3a)*
+
+### Which application and screen?
+
+**In VS Code**, scroll through `ci/af-plan.yaml` to `env.contexts`, authentication script, `alice` user, and `includePaths`. Keep the relevant YAML keys visible.
+
+### Run this exact command
+
+**Where:** the VS Code integrated Terminal. **Current folder:** `demos/module2-demos/m2-demo1-authenticated-zap-github-actions`.
+
+```bash
+./steps/02-inspect-authenticated-scan-context.sh
+```
+
+### Expected output and what it means
+
+This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
+
+<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
+<tbody><tr><td><b>Context</b></td><td><code>Globomantics</code></td><td>Correct test context</td></tr>
+<tr><td><b>Authentication</b></td><td><code>script-based → globomantics-auth (/login)</code></td><td>Script supplies session</td></tr>
+<tr><td><b>User</b></td><td><code>alice</code></td><td>Identity for protected scan</td></tr>
+<tr><td><b>Target scope</b></td><td><code>http://app:8000 (profile and greet paths)</code></td><td>Target stays authorized</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS context and authentication configured</code></td><td>Configuration established</td></tr></tbody></table>
+
+**Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
+
+### How to interpret this result
+
+The context specifies how ZAP logs in and where it is allowed to scan. This is the foundation for meaningful authenticated coverage.
+
+**How the investigation advances:** Confirm the original JavaScript and Python scripts are reused rather than replaced.
+
+</details>
+
+<details>
+<summary><b>Step 3 — Verify the scripts run in the authenticated scope</b> · Reuse security scripts</summary>
+
+### The specific problem
+
+Rewriting the same script in CI introduces drift and makes the reported result harder to trust.
+
+**What you are learning:** Reuse configured custom security scripts in automation *(EO3a)*
+
+### Which application and screen?
+
+**In VS Code**, inspect the plan's script-loading jobs, requestor, and active scan. Then inspect the protected profile request or report in the same hosted GitHub Actions run.
+
+### Run this exact command
+
+**Where:** the VS Code integrated Terminal. **Current folder:** `demos/module2-demos/m2-demo1-authenticated-zap-github-actions`.
+
+```bash
+./steps/03-verify-reused-security-scripts.sh
+```
+
+### Expected output and what it means
+
+This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
+
+<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
+<tbody><tr><td><b>Loaded by the plan</b></td><td><code>globomantics-marker (JS), active-rule (Py), auth (Py)</code></td><td>Original scripts reused</td></tr>
+<tr><td><b>Ran authenticated against</b></td><td><code>/account/profile (note parameter)</code></td><td>Protected page reached</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS scripts executed against authenticated scope</code></td><td>Do not infer an unshown marker side effect</td></tr></tbody></table>
+
+**Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
+
+### How to interpret this result
+
+The plan loads the original extensions and targets the authenticated profile. This confirms script reuse and coverage, not every possible side effect of the HTTP Sender script.
+
+**How the investigation advances:** Locate the exact named custom finding in the current CI evidence.
+
+</details>
+
+<details>
+<summary><b>Step 4 — Confirm the custom Python alert in the report</b> · Verify named alert</summary>
+
+### The specific problem
+
+A successful job could still omit the application-specific finding it was supposed to prove.
+
+**What you are learning:** Validate authenticated security results in a CI report *(EO3a)*
+
+### Which application and screen?
+
+**Open GitHub → Actions → latest matching authenticated scan run → Artifacts / scan report**. Keep the run's branch and SHA visible. Run the terminal step in VS Code.
+
+### Run this exact command
+
+**Where:** the VS Code integrated Terminal; inspect the actual GitHub Actions artifact separately. **Current folder:** `demos/module2-demos/m2-demo1-authenticated-zap-github-actions`.
+
+```bash
+./steps/04-confirm-authenticated-custom-alert.sh
+```
+
+### Expected output and what it means
+
+This is the existing script's **output field contract**, not a manufactured scan result. The field values containing angle brackets vary and must be taken from the real output.
+
+<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
+<tbody><tr><td><b>Alert</b></td><td><code>Globomantics unsafe reflection (custom rule)</code></td><td>Exact named Python finding</td></tr>
+<tr><td><b>Risk</b></td><td><code>Medium</code></td><td>Current report rating</td></tr>
+<tr><td><b>Parameter</b></td><td><code>note</code></td><td>Affected protected-page input</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS named custom alert recorded</code></td><td>Must be the script's alert, not built-in XSS</td></tr></tbody></table>
+
+**Failure handling:** If the script reports FAIL, the required result is not established. Review the diagnostic and do not advance or substitute a prior run.
+
+### How to interpret this result
+
+The report's named custom finding, risk and affected parameter connect the headless job to the original application-specific security check. A historical successful job does not prove a newer commit.
+
+**How the investigation advances:** A repeatable authenticated CI report can now become a trusted source for API-driven decisions.
+
+</details>
+
+## Complete the exercise
+
+A headless scan is useful only when its reported target, authentication and custom finding are real.
+
+From the same demo directory, stop the local services:
+
+```bash
 ./scripts/demo_down.sh
 ```
 
-The preflight saves a timestamped log in `logs/`. For hosted evidence, use the GitHub Actions link in the detailed steps and inspect the actual workflow's **run SHA**, status, job log and report. Never assume a successful report from an earlier session satisfies this exercise.
+The `m2-demo1-after` branch contains the completed example or reference behavior. Preserve student changes before switching branches. For a safe comparison run `git diff m2-demo1-before..m2-demo1-after -- demos/module2-demos/m2-demo1-authenticated-zap-github-actions` from the repository root; operational-only exercises may have no source diff.
 
-**Compare with the completed version:** `git diff m2-demo1-before..m2-demo1-after -- demos/module2-demos/m2-demo1-authenticated-zap-github-actions`. This comparison does not overwrite your work. Both the starter and completed branches include their required prerequisites; authored solution files or plans are added by the exercise when applicable.
+**One batch validation command for the course:** `./setup/run-all-demo-preflights.sh` from the repository root. This checks all six finished branches and creates real evidence bundles for the production team. There are no separate per-demo preflight commands.
 
-**Technical evidence note:** The hosted job's source SHA matters: an older successful workflow cannot prove a newer plan. A built-in XSS alert does not substitute for the named custom Python alert. On the starter branch the finished Automation Framework plan must be created before its execution succeeds.
-
-All scanning stays within the supplied, authorized Globomantics training environment.
-
----
-
-## Detailed Instructions And Expected Evidence
-
-<details><summary><b>View The Four Executable Steps</b></summary>
-
-```bash
-./steps/01-run-headless-automation-plan.sh
-./steps/02-inspect-authenticated-scan-context.sh
-./steps/03-verify-reused-security-scripts.sh
-./steps/04-confirm-authenticated-custom-alert.sh
-```
-
-Run these commands in order from this demo's folder, then execute `./scripts/preflight_check.sh`. Inspect actual ZAP GUI or GitHub Actions evidence where indicated.
-</details>
-
-
-Run the ZAP scripts you built in Module 1 automatically and headless inside a
-GitHub Actions pipeline — logged in as a real user, driven entirely by one ZAP
-Automation Framework plan. You read the plan in VS Code to understand how it binds
-authentication and scope, then prove the same plan runs headless and authenticated.
-
-> **Authorization and scope.** The scan runs only against the local Globomantics
-> app started inside the workflow. Never point it at any system you are not
-> authorized to test.
-
-## Applications and locations used
-
-| Application | Where | Used for |
-|-------------|-------|----------|
-| VS Code | `demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci/af-plan.yaml` + the integrated terminal | reading the plan config, then running `./scripts/demo_step.sh N` |
-| GitHub Actions | `https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/actions/workflows/zap-authenticated-scan.yml` → latest run → job **authenticated-scan** | the same plan run headless on the hosted runner |
-| CI artifact | run page → **Artifacts** → `globo-ci-report` | the archived report from the hosted run |
-
-The local run and the GitHub Actions run execute the **same** plan: use VS Code for
-the config and mechanics, and the Actions run for the hosted-runner proof.
-
-## Setup
-
-```bash
-cd demos/module2-demos/m2-demo1-authenticated-zap-github-actions
-./scripts/demo_up.sh             # prints "Up" when healthy
-```
-
-To show the hosted run, trigger the workflow from the Actions tab (**Run workflow**,
-it is `workflow_dispatch`) or push to the repository, then open the most recent run
-of *Globomantics authenticated ZAP scan*.
-
-## Step-by-step LO traceability
-
-| Step | LO | Config / mechanism (`ci/af-plan.yaml`) | Command | Observed result | Proof artifact |
-|------|----|----------------------------------------|---------|-----------------|----------------|
-| 1 | EO3a | whole plan, run via `zap.sh -cmd -autorun` | `steps/01-run-headless-automation-plan.sh` | plan runs headless to completion, no errors | GitHub Actions job log |
-| 2 | EO3a | `authentication` 29–40 · `users` 44–47 · `includePaths` 26–28 | `steps/02-inspect-authenticated-scan-context.sh` | plan binds context `Globomantics`, scripted auth, user `alice`, scope `http://app:8000` | Authenticated context configuration |
-| 3 | EO3a | `passiveScan-config` 60–62 · script `add`/`enable` 67–91 · `spider` 93–99 · `requestor` 109–119 · `activeScan` + rule `50000` 121–134 | `steps/03-verify-reused-security-scripts.sh` | Module 1 scripts load and run against `/account/profile` while logged in | Authenticated script job result |
-| 4 | EO3a | `report` 141–146 | `steps/04-confirm-authenticated-custom-alert.sh` | custom alert `Globomantics unsafe reflection (custom rule)` on `/account/profile`, param `note` | Authenticated custom alert record |
-
----
-
-## Step 1: Run ZAP headless from the plan (EO3a)
-
-**The problem.** A pipeline has no GUI to click. ZAP must run the entire
-authenticated scan from one config file, unattended — exactly as the hosted runner
-does.
-
-**Execute.**
-
-```bash
-./steps/01-run-headless-automation-plan.sh
-```
-
-**Inspect the actual evidence.** ZAP runs `ghcr.io/zaproxy/zaproxy` (pinned by
-digest = tag `20260807-stable`, ZAP 2.17.0) via `zap.sh -cmd -autorun …` and the
-plan runs headless to completion with no errors, following the canonical job order
-`passiveScan-config → script → spider → passiveScan-wait → activeScan →
-passiveScan-wait → report` (the gate jobs `alertFilter`/`exitStatus` are M2 C5).
-In CI, the same beat is the **authenticated-scan** job's **Run ZAP headless with the
-Automation Framework plan** step on `ubuntu-24.04`.
-
-**The engineer's decision.** One plan file drives the whole authenticated scan with
-no window — which is what makes it runnable unattended in CI.
-
-Proof artifact: GitHub Actions job log.
-
----
-
-## Step 2: Show the authenticated context configuration (EO3a)
-
-**The problem.** A headless run cannot fill in a login form, so the plan must declare
-*how to log in* and *what to scan* as data, once, before any scanning.
-
-**Inspect the plan in VS Code.** Open `demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci/af-plan.yaml` →
-`env.contexts`:
-
-- **`authentication` (lines 29–40)** — `method: script` loads
-  `globomantics-auth.py` by path, with `scriptEngine: "python : jython"` and the
-  `Login URL` it needs. Verification is response-based: `loggedInRegex: "Signed in
-  as"` and `loggedOutRegex: "Please log in first"` tell ZAP when the session is valid.
-- **`users` (lines 44–47)** — the user the scan runs as: `alice`, with the
-  `username` credential the auth script consumes.
-- **`includePaths` (lines 26–28)** — the scope: the profile and greet paths on
-  `http://app:8000`.
-
-The mechanism: authentication and scope are declared as config, so the same login
-and target apply identically on every run.
-
-**Execute.**
-
-```bash
-./steps/02-inspect-authenticated-scan-context.sh
-```
-
-**Inspect the actual evidence.** The plan binds Context `Globomantics`, script-based
-authentication via `globomantics-auth` (Login URL `/login`), user `alice`, and scope
-`http://app:8000` before scanning.
-
-**The engineer's decision.** Because the login and scope live in the plan, the
-authenticated scan is reproducible on every unattended run.
-
-Proof artifact: Authenticated context configuration.
-
----
-
-## Step 3: See the Module 1 scripts run authenticated (EO3a)
-
-**The problem.** The plan has to load the exact scripts from Module 1 and run them
-as `alice` against the login-only page — not re-implement them.
-
-**Inspect the jobs in VS Code.** In the same file, the `jobs` list follows the
-canonical Automation Framework order (non-gate portion):
-
-- **`passiveScan-config` (lines 60–62)** — enables scope-limited passive scanning
-  before any traffic.
-- **script `add` / `enable` (lines 67–91)** — loads `globomantics-active-rule` (Py)
-  and `globomantics-marker` (JS) by path; the auth script is loaded by the context.
-- **`spider` (lines 93–99)** — crawls the scope *as alice* so the sites tree is
-  populated from inside the session.
-- **`passiveScan-wait` (lines 101–103)** — drains the passive-scan queue.
-- **`requestor` (lines 109–119)** — seeds `/account/profile?note=seed` into the sites
-  tree *as alice*, guaranteeing the authenticated node (with the `note` param) the
-  active scan and custom rule attack.
-- **`activeScan` + rule `50000` (lines 121–134)** — runs the scan as the context user;
-  the Script Active Scan Rules plugin (`50000`, inline policy at LOW threshold) is what
-  runs the custom Python rule. A second `passiveScan-wait` then `report` follow.
-
-**Execute.**
-
-```bash
-./steps/03-verify-reused-security-scripts.sh
-```
-
-**Inspect the actual evidence.** The plan loads `globomantics-marker` (JS),
-`globomantics-active-rule` (Py), and `globomantics-auth` (Py) and runs authenticated
-against `/account/profile` — the scan reaches the logged-in page.
-
-**The engineer's decision.** The custom JavaScript and Python checks from Module 1
-run unchanged inside the pipeline, now against an authenticated scope.
-
-Proof artifact: Authenticated script job result.
-
----
-
-## Step 4: Confirm the authenticated custom alert (EO3a)
-
-**The problem.** The run must record the unsafe-reflection finding on the login-only
-page — the exact condition the Module 1 custom rule targets, reachable only because
-the scripted login worked (the page is HTTP 401 without it).
-
-**Execute.**
-
-```bash
-./steps/04-confirm-authenticated-custom-alert.sh
-```
-
-**Inspect the actual evidence.** The custom rule's named alert `Globomantics unsafe
-reflection (custom rule)` is recorded on `/account/profile`, parameter `note`, under
-the authenticated headless run — alongside ZAP's built-in `Cross Site Scripting
-(Reflected)` on the same parameter. In CI it is written to the downloadable
-`globo-ci-report` artifact.
-
-**The engineer's decision.** The finding exists only under authentication, and it is
-*your* Module 1 rule's named alert serialized by the headless pipeline run — exactly
-what a quality gate can later pass or fail the build on.
-
-Proof artifact: Authenticated custom alert record.
-
-## Validate and reset
-
-Run the same Automation Framework plan locally through the checker — it runs the plan
-via the ZAP API, logs in, runs the scripts authenticated, and confirms the finding,
-writing a reviewable log to `logs/`:
-
-```bash
-./scripts/preflight_check.sh
-```
-
-It ends with `5 checks passed, 0 failed`. Tear down with `./scripts/demo_down.sh`.
+[← Module 2 catalog](../README.md) · [← Course home](../../../README.md)
