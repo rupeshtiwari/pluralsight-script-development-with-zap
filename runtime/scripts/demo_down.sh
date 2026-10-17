@@ -6,7 +6,7 @@ cd "${REPO_ROOT}"
 
 log "Stopping demo stack..."
 if ! docker_up; then
-    log "Docker engine is not running — nothing to tear down. Done."
+    log "Docker engine is not running, nothing to tear down. Done."
     exit 0
 fi
 if ${COMPOSE} down --remove-orphans --volumes --timeout 20; then
