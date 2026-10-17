@@ -49,22 +49,6 @@ Imagine you're responsible for releasing the **Globomantics Store**. Its search 
 
 **The goal is not to generate more alerts. It is to connect the request, application behavior, security finding, and engineering decision with evidence you can reproduce.**
 
-## ⚠️ Educational and Training Use Only
-
-This repository is an intentionally vulnerable, controlled training environment created to teach OWASP ZAP scripting, security testing, scan automation, reporting, and evidence-based security decisions.
-
-The Globomantics application, security configurations, credentials, scripts, and CI examples are designed for demonstration and learning purposes.
-
-This project is **not production-ready** and must not be deployed, exposed, or reused as a production application or security-testing platform.
-
-The examples have not been validated against production datasets, enterprise traffic, or real-world deployment requirements. They are intentionally simplified to make specific security concepts observable and reproducible within the supported training environment.
-
-Security weaknesses are included deliberately. The presence of an insecure implementation is part of the exercise, not an endorsement of that implementation.
-
-Use this project only in an isolated, authorized lab environment. **Do not point its active scanning scripts at systems without explicit permission.**
-
-The objective is to develop security-testing knowledge and sound engineering judgment, not to provide production-certified application code or replace established security assurance processes.
-
 ## What Is OWASP ZAP?
 
 **OWASP ZAP (Zed Attack Proxy)** is an open-source web application security-testing tool. It can intercept HTTP requests and responses, run passive and active checks, expose results through an API, and execute custom scripts. Its Automation Framework lets you run the same controlled security checks without a GUI—for example inside GitHub Actions.
@@ -268,6 +252,22 @@ Open the workflow on the corresponding `*-after` branch and check its commit SHA
 
 Open [**Module 1 · Targeted Security Testing**](demos/module1-demos/README.md) or [**Module 2 · Security Automation**](demos/module2-demos/README.md), choose a single demo and follow its own commands. You do not need access to a separate outline.
 
-> ⚠️ **Educational and training use only.** This is an intentionally vulnerable, controlled training environment — not production-ready. Its weaknesses are deliberate teaching aids. Run it only in an isolated, authorized lab, and never point its active scanning scripts at systems you do not have explicit permission to test. See [Educational and Training Use Only](#️-educational-and-training-use-only) above.
+---
+
+<div align="center">
+
+### ⚠️ Educational and Training Use Only
+
+</div>
+
+> **This repository is an intentionally vulnerable, controlled training environment** created to teach OWASP ZAP scripting, security testing, scan automation, reporting, and evidence-based security decisions.
+>
+> - The Globomantics application, security configurations, credentials, scripts, and CI examples exist **for demonstration and learning only**.
+> - This project is **not production-ready** and must not be deployed, exposed, or reused as a production application or security-testing platform.
+> - The examples are **intentionally simplified** to make specific security concepts observable and reproducible; they have not been validated against production datasets, enterprise traffic, or real-world deployment requirements.
+> - **Security weaknesses are included deliberately.** An insecure implementation here is part of the exercise, not an endorsement of that implementation.
+> - **Use this project only in an isolated, authorized lab.** Never point its active scanning scripts at systems you do not have explicit permission to test.
+>
+> The objective is to build security-testing knowledge and sound engineering judgment — not to provide production-certified code or replace established security assurance processes.
 
 <div align="center"><sub>Maintained by <a href="https://github.com/rupeshtiwari">Rupesh Tiwari</a> · Authorized Globomantics practice only</sub></div>
