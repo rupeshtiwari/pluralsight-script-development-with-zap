@@ -380,7 +380,7 @@ step3_auth_executes() {
     local tr; tr="$(auth_trace)"
     fm star "Without login" "/account/profile -> HTTP ${gated}"
     fm star "ZAP forced-user (script auth)" "/account/profile -> HTTP ${authed}" focus
-    fm star "Auth script ran" "$(echo "${tr}" | grep -m1 'authenticate:' | cut -c1-90)"
+    fm star "Auth script ran" "$(echo "${tr}" | grep -m1 'authenticate:')"
 
     # Fresh alert store, then the custom rule scans the page AS the scripted user.
     del_all_alerts
