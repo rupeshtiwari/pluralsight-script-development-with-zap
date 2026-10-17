@@ -29,8 +29,8 @@ You need machine-readable evidence from a completed authenticated Store scan. An
 
 You will retrieve four kinds of evidence from ZAP programmatically:
 
-- Query scan status and findings using the official ZAP API *(EO3b)*
-- Reconcile the API's named custom rule with a generated JSON report and actual Insights about scan effectiveness *(EO3b)*
+1. Query scan status and findings using the official ZAP API *(EO3b)*
+2. Reconcile the API's named custom rule with a generated JSON report and actual Insights about scan effectiveness *(EO3b)*
 
 You do not need the separate course outline to understand the objective or follow the exercises.
 
@@ -294,9 +294,12 @@ Insights describe scan behavior and confidence in coverage, not only vulnerabili
 <!-- student-achievement:start -->
 ## What You Achieved
 
-After the four checks, you can inspect ZAP programmatically, distinguish risk from confidence, and reconcile a report with the API. You can use actual Insights to discuss scan effectiveness, including operational failures, without replacing missing Insights with unrelated counters.
+You can now explain each learning objective with the evidence you captured:
 
-**Your final check:** Explain the result using your own captured evidence. A README example, missing result or earlier run does not satisfy this exercise.
+1. **(EO3b) You inspected ZAP programmatically through its API.** You read engine version `2.17.0`, a scan that reached `FINISHED` / `100%`, and the custom alert (pluginId `50000`, parameter `note`) with risk and confidence as two separate fields (`Medium`/`Medium`).
+2. **(EO3b) You reconciled the report with the API and read real Insights.** The generated `traditional-json` report `riskdesc` "Medium (Medium)" matched the API values for the same rule, and you read an actual `insights[]` entry describing scan effectiveness — never a substitute counter.
+
+**Your final check:** Explain each numbered outcome using your own captured evidence from this run. A README example, a missing result or an earlier run does not satisfy this exercise.
 <!-- student-achievement:end -->
 
 ## Finish Your Lab

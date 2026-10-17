@@ -56,10 +56,11 @@ services:
       ZAP_API_KEY: ${ZAP_API_KEY}
     volumes:
       - ./runtime/zap/entrypoint.sh:/zap-entrypoint.sh:ro
-      # Course ZAP scripts, read-only, so the demos can load them by path.
-      - ./demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts:/zap-scripts:ro
+      # Course ZAP scripts. Writable so a script written in ZAP's Script Console can be
+      # saved straight into the demo folder (and loaded by path by the steps).
+      - ./demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts:/zap-scripts
       # Clip 5 Python (Jython) scripts: custom active rule + authentication.
-      - ./demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts:/zap-scripts-py:ro
+      - ./demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts:/zap-scripts-py
       # Module 2 Automation Framework plan (mounted so the author preflight can run it).
       - ./demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci:/af:ro
     ports:
