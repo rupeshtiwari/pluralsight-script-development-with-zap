@@ -29,9 +29,9 @@ You are reviewing a security scan for the Globomantics Store. A long alert list 
 
 You will follow a single investigation from selecting focused scan rules through checking actual application responses:
 
-- Find where SQL, MongoDB and operating-system command inputs cross unsafe boundaries *(EO1a)*
-- Validate reflected XSS using the output context and ZAP's injected request *(EO1b)*
-- Test whether CSRF tokens protect the intended authenticated session *(EO1c)*
+1. Find where SQL, MongoDB and operating-system command inputs cross unsafe boundaries *(EO1a)*
+2. Validate reflected XSS using the output context and ZAP's injected request *(EO1b)*
+3. Test whether CSRF tokens protect the intended authenticated session *(EO1c)*
 
 No separate course outline is required to complete this lab.
 
@@ -315,9 +315,14 @@ A raw rule ID is a lead; its actual request and application effect support the e
 <!-- student-achievement:start -->
 ## What You Achieved
 
-After completing the four checks and inspecting the required evidence, you can explain which input crosses each unsafe boundary. You can distinguish an alert from confirmation, show the token/session failure, and support a disposition with the actual request and response.
+You can now explain each learning objective with the evidence you captured:
 
-**Your final check:** Explain the result using your own captured evidence. A README example, missing result or earlier run does not satisfy this exercise.
+1. **(EO1a) You located three different injection boundaries in one focused scan.** ZAP raised SQL `40018` on `/search` (parameter `q`), MongoDB NoSQL `40033` on `/api/account` (`username`), and OS command `90020`/`90037` on `/admin/ping` (`host`).
+2. **(EO1b) You confirmed reflected XSS by output context, not by guesswork.** ZAP rule `40012` fired on the `name` parameter of `/greet` with a context-matched payload, proving the input is reflected unescaped — not that a browser popped an alert.
+3. **(EO1c) You showed the CSRF token is not bound to its session.** Valid token = `200`, missing token = `403`, yet a token replayed into another session returned `200` and changed the stored email from `alice@globomantics.example` to `attacker@evil.example`.
+4. **(EO1a · EO1b · EO1c) You turned alerts into an evidence-backed disposition.** Each finding was tied to a real effect — the database parse error, the account-count change, the harmless injected marker `ZAP_CMD_PROOF`, and the reflected response — and written into a disposition record.
+
+**Your final check:** Explain each numbered outcome using your own captured evidence from this run. A README example, a missing result or an earlier run does not satisfy this exercise.
 <!-- student-achievement:end -->
 
 ## Finish Your Lab
