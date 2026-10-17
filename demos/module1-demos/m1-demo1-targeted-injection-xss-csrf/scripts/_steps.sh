@@ -154,21 +154,21 @@ print_reference() {
     fm header "Before you test: map each case to its context / state" \
               "The context and the token state decide the test you run (EO1b, EO1c)."
     fm section "XSS execution contexts"
-    fm item "HTML body — input lands between tags"
-    fm item "HTML attribute — input lands inside a quoted attribute value"
-    fm item "JavaScript string — input lands inside a quoted JS string"
+    fm item "HTML body, input lands between tags"
+    fm item "HTML attribute, input lands inside a quoted attribute value"
+    fm item "JavaScript string, input lands inside a quoted JS string"
     fm section "CSRF token states"
-    fm item "valid for this session — the request should succeed"
-    fm item "missing or invalid — the request should be rejected"
-    fm item "replayed — a token that was already used once is sent again: the request should be rejected"
-    fm item "cross-session — a token issued to another session is sent with this session's cookie: the request should be rejected"
+    fm item "valid for this session, the request should succeed"
+    fm item "missing or invalid, the request should be rejected"
+    fm item "replayed, a token that was already used once is sent again: the request should be rejected"
+    fm item "cross-session, a token issued to another session is sent with this session's cookie: the request should be rejected"
 }
 
 # ===========================================================================
-# STEP 1 — Targeted injection scan (EO1a)  → "Targeted scan policy and rule list"
+# STEP 1, Targeted injection scan (EO1a)  → "Targeted scan policy and rule list"
 # ===========================================================================
 step1_injection() {
-    fm header "Targeted injection scan — one policy, three endpoints" \
+    fm header "Targeted injection scan, one policy, three endpoints" \
               "Proves ZAP detects SQL, NoSQL, and command injection as real findings (EO1a)."
     clear_alerts || { fail "could not clear old alerts" "ZAP API refused deleteAllAlerts" "restart ZAP with ./scripts/demo_reset.sh"; return 1; }
     build_policy_quiet || { fail "ZAP rejected the scan policy" "a rule ID is not installed" "check ascanrulesBeta (40033) is installed"; return 1; }
@@ -184,7 +184,7 @@ step1_injection() {
         fi
     done
 
-    fm section "Findings — alert raised per endpoint (this run only)"
+    fm section "Findings, alert raised per endpoint (this run only)"
     local allok=1 rec pid risk conf
     _row() { # <label> <url> <ids>
         rec="$(first_alert "$2" "$3")"
@@ -212,14 +212,14 @@ step1_injection() {
 }
 
 # ===========================================================================
-# STEP 2 — XSS request and response body (EO1b)
+# STEP 2, XSS request and response body (EO1b)
 # ===========================================================================
 step2_xss() {
-    fm header "Reflected XSS — a context-matched payload, then ZAP confirms it" \
+    fm header "Reflected XSS, a context-matched payload, then ZAP confirms it" \
               "The output context decides the payload; ZAP's reflected-XSS rule 40012 then confirms the finding (EO1b)."
     clear_alerts_for "${APP_INTERNAL}/greet" 40012 || { fail "could not clear old XSS alerts" "ZAP API refused deleteAlert" "restart ZAP with ./scripts/demo_reset.sh"; return 1; }
 
-    # Part A — Maya's context-matched cases. Each payload is sent through ZAP; the
+    # Part A, Maya's context-matched cases. Each payload is sent through ZAP; the
     # exact request and the response line that reflects it are printed.
     local n=0 ctx payload needle body line
     fm section "Context-matched cases (request → response body line)"
@@ -244,7 +244,7 @@ HTML attribute|"><svg onload=alert(1)>|value=""><svg onload=alert(1)>
 JavaScript string|";alert(1);//|greeting = "";alert(1);//
 CASES
 
-    # Part B — ZAP actively scans 'name' with reflected-XSS rule 40012.
+    # Part B, ZAP actively scans 'name' with reflected-XSS rule 40012.
     build_xss_policy_quiet || { fail "ZAP rejected the XSS policy" "rule 40012 missing" "check the ZAP image"; return 1; }
     fm note "running ZAP's reflected-XSS rule 40012 against /greet (name)..."
     scan_xss_quiet "${APP_INTERNAL}/greet?name=zzMARKzz"; local rc=$?
@@ -269,10 +269,10 @@ CASES
 }
 
 # ===========================================================================
-# STEP 3 — CSRF token replay result (EO1c)
+# STEP 3, CSRF token replay result (EO1c)
 # ===========================================================================
 step3_csrf() {
-    fm header "CSRF — valid, missing, replayed and cross-session tokens" \
+    fm header "CSRF, valid, missing, replayed and cross-session tokens" \
               "A CSRF token must be single-use and tied to its session. A used token is replayed, and a token from another session is tried; both should be rejected (EO1c)."
     local A=/tmp/.c_a B=/tmp/.c_b
     local legit="alice@globomantics.example" replayed="replayed@evil.example" attack="attacker@evil.example"
@@ -309,9 +309,9 @@ step3_csrf() {
 
     if [ "${v} ${m} ${r}" = "200 403 200" ] && [ "${before_r}" = "${legit}" ] && [ "${after_r}" = "${replayed}" ]; then
         if [ "${x}" = 200 ] && [ "${after_x}" = "${attack}" ]; then
-            pass "the used token was accepted again (200) and changed the email; a token from another session was also accepted — tokens are neither single-use nor session-bound"
+            pass "the used token was accepted again (200) and changed the email; a token from another session was also accepted, tokens are neither single-use nor session-bound"
         else
-            pass "the used token was accepted again (200) and changed the email — tokens are not single-use"
+            pass "the used token was accepted again (200) and changed the email, tokens are not single-use"
         fi
     else
         fail "CSRF result was valid=${v} missing=${m} replay=${r}, email ${before_r:-<empty>} -> ${after_r:-<empty>} (expected 200/403/200 and ${legit} -> ${replayed})" \
@@ -322,12 +322,12 @@ step3_csrf() {
 }
 
 # ===========================================================================
-# STEP 4 — Alert disposition record (TO1: EO1a + EO1b + EO1c)
+# STEP 4, Alert disposition record (TO1: EO1a + EO1b + EO1c)
 # Reads the alerts ZAP raised in Steps 1-2, reconciles each with live behaviour,
 # and writes the record to logs/alert-disposition.md.
 # ===========================================================================
 step4_disposition() {
-    fm header "Alert disposition — reconcile each ZAP alert with app behavior" \
+    fm header "Alert disposition, reconcile each ZAP alert with app behavior" \
               "Turns ZAP alerts into recorded decisions you can defend (EO1a, EO1b, EO1c)."
     local sqlerr b i ping xss csrf rec_sql rec_nosql rec_cmd rec_xss record ok=1
     rec_sql="$(first_alert "${APP_INTERNAL}/search?q=Router" "40018 40022")"
@@ -358,16 +358,16 @@ step4_disposition() {
     d_cmd="$(_disp "${rec_cmd}" "${ping}")";    d_xss="$(_disp "${rec_xss}" "${xss}")"
     d_csrf="$(_disp "-" "${csrf}")"
 
-    fm star "${rec_sql%%|*} SQL injection · /search (q)" "${d_sql} — DB error: ${sqlerr:-none}" focus
-    fm star "${rec_nosql%%|*} NoSQL injection · /api/account (username)" "${d_nosql} — ${nosql:-no count change}" focus
-    fm star "${rec_cmd%%|*} Command injection · /admin/ping (host)" "${d_cmd} — injected shell marker: ${ping:-none}" focus
-    fm star "${rec_xss%%|*} Reflected XSS · /greet (name)" "${d_xss} — ${xss:-not reflected}" focus
-    fm star "CSRF · /account/email (csrf_token)" "${d_csrf} — ${csrf:-replay rejected}" focus
+    fm star "${rec_sql%%|*} SQL injection · /search (q)" "${d_sql}, DB error: ${sqlerr:-none}" focus
+    fm star "${rec_nosql%%|*} NoSQL injection · /api/account (username)" "${d_nosql}, ${nosql:-no count change}" focus
+    fm star "${rec_cmd%%|*} Command injection · /admin/ping (host)" "${d_cmd}, injected shell marker: ${ping:-none}" focus
+    fm star "${rec_xss%%|*} Reflected XSS · /greet (name)" "${d_xss}, ${xss:-not reflected}" focus
+    fm star "CSRF · /account/email (csrf_token)" "${d_csrf}, ${csrf:-replay rejected}" focus
 
     record="${HERE_STEPS}/../logs/alert-disposition.md"
     mkdir -p "$(dirname "${record}")"
     {
-        echo "# Alert disposition record — m1-demo1 ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+        echo "# Alert disposition record, m1-demo1 ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
         echo
         echo "| Alert ID | Rule | Endpoint | Disposition | Evidence |"
         echo "|---|---|---|---|---|"
@@ -375,7 +375,7 @@ step4_disposition() {
         echo "| ${rec_nosql%%|*} | NoSQL Injection - MongoDB | GET /api/account?username= | ${d_nosql} | ${nosql:-no count change} |"
         echo "| ${rec_cmd%%|*} | Remote OS Command Injection | GET /admin/ping?host= | ${d_cmd} | shell marker: ${ping:-none} |"
         echo "| ${rec_xss%%|*} | Cross Site Scripting (Reflected) | GET /greet?name= | ${d_xss} | ${xss:-not reflected} |"
-        echo "| — | CSRF token replay | POST /account/email | ${d_csrf} | ${csrf:-replay rejected} |"
+        echo "|, | CSRF token replay | POST /account/email | ${d_csrf} | ${csrf:-replay rejected} |"
     } > "${record}"
     fm star "Disposition record written" "logs/alert-disposition.md"
 
