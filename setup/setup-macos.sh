@@ -38,7 +38,7 @@ ready=1
 step()  { echo; echo "${C_H}=== $* ===${C_RST}"; }
 record(){ REPORT+=("$1|$2|$3|${4:-}"); [ "$2" = "READY" ] || ready=0; }
 
-echo "${C_H}Globomantics ZAP demo — environment setup${C_RST}"
+echo "${C_H}Globomantics ZAP demo, environment setup${C_RST}"
 echo "${C_MUT}host: $(uname -mrs)    date: $(date)    log: ${LOG}${C_RST}"
 
 # --- 1. Homebrew -------------------------------------------------------------

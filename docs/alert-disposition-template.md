@@ -2,7 +2,7 @@
 
 Use one row per ZAP alert observed during the demo. "Disposition" is the
 triage decision: **True Positive**, **False Positive**, or **Accepted Risk**.
-"Evidence" is what proves the call — the payload, the response, or the fix.
+"Evidence" is what proves the call, the payload, the response, or the fix.
 
 | Alert ID | Rule | Endpoint | Disposition | Evidence |
 |----------|------|----------|-------------|----------|
