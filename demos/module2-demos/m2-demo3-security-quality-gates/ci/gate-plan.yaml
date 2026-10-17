@@ -1,0 +1,64 @@
+# ZAP Automation Framework plan — Globomantics quality GATE.
+#
+# This plan does NOT just scan: it DECIDES. It marks a known benign finding as a
+# False Positive, scans the Globomantics app, writes a JSON report, and then runs
+# exitStatus — which turns the remaining alert risks into a process exit code a
+# pipeline can gate on.
+#
+# Run headless, exactly as the GitHub Actions job does:
+#   zap.sh -cmd -autorun /zap/wrk/gate-plan.yaml ; echo "exit=$?"
+---
+env:
+  contexts:
+    - name: GlobomanticsGate
+      urls:
+        - "http://app:8000"
+      includePaths:
+        - "http://app:8000/greet.*"
+  parameters:
+    # Let exitStatus make the gate decision — do not abort early on findings.
+    failOnError: false
+    failOnWarning: false
+    progressToStdout: true
+
+jobs:
+  # 1) FILTER FIRST: mark a known benign Globomantics finding as a False
+  #    Positive, BEFORE scanning, so every later alert inherits this disposition.
+  - type: alertFilter
+    alertFilters:
+      - ruleId: 10021                       # X-Content-Type-Options Header Missing
+        newRisk: "False Positive"
+        url: "http://app:8000/greet.*"
+        urlRegex: true
+
+  # 2) Seed the page to scan.
+  - type: requestor
+    requests:
+      - url: "http://app:8000/greet?name=gate"
+        method: "GET"
+
+  # 3) Scan it. The reflected-XSS High finding is what the gate will catch.
+  - type: activeScan
+    parameters:
+      context: "GlobomanticsGate"
+      maxRuleDurationInMins: 2
+      maxScanDurationInMins: 5
+    policyDefinition:
+      defaultStrength: "medium"
+      defaultThreshold: "medium"
+
+  # 4) Write the evidence the gate decision is read from.
+  - type: report
+    parameters:
+      template: "traditional-json"
+      reportDir: "/zap/wrk"
+      reportFile: "globo-gate-report.json"
+      reportTitle: "Globomantics quality gate"
+
+  # 5) THE GATE: turn the remaining alert risks into a process exit code.
+  #    A High alert is at/above errorLevel, so the run exits non-zero — the build
+  #    is blocked. (Process result: 0 ok, 1 error, 2 warning.)
+  - type: exitStatus
+    parameters:
+      errorLevel: "HIGH"
+      warnLevel: "MEDIUM"
