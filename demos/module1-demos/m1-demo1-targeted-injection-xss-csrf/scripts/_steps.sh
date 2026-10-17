@@ -225,7 +225,13 @@ step2_xss() {
     fm section "Context-matched cases (request → response body line)"
     while IFS='|' read -r ctx payload needle; do
         body="$(curl -s -x "${PROXY}" -G --data-urlencode "name=${payload}" "${APP_INTERNAL}/greet")"
-        line="$(printf '%s\n' "${body}" | grep -F -- "${needle}" | head -1 | sed 's/^[[:space:]]*//' | cut -c1-110)"
+        # Show the reflection IN CONTEXT: a window centred on the injected payload, not the first N
+        # characters of the page (that only showed the doctype/head). The payload is never cut off;
+        # fmt.py wraps the window onto aligned lines, so nothing is truncated.
+        line="$(printf '%s\n' "${body}" | grep -F -- "${needle}" | head -1 | sed 's/^[[:space:]]*//' \
+                | needle="${needle}" awk '{n=ENVIRON["needle"]; i=index($0,n);
+                    if (i==0) print $0;
+                    else { s=(i>45?i-45:1); print substr($0, s, length(n)+90) } }')"
         fm star "${ctx} · request" "GET /greet?name=${payload}"
         if [ -n "${line}" ]; then
             fm star "${ctx} · response body" "${line}" focus; n=$((n+1))
