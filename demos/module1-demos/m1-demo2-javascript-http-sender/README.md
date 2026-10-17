@@ -66,7 +66,7 @@ cd demos/module1-demos/m1-demo2-javascript-http-sender
 
 **Expected start:** the startup script brings up the Globomantics app and ZAP and reports readiness. Continue only after it does — a failed startup is not one of the four teaching steps.
 
-**Interfaces:** [Globomantics app — localhost:8000](http://localhost:8000/) · [ZAP GUI — localhost:8080/zap/](http://localhost:8080/zap/) · [ZAP API/proxy — localhost:8090](http://localhost:8090/). You author the script in **VS Code** (`zap-scripts/globomantics-marker.js`) and inspect its effects in **ZAP's browser GUI** (History and Script Console). The `-before` branch deliberately ships without the finished JavaScript — create it from the example before expecting the verification steps to pass.
+**Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Globomantics app — localhost:8000</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI — localhost:8080/zap/</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API/proxy — localhost:8090</a>. You author the script in **VS Code** (`zap-scripts/globomantics-marker.js`) and inspect its effects in **ZAP's browser GUI** (History and Script Console). The `-before` branch deliberately ships without the finished JavaScript — create it from the example before expecting the verification steps to pass.
 
 </details>
 
@@ -139,7 +139,7 @@ Loading this file registers it with ZAP's **Graal.js** engine as an `httpsender`
 ./steps/01-load-javascript-http-sender.sh
 ```
 
-Then open [ZAP — localhost:8080/zap/](http://localhost:8080/zap/) → **Scripts → HTTP Sender → globomantics-marker** and read its name, engine and enabled state.
+Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP — localhost:8080/zap/</a> → **Scripts → HTTP Sender → globomantics-marker** and read its name, engine and enabled state.
 
 ### Expected result (the script's output contract — not your run)
 
@@ -185,7 +185,7 @@ Why does this matter more than Step 1? Because registration and execution fail i
 ./steps/02-prove-outbound-marker-header.sh
 ```
 
-Then open [ZAP — localhost:8080/zap/](http://localhost:8080/zap/) → **History**, select the newest `/greet?name=marker-…` request, and read its **Request** panel so you see the header on the message ZAP sent.
+Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP — localhost:8080/zap/</a> → **History**, select the newest `/greet?name=marker-…` request, and read its **Request** panel so you see the header on the message ZAP sent.
 
 ### Expected result (the script's output contract — not your run)
 
@@ -232,7 +232,7 @@ Here is the discipline I want you to keep: the terminal can happily print the *e
 ./steps/03-check-live-script-console.sh
 ```
 
-Then switch to [ZAP — localhost:8080/zap/](http://localhost:8080/zap/) → **Scripts → Script Console** and find the fresh line whose request URL matches this run.
+Then switch to <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP — localhost:8080/zap/</a> → **Scripts → Script Console** and find the fresh line whose request URL matches this run.
 
 ### Expected result (the script's output contract — not your run)
 
@@ -275,7 +275,7 @@ Reusable automation does not point at a file path and hope; it calls a *register
 ./steps/04-verify-enabled-script-registration.sh
 ```
 
-Then open [ZAP — localhost:8080/zap/](http://localhost:8080/zap/) → **Scripts → HTTP Sender → globomantics-marker** and read its name, type and engine from the same live session.
+Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP — localhost:8080/zap/</a> → **Scripts → HTTP Sender → globomantics-marker** and read its name, type and engine from the same live session.
 
 ### Expected result (the script's output contract — not your run)
 
