@@ -66,7 +66,7 @@ cd demos/module1-demos/m1-demo3-python-scanning-authentication
 
 **Expected start:** the reset script prints a clean-slate message and brings up the vulnerable Globomantics build. Continue only after it reports readiness — a failed startup is not one of the four teaching steps.
 
-**Interfaces:** [Globomantics app — localhost:8000](http://localhost:8000/) · [ZAP GUI — localhost:8080/zap/](http://localhost:8080/zap/) · [ZAP API/proxy — localhost:8090](http://localhost:8090/). You author the two Python scripts in **VS Code** and inspect them in **ZAP's GUI** (Scripts → Active Rules, Scripts → Authentication, the Globomantics context, and Alerts). The `-before` branch omits the finished rule and auth script — create them before the later checks.
+**Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Globomantics app — localhost:8000</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI — localhost:8080/zap/</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API/proxy — localhost:8090</a>. You author the two Python scripts in **VS Code** and inspect them in **ZAP's GUI** (Scripts → Active Rules, Scripts → Authentication, the Globomantics context, and Alerts). The `-before` branch omits the finished rule and auth script — create them before the later checks.
 
 </details>
 
@@ -177,7 +177,7 @@ This runs on ZAP's **Python Scripting (jython)** add-on, so the file is Python 2
 ./steps/01-load-python-active-scan-rule.sh
 ```
 
-Then open [ZAP — localhost:8080/zap/](http://localhost:8080/zap/) → **Scripts → Active Rules** and confirm the loaded rule and its name.
+Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP — localhost:8080/zap/</a> → **Scripts → Active Rules** and confirm the loaded rule and its name.
 
 ### Expected result (the script's output contract — not your run)
 
@@ -289,7 +289,7 @@ The reason the logged-in check matters as much as the login itself: without it, 
 ./steps/02-register-scripted-authentication.sh
 ```
 
-Then open [ZAP — localhost:8080/zap/](http://localhost:8080/zap/) → **Scripts → Authentication** to confirm the registered script.
+Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP — localhost:8080/zap/</a> → **Scripts → Authentication** to confirm the registered script.
 
 ### Expected result (the script's output contract — not your run)
 
@@ -336,7 +336,7 @@ Why insist on the comparison? Because a clean scan report is meaningless if the 
 ./steps/03-confirm-authenticated-profile-access.sh
 ```
 
-Keep the denied and authenticated profile requests and the authentication trace visible together. Open [ZAP — localhost:8080/zap/](http://localhost:8080/zap/) → the **Globomantics context → Users → Alice** when you want to see the context ZAP authenticated as.
+Keep the denied and authenticated profile requests and the authentication trace visible together. Open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP — localhost:8080/zap/</a> → the **Globomantics context → Users → Alice** when you want to see the context ZAP authenticated as.
 
 ### Expected result (the script's output contract — not your run)
 
@@ -384,7 +384,7 @@ The absent-before/present-after gate is the heart of the step. A leftover alert 
 ./steps/04-confirm-custom-scan-alert.sh
 ```
 
-Then open [ZAP — localhost:8080/zap/](http://localhost:8080/zap/) → **Alerts** and select the newly raised custom alert on `/account/profile`.
+Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP — localhost:8080/zap/</a> → **Alerts** and select the newly raised custom alert on `/account/profile`.
 
 ### Expected result (the script's output contract — not your run)
 
