@@ -21,7 +21,7 @@ K="${ZAP_API_KEY:-}"   # lazy: the reference panel needs no key; ensure_ready ch
 POLICY="m1demo1"
 POLICY_IDS="40018 40019 40020 40021 40022 40027 40033 90020 90037"
 XSS_POLICY="m1xss"
-XSS_IDS="40012 40014 40016 40017"   # reflected / persistent XSS active rules
+XSS_IDS="40012"   # reflected XSS active rule (persistent-XSS rules are out of scope here)
 
 PASS=0; FAIL=0; STEP_RC=0
 pass() { fm ok "$1"; PASS=$((PASS+1)); STEP_RC=0; }
@@ -57,26 +57,48 @@ ensure_ready() {
     return 0
 }
 
-build_policy_quiet() {
+build_policy_quiet() { # returns non-zero if ZAP rejects the policy or a rule
     zap ascan/action/removeScanPolicy "scanPolicyName=${POLICY}" >/dev/null 2>&1 || true
-    zap ascan/action/addScanPolicy "scanPolicyName=${POLICY}" >/dev/null 2>&1 || true
-    zap ascan/action/disableAllScanners "scanPolicyName=${POLICY}" >/dev/null 2>&1 || true
+    zap ascan/action/addScanPolicy "scanPolicyName=${POLICY}" >/dev/null || return 1
+    zap ascan/action/disableAllScanners "scanPolicyName=${POLICY}" >/dev/null || return 1
     local id
     for id in ${POLICY_IDS}; do
-        zap ascan/action/enableScanners "ids=${id}&scanPolicyName=${POLICY}" >/dev/null 2>&1 || true
+        zap ascan/action/enableScanners "ids=${id}&scanPolicyName=${POLICY}" >/dev/null || return 1
+    done
+}
+
+enabled_rules() { # <policy> -> space-separated rule IDs ZAP reports as enabled
+    zap ascan/view/scanners "scanPolicyName=$1" | python3 -c '
+import json,sys
+print(" ".join(sorted(s["id"] for s in json.load(sys.stdin)["scanners"] if s.get("enabled")=="true")))'
+}
+
+clear_alerts() { zap core/action/deleteAllAlerts >/dev/null; }
+
+clear_alerts_for() { # <url> <pluginId> -- delete only that rule's old alerts on that URL
+    local base id; base="$(enc "${1%%\?*}")"
+    for id in $(zap core/view/alerts "baseurl=${base}" | python3 -c '
+import json,sys
+print(" ".join(a["id"] for a in json.load(sys.stdin)["alerts"] if a.get("pluginId")==sys.argv[1]))' "$2"); do
+        zap core/action/deleteAlert "id=${id}" >/dev/null || return 1
     done
 }
 
 scan_url_quiet() { # <url>  -- active-scan one endpoint, wait, no output
     local url="$1" eu sid st waited=0
     eu="$(enc "${url}")"
-    zap core/action/accessUrl "url=${eu}&followRedirects=false" >/dev/null 2>&1 || return 1
-    sid="$(zap ascan/action/scan "url=${eu}&recurse=false&scanPolicyName=${POLICY}" | jget scan 2>/dev/null)"
+    local try
+    for try in 1 2 3 4 5; do
+        zap core/action/accessUrl "url=${eu}&followRedirects=false" >/dev/null 2>&1 || true
+        sid="$(zap ascan/action/scan "url=${eu}&recurse=false&scanPolicyName=${POLICY}" | jget scan 2>/dev/null)"
+        [[ "${sid}" =~ ^[0-9]+$ ]] && break
+        sleep 3   # the sites tree may not hold the URL yet on a fresh ZAP
+    done
     [[ "${sid}" =~ ^[0-9]+$ ]] || return 1
     while :; do
         st="$(zap ascan/view/status "scanId=${sid}" | jget status 2>/dev/null)"
-        [ "${st}" = "100" ] && break
-        sleep 3; waited=$((waited+3)); [ "${waited}" -gt 300 ] && break
+        [ "${st}" = "100" ] && return 0
+        sleep 3; waited=$((waited+3)); [ "${waited}" -gt 300 ] && return 2   # timed out
     done
 }
 
@@ -94,11 +116,11 @@ for a in json.load(sys.stdin)["alerts"]:
 
 build_xss_policy_quiet() {
     zap ascan/action/removeScanPolicy "scanPolicyName=${XSS_POLICY}" >/dev/null 2>&1 || true
-    zap ascan/action/addScanPolicy "scanPolicyName=${XSS_POLICY}" >/dev/null 2>&1 || true
-    zap ascan/action/disableAllScanners "scanPolicyName=${XSS_POLICY}" >/dev/null 2>&1 || true
+    zap ascan/action/addScanPolicy "scanPolicyName=${XSS_POLICY}" >/dev/null || return 1
+    zap ascan/action/disableAllScanners "scanPolicyName=${XSS_POLICY}" >/dev/null || return 1
     local id
     for id in ${XSS_IDS}; do
-        zap ascan/action/enableScanners "ids=${id}&scanPolicyName=${XSS_POLICY}" >/dev/null 2>&1 || true
+        zap ascan/action/enableScanners "ids=${id}&scanPolicyName=${XSS_POLICY}" >/dev/null || return 1
     done
 }
 
@@ -110,20 +132,19 @@ scan_xss_quiet() { # <url> -- active-scan one endpoint with the XSS policy, wait
     [[ "${sid}" =~ ^[0-9]+$ ]] || return 1
     while :; do
         st="$(zap ascan/view/status "scanId=${sid}" | jget status 2>/dev/null)"
-        [ "${st}" = "100" ] && break
-        sleep 3; waited=$((waited+3)); [ "${waited}" -gt 180 ] && break
+        [ "${st}" = "100" ] && return 0
+        sleep 3; waited=$((waited+3)); [ "${waited}" -gt 180 ] && return 2   # timed out
     done
 }
 
-# ZAP's reflected-XSS alert on a URL -> "param|attack|evidence" (empty if none).
+# ZAP's reflected-XSS alert on a URL -> "name|param|attack|evidence|risk|confidence" (empty if none).
 xss_alert() { # <url>
     local base; base="$(enc "${1%%\?*}")"
     zap core/view/alerts "baseurl=${base}" | python3 -c '
 import json,sys
 for a in json.load(sys.stdin)["alerts"]:
-    nm = a.get("alert") or a.get("name") or ""
-    if a.get("pluginId")=="40012" or "Cross Site Scripting (Reflected)" in nm:
-        print("%s|%s|%s" % (a.get("param",""), a.get("attack",""), a.get("evidence","")))
+    if a.get("pluginId")=="40012":
+        print("|".join(a.get(k,"").replace("|","/").replace("\n"," ") for k in ("alert","param","attack","evidence","risk","confidence")))
         break
 '
 }
@@ -139,7 +160,8 @@ print_reference() {
     fm section "CSRF token states"
     fm item "valid for this session — the request should succeed"
     fm item "missing or invalid — the request should be rejected"
-    fm item "a valid token reused with a DIFFERENT session's cookie — the request should be rejected: a token must be tied to the session it was issued to (same-session reuse is only a concern when the app requires single-use tokens)"
+    fm item "replayed — a token that was already used once is sent again: the request should be rejected"
+    fm item "cross-session — a token issued to another session is sent with this session's cookie: the request should be rejected"
 }
 
 # ===========================================================================
@@ -148,15 +170,21 @@ print_reference() {
 step1_injection() {
     fm header "Targeted injection scan — one policy, three endpoints" \
               "Proves ZAP detects SQL, NoSQL, and command injection as real findings (EO1a)."
-    build_policy_quiet
-    fm star "Policy rules enabled" "SQL-injection family + NoSQL 40033 + command 90020/90037"
+    clear_alerts || { fail "could not clear old alerts" "ZAP API refused deleteAllAlerts" "restart ZAP with ./scripts/demo_reset.sh"; return 1; }
+    build_policy_quiet || { fail "ZAP rejected the scan policy" "a rule ID is not installed" "check ascanrulesBeta (40033) is installed"; return 1; }
+    local rules; rules="$(enabled_rules "${POLICY}")"
+    fm star "Policy ${POLICY} · rules ZAP reports enabled" "${rules:-<none>}"
 
     fm note "running the focused scan across the three endpoints..."
-    scan_url_quiet "${APP_INTERNAL}/search?q=Router"
-    scan_url_quiet "${APP_INTERNAL}/api/account?username=alice"
-    scan_url_quiet "${APP_INTERNAL}/admin/ping?host=127.0.0.1"
+    local u rc scan_ok=1
+    for u in "${APP_INTERNAL}/search?q=Router" "${APP_INTERNAL}/api/account?username=alice" "${APP_INTERNAL}/admin/ping?host=127.0.0.1"; do
+        scan_url_quiet "${u}"; rc=$?
+        if [ "${rc}" != 0 ]; then
+            fm star "Scan ${u#${APP_INTERNAL}}" "$([ "${rc}" = 2 ] && echo 'TIMED OUT' || echo 'DID NOT START')"; scan_ok=0
+        fi
+    done
 
-    fm section "Findings — alert raised per endpoint"
+    fm section "Findings — alert raised per endpoint (this run only)"
     local allok=1 rec pid risk conf
     _row() { # <label> <url> <ids>
         rec="$(first_alert "$2" "$3")"
@@ -171,11 +199,15 @@ step1_injection() {
     _row "NoSQL injection · /api/account (username)" "${APP_INTERNAL}/api/account?username=alice" "40033"
     _row "Command injection · /admin/ping (host)"    "${APP_INTERNAL}/admin/ping?host=127.0.0.1" "90020 90037"
 
-    [ "${allok}" = 1 ] \
-        && pass "targeted scan raised all three injection alerts" \
-        || fail "one or more injection alerts did not fire" \
-                "an endpoint or the scan policy changed" \
-                "ask: 're-check the injection endpoint in step 1 that raised no alert; fix the endpoint, not the check'"
+    local need missing=""
+    for need in 40018 40022 40033 90020 90037; do [[ " ${rules} " == *" ${need} "* ]] || missing="${missing} ${need}"; done
+    if [ "${allok}" = 1 ] && [ "${scan_ok}" = 1 ] && [ -z "${missing}" ]; then
+        pass "targeted scan raised all three injection alerts"
+    else
+        fail "one or more injection alerts did not fire (scans ok=${scan_ok}; missing rules:${missing:- none})" \
+             "an endpoint, a scan or the scan policy changed" \
+             "re-check the endpoint that raised no alert; fix the endpoint, not the check"
+    fi
     return "${STEP_RC}"
 }
 
@@ -183,48 +215,49 @@ step1_injection() {
 # STEP 2 — XSS request and response body (EO1b)
 # ===========================================================================
 step2_xss() {
-    fm header "Reflected XSS — match the context, then let ZAP confirm it" \
-              "The output context decides the payload; ZAP's active scanner then proves an executable reflected XSS, not just a reflection (EO1b)."
+    fm header "Reflected XSS — a context-matched payload, then ZAP confirms it" \
+              "The output context decides the payload; ZAP's reflected-XSS rule 40012 then confirms the finding (EO1b)."
+    clear_alerts_for "${APP_INTERNAL}/greet" 40012 || { fail "could not clear old XSS alerts" "ZAP API refused deleteAlert" "restart ZAP with ./scripts/demo_reset.sh"; return 1; }
 
-    # Part A — the single 'name' input lands in three output contexts, so a real
-    # test needs a context-specific payload for each. This is where you choose
-    # the payload; it is NOT by itself proof of executable XSS.
-    local marker='zzMARKzz' body b1 b2 b3
-    body="$(curl -s -x "${PROXY}" "${APP_INTERNAL}/greet?name=$(enc "${marker}")")"
-    fm section "Output contexts for the 'name' parameter (choose a payload per context)"
-    b1="$(echo "${body}" | grep -o '<p>Hello[^<]*' | head -1)"
-    b2="$(echo "${body}" | grep -oE 'type="text" value="[^"]*"' | head -1 | sed 's/^type="text" //')"
-    b3="$(echo "${body}" | grep -o 'var greeting = "[^;]*' | head -1)"
-    fm star "HTML body — use <script>…</script>" "${b1}"
-    fm star "HTML attribute — break out with \">…" "${b2}"
-    fm star "JS string — break out with \";…" "${b3}"
-    local n=0
-    echo "${body}" | grep -q "<p>Hello ${marker}"     && n=$((n+1))
-    echo "${body}" | grep -q "value=\"${marker}\""     && n=$((n+1))
-    echo "${body}" | grep -q "greeting = \"${marker}\"" && n=$((n+1))
+    # Part A — Maya's context-matched cases. Each payload is sent through ZAP; the
+    # exact request and the response line that reflects it are printed.
+    local n=0 ctx payload needle body line
+    fm section "Context-matched cases (request → response body line)"
+    while IFS='|' read -r ctx payload needle; do
+        body="$(curl -s -x "${PROXY}" -G --data-urlencode "name=${payload}" "${APP_INTERNAL}/greet")"
+        line="$(printf '%s\n' "${body}" | grep -F -- "${needle}" | head -1 | sed 's/^[[:space:]]*//' | cut -c1-110)"
+        fm star "${ctx} · request" "GET /greet?name=${payload}"
+        if [ -n "${line}" ]; then
+            fm star "${ctx} · response body" "${line}" focus; n=$((n+1))
+        else
+            fm star "${ctx} · response body" "payload NOT reflected unescaped"
+        fi
+    done <<'CASES'
+HTML body|<script>alert(1)</script>|<p>Hello <script>alert(1)</script>
+HTML attribute|"><svg onload=alert(1)>|value=""><svg onload=alert(1)>
+JavaScript string|";alert(1);//|greeting = "";alert(1);//
+CASES
 
-    # Part B — ZAP actively scans 'name' with the reflected-XSS rules; it injects
-    # real payloads and raises "Cross Site Scripting (Reflected)" only when the
-    # reflection is actually exploitable in its context.
-    build_xss_policy_quiet
-    fm note "running ZAP's reflected-XSS scanner against /greet (name)..."
-    scan_xss_quiet "${APP_INTERNAL}/greet?name=${marker}"
-    local rec param attack evidence
+    # Part B — ZAP actively scans 'name' with reflected-XSS rule 40012.
+    build_xss_policy_quiet || { fail "ZAP rejected the XSS policy" "rule 40012 missing" "check the ZAP image"; return 1; }
+    fm note "running ZAP's reflected-XSS rule 40012 against /greet (name)..."
+    scan_xss_quiet "${APP_INTERNAL}/greet?name=zzMARKzz"; local rc=$?
+    local rec name param attack evidence risk conf
     rec="$(xss_alert "${APP_INTERNAL}/greet")"
-    IFS='|' read -r param attack evidence <<<"${rec}"
+    IFS='|' read -r name param attack evidence risk conf <<<"${rec}"
 
-    fm section "ZAP's confirmed finding"
-    fm star "Alert" "Cross Site Scripting (Reflected)" focus
+    fm section "ZAP's confirmed finding (this run only)"
+    fm star "Alert" "${name:-NO ALERT RAISED}${risk:+ · ${risk}/${conf}}" focus
     fm star "Affected parameter" "${param:-<none>}"
     fm star "Payload ZAP injected" "${attack:-<none>}" focus
     fm star "Evidence (reflected in the response)" "${evidence:-<none>}"
 
-    if [ "${n}" = 3 ] && [ -n "${param}" ] && [ -n "${attack}" ]; then
-        pass "ZAP confirmed reflected XSS on '${param}' with a context-specific payload (and the input lands in all three contexts)"
+    if [ "${n}" = 3 ] && [ "${rc}" = 0 ] && [ "${param}" = "name" ] && [ -n "${attack}" ]; then
+        pass "all three context-matched payloads reflected unescaped, and ZAP rule 40012 confirmed reflected XSS on 'name'"
     else
-        fail "reflected XSS was not confirmed (contexts ${n}/3; ZAP param='${param:-}')" \
-             "the vulnerable build should reflect in 3 contexts and ZAP should raise Cross Site Scripting (Reflected) on name" \
-             "ask: 'on the vulnerable build, /greet did not yield ZAP a Cross Site Scripting (Reflected) alert on name; check the XSS rules and the endpoint'"
+        fail "reflected XSS was not confirmed (contexts ${n}/3; scan rc=${rc}; ZAP param='${param:-}')" \
+             "the vulnerable build should reflect each payload unescaped and ZAP should raise 40012 on name" \
+             "check the /greet endpoint and that APP_BUILD=vulnerable"
     fi
     return "${STEP_RC}"
 }
@@ -233,11 +266,11 @@ step2_xss() {
 # STEP 3 — CSRF token replay result (EO1c)
 # ===========================================================================
 step3_csrf() {
-    fm header "CSRF — a token reused across sessions" \
-              "A CSRF token must be tied to the session it was issued to. Here a token minted in one session is reused with a second session's cookie, and the protected email change still runs (EO1c)."
+    fm header "CSRF — valid, missing, replayed and cross-session tokens" \
+              "A CSRF token must be single-use and tied to its session. A used token is replayed, and a token from another session is tried; both should be rejected (EO1c)."
     local A=/tmp/.c_a B=/tmp/.c_b
-    local legit="alice@globomantics.example" attack="attacker@evil.example"
-    local tokenA tokenB v m before_x x after_x
+    local legit="alice@globomantics.example" replayed="replayed@evil.example" attack="attacker@evil.example"
+    local tokenA tokenB v m r x before_r after_r after_x
     rm -f "${A}" "${B}"
 
     _post() { # <cookiejar> <data> -> HTTP code
@@ -248,64 +281,104 @@ step3_csrf() {
             | python3 -c 'import json,sys;print(json.load(sys.stdin).get("email",""))' 2>/dev/null
     }
 
-    # Two independent authenticated sessions. A is where a valid token is minted;
-    # B is the second session whose cookie rides the forged request.
     curl -s -x "${PROXY}" -o /dev/null -c "${A}" -X POST --data 'username=mallory' "${APP_INTERNAL}/login" >/dev/null
     curl -s -x "${PROXY}" -o /dev/null -c "${B}" -X POST --data 'username=alice'   "${APP_INTERNAL}/login" >/dev/null
     tokenA="$(curl -s -x "${PROXY}" -b "${A}" "${APP_INTERNAL}/account/email" | grep -o '[a-f0-9]\{32\}' | head -1)"
     tokenB="$(curl -s -x "${PROXY}" -b "${B}" "${APP_INTERNAL}/account/email" | grep -o '[a-f0-9]\{32\}' | head -1)"
 
-    v="$(_post "${B}" "email=${legit}&csrf_token=${tokenB}")"   # control: B's own token
-    m="$(_post "${B}" "email=${attack}")"                       # control: no token
-    before_x="$(_email "${B}")"                                 # state after the valid control
-    x="$(_post "${B}" "email=${attack}&csrf_token=${tokenA}")"  # A's token with B's cookie
-    after_x="$(_email "${B}")"                                  # state after the cross-session request
+    v="$(_post "${B}" "email=${legit}&csrf_token=${tokenB}")"      # valid: B's own fresh token
+    m="$(_post "${B}" "email=${attack}")"                          # missing token
+    before_r="$(_email "${B}")"
+    r="$(_post "${B}" "email=${replayed}&csrf_token=${tokenB}")"   # replay: the SAME, already-used token
+    after_r="$(_email "${B}")"
+    x="$(_post "${B}" "email=${attack}&csrf_token=${tokenA}")"     # cross-session: A's token, B's cookie
+    after_x="$(_email "${B}")"
 
-    fm star "valid token (session B's own)" "${v}"
+    fm star "valid token (session B's own, first use)" "${v}"
     fm star "missing token" "${m}"
-    fm star "session B's email before the cross-session request" "${before_x}"
-    fm star "token from session A, submitted with session B's cookie" "${x}  (should be rejected)" focus
-    fm star "session B's email after the cross-session request" "${after_x}" focus
+    fm star "replayed used token (same token, second use)" "${r}  (should be rejected)" focus
+    fm star "session B's email: before → after the replay" "${before_r} → ${after_r}" focus
+    fm star "token from session A, submitted with session B's cookie" "${x}  (should be rejected)"
+    fm star "session B's email after the cross-session request" "${after_x}"
 
-    if [ "${v} ${m} ${x}" = "200 403 200" ] && [ "${before_x}" = "${legit}" ] && [ "${after_x}" = "${attack}" ]; then
-        pass "session A's token was accepted with session B's cookie (200) and changed session B's email to ${attack} — the token is not tied to its session"
+    if [ "${v} ${m} ${r}" = "200 403 200" ] && [ "${before_r}" = "${legit}" ] && [ "${after_r}" = "${replayed}" ]; then
+        if [ "${x}" = 200 ] && [ "${after_x}" = "${attack}" ]; then
+            pass "the used token was accepted again (200) and changed the email; a token from another session was also accepted — tokens are neither single-use nor session-bound"
+        else
+            pass "the used token was accepted again (200) and changed the email — tokens are not single-use"
+        fi
     else
-        fail "cross-session CSRF result was ${v}/${m}/${x}, email ${before_x:-<empty>} -> ${after_x:-<empty>} (expected 200/403/200 and ${legit} -> ${attack})" \
-             "the vulnerable build should accept session A's token with session B's cookie and change state" \
-             "ask: 'on the vulnerable build, the email-change handler is not accepting a cross-session token; inspect the CSRF check and /account/email/current'"
+        fail "CSRF result was valid=${v} missing=${m} replay=${r}, email ${before_r:-<empty>} -> ${after_r:-<empty>} (expected 200/403/200 and ${legit} -> ${replayed})" \
+             "the vulnerable build should accept a replayed token and change state" \
+             "check APP_BUILD=vulnerable and the /account/email handler"
     fi
     return "${STEP_RC}"
 }
 
 # ===========================================================================
 # STEP 4 — Alert disposition record (TO1: EO1a + EO1b + EO1c)
-# Self-contained: re-confirms each finding from live app behavior.
+# Reads the alerts ZAP raised in Steps 1-2, reconciles each with live behaviour,
+# and writes the record to logs/alert-disposition.md.
 # ===========================================================================
 step4_disposition() {
-    fm header "Alert disposition — reconcile each alert with app behavior" \
-              "Turns raw alerts into decisions you can defend (EO1a, EO1b, EO1c)."
-    local sqlerr b i ping xss
+    fm header "Alert disposition — reconcile each ZAP alert with app behavior" \
+              "Turns ZAP alerts into recorded decisions you can defend (EO1a, EO1b, EO1c)."
+    local sqlerr b i ping xss csrf rec_sql rec_nosql rec_cmd rec_xss record ok=1
+    rec_sql="$(first_alert "${APP_INTERNAL}/search?q=Router" "40018 40022")"
+    rec_nosql="$(first_alert "${APP_INTERNAL}/api/account?username=alice" "40033")"
+    rec_cmd="$(first_alert "${APP_INTERNAL}/admin/ping?host=127.0.0.1" "90020 90037")"
+    rec_xss="$(first_alert "${APP_INTERNAL}/greet" "40012")"
+
     sqlerr="$(curl -s -x "${PROXY}" "${APP_INTERNAL}/search?q=Router%27" | grep -o 'unterminated[^<]*' | head -1 \
               | python3 -c 'import html,sys;print(html.unescape(sys.stdin.read().strip()))')"
-    b="$(curl -s -x "${PROXY}" "${APP_INTERNAL}/api/account?username=alice"     | python3 -c 'import json,sys;print(json.load(sys.stdin).get("count","?"))')"
-    i="$(curl -s -x "${PROXY}" "${APP_INTERNAL}/api/account?username%5B%24ne%5D=" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("count","?"))')"
-    # A routine ping proves the endpoint works, NOT command injection.
-    # Exercise only the authorized local training app with a harmless shell
-    # marker appended to the host parameter, then verify its actual output.
+    b="$(curl -s -x "${PROXY}" "${APP_INTERNAL}/api/account?username=alice"     | python3 -c 'import json,sys;print(json.load(sys.stdin).get("count",""))' 2>/dev/null)"
+    i="$(curl -s -x "${PROXY}" "${APP_INTERNAL}/api/account?username%5B%24ne%5D=" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("count",""))' 2>/dev/null)"
     ping="$(curl -s -x "${PROXY}" -G --data-urlencode 'host=127.0.0.1; printf ZAP_CMD_PROOF' "${APP_INTERNAL}/admin/ping" | grep -o 'ZAP_CMD_PROOF' | head -1)"
-    if curl -s -x "${PROXY}" "${APP_INTERNAL}/greet?name=zzMARKzz" | grep -q '<p>Hello zzMARKzz'; then xss="reflected unescaped"; else xss="encoded"; fi
+    if curl -s -x "${PROXY}" -G --data-urlencode 'name=<script>alert(1)</script>' "${APP_INTERNAL}/greet" | grep -qF '<p>Hello <script>alert(1)</script>'; then xss="payload reflected unescaped"; fi
+    # CSRF has no ZAP alert in this policy; its row is backed by a fresh replay check.
+    local C=/tmp/.c_d t c1 c2
+    curl -s -x "${PROXY}" -o /dev/null -c "${C}" -X POST --data 'username=alice' "${APP_INTERNAL}/login" >/dev/null
+    t="$(curl -s -x "${PROXY}" -b "${C}" "${APP_INTERNAL}/account/email" | grep -o '[a-f0-9]\{32\}' | head -1)"
+    c1="$(curl -s -x "${PROXY}" -o /dev/null -w '%{http_code}' -b "${C}" -X POST --data "email=alice@globomantics.example&csrf_token=${t}" "${APP_INTERNAL}/account/email")"
+    c2="$(curl -s -x "${PROXY}" -o /dev/null -w '%{http_code}' -b "${C}" -X POST --data "email=replayed@evil.example&csrf_token=${t}" "${APP_INTERNAL}/account/email")"
+    [ "${c1} ${c2}" = "200 200" ] && csrf="used token accepted twice (${c1}, ${c2})"
 
-    fm star "40018 SQL injection · /search" "confirmed — DB error: ${sqlerr:-none}" focus
-    fm star "40033 NoSQL injection · /api/account" "confirmed — accounts ${b} → ${i} under operator injection" focus
-    fm star "90020/90037 Command injection · /admin/ping" "injected shell marker: ${ping:-none}" focus
-    fm star "XSS reflected · /greet" "confirmed — ${xss}" focus
+    _disp() { # <zap record or "-"> <evidence or empty> -> "True Positive" | "Not confirmed"
+        if [ -n "$1" ] && [ -n "$2" ]; then echo "True Positive"; else echo "Not confirmed"; ok=0; fi
+    }
+    local d_sql d_nosql d_cmd d_xss d_csrf
+    [[ "${b}" =~ ^[0-9]+$ && "${i}" =~ ^[0-9]+$ && "${i}" -gt "${b}" ]] && nosql="accounts ${b} → ${i}" || nosql=""
+    d_sql="$(_disp "${rec_sql}" "${sqlerr}")";  d_nosql="$(_disp "${rec_nosql}" "${nosql}")"
+    d_cmd="$(_disp "${rec_cmd}" "${ping}")";    d_xss="$(_disp "${rec_xss}" "${xss}")"
+    d_csrf="$(_disp "-" "${csrf}")"
 
-    if [ -n "${sqlerr}" ] && [ "${i}" != "${b}" ] && [ -n "${ping}" ] && [ "${xss}" = "reflected unescaped" ]; then
-        pass "injection and reflected-XSS dispositions tied to observed behavior; injected shell marker verified"
+    fm star "${rec_sql%%|*} SQL injection · /search (q)" "${d_sql} — DB error: ${sqlerr:-none}" focus
+    fm star "${rec_nosql%%|*} NoSQL injection · /api/account (username)" "${d_nosql} — ${nosql:-no count change}" focus
+    fm star "${rec_cmd%%|*} Command injection · /admin/ping (host)" "${d_cmd} — injected shell marker: ${ping:-none}" focus
+    fm star "${rec_xss%%|*} Reflected XSS · /greet (name)" "${d_xss} — ${xss:-not reflected}" focus
+    fm star "CSRF · /account/email (csrf_token)" "${d_csrf} — ${csrf:-replay rejected}" focus
+
+    record="${HERE_STEPS}/../logs/alert-disposition.md"
+    mkdir -p "$(dirname "${record}")"
+    {
+        echo "# Alert disposition record — m1-demo1 ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+        echo
+        echo "| Alert ID | Rule | Endpoint | Disposition | Evidence |"
+        echo "|---|---|---|---|---|"
+        echo "| ${rec_sql%%|*} | SQL Injection | GET /search?q= | ${d_sql} | ${sqlerr:-no DB error} |"
+        echo "| ${rec_nosql%%|*} | NoSQL Injection - MongoDB | GET /api/account?username= | ${d_nosql} | ${nosql:-no count change} |"
+        echo "| ${rec_cmd%%|*} | Remote OS Command Injection | GET /admin/ping?host= | ${d_cmd} | shell marker: ${ping:-none} |"
+        echo "| ${rec_xss%%|*} | Cross Site Scripting (Reflected) | GET /greet?name= | ${d_xss} | ${xss:-not reflected} |"
+        echo "| — | CSRF token replay | POST /account/email | ${d_csrf} | ${csrf:-replay rejected} |"
+    } > "${record}"
+    fm star "Disposition record written" "logs/alert-disposition.md"
+
+    if [ "${ok}" = 1 ]; then
+        pass "every ZAP alert and the CSRF case reconciled with observed behavior and recorded"
     else
-        fail "a finding could not be reconciled with app behavior" \
-             "the app behaved differently than the disposition expects" \
-             "ask: 're-check the disposition evidence for the finding that did not confirm on the vulnerable build'"
+        fail "a finding could not be reconciled (missing ZAP alert or behaviour evidence)" \
+             "run Steps 1 and 2 first in this ZAP session, on the vulnerable build" \
+             "re-run Steps 1-2, then Step 4"
     fi
     return "${STEP_RC}"
 }

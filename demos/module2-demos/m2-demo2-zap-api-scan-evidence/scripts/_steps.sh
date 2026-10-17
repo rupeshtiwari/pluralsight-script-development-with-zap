@@ -82,11 +82,20 @@ for a in d.get("alerts",[]):
         print("yes"); break' "${CUSTOM_NAME}"
 }
 
-ensure_scan() { # prime once if there is no finished authenticated scan + alert yet
+STATE="${DEMO_DIR}/logs/.m2demo2-state"   # Step 1 plan + Step 2 API values, read by Steps 3-4
+mkdir -p "${DEMO_DIR}/logs"
+
+ensure_scan() { # Steps 2-4: the authenticated run from Step 1 must exist in this ZAP session
     { [ -n "$(custom_present)" ] && [ -n "$(scan_finished)" ]; } && return 0
-    fm note "Priming: this ZAP session has no finished authenticated scan yet — running the authenticated plan once so there is evidence to inspect."
+    fail "no finished authenticated scan in this ZAP session" "Step 1 runs the authenticated plan" "run Step 1 first"
+    return 1
+}
+
+run_authenticated_plan() { # Step 1: fresh alerts, run the authenticated plan, wait for the scan
+    zap core/action/deleteAllAlerts >/dev/null || return 1
     run_plan || { fail "could not start the plan to generate evidence" "automation/action/runPlan returned no plan id" "ask: 'the AF plan did not run; check the automation add-on and /af/af-plan.yaml'"; return 1; }
     local i; for i in $(seq 1 160); do plan_finished && break; sleep 3; done
+    plan_finished || { fail "the authenticated plan did not finish in time" "planProgress never reported finished" "check the ZAP container log"; return 1; }
     # Bounded wait for the active scan to fully complete so Step 1 observes
     # progress=100 and the JSON report in Steps 3-4 is generated from a finished
     # scan. If it never reaches 100% within the timeout, fail with a nonzero exit.
@@ -111,18 +120,19 @@ ensure_ready() {
     [ -n "${K}" ] || { fail "ZAP_API_KEY is not set" "the .env file is missing or not loaded" "run from the repo so .env loads"; return 1; }
     zap core/view/version | grep -q '"version"' || {
         fail "ZAP API not reachable" "the stack may still be starting" "run scripts/demo_up.sh, wait for 'Up', then retry"; return 1; }
-    ensure_scan || return 1
     return 0
 }
 
 # Cache the generated report path so steps 3 and 4 read the same file.
-REPORT_CONTAINER_PATH="/tmp/globo-api-report.json"
-generate_report() { # -> writes the report inside the ZAP container, echoes host-read JSON
-    local cid; cid="$(zap_container)"
+REPORT_CONTAINER_PATH=""
+generate_report() { # -> a NEW report file each call (never a stale one); echoes its JSON
+    local cid name; cid="$(zap_container)"
     [ -n "${cid}" ] || return 1
+    name="globo-api-report-$(date +%s)-${RANDOM}.json"
+    REPORT_CONTAINER_PATH="/tmp/${name}"
     zap reports/action/generate \
-        "title=$(enc 'Globomantics API evidence')&template=traditional-json&reportDir=/tmp&reportFileName=globo-api-report.json&display=false" \
-        >/dev/null 2>&1 || true
+        "title=$(enc 'Globomantics API evidence')&template=traditional-json&reportDir=/tmp&reportFileName=${name}&display=false" \
+        >/dev/null || return 1
     docker exec "${cid}" cat "${REPORT_CONTAINER_PATH}" 2>/dev/null
 }
 
@@ -130,10 +140,20 @@ generate_report() { # -> writes the report inside the ZAP container, echoes host
 # STEP 1 — ZAP API status response (EO3b)  -> "ZAP API status response"
 # ===========================================================================
 step1_api_status() {
-    fm header "The ZAP API answers: what engine, and is the scan done?" \
-              "You drive ZAP over HTTP, not the GUI — ask the running engine its version and whether the authenticated scan has finished (EO3b)."
-    local ver; ver="$(zap core/view/version | jq_py 'import json,sys
+    fm header "The ZAP API answers: what engine, and is the authenticated scan done?" \
+              "You drive ZAP over HTTP, not the GUI — start the authenticated plan, then ask the engine its version and whether the scan has finished (EO3b)."
+    fm note "running the authenticated Automation Framework plan through the API (fresh alert store)..."
+    run_authenticated_plan || return "${STEP_RC}"
+    local ver prog user errs
+    ver="$(zap core/view/version | jq_py 'import json,sys
 try: print(json.load(sys.stdin).get("version",""))
+except Exception: print("")')"
+    prog="$(zap automation/view/planProgress "planId=${PLAN_ID}")"
+    errs="$(printf '%s' "${prog}" | python3 -c 'import json,sys
+try: print(len(json.load(sys.stdin).get("error",[])))
+except Exception: print("?")')"
+    user="$(zap users/view/usersList "contextId=$(zap context/view/context "contextName=Globomantics" | python3 -c 'import json,sys;print(json.load(sys.stdin)["context"]["id"])' 2>/dev/null)" 2>/dev/null | python3 -c 'import json,sys
+try: print(" ".join(u["name"] for u in json.load(sys.stdin)["usersList"]))
 except Exception: print("")')"
     local scan; scan="$(zap ascan/view/scans | jq_py 'import json,sys
 try: s=json.load(sys.stdin).get("scans",[])
@@ -142,15 +162,17 @@ if not s: print("||"); raise SystemExit
 a=s[-1]
 print("%s|%s|%s|%s" % (a.get("id",""), a.get("progress",""), a.get("state",""), a.get("reqCount","")))')"
     IFS='|' read -r sid sprog sstate sreq <<<"${scan}"
+    printf 'plan=%s\nscan=%s\n' "${PLAN_ID}" "${sid}" > "${STATE}"
     fm star "ZAP runtime  (GET core/view/version)" "${ver:-unknown}" focus
-    fm star "Active scan  (GET ascan/view/scans)" "id=${sid:-?} · progress=${sprog:-?}% · state=${sstate:-?}"
+    fm star "Authenticated plan  (automation/view/planProgress)" "plan ${PLAN_ID} · finished · ${errs} errors · scanning as ${user:-?}"
+    fm star "Active scan  (GET ascan/view/scans)" "id=${sid:-?} · progress=${sprog:-?}% · state=${sstate:-?}" focus
     fm star "Requests the scan sent" "${sreq:-?}"
-    if [ -n "${ver}" ] && [ "${sprog}" = "100" ]; then
-        pass "the API reports the ZAP runtime and a finished scan"
+    if [ -n "${ver}" ] && [ "${sprog}" = "100" ] && [ "${errs}" = "0" ] && [[ " ${user} " == *" alice "* ]]; then
+        pass "the API reports the ZAP runtime and a finished authenticated scan"
     else
-        fail "the API did not report a finished scan" \
-             "version or scan status was missing (version='${ver}', progress='${sprog}')" \
-             "ask: 'ZAP API status is incomplete; confirm the scan ran and ascan/view/scans returns progress 100'"
+        fail "the API did not report a finished authenticated scan (version='${ver}', progress='${sprog}', plan errors=${errs}, user='${user}')" \
+             "the authenticated plan failed or the scan did not finish" \
+             "check ci/af-plan.yaml (mounted at /af) and the ZAP container log"
     fi
     return "${STEP_RC}"
 }
@@ -161,26 +183,24 @@ print("%s|%s|%s|%s" % (a.get("id",""), a.get("progress",""), a.get("state",""), 
 step2_api_alert() {
     fm header "The ZAP API answers: what did your script find, and how is it rated?" \
               "Ask the API for the script-generated custom alert — its rule identity and its disposition (risk + confidence) — the data a pipeline reads to decide (EO3b)."
+    ensure_scan || return "${STEP_RC}"
     local rec; rec="$(zap core/view/alerts "baseurl=$(enc "${PROFILE}")" | python3 -c 'import json,sys
 name=sys.argv[1]
-try: d=json.load(sys.stdin)
-except Exception: print("||||"); raise SystemExit
-for a in d.get("alerts",[]):
+for a in json.load(sys.stdin).get("alerts",[]):
     if (a.get("alert") or a.get("name"))==name:
-        print("%s|%s|%s|%s|%s" % (a.get("pluginId",""), a.get("alert") or a.get("name"), a.get("risk",""), a.get("confidence",""), a.get("param","")))
-        break
-else:
-    print("||||")' "${CUSTOM_NAME}")"
-    IFS='|' read -r pid name risk conf param <<<"${rec}"
+        print("|".join(str(a.get(k,"")) for k in ("pluginId","alertRef","alert","risk","confidence","param","id"))); break' "${CUSTOM_NAME}")"
+    IFS='|' read -r pid aref name risk conf param aid <<<"${rec}"
     if [ -n "${name}" ]; then
-        fm star "Rule identity  (pluginId · alert)" "${pid} · ${name}" focus
-        fm star "Disposition  (risk · confidence)" "${risk} · ${conf}"
+        fm star "Rule identity  (pluginId · alertRef)" "${pid} · ${aref}" focus
+        fm star "Alert" "${name}  (alert id ${aid})"
+        fm star "Disposition  (risk · confidence)" "${risk} · ${conf}" focus
         fm star "Parameter" "${param}"
+        printf 'pid=%s\nrisk=%s\nconf=%s\nparam=%s\n' "${pid}" "${risk}" "${conf}" "${param}" >> "${STATE}"
         pass "the API returns the script-generated alert's rule identity and disposition"
     else
         fail "the API returned no script-generated custom alert for the authenticated page" \
              "core/view/alerts had no '${CUSTOM_NAME}' entry on /account/profile" \
-             "ask: 'the ZAP API alert response is missing the custom rule alert; confirm the authenticated scan ran the Module 1 Python rule against /account/profile'"
+             "run Step 1 again; confirm the Module 1 Python rule ran as alice"
     fi
     return "${STEP_RC}"
 }
@@ -190,36 +210,44 @@ else:
 # ===========================================================================
 step3_json_report() {
     fm header "The official JSON report reconciles with the API" \
-              "Generate ZAP's own JSON report through the API and confirm it carries the SAME script-generated alert as the API response — one source of truth a pipeline can archive (EO3b)."
+              "Generate ZAP's own JSON report through the API and compare its alert field by field with the Step 2 API response (EO3b)."
+    ensure_scan || return "${STEP_RC}"
     local rep; rep="$(generate_report)"
     if [ -z "${rep}" ]; then
-        fail "could not read the generated JSON report" \
-             "reports/action/generate or reading /tmp/globo-api-report.json failed" \
-             "ask: 'the JSON report was not produced; confirm the reports add-on and docker access to the ZAP container'"
+        fail "could not generate or read the JSON report" "reports/action/generate failed" "check the reports add-on and docker access to the ZAP container"
         return "${STEP_RC}"
     fi
     local line; line="$(printf '%s' "${rep}" | python3 -c 'import json,sys
 name=sys.argv[1]
-try: d=json.load(sys.stdin)
-except Exception: print("|||"); raise SystemExit
+d=json.load(sys.stdin)
 for site in d.get("site",[]):
     for a in site.get("alerts",[]):
         if (a.get("alert") or a.get("name"))==name:
             inst=(a.get("instances") or [{}])[0]
-            print("%s|%s|%s|%s" % (a.get("pluginid",""), a.get("alert") or a.get("name"), a.get("riskdesc",""), inst.get("param","")))
-            raise SystemExit
-print("|||")' "${CUSTOM_NAME}")"
-    IFS='|' read -r pid name riskdesc param <<<"${line}"
-    if [ -n "${name}" ]; then
-        fm star "Report template" "traditional-json  (reports/action/generate)" focus
-        fm star "Report alert  (pluginid · name)" "${pid} · ${name}"
-        fm star "Report rating  (riskdesc)" "${riskdesc}"
-        fm star "Reconciled with the API" "same script-generated alert as the Step 2 alert response"
-        pass "the official JSON report carries the same script-generated alert as the API"
+            print("|".join([a.get("pluginid",""), a.get("riskdesc",""), inst.get("param","")])); raise SystemExit' "${CUSTOM_NAME}")"
+    IFS='|' read -r rpid riskdesc rparam <<<"${line}"
+    local arec apid arisk aconf aparam
+    arec="$(zap core/view/alerts "baseurl=$(enc "${PROFILE}")" | python3 -c '
+import json,sys
+name=sys.argv[1]
+for a in json.load(sys.stdin).get("alerts",[]):
+    if (a.get("alert") or a.get("name"))==name:
+        print("|".join(str(a.get(k,"")) for k in ("pluginId","risk","confidence","param"))); break' "${CUSTOM_NAME}")"
+    IFS='|' read -r apid arisk aconf aparam <<<"${arec}"
+    fm star "Report file  (traditional-json)" "${REPORT_CONTAINER_PATH}"
+    fm star "Report  pluginid · riskdesc · param" "${rpid:-?} · ${riskdesc:-?} · ${rparam:-?}" focus
+    fm star "API (Step 2)  pluginId · risk (confidence) · param" "${apid:-?} · ${arisk:-?} (${aconf:-?}) · ${aparam:-?}" focus
+    local m=0
+    [ -n "${rpid}" ] && [ "${rpid}" = "${apid}" ] && m=$((m+1))
+    [ -n "${riskdesc}" ] && [ "${riskdesc}" = "${arisk} (${aconf})" ] && m=$((m+1))
+    [ -n "${rparam}" ] && [ "${rparam}" = "${aparam}" ] && m=$((m+1))
+    fm star "Fields that match" "${m} of 3"
+    if [ "${m}" = 3 ]; then
+        pass "the official JSON report matches the API alert on rule ID, risk/confidence and parameter"
     else
-        fail "the JSON report did not contain the script-generated custom alert" \
-             "no '${CUSTOM_NAME}' entry in the report's site[].alerts[]" \
-             "ask: 'the JSON report is missing the custom rule alert; confirm the authenticated scan ran the Module 1 Python rule and the report template'"
+        fail "the JSON report and the API disagree (${m}/3 fields match)" \
+             "run Step 2 first in this session, or the report was generated from different scan data" \
+             "re-run Steps 1-3; investigate any mismatch, never assume freshness"
     fi
     return "${STEP_RC}"
 }
@@ -230,36 +258,28 @@ print("|||")' "${CUSTOM_NAME}")"
 step4_insights() {
     fm header "ZAP 2.17.0 Insights assess scan effectiveness, not just findings" \
               "Read the report's Insights — signals about how well the scan ran and any operational issues — so you trust the result, not just the alert list (EO3b)."
+    ensure_scan || return "${STEP_RC}"
     local rep; rep="$(generate_report)"
     if [ -z "${rep}" ]; then
-        fail "could not read the generated JSON report for Insights" \
-             "reports/action/generate or reading ${REPORT_CONTAINER_PATH} failed" \
-             "ask: 'the JSON report was not produced; confirm the reports add-on and docker access to the ZAP container'"
+        fail "could not generate or read the JSON report for Insights" "reports/action/generate failed" "check the reports add-on"
         return "${STEP_RC}"
     fi
-    # Require the report's OWN Insights section. Generic statistics are NOT a
-    # substitute for ZAP 2.17.0 Insights evidence, so a missing insights section
-    # is a hard failure (fail closed) rather than a silent fallback to stats.
     local ins; ins="$(printf '%s' "${rep}" | jq_py 'import json,sys
-try: d=json.load(sys.stdin)
-except Exception: raise SystemExit
-items=d.get("insights") or []
-for it in items[:3]:
+d=json.load(sys.stdin)
+for it in (d.get("insights") or [])[:3]:
     print("%s\t%s\t%s\t%s" % (it.get("level",""), it.get("key",""), it.get("statistic",""), (it.get("description") or it.get("reason") or "")))')"
     if [ -z "${ins}" ]; then
-        fail "the report contained no ZAP Insights section" \
-             "ZAP 2.17.0 Insights evidence is required here; generic ZAP statistics do not substitute for it" \
-             "ask: 'the traditional-json report has no insights[] section on this ZAP build; confirm ZAP 2.17.0 emits Insights in the report before recording'"
+        fm star "Top-level report keys" "$(printf '%s' "${rep}" | python3 -c 'import json,sys;print(" ".join(sorted(json.load(sys.stdin).keys())))')"
+        fail "the report contained no ZAP Insights entries" \
+             "ZAP 2.17.0 Insights are required here; generic statistics do not substitute" \
+             "confirm the report keys above contain insights before recording"
         return "${STEP_RC}"
     fi
     local first=1
     while IFS=$'\t' read -r lvl key stat desc; do
         [ -z "${lvl}${key}${stat}${desc}" ] && continue
-        if [ "${first}" = 1 ]; then
-            fm star "Insight  (level · key)" "${lvl} · ${key}" focus; first=0
-        else
-            fm star "Insight  (level · key)" "${lvl} · ${key}"
-        fi
+        if [ "${first}" = 1 ]; then fm star "Insight  (level · key)" "${lvl} · ${key}" focus; first=0
+        else fm star "Insight  (level · key)" "${lvl} · ${key}"; fi
         fm star "Statistic · meaning" "${stat} · ${desc}"
     done <<<"${ins}"
     pass "the report's own Insights section reports scan effectiveness"
