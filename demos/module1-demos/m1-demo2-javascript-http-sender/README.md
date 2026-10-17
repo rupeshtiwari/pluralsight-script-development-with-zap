@@ -29,8 +29,8 @@ You need to distinguish authorized security-test traffic from normal Store reque
 
 You will extend ZAP through a real message hook and then verify it with observable effects:
 
-- Write and register an HTTP Sender JavaScript script in ZAP *(EO2a)*
-- Prove the outgoing header, live console output and enabled registration of that same script *(EO2a)*
+1. Write and register an HTTP Sender JavaScript script in ZAP *(EO2a)*
+2. Prove the outgoing header, live console output and enabled registration of that same script *(EO2a)*
 
 No separate course outline is required to complete this lab.
 
@@ -306,9 +306,12 @@ The script has a stable source path, a valid HTTP Sender type, and enabled regis
 <!-- student-achievement:start -->
 ## What You Achieved
 
-After all four checks and the live Script Console inspection, you can extend ZAP at the HTTP Sender hook and prove an actual message was changed. You can reuse the saved script name and path without confusing current registration with persistence after container teardown.
+You can now explain each learning objective with the evidence you captured:
 
-**Your final check:** Explain the result using your own captured evidence. A README example, missing result or earlier run does not satisfy this exercise.
+1. **(EO2a) You extended ZAP at the HTTP Sender hook.** You wrote and registered a JavaScript HTTP Sender script; ZAP listed it as type `httpsender`, enabled.
+2. **(EO2a) You proved the script changed real traffic — three independent ways.** The header `X-Globomantics-Marker: GLOBO-DEMO` appeared on a ZAP-sent `/greet` request, the live Script Console printed the fresh marker line the script wrote, and the registration was confirmed by name for Module 2 to reuse.
+
+**Your final check:** Explain each numbered outcome using your own captured evidence from this run. A README example, a missing result or an earlier run does not satisfy this exercise.
 <!-- student-achievement:end -->
 
 ## Finish Your Lab
