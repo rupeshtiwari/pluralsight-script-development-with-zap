@@ -66,7 +66,7 @@ cd demos/module2-demos/m2-demo3-security-quality-gates
 
 **Expected start:** the startup script reports healthy Globomantics, Postgres, MongoDB and ZAP services. If anything is not ready, stop and read the actual output before continuing.
 
-**Interfaces:** [Training application](http://localhost:8000/) · [ZAP GUI](http://localhost:8080/zap/) · [ZAP API and proxy](http://localhost:8090/), plus **GitHub → Actions → quality-gate** for the hosted proof. The `-before` branch deliberately omits the finished `ci/gate-plan.yaml` — author it from the exercise before running the gate.
+**Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Training application</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API and proxy</a>, plus **GitHub → Actions → quality-gate** for the hosted proof. The `-before` branch deliberately omits the finished `ci/gate-plan.yaml` — author it from the exercise before running the gate.
 
 </details>
 
@@ -188,7 +188,7 @@ The discipline this step enforces is *attribution*: an arbitrary nonzero exit co
 ./steps/03-run-security-quality-gate.sh
 ```
 
-For the hosted proof, open the [quality-gate workflow](https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/actions/workflows/zap-quality-gate.yml), select the run for your branch/SHA, and read the gate step in the quality-gate job.
+For the hosted proof, open the <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/actions/workflows/zap-quality-gate.yml" target="_blank" rel="noopener">quality-gate workflow</a>, select the run for your branch/SHA, and read the gate step in the quality-gate job.
 
 ### Expected result (the script's output contract — not your run)
 
