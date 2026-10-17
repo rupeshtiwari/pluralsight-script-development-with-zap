@@ -19,14 +19,14 @@ COMPOSE="docker compose"
 docker_up() { docker info >/dev/null 2>&1; }
 
 # Make sure the Docker engine is running before we touch compose.
-# On macOS the engine is Colima, which stops when the Mac sleeps or reboots —
+# On macOS the engine is Colima, which stops when the Mac sleeps or reboots, 
 # so if it is down and Colima is installed, start it automatically and wait
 # until Docker answers. This keeps `demo_up.sh` working after a restart without
 # the student having to know about Colima at all.
 ensure_docker() {
     if docker_up; then return 0; fi
     if command -v colima >/dev/null 2>&1; then
-        warn "Docker engine is not running — starting Colima (this can take ~30s)..."
+        warn "Docker engine is not running, starting Colima (this can take ~30s)..."
         colima start || die "Could not start Colima. Run 'colima start' yourself, then retry."
         local i
         for i in $(seq 1 45); do
