@@ -60,7 +60,7 @@ run_gate() {
 
 ensure_gate() { # reuse the last gate run, or run it once
     [ -f "${GATE_REPORT}" ] && [ -f "${GATE_EXIT_FILE}" ] && return 0
-    fm note "Priming: no gate run in this session yet — running the gate plan headless once so this step has a report and an exit code."
+    fm note "Priming: no gate run in this session yet, running the gate plan headless once so this step has a report and an exit code."
     run_gate
 }
 
@@ -83,10 +83,10 @@ HOSTED_PATHS=(demos/module2-demos/m2-demo3-security-quality-gates/ci .github/wor
 hosted() { python3 "${REPO_ROOT}/runtime/scripts/hosted_run.py" "${REPO_ROOT}" zap-quality-gate.yml m2-demo3-after "${HOSTED_PATHS[@]}" 2>/dev/null; }
 
 # ===========================================================================
-# STEP 1 — False Positive alert filter (EO3c)  -> "False Positive alert filter"
+# STEP 1, False Positive alert filter (EO3c)  -> "False Positive alert filter"
 # ===========================================================================
 step1_fp_filter() {
-    fm header "A known benign finding is marked False Positive — by config" \
+    fm header "A known benign finding is marked False Positive, by config" \
               "A quality gate must ignore noise it has already judged benign. The alertFilter job records that decision once, in the plan, so every run applies it (EO3c)."
     local rid risk url
     rid="$(plan_value ruleId)"; risk="$(plan_value newRisk)"; url="$(plan_value url)"
@@ -104,7 +104,7 @@ step1_fp_filter() {
 }
 
 # ===========================================================================
-# STEP 2 — Automation Framework job order (EO3c)  -> "Automation Framework job order"
+# STEP 2, Automation Framework job order (EO3c)  -> "Automation Framework job order"
 # ===========================================================================
 step2_job_order() {
     fm header "Order matters: filter BEFORE scan, gate LAST" \
@@ -125,11 +125,11 @@ step2_job_order() {
 }
 
 # ===========================================================================
-# STEP 3 — Gate JSON report and exit code (EO3c)  -> "Gate JSON report and exit code"
+# STEP 3, Gate JSON report and exit code (EO3c)  -> "Gate JSON report and exit code"
 # ===========================================================================
 step3_gate_exit() {
     fm header "The gate turns alert risk into a build decision" \
-              "exitStatus compares the remaining alerts against warnLevel/errorLevel and sets the process exit code — the signal a pipeline blocks on (EO3c)."
+              "exitStatus compares the remaining alerts against warnLevel/errorLevel and sets the process exit code, the signal a pipeline blocks on (EO3c)."
     run_gate || { fail "the gate run did not produce a report" "zap.sh -cmd -autorun failed" "read logs/.gate/run.log and fix gate-plan.yaml"; return "${STEP_RC}"; }
     local code; code="$(cat "${GATE_EXIT_FILE}" 2>/dev/null)"
     local highs; highs="$(jq_py 'import json
@@ -158,11 +158,11 @@ print(sum(1 for s in d.get("site",[]) for a in s.get("alerts",[]) if str(a.get("
 }
 
 # ===========================================================================
-# STEP 4 — Filtered alert report (EO3c)  -> "Filtered alert report"
+# STEP 4, Filtered alert report (EO3c)  -> "Filtered alert report"
 # ===========================================================================
 step4_filtered_report() {
     fm header "The report proves the filter held and the gate was right" \
-              "The benign finding now carries the False Positive disposition, while the real High finding remains — exactly why the gate blocked (EO3c)."
+              "The benign finding now carries the False Positive disposition, while the real High finding remains, exactly why the gate blocked (EO3c)."
     ensure_gate || { return "${STEP_RC}"; }
     local row; row="$(jq_py 'import json
 d=json.load(open("'"${GATE_REPORT}"'"))
@@ -174,11 +174,11 @@ for s in d.get("site",[]):
 print("|".join(fp+xs))')"
     IFS='|' read -r fpn fpr xn xr <<<"${row}"
     local code; code="$(cat "${GATE_EXIT_FILE}" 2>/dev/null)"
-    fm star "Benign finding  (rule ${FP_RULE})" "${fpn:-not present} — ${fpr:-not present}" focus
-    fm star "Real finding  (rule ${XSS_RULE})" "${xn:-not present} — ${xr:-not present}" focus
+    fm star "Benign finding  (rule ${FP_RULE})" "${fpn:-not present}, ${fpr:-not present}" focus
+    fm star "Real finding  (rule ${XSS_RULE})" "${xn:-not present}, ${xr:-not present}" focus
     fm star "Gate outcome (from this run)" "exit ${code:-?} → $([ "${code}" = 1 ] && echo 'build blocked' || echo 'build NOT blocked')"
     if [ -n "${fpn}" ] && [[ "${fpr}" == *"False Positive"* ]] && [ -n "${xn}" ] && [[ "${xr}" == High* ]] && [ "${code}" = 1 ]; then
-        pass "the filtered report shows the benign finding as False Positive and the High kept — the reason the gate blocked"
+        pass "the filtered report shows the benign finding as False Positive and the High kept, the reason the gate blocked"
     else
         fail "the report did not prove both the False Positive and the remaining High-risk alert" \
              "expected rule ${FP_RULE} False Positive and rule ${XSS_RULE} High from the same run that exited 1" \

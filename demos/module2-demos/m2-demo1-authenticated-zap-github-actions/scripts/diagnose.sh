@@ -46,7 +46,7 @@ for k in ("started","finished","error","warn","info"):
 
 echo
 echo "============================================================"
-echo "2. SITES TREE — is the authenticated profile node present?"
+echo "2. SITES TREE, is the authenticated profile node present?"
 echo "============================================================"
 curl -s "${ZAP}/JSON/core/view/urls/?apikey=${K}&baseurl=$(enc "${APP}")" | python3 -c '
 import json,sys
@@ -56,7 +56,7 @@ prof=[u for u in urls if "/account/profile" in u]
 print("  total urls in tree:", len(urls))
 print("  profile nodes:")
 for u in prof: print("      -", u)
-if not prof: print("      (none — the active scan had no profile node to attack)")'
+if not prof: print("      (none, the active scan had no profile node to attack)")'
 
 echo
 echo "============================================================"
@@ -91,7 +91,7 @@ else:
 
 echo
 echo "============================================================"
-echo "4. DIRECT AUTH TEST (host -> app, bypassing ZAP) — does"
+echo "4. DIRECT AUTH TEST (host -> app, bypassing ZAP), does"
 echo "   login + note reflect? Confirms the app itself is fine."
 echo "============================================================"
 CID="$(docker ps --format '{{.Names}}' | grep -E 'zap' | head -1)"
