@@ -67,7 +67,7 @@ cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
 
 **Expected start:** the reset script prints a clean-slate message and brings up the vulnerable Globomantics build. Continue only after it reports readiness — a failed startup is not one of the four teaching steps.
 
-**Interfaces:** [Globomantics app — localhost:8000](http://localhost:8000/) · [ZAP GUI — localhost:8080/zap/](http://localhost:8080/zap/) · [ZAP API/proxy — localhost:8090](http://localhost:8090/). Open only the interface a step calls for. Use VS Code with `runtime/app/main.py` open and the integrated Terminal; the script prints the real ZAP findings in that terminal.
+**Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Globomantics app — localhost:8000</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI — localhost:8080/zap/</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API/proxy — localhost:8090</a>. Open only the interface a step calls for. Use VS Code with `runtime/app/main.py` open and the integrated Terminal; the script prints the real ZAP findings in that terminal.
 
 </details>
 
@@ -100,7 +100,7 @@ Three different interpreters — a SQL database, a document database, and a shel
 ./steps/01-run-targeted-injection-scan.sh
 ```
 
-Then open [ZAP — localhost:8080/zap/](http://localhost:8080/zap/) → **Alerts**, select each SQL, NoSQL and command finding, and read its **Request** and **Response** — match the rule to its `q`, `username` or `host` parameter.
+Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP — localhost:8080/zap/</a> → **Alerts**, select each SQL, NoSQL and command finding, and read its **Request** and **Response** — match the rule to its `q`, `username` or `host` parameter.
 
 ### Expected result (the script's output contract — not your run)
 
@@ -155,7 +155,7 @@ The step sends one context-matched request per sink and shows the response line 
 ./steps/02-verify-reflected-xss-contexts.sh
 ```
 
-Then open [ZAP — localhost:8080/zap/](http://localhost:8080/zap/) → **History**, find the matching `/greet` request, and read **Request**/**Response** so you can see the injected `name` value sitting in the output context.
+Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP — localhost:8080/zap/</a> → **History**, find the matching `/greet` request, and read **Request**/**Response** so you can see the injected `name` value sitting in the output context.
 
 ### Expected result (the script's output contract — not your run)
 
@@ -211,7 +211,7 @@ The step runs all four and shows session B's stored email before and after, so t
 ./steps/03-test-cross-session-csrf-token.sh
 ```
 
-Keep the valid-token control, missing-token control, replay, cross-session request and the before/after email rows visible together. The browser form at [localhost:8000/account/email](http://localhost:8000/account/email) is context, not the proof — the terminal rows are.
+Keep the valid-token control, missing-token control, replay, cross-session request and the before/after email rows visible together. The browser form at <a href="http://localhost:8000/account/email" target="_blank" rel="noopener">localhost:8000/account/email</a> is context, not the proof — the terminal rows are.
 
 ### Expected result (the script's output contract — not your run)
 
@@ -264,7 +264,7 @@ A rule ID is a lead; a disposition is a decision with the evidence attached. Kee
 ./steps/04-reconcile-security-alerts.sh
 ```
 
-Use [ZAP — localhost:8080/zap/](http://localhost:8080/zap/) → **Alerts** and the matching **Request/Response** to corroborate each finding, and open `logs/alert-disposition.md` in VS Code to read the decision the step recorded.
+Use <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP — localhost:8080/zap/</a> → **Alerts** and the matching **Request/Response** to corroborate each finding, and open `logs/alert-disposition.md` in VS Code to read the decision the step recorded.
 
 ### Expected result (the script's output contract — not your run)
 
