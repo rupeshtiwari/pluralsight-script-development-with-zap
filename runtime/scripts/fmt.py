@@ -50,6 +50,12 @@ PALETTE = {
 }
 _USE_COLOR = sys.stdout.isatty() or os.environ.get("FORCE_COLOR") == "1"
 
+# Fixed, deterministic table geometry so the terminal render and the README render match exactly,
+# and so a long value WRAPS onto aligned continuation lines instead of being truncated or overflowing.
+# The editor boxes values, so each row is followed by one blank line of padding to box into.
+LABEL_WIDTH = 40
+VALUE_WIDTH = 60
+
 
 def _w(name: str, text: str) -> str:
     """Render text in the brand color bound to a role (true color)."""
@@ -76,18 +82,46 @@ def header(what: str, why: str = "", width: int = 74) -> None:
     print(_w("header", "  ★ │ " + "OBSERVED FIELD".ljust(40) + " │ " + "ACTUAL VALUE"))
 
 
-def star(label: str, value: str, focus: bool = False) -> None:
-    """Aligned field/value row, never truncating observed security evidence.
+def _wrap_value(value: str, width: int):
+    """Word-wrap a value to `width`, hard-breaking any single token longer than the column
+    (HTML and payloads have no spaces), so nothing is ever truncated."""
+    out, line = [], ""
+    for word in value.split(" "):
+        while len(word) > width:
+            if line:
+                out.append(line)
+                line = ""
+            out.append(word[:width])
+            word = word[width:]
+        if not line:
+            line = word
+        elif len(line) + 1 + len(word) <= width:
+            line += " " + word
+        else:
+            out.append(line)
+            line = word
+    out.append(line)
+    return out or [""]
 
-    The one field intended for narration is highlighted using primary pink.
-    The display is compatible with the companion HTML evidence table parser.
+
+def star(label: str, value: str, focus: bool = False) -> None:
+    """Aligned field/value row that shows the FULL value, wrapping long values onto aligned
+    continuation lines (never truncated), with one blank padding line after it.
+
+    The table geometry is fixed (LABEL_WIDTH / VALUE_WIDTH) so the terminal and the README match.
+    The one field intended for narration is highlighted in primary pink. Continuation lines keep the
+    two gutters with an empty label cell, so the evidence parser can rejoin them into one value.
     """
     label, value = str(label).strip(), str(value)
-    prefix = _w("header", "  ★ │ ")
-    field = _w("label", f"{label:<40}")
-    separator = _w("header", " │ ")
-    observed = _w("focus" if focus else "value", value)
-    print(prefix + field + separator + observed)
+    color = "focus" if focus else "value"
+    chunks = _wrap_value(value, VALUE_WIDTH)
+    sep = _w("header", " │ ")
+    # First line: star, label, value.
+    print(_w("header", "  ★ │ ") + _w("label", f"{label:<{LABEL_WIDTH}}") + sep + _w(color, chunks[0]))
+    # Continuation lines: aligned under the value column, empty label cell, both gutters kept.
+    for chunk in chunks[1:]:
+        print(_w("header", "    │ ") + (" " * LABEL_WIDTH) + sep + _w(color, chunk))
+    print()  # one blank line of padding, so the editor can box the value without touching the next row
 
 
 def section(title: str) -> None:
