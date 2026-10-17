@@ -62,6 +62,8 @@ reset_plan_state() {
 PLAN_ID=""
 run_plan() { # -> sets PLAN_ID
     reset_plan_state
+    zap core/action/deleteAllAlerts >/dev/null || return 1   # every alert after this comes from this plan run
+    local c; c="$(zap_container)"; [ -n "${c}" ] && docker exec "${c}" sh -c 'rm -f /tmp/globo-rule-trace.log' >/dev/null 2>&1
     PLAN_ID="$(zap automation/action/runPlan "filePath=$(enc "${AF_PLAN_ZAP}")" | python3 -c 'import json,sys
 try: print(json.load(sys.stdin).get("planId",""))
 except Exception: print("")')"
@@ -125,30 +127,37 @@ ensure_ready() {
     return 0
 }
 
+HOSTED_PATHS=(demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts .github/workflows/zap-authenticated-scan.yml)
+hosted() { python3 "${REPO_ROOT}/runtime/scripts/hosted_run.py" "${REPO_ROOT}" zap-authenticated-scan.yml m2-demo1-after "${HOSTED_PATHS[@]}" 2>/dev/null; }
+
 # ===========================================================================
 # STEP 1 — Headless Automation Framework run (EO3a)  → "GitHub Actions job log"
 # ===========================================================================
 step1_headless_run() {
     fm header "ZAP runs headless from the Automation Framework plan" \
-              "No GUI, no clicks — ZAP runs the whole scan from one config file, exactly as the GitHub Actions job does (EO3a)."
-    fm star "Runner (CI)" "ubuntu-24.04 · ghcr.io/zaproxy/zaproxy:stable" focus
-    fm star "Command" "zap.sh -cmd -autorun /zap/wrk/af-plan.yaml  (headless)"
+              "No GUI, no clicks — ZAP runs the whole scan from one config file. The GitHub Actions job log is the proof (EO3a)."
     if ! run_plan; then
         fail "the Automation Framework plan did not start" "automation/action/runPlan returned no plan id" \
-             "ask: 'the ZAP Automation Framework could not run /af/af-plan.yaml; check the automation add-on and the plan path'"
+             "check the automation add-on and the plan path /af/af-plan.yaml"
         return "${STEP_RC}"
     fi
-    local i
-    for i in $(seq 1 120); do
-        plan_finished && break
-        sleep 3
-    done
-    local errs; errs="$(plan_field error)"
-    if plan_finished && [ "${errs}" = "0" ]; then
-        pass "the plan ran headless to completion with no errors"
+    local i; for i in $(seq 1 120); do plan_finished && break; sleep 3; done
+    local errs warns jobs; errs="$(plan_field error)"; warns="$(plan_field warn)"; jobs="$(plan_field info)"
+    fm star "Local plan run" "plan ${PLAN_ID} · $(plan_finished && echo finished || echo NOT finished) · ${errs} errors · ${warns} warnings" focus
+    local h id concl sha labels covers url steps
+    h="$(hosted)"; IFS='|' read -r id concl sha labels covers url steps <<<"${h}"
+    fm section "Hosted proof — GitHub Actions (read from the Actions API)"
+    fm star "Workflow run" "${id:-none found} · ${concl:-?} · commit ${sha:-?}" focus
+    fm star "Runner" "${labels:-?}"
+    fm star "Headless ZAP step" "$(printf '%s' "${steps}" | tr ';' '\n' | grep -m1 '^Run ZAP headless' | cut -d= -f2 || echo '?')"
+    fm star "Run covers this code" "${covers:-no}  ${url}"
+    if plan_finished && [ "${errs}" = "0" ] && [ "${concl}" = "success" ] && [ "${covers}" = "yes" -o "${covers}" = "branch" ] \
+       && [[ ",${labels}," == *",ubuntu-24.04,"* ]] && [[ "${steps}" == *"Run ZAP headless with the Automation Framework plan=success"* ]]; then
+        pass "the plan ran headless with no errors, and the hosted ubuntu-24.04 job for this code succeeded"
     else
-        fail "the headless plan did not finish cleanly" "it is still running, or it reported ${errs} error(s)" \
-             "ask: 'the ZAP AF plan reported errors; read automation/view/planProgress and fix the plan'"
+        fail "headless proof incomplete (local errors=${errs}; hosted=${concl:-none}, covers this code=${covers:-no})" \
+             "the local plan failed, or no successful hosted run exists for the current scan files" \
+             "fix the plan, or push / run the 'Globomantics authenticated ZAP scan' workflow on m2-demo1-after, then retry"
     fi
     return "${STEP_RC}"
 }
@@ -157,42 +166,72 @@ step1_headless_run() {
 # STEP 2 — Authenticated context configuration (EO3a) → config artifact
 # ===========================================================================
 step2_context_config() {
-    fm header "The authenticated context, declared as config" \
-              "The plan binds the target scope, the scripted login, and the user BEFORE scanning — the config a pipeline runs unattended (EO3a)."
-    local ok=1
-    grep -q 'Globomantics' "${AF_PLAN_HOST}" || ok=0
-    grep -q 'globomantics-auth' "${AF_PLAN_HOST}" || ok=0
-    grep -q 'alice' "${AF_PLAN_HOST}" || ok=0
-    grep -q 'app:8000' "${AF_PLAN_HOST}" || ok=0
-    fm star "Context" "Globomantics" focus
-    fm star "Authentication" "script-based → globomantics-auth (Login URL: /login)"
-    fm star "User" "alice"
-    fm star "Target scope" "http://app:8000 (profile + greet paths)"
-    if [ "${ok}" = 1 ]; then
-        pass "the plan binds context + scripted auth + user + scope before scanning"
+    fm header "The authenticated context, declared as config — proven loaded by the hosted run" \
+              "The plan binds scope, scripted login and user BEFORE scanning. The hosted job runs this exact plan and raises the custom alert on a login-only page — which only happens when ZAP loaded the context, user and scripted auth (EO3a)."
+    local ctx auth engine user scope
+    ctx="$(grep -A2 'contexts:' "${AF_PLAN_HOST}" | grep -m1 'name:' | sed 's/.*name: *//; s/"//g')"
+    auth="$(awk '/authentication:/{f=1} f&&/method:/{print $2; exit}' "${AF_PLAN_HOST}" | tr -d '\"')"
+    engine="$(grep -m1 'scriptEngine:' "${AF_PLAN_HOST}" | sed 's/.*scriptEngine: *//; s/\"//g')"
+    user="$(awk '/users:/{f=1} f&&/name:/{print $3; exit}' "${AF_PLAN_HOST}" | tr -d '\"')"
+    scope="$(grep -m1 'account/profile' "${AF_PLAN_HOST}" | sed 's/^ *- *//; s/\"//g')"
+    local h id concl sha labels covers url steps assert
+    h="$(hosted)"; IFS='|' read -r id concl sha labels covers url steps <<<"${h}"
+    assert="$(printf '%s' "${steps}" | tr ';' '\n' | grep -m1 '^Assert the authenticated custom alert' | cut -d= -f2)"
+    # Local supporting evidence: an authenticated (session-cookie) request reached the login-only page.
+    local reached; reached="$(wait_nonempty 60 marker_on_auth_request)"
+    fm star "Context · authentication · engine (ci/af-plan.yaml)" "${ctx} · ${auth} · ${engine}" focus
+    fm star "User · scope" "${user} · ${scope}"
+    fm star "Local: authenticated request reached the login-only page" "${reached:-none}"
+    fm star "Hosted run proved it loaded (run ${id:-none})" "custom alert on login-only page: assert=${assert:-not found} · covers this code: ${covers:-no}" focus
+    if [ "${ctx}" = "Globomantics" ] && [ "${auth}" = "script" ] && [ "${user}" = "alice" ] \
+       && [[ "${scope}" == *account/profile* ]] && [ "${assert}" = "success" ] && { [ "${covers}" = "yes" ] || [ "${covers}" = "branch" ]; }; then
+        pass "the plan declares the authenticated context and the hosted run proves ZAP loaded it (authenticated custom alert on a login-only page)"
     else
-        fail "the authenticated context configuration is incomplete" \
-             "the plan is missing the context, auth script, user, or scope" \
-             "ask: 'the af-plan.yaml context/auth/user/scope block is incomplete; restore it'"
+        fail "the authenticated context was not proven loaded (ctx=${ctx} auth=${auth} user=${user}; hosted assert=${assert:-none}, covers=${covers:-no})" \
+             "the plan env block is incomplete, or no hosted run covers this code" \
+             "check env.contexts in ci/af-plan.yaml; run the authenticated-scan workflow on m2-demo1-after"
     fi
     return "${STEP_RC}"
+}
+
+marker_on_auth_request() { # an authenticated scan request carrying the JS marker header
+    zap core/view/messages "baseurl=$(enc "${APP_INTERNAL}/account/profile")&count=500" | python3 -c '
+import json,sys
+for m in reversed(json.load(sys.stdin).get("messages",[])):
+    h=m.get("requestHeader","")
+    if "X-Globomantics-Marker: GLOBO-DEMO" in h and "session=" in h.lower():
+        print(h.splitlines()[0].strip()[:100]); break'
+}
+
+custom_alert_present() { # the custom Python rule's named alert on the authenticated page
+    zap core/view/alerts "baseurl=$(enc "${APP_INTERNAL}/account/profile")" | python3 -c '
+import json,sys
+name=sys.argv[1]
+for a in json.load(sys.stdin).get("alerts",[]):
+    if (a.get("alert") or a.get("name"))==name:
+        print("%s · %s/%s" % (a.get("pluginId"), a.get("risk"), a.get("confidence"))); break' "${ALERT_NAME}"
 }
 
 # ===========================================================================
 # STEP 3 — Authenticated script job result (EO3a) → "Authenticated script job result"
 # ===========================================================================
 step3_script_job() {
-    fm header "The Module 1 scripts running under the authenticated scope" \
-              "The same JavaScript and Python checks you wrote in Module 1 now run unattended, logged in as alice (EO3a)."
-    fm star "Loaded by the plan" "globomantics-marker (JS) · globomantics-active-rule (Py) · globomantics-auth (Py)" focus
-    local refl; refl="$(wait_nonempty 180 reflection_reached)"
-    if [ -n "${refl}" ]; then
-        fm star "Ran authenticated against" "/account/profile — reflection reached while logged in"
-        pass "the scripts executed against the authenticated scope"
+    fm header "The Module 1 scripts running during the authenticated plan" \
+              "The JavaScript marker stamps the plan's requests, and the Python rule raises its alert on the login-only page — both from the same authenticated run (EO3a)."
+    local js py h id concl sha labels covers url steps assert py_ok=""
+    js="$(wait_nonempty 120 marker_on_auth_request)"
+    py="$(wait_nonempty 120 custom_alert_present)"
+    h="$(hosted)"; IFS='|' read -r id concl sha labels covers url steps <<<"${h}"
+    assert="$(printf '%s' "${steps}" | tr ';' '\n' | grep -m1 '^Assert the authenticated custom alert' | cut -d= -f2)"
+    { [ -n "${py}" ] || { [ "${assert}" = "success" ] && { [ "${covers}" = "yes" ] || [ "${covers}" = "branch" ]; }; }; } && py_ok=1
+    fm star "JavaScript check (globomantics-marker)" "${js:+marker header on an authenticated request: }${js:-no marked authenticated request}" focus
+    fm star "Python check (globomantics-active-rule)" "${py:+local custom alert ${py}}${py:-hosted report custom alert (assert=${assert:-none})}" focus
+    if [ -n "${js}" ] && [ -n "${py_ok}" ]; then
+        pass "both Module 1 scripts ran during the authenticated plan (JS stamped an authenticated request; the Python rule raised its alert on the login-only page)"
     else
-        fail "the scripts did not run against the authenticated scope" \
-             "the active scan did not reach the logged-in page" \
-             "ask: 'the AF plan scan did not run authenticated; check the context user and scripted auth'"
+        fail "a Module 1 script did not run (js=${js:+yes} python=${py_ok:+yes})" \
+             "the script job did not load it, or the scan did not run as alice" \
+             "run Step 1 first; check the script jobs and context user in ci/af-plan.yaml"
     fi
     return "${STEP_RC}"
 }
@@ -202,22 +241,21 @@ step3_script_job() {
 # ===========================================================================
 step4_custom_alert() {
     fm header "The authenticated finding recorded by the pipeline" \
-              "The headless run records the custom rule's named alert on the login-only page, logged in as alice — the result a quality gate can later gate on (EO3a)."
-    local rec; rec="$(wait_nonempty 180 custom_alert)"
-    if [ -n "${rec}" ]; then
-        IFS='|' read -r n r p <<<"${rec}"
-        fm star "Alert" "${n}" focus
-        fm star "Risk" "${r}"
-        fm star "Parameter" "${p}"
-        pass "the custom rule raised its named alert under the authenticated AF run (serialized in the headless report)"
+              "The custom rule's named alert on the login-only page — from this plan run locally, and from the hosted job's fail-closed report check (EO3a)."
+    local rec n r p h id concl sha labels covers url steps
+    rec="$(wait_nonempty 180 custom_alert)"
+    IFS='|' read -r n r p <<<"${rec}"
+    fm star "Alert (this plan run; store was cleared first)" "${n:-NOT RAISED}" focus
+    fm star "Risk · parameter" "${r:-?} · ${p:-?}"
+    h="$(hosted)"; IFS='|' read -r id concl sha labels covers url steps <<<"${h}"
+    local assert; assert="$(printf '%s' "${steps}" | tr ';' '\n' | grep -m1 '^Assert the authenticated custom alert' | cut -d= -f2)"
+    fm star "Hosted report check (run ${id:-none})" "${assert:-not found} · covers this code: ${covers:-no}" focus
+    if [ -n "${rec}" ] && [ "${assert}" = "success" ] && [ "${covers}" = "yes" -o "${covers}" = "branch" ]; then
+        pass "the custom alert was raised by this authenticated run, and the hosted job's report check passed for this code"
     else
-        # The required proof is the NAMED custom alert. A built-in reflected-XSS
-        # finding is NOT an acceptable substitute, so a missing custom alert is a
-        # hard failure. Any reflection found is shown only as a diagnostic.
-        local refl; refl="$(reflection_reached)"
-        fail "the authenticated AF run did not record the custom alert '${ALERT_NAME}'" \
-             "the named custom alert is required here; a built-in reflected-XSS finding${refl:+ (present: ${refl})} does not substitute for it" \
-             "ask: 'the authenticated AF scan did not raise ${ALERT_NAME} on /account/profile as alice; check the context auth and the custom rule'"
+        fail "authenticated custom alert not proven (local=${rec:+yes} hosted=${assert:-none} covers=${covers:-no})" \
+             "the named custom alert is required; a built-in reflected-XSS finding does not substitute" \
+             "run Step 1 first; for hosted proof run the workflow on m2-demo1-after"
     fi
     return "${STEP_RC}"
 }
