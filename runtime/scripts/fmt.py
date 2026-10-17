@@ -105,22 +105,25 @@ def _wrap_value(value: str, width: int):
 
 
 def star(label: str, value: str, focus: bool = False) -> None:
-    """Aligned field/value row that shows the FULL value, wrapping long values onto aligned
-    continuation lines (never truncated), with one blank padding line after it.
+    """Aligned field/value row that shows the FULL value, with the `│` separator ALWAYS at the same
+    column so the table never misaligns, whatever the label or value length.
 
-    The table geometry is fixed (LABEL_WIDTH / VALUE_WIDTH) so the terminal and the README match.
-    The one field intended for narration is highlighted in primary pink. Continuation lines keep the
-    two gutters with an empty label cell, so the evidence parser can rejoin them into one value.
+    BOTH columns wrap: a label longer than LABEL_WIDTH and a value longer than VALUE_WIDTH each flow
+    onto continuation lines within their own column, so the separator stays put and nothing is
+    truncated. One blank padding line follows the row so the editor can box a value cleanly. The
+    geometry is fixed (LABEL_WIDTH / VALUE_WIDTH) so the terminal and the README match. Continuation
+    lines keep both gutters, so the evidence parser can rejoin label and value.
     """
     label, value = str(label).strip(), str(value)
     color = "focus" if focus else "value"
-    chunks = _wrap_value(value, VALUE_WIDTH)
     sep = _w("header", " │ ")
-    # First line: star, label, value.
-    print(_w("header", "  ★ │ ") + _w("label", f"{label:<{LABEL_WIDTH}}") + sep + _w(color, chunks[0]))
-    # Continuation lines: aligned under the value column, empty label cell, both gutters kept.
-    for chunk in chunks[1:]:
-        print(_w("header", "    │ ") + (" " * LABEL_WIDTH) + sep + _w(color, chunk))
+    lab_chunks = _wrap_value(label, LABEL_WIDTH)
+    val_chunks = _wrap_value(value, VALUE_WIDTH)
+    for i in range(max(len(lab_chunks), len(val_chunks))):
+        lab = lab_chunks[i] if i < len(lab_chunks) else ""
+        val = val_chunks[i] if i < len(val_chunks) else ""
+        mark = "  ★ │ " if i == 0 else "    │ "
+        print(_w("header", mark) + _w("label", f"{lab:<{LABEL_WIDTH}}") + sep + _w(color, val))
     print()  # one blank line of padding, so the editor can box the value without touching the next row
 
 
