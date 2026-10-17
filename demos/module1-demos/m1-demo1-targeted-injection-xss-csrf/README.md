@@ -116,9 +116,15 @@ Rule IDs and parameter names come from the demo; the `<…>` risk/confidence val
 <tr><td><b>Result</b></td><td><code>✔ PASS targeted scan raised all three injection alerts</code></td><td>Only a pass with three real findings</td></tr>
 </tbody></table>
 
-### Investigate, then decide
+### Read your output, then decide
 
-Line each alert up with the source you read: the `40018` on `q` is the string-formatted SQL query; the `40033` on `username` is the Mongo operator reaching the document match; the `90020` on `host` is the shell. The decision this authorizes: *a targeted policy, mapped to known sinks, gives you three reproducible leads* — not a severity number you have to take on faith.
+Read the output from the top, because each line is there for a reason.
+
+- The **Policy rules enabled** line should list exactly `40018 … 90037`. Notice what that line *proves*: you scanned a **focused** family of injection rules, not the whole rule set — so the three findings under it are signal, not a pile you now have to triage. This is the "narrow policy, readable result" idea from the code you read, made visible.
+- Then the three alert lines. Each names its parameter, so you can walk it straight back to the sink you opened: `40018` on `/search (q)` is the string-formatted SQL query in `search`; `40033` on `/api/account (username)` is the Mongo operator reaching the document match in `account`; `90020` on `/admin/ping (host)` is the shell in `admin_ping`. Same scan, three different interpreters — that is why one "alert total" would have hidden three separate defects.
+- The `✔ PASS` line appears **only because all three fired**. If one endpoint had stayed silent the script would have stopped, so a pass here is itself evidence, not a formality.
+
+**What this establishes:** a targeted policy mapped to known sinks gives you three reproducible leads — not a severity number you take on faith. Hold on to the three parameters (`q`, `username`, `host`); the rest of the demo proves them one class at a time.
 
 **On FAIL:** the script names which endpoint did not alert. Fix that — wrong branch, app not reset, or the sink changed — rather than claiming an alert appeared.
 
@@ -166,9 +172,15 @@ The injected payload is run-specific — read it from your output; the rule ID, 
 <tr><td><b>Result</b></td><td><code>✔ PASS context-matched payloads reflected unescaped; rule 40012 confirmed</code></td><td>A real payload and reflected evidence</td></tr>
 </tbody></table>
 
-### Investigate, then decide
+### Read your output, then decide
 
-Map each injected payload to the response line it appears in, and confirm `40012` cited the same `name` parameter. The lesson to carry: *reflection in the matching context is the proof, and the context dictates the payload* — "it reflected" alone is not a browser executing script. The decision: this is a confirmed reflected XSS on `name`, reproducible with a named rule and a captured payload.
+In the last step a scan *reported* a lead; here your output has to show the lead is real, line by line.
+
+- The three **request → response** rows are the heart of it. For each one, find your injected `name` value sitting **unescaped** in the response — a `<script>` in the body row, a broken-out attribute in the attribute row, a closed JS string in the script row. Why three rows and not one? Because the same input lands in three different places, and each needed a different payload to escape it. Seeing the payload survive in its own context is the proof that "reflected" has become "executable here."
+- The **ZAP alert** row (`40012` on `name`) is the engine agreeing with you independently. Notice it cites the *same* parameter you just traced — your manual reading and ZAP's automated rule are pointing at one defect, from two directions.
+- The **payload** row is run-specific on purpose: read it from *your* output, not from this page, so the evidence is yours.
+
+**What this establishes:** this is a confirmed reflected XSS on `name`, reproducible with a named rule and a captured payload — and, unlike step 1's lead, you have now *watched* it reflect. The method also carries forward: the context dictates the payload, every time.
 
 **On FAIL:** read the diagnostic — a context that came back encoded or a missing `40012` — and verify branch and app state instead of asserting the finding.
 
@@ -215,9 +227,15 @@ Keep the valid-token control, missing-token control, replay, cross-session reque
 <tr><td><b>Result</b></td><td><code>✔ PASS used token accepted again and a cross-session token accepted — tokens are neither single-use nor session-bound</code></td><td>Status <b>and</b> changed email</td></tr>
 </tbody></table>
 
-### Investigate, then decide
+### Read your output, then decide
 
-The two controls prove the app really does check for a token; the two abuse cases prove the check is the wrong one. Tie each accepted `200` back to the missing validation you read in `change_email`. The decision: *this is a true CSRF defect — the token is present but not enforced as single-use or session-bound* — and you can show the overwritten email to prove it.
+Steps 1 and 2 read values off the screen; this step changes a record, so read the output as a before/after story.
+
+- Start with the two **controls**. `Valid token → 200` and `Missing token → 403` are there to prove the endpoint genuinely checks for a token at all — without them, an attacker's `200` could just mean "this app never checked." Those two lines are what make the next two damning instead of ambiguous.
+- Now the two **abuse** lines: the replayed used token and the cross-session token both come back `200 (should be rejected)`. Read them against the missing validation you saw in `change_email` — no single-use check, no session binding. The status code alone isn't the proof, though.
+- The proof is the **email before → after** rows beneath each abuse. Watch the stored address actually move — once on the replay, again on the cross-session request. A changed record is something you can show a reviewer; a bare `200` is not.
+
+**What this establishes:** this is a true CSRF defect — the token is present but enforced as neither single-use nor session-bound — and you have the overwritten email to prove it. Notice the pattern completing across the three steps: a lead (step 1), a reflection you watched (step 2), and now a state change you caused (step 3) — each a stronger grade of evidence than the last.
 
 **On FAIL:** a control that did not behave (valid ≠ `200`, missing ≠ `403`) means the app state is wrong, not the finding. Reset and re-run rather than reporting a bypass you did not see.
 
@@ -264,9 +282,15 @@ The error text and account counts are run-specific; read them from your output. 
 <tr><td><b>Result</b></td><td><code>✔ PASS every alert and the CSRF case reconciled and recorded</code></td><td>Evidence before disposition</td></tr>
 </tbody></table>
 
-### Investigate, then decide
+### Read your output, then decide
 
-Read the disposition record and confirm each line names an effect, not just a severity. The decision this whole demo was building to: *you ship confirmed defects with their evidence, and you set aside anything you could not reproduce* — the database parse error, the account-count change, the `ZAP_CMD_PROOF` marker, the reflected payload, and the twice-accepted token are what make these five findings defensible.
+This is where the three steps converge, so read the table as the receipt for the whole investigation.
+
+- Each row pairs a finding with the **real effect** that makes it a True Positive — and every one of those effects is something you produced in an earlier step: the SQL alert → the database's own parse error; the NoSQL alert → the change in how many account records matched; the command alert → the `ZAP_CMD_PROOF` marker the injected shell printed; the XSS alert → the unescaped reflection from step 2; the CSRF case → the token accepted twice from step 3. Notice there is no row that says "High severity" and stops — severity never appears, because it was never the point.
+- The **Disposition record written** line (`logs/alert-disposition.md`) is the deliverable. Open it: it turns everything you watched on screen into a reviewable artifact, so the decision outlives this terminal session.
+- The `✔ PASS` line means every finding reconciled against an effect. A finding with no effect would not be here — which is exactly the discipline the step is teaching.
+
+**What this establishes:** you ship confirmed defects *with* their evidence and set aside anything you could not reproduce. That is the decision the whole demo was building toward — and it is why the earlier steps insisted on effects, not alert titles.
 
 **On FAIL:** a finding that would not reconcile is information, not an obstacle — record it as unconfirmed and investigate, rather than forcing a disposition.
 
