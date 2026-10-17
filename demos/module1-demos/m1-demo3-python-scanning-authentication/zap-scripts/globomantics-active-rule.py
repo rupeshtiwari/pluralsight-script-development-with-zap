@@ -4,7 +4,7 @@
 #   During an active scan, for each query parameter on a page it sends a
 #   distinctive probe and checks whether the response reflects it verbatim.
 #   On /account/profile the note value is written into the HTML body without
-#   output encoding, so the probe comes back unescaped — a strong indicator of
+#   output encoding, so the probe comes back unescaped, a strong indicator of
 #   reflected XSS (the value is returned in a way that could let an attacker's
 #   markup or script run). Confirming it actually executes is a separate,
 #   context-specific step; this rule flags the unencoded reflection and raises

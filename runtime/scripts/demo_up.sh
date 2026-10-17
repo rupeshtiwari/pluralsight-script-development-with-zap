@@ -34,10 +34,10 @@ while :; do
     if [ "${now}" -ge "${deadline}" ]; then
         warn "Timed out after ${WAIT_SECS}s. Current status:"
         ${COMPOSE} ps
-        die "Stack did not become healthy in time. ZAP's first boot can be slow on a cold engine — re-run ./scripts/demo_up.sh, or give it longer with: HEALTH_TIMEOUT=900 ./scripts/demo_up.sh"
+        die "Stack did not become healthy in time. ZAP's first boot can be slow on a cold engine, re-run ./scripts/demo_up.sh, or give it longer with: HEALTH_TIMEOUT=900 ./scripts/demo_up.sh"
     fi
     if [ $(( now - last_beat )) -ge 30 ]; then
-        log "still starting ($(( now - start ))s elapsed) — waiting on:${pending}"
+        log "still starting ($(( now - start ))s elapsed), waiting on:${pending}"
         last_beat="${now}"
     fi
     sleep 3
