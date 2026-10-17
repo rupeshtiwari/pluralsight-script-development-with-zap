@@ -29,8 +29,8 @@ Your custom security check needs a protected Store profile, but an unauthenticat
 
 You will create two distinct script capabilities that work together:
 
-- Implement a focused custom Python (Jython) active-scan rule *(EO2b)*
-- Automate the ZAP authentication sequence and prove protected endpoint access *(EO2c)*
+1. Implement a focused custom Python (Jython) active-scan rule *(EO2b)*
+2. Automate the ZAP authentication sequence and prove protected endpoint access *(EO2c)*
 
 No separate course outline is required to complete this lab.
 
@@ -307,9 +307,12 @@ A new authenticated scan now produces the required custom alert tied to `note`. 
 <!-- student-achievement:start -->
 ## What You Achieved
 
-After the four checks, you can separate a scanning rule from authentication, prove protected-page coverage and distinguish a new custom alert from an old or built-in finding. You also know the username-only training login is not a production authentication design.
+You can now explain each learning objective with the evidence you captured:
 
-**Your final check:** Explain the result using your own captured evidence. A README example, missing result or earlier run does not satisfy this exercise.
+1. **(EO2b) You implemented a custom Jython active-scan rule.** It loaded with no script error and raised its own named alert (rule `50000`) on `/account/profile` (parameter `note`) at Medium/Medium — distinct from any built-in rule.
+2. **(EO2c) You automated the login and proved protected-page access.** The authentication script submitted `username=alice` to `POST /login`; `/account/profile` returned `401` unauthenticated and `200` as the scripted user, and the custom rule then ran inside that authenticated scope.
+
+**Your final check:** Explain each numbered outcome using your own captured evidence from this run. A README example, a missing result or an earlier run does not satisfy this exercise.
 <!-- student-achievement:end -->
 
 ## Finish Your Lab
