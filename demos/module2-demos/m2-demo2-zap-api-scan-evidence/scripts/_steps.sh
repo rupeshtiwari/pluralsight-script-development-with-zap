@@ -2,7 +2,7 @@
 # Shared step library for m2-c4 "Query the ZAP API and inspect scan evidence".
 #
 # Sourced by preflight_check.sh and demo_step.sh. Each step drives ZAP ONLY
-# through its HTTP API (localhost:8090) — the point of this lab: inspecting a
+# through its HTTP API (localhost:8090), the point of this lab: inspecting a
 # finished scan's evidence programmatically, not from the GUI (EO3b).
 #   1. ZAP API status response     2. ZAP API alert response
 #   3. ZAP JSON report             4. ZAP Insights evidence
@@ -43,7 +43,7 @@ zap() { # <path> <query> -> body (asserts HTTP 200)
 
 # Select the ZAP SERVICE container specifically. The compose project name
 # contains "zap", so a plain `grep zap` matches every service (app, mongo,
-# postgres, zap) and can return the wrong container — which made the report
+# postgres, zap) and can return the wrong container, which made the report
 # read happen in the app container's /tmp. `docker compose ps -q zap` resolves
 # the zap service only (same approach as m2-c3).
 zap_container() { ( cd "${REPO_ROOT}" && docker compose ps -q zap 2>/dev/null ) | head -1; }
@@ -108,7 +108,7 @@ run_authenticated_plan() { # Step 1: fresh alerts, run the authenticated plan, w
     fi
     # The scan can finish a moment before its alerts are queryable, so wait for
     # the script-generated alert rather than checking once. The named custom
-    # alert is REQUIRED — a missing alert fails with a nonzero exit.
+    # alert is REQUIRED, a missing alert fails with a nonzero exit.
     local j; for j in $(seq 1 36); do [ -n "$(custom_present)" ] && return 0; sleep 5; done
     fail "the script-generated custom alert did not appear after the scan" \
          "core/view/alerts has no '${CUSTOM_NAME}' on ${PROFILE} after a completed scan" \
@@ -137,11 +137,11 @@ generate_report() { # -> a NEW report file each call (never a stale one); echoes
 }
 
 # ===========================================================================
-# STEP 1 — ZAP API status response (EO3b)  -> "ZAP API status response"
+# STEP 1, ZAP API status response (EO3b)  -> "ZAP API status response"
 # ===========================================================================
 step1_api_status() {
     fm header "The ZAP API answers: what engine, and is the authenticated scan done?" \
-              "You drive ZAP over HTTP, not the GUI — start the authenticated plan, then ask the engine its version and whether the scan has finished (EO3b)."
+              "You drive ZAP over HTTP, not the GUI, start the authenticated plan, then ask the engine its version and whether the scan has finished (EO3b)."
     fm note "running the authenticated Automation Framework plan through the API (fresh alert store)..."
     run_authenticated_plan || return "${STEP_RC}"
     local ver prog user errs
@@ -178,11 +178,11 @@ print("%s|%s|%s|%s" % (a.get("id",""), a.get("progress",""), a.get("state",""), 
 }
 
 # ===========================================================================
-# STEP 2 — ZAP API alert response (EO3b)  -> "ZAP API alert response"
+# STEP 2, ZAP API alert response (EO3b)  -> "ZAP API alert response"
 # ===========================================================================
 step2_api_alert() {
     fm header "The ZAP API answers: what did your script find, and how is it rated?" \
-              "Ask the API for the script-generated custom alert — its rule identity and its disposition (risk + confidence) — the data a pipeline reads to decide (EO3b)."
+              "Ask the API for the script-generated custom alert, its rule identity and its disposition (risk + confidence), the data a pipeline reads to decide (EO3b)."
     ensure_scan || return "${STEP_RC}"
     local rec; rec="$(zap core/view/alerts "baseurl=$(enc "${PROFILE}")" | python3 -c 'import json,sys
 name=sys.argv[1]
@@ -206,7 +206,7 @@ for a in json.load(sys.stdin).get("alerts",[]):
 }
 
 # ===========================================================================
-# STEP 3 — ZAP JSON report (EO3b)  -> "ZAP JSON report"
+# STEP 3, ZAP JSON report (EO3b)  -> "ZAP JSON report"
 # ===========================================================================
 step3_json_report() {
     fm header "The official JSON report reconciles with the API" \
@@ -253,11 +253,11 @@ for a in json.load(sys.stdin).get("alerts",[]):
 }
 
 # ===========================================================================
-# STEP 4 — ZAP Insights evidence (EO3b)  -> "ZAP Insights evidence"
+# STEP 4, ZAP Insights evidence (EO3b)  -> "ZAP Insights evidence"
 # ===========================================================================
 step4_insights() {
     fm header "ZAP 2.17.0 Insights assess scan effectiveness, not just findings" \
-              "Read the report's Insights — signals about how well the scan ran and any operational issues — so you trust the result, not just the alert list (EO3b)."
+              "Read the report's Insights, signals about how well the scan ran and any operational issues, so you trust the result, not just the alert list (EO3b)."
     ensure_scan || return "${STEP_RC}"
     local rep; rep="$(generate_report)"
     if [ -z "${rep}" ]; then
