@@ -79,9 +79,49 @@ cd demos/module1-demos/m1-demo2-javascript-http-sender
 
 Register a JavaScript HTTP Sender hook, and understand why a file in the repo is not yet an extension that modifies traffic. *(EO2a)*
 
+### ✍️ Author the script (the `-before` branch ships without it)
+
+On the `m1-demo2-before` branch, `zap-scripts/globomantics-marker.js` **does not exist** — `zap-scripts/` holds only a `.gitkeep`. You write the file. Build it up in four moves, then save it exactly as below. (The finished reference is on the `m1-demo2-after` branch, but author it yourself first — typing the hook is the lesson.)
+
+1. **Name the hook ZAP calls.** An HTTP Sender script contracts with ZAP through one function name: `sendingRequest(msg, initiator, helper)`, which ZAP runs for every message it is about to send.
+2. **Pull the marker out as constants**, so there is one obvious place to change it.
+3. **Mutate the outbound request** with `msg.getRequestHeader().setHeader(...)` — this is the line that *changes* traffic, not just observes it.
+4. **Report what you did** with `print(...)`, and stash the exact line in a `ScriptVars` global so Step 3 can read it back from ZAP.
+
+<details><summary>📄 <b>Write this to <code>zap-scripts/globomantics-marker.js</code></b></summary>
+
+```javascript
+// Globomantics HTTP Sender script (GraalVM JavaScript).
+// ZAP runs this for every message it sends. It marks each outbound request
+// with a fixed header and prints a named line to the Script Console, so a
+// later Automation Framework run can call this same saved script.
+// Authorized use only: exercised against the local Globomantics training app.
+
+var MARKER_HEADER = "X-Globomantics-Marker";
+var MARKER_VALUE  = "GLOBO-DEMO";
+var CONSOLE_TAG   = "[globo-marker]";
+
+var ScriptVars = Java.type("org.zaproxy.zap.extension.script.ScriptVars");
+
+// Called just before ZAP sends a request.
+function sendingRequest(msg, initiator, helper) {
+    msg.getRequestHeader().setHeader(MARKER_HEADER, MARKER_VALUE);
+    var line = CONSOLE_TAG + " added " + MARKER_HEADER + ": " + MARKER_VALUE +
+               " to " + msg.getRequestHeader().getURI().toString();
+    print(line);
+    // Keep the exact line ZAP printed, so it can be read back through the API.
+    ScriptVars.setGlobalVar("globo.marker.lastLine", line);
+}
+
+// Called when ZAP receives a response. This demo only marks outbound requests.
+function responseReceived(msg, initiator, helper) {
+}
+```
+</details>
+
 ### What we examine, and why
 
-Open `zap-scripts/globomantics-marker.js` in VS Code and read the parts that make it an HTTP Sender script, not just any JavaScript:
+With the file saved, read the parts that make it an HTTP Sender script, not just any JavaScript:
 
 - **`sendingRequest(msg, initiator, helper)`** — this is the hook. ZAP calls it for *every message it is about to send*, which is exactly the moment to stamp a header. (There is a matching `responseReceived` for the other direction.) Understanding that the function name *is* the contract with ZAP is the whole lesson of the step.
 - **`MARKER_HEADER` / `MARKER_VALUE`** — the constants `X-Globomantics-Marker` and `GLOBO-DEMO`, kept at the top so the marker is one obvious thing to change.
