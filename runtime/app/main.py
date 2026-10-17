@@ -44,7 +44,7 @@ CSRF_TOKENS: dict[str, dict] = {}      # token -> {"session": sid, "used": bool}
 
 
 # ---------------------------------------------------------------------------
-# Store skin — cosmetic only. It wraps page content in a shared header/footer
+# Store skin · cosmetic only. It wraps page content in a shared header/footer
 # and CSS so the training app looks like the "Globomantics Store". It must NEVER
 # change the vulnerable sink strings the demo relies on (the raw XSS reflections
 # in /greet, the SQL error surfaced by /search, the CSRF token in the form).
@@ -78,7 +78,7 @@ def shell(title: str, body: str) -> str:
         f'<!doctype html><html><head><meta charset="utf-8"><title>{title}</title>'
         f"{STORE_CSS}</head><body>{NAV}"
         f'<main class="wrap">{body}</main>'
-        '<footer class="foot">Globomantics training store — authorized testing only</footer>'
+        '<footer class="foot">Globomantics training store · authorized testing only</footer>'
         "</body></html>"
     )
 
@@ -136,7 +136,7 @@ def index() -> str:
 
 
 # ---------------------------------------------------------------------------
-# 1. SQL injection — product search (PostgreSQL)
+# 1. SQL injection · product search (PostgreSQL)
 # ---------------------------------------------------------------------------
 @app.get("/search", response_class=HTMLResponse)
 def search(q: str = "") -> str:
@@ -162,7 +162,7 @@ def search(q: str = "") -> str:
     except Exception as exc:  # noqa: BLE001
         error = str(exc)
     items = "".join(
-        f"<li>{html.escape(str(r[0]))} — {html.escape(str(r[1]))} — "
+        f"<li>{html.escape(str(r[0]))} · {html.escape(str(r[1]))} · "
         f"${html.escape(str(r[2]))}</li>"
         for r in rows
     )
@@ -170,11 +170,11 @@ def search(q: str = "") -> str:
     if error:
         # Surfacing the DB error message aids ZAP's error-based SQLi detection.
         body += f"<pre>{html.escape(error)}</pre>"
-    return shell("Search — Globomantics Store", body)
+    return shell("Search · Globomantics Store", body)
 
 
 # ---------------------------------------------------------------------------
-# 2. NoSQL injection — account lookup (MongoDB)
+# 2. NoSQL injection · account lookup (MongoDB)
 # ---------------------------------------------------------------------------
 # Matches qs-style bracket notation such as "username[$ne]".
 _OP_KEY_RE = re.compile(r"^(?P<field>[^\[]+)\[(?P<op>\$[a-zA-Z]+)\]$")
@@ -191,7 +191,7 @@ def account(request: Request) -> JSONResponse:
             #   /api/account?username[$ne]=
             #   /api/account?username[$regex]=.*
             # which turns an equality lookup into an operator query and returns
-            # accounts that should not match — classic NoSQL operator injection.
+            # accounts that should not match · classic NoSQL operator injection.
             username_filter: object = ""
             for key, value in params.multi_items():
                 m = _OP_KEY_RE.match(key)
@@ -215,7 +215,7 @@ def account(request: Request) -> JSONResponse:
 
 
 # ---------------------------------------------------------------------------
-# 3. Command injection — admin ping diagnostic
+# 3. Command injection · admin ping diagnostic
 # ---------------------------------------------------------------------------
 _HOST_RE = re.compile(r"^[A-Za-z0-9.-]{1,253}$")
 
@@ -250,7 +250,7 @@ def admin_ping(host: str = "127.0.0.1") -> Response:
 
 
 # ---------------------------------------------------------------------------
-# 4. Reflected XSS — three contexts
+# 4. Reflected XSS · three contexts
 # ---------------------------------------------------------------------------
 @app.get("/greet", response_class=HTMLResponse)
 def greet(name: str = "friend") -> str:
@@ -266,7 +266,7 @@ def greet(name: str = "friend") -> str:
         attr_ctx = html.escape(name, quote=True)
         js_ctx = json.dumps(name)[1:-1]  # escape for a JS string literal
 
-    # The three sink strings below are UNCHANGED — the demo checks for them
+    # The three sink strings below are UNCHANGED · the demo checks for them
     # verbatim. Only the surrounding store shell is new.
     body = (
         '<div class="card">'
@@ -275,11 +275,11 @@ def greet(name: str = "friend") -> str:
         f'<script>var greeting = "{js_ctx}"; </script>'
         "</div>"
     )
-    return shell("Welcome — Globomantics Store", body)
+    return shell("Welcome · Globomantics Store", body)
 
 
 # ---------------------------------------------------------------------------
-# 5. CSRF — login + email change
+# 5. CSRF · login + email change
 # ---------------------------------------------------------------------------
 def _issue_csrf(sid: str) -> str:
     token = secrets.token_hex(16)
@@ -310,7 +310,7 @@ def email_form(request: Request) -> HTMLResponse:
         '<button type="submit">Update</button>'
         "</form></div>"
     )
-    return HTMLResponse(shell("Account — Globomantics Store", body))
+    return HTMLResponse(shell("Account · Globomantics Store", body))
 
 
 @app.post("/account/email")
@@ -358,11 +358,11 @@ def current_email(request: Request) -> JSONResponse:
 
 
 # ---------------------------------------------------------------------------
-# 6. Authenticated profile page — the target for Clip 5's custom Python
+# 6. Authenticated profile page · the target for Clip 5's custom Python
 #    active-scan rule. It is SESSION-GATED (401 without a valid login cookie),
 #    so the custom rule only reaches it after ZAP's scripted authentication has
 #    logged in. In the vulnerable build the `note` parameter is reflected
-#    without output encoding — the exact condition the custom rule detects.
+#    without output encoding · the exact condition the custom rule detects.
 # ---------------------------------------------------------------------------
 @app.get("/account/profile", response_class=HTMLResponse)
 def profile(request: Request, note: str = "") -> HTMLResponse:
@@ -384,4 +384,4 @@ def profile(request: Request, note: str = "") -> HTMLResponse:
         f"<p>Note: {note_ctx}</p>"
         "</div>"
     )
-    return HTMLResponse(shell("Profile — Globomantics Store", body))
+    return HTMLResponse(shell("Profile · Globomantics Store", body))

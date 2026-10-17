@@ -1,5 +1,5 @@
 #!/bin/bash
-# Run ONE demo step and stop — one clean screen at a time.
+# Run ONE demo step and stop, one clean screen at a time.
 #
 #   ./scripts/demo_step.sh ref     # the context / token-state reference panel
 #   ./scripts/steps/01-...sh       # targeted injection scan
