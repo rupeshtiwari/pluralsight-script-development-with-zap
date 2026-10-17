@@ -33,7 +33,7 @@ run_plan_and_wait() {
 # scan data yet (you're recording a step on its own), run the plan once first.
 prime_if_needed() {
     [ -n "$(reflection_reached)" ] && return 0
-    fm note "Priming: no scan result in this ZAP session yet — running the plan once so this step has data."
+    fm note "Priming: no scan result in this ZAP session yet, running the plan once so this step has data."
     run_plan_and_wait
 }
 
