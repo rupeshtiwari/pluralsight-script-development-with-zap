@@ -19,42 +19,42 @@
 </p>
 <!-- demo-navigation:end -->
 
-## Your Scenario
+## Your scenario
 
-Your custom security check needs a protected Store profile, but an unauthenticated scanner cannot reach it. You need separate scanning and login scripts, and evidence that ZAP used the authenticated session.
+The Globomantics Store has a flaw that only shows up *after you log in* — a profile field that reflects input unsafely. That one detail breaks the easy path. A built-in scanner does not know about your application-specific condition, and an unauthenticated scanner never even reaches the profile page, so it reports a reassuring nothing. Two different gaps, and you have to close both before you can honestly say the page was tested.
 
-**Your practical goal:** I will guide you through a Jython-compatible active rule and a separate authentication script. You will compare denied and authenticated profile access, then require a fresh alert from your named custom rule.
+So in this demo you and I build two small scripts that work as a pair: a **custom Jython active-scan rule** that encodes the house-specific check ZAP does not ship, and a **scripted authentication** sequence that logs ZAP in so the rule can run where the vulnerability actually lives. Then — and this is the part that makes it real — we prove the login changed access (`401` without it, `200` with it) and we require a *fresh* alert from our named rule, because an alert left over from an earlier run would let an unrun scan masquerade as a passing one. The alert you capture here, rule `50000`, is the exact finding Module 2 Demo 2 will later pull straight from the ZAP API, so this is where that thread begins.
 
-## Your Learning Goals
+## Your learning goals
 
 You will create two distinct script capabilities that work together:
 
 1. Implement a focused custom Python (Jython) active-scan rule *(EO2b)*
-2. Automate the ZAP authentication sequence and prove protected endpoint access *(EO2c)*
+2. Automate the ZAP authentication sequence and prove protected-endpoint access *(EO2c)*
 
-No separate course outline is required to complete this lab.
+No separate course outline is required — each step states what you are checking and why.
 
-## Your Evidence Path
+## Your evidence path
 
 ```mermaid
 flowchart LR
-  S1["Load custom rule"]
-  S2["Script authentication"]
-  S3["Prove protected access"]
-  S4["Prove custom alert"]
-  S1 --> S2
-  S2 --> S3
-  S3 --> S4
+  S1["Load the custom rule<br/>(Jython active rule)"]
+  S2["Script the login<br/>(authentication + logged-in check)"]
+  S3["Prove protected access<br/>(401 → 200 as alice)"]
+  S4["Prove a fresh custom alert<br/>(absent → present · rule 50000)"]
+  S1 --> S2 --> S3 --> S4
 ```
 
-## Start Your Lab
+Read it as a dependency chain: the rule is useless until the login lets it reach the page, and the login is only proven once the rule fires a *new* finding inside the authenticated scope.
 
-This step starts the actual vulnerable Globomantics web application and ZAP container. The Mac prerequisite installer, `setup/setup-macos.sh`, is a **one-time preparation task** explained in the [course README](../../../README.md). You do not need to reinstall tools for every demo.
+## Start your lab
+
+The Mac prerequisite installer, `setup/setup-macos.sh`, is a **one-time** preparation task explained in the [course README](../../../README.md). Each demo then starts its **own** local stack.
 
 <details open>
-<summary><b>Start Module 1 Demo 3 — exact branch, folder and runtime</b></summary>
+<summary><b>Open the exact branch, folder and runtime for Module 1 Demo 3</b></summary>
 
-**Where:** macOS Terminal or the VS Code integrated terminal, starting in the root of your existing local repository.
+**Where:** the VS Code integrated Terminal, starting in the root of your existing local repository. This demo shows source code, so work in VS Code throughout.
 
 ```bash
 cd "$HOME/pluralsight-script-development-with-zap"
@@ -64,268 +64,237 @@ cd demos/module1-demos/m1-demo3-python-scanning-authentication
 ./scripts/demo_reset.sh
 ```
 
-**Expected startup:** the script waits for the local services. For a reset it prints a clean-slate message and brings up the vulnerable build. Continue only after it reports readiness; a failed startup is not part of the four teaching steps.
+**Expected start:** the reset script prints a clean-slate message and brings up the vulnerable Globomantics build. Continue only after it reports readiness — a failed startup is not one of the four teaching steps.
 
-**Open these actual interfaces:** [Globomantics app — localhost:8000](http://localhost:8000/) · [ZAP GUI — localhost:8080/zap/](http://localhost:8080/zap/) · [ZAP API/proxy — localhost:8090](http://localhost:8090/). Open only the interface called for by the current step. The starter omits the completed Python rule and authentication script. Create them before attempting the later checks.
+**Interfaces:** [Globomantics app — localhost:8000](http://localhost:8000/) · [ZAP GUI — localhost:8080/zap/](http://localhost:8080/zap/) · [ZAP API/proxy — localhost:8090](http://localhost:8090/). You author the two Python scripts in **VS Code** and inspect them in **ZAP's GUI** (Scripts → Active Rules, Scripts → Authentication, the Globomantics context, and Alerts). The `-before` branch omits the finished rule and auth script — create them before the later checks.
 
 </details>
 
-## Your Four Steps
+## Your four steps
 
 <details open>
-<summary><b>Step 1: Register a custom Jython active-scan rule</b> — Load custom rule</summary>
+<summary><b>Step 1 — Register a custom Jython active-scan rule</b> · the house-specific check</summary>
 
-### Learning Goal
+### What you are learning
 
-A built-in scanner may not test the application's own unsafe reflection condition.
+Implement and register a custom Python active-scan rule — the application-specific test a built-in scanner does not cover. *(EO2b)*
 
-**Learning focus:** Implement a custom Python scanning rule *(EO2b)*
+### What we examine, and why
 
-### Demo Workspace
+Open `zap-scripts/globomantics-active-rule.py` in VS Code and read the two functions that make it an active rule:
 
-**Open VS Code.** Open `zap-scripts/globomantics-active-rule.py`. Inspect `scan` and `newAlert` / `raiseAlert`. Show **ZAP GUI → Scripts → Active Rules** if validating the loaded script.
+- **`scan(sas, msg, param, value)`** — ZAP calls this per parameter during an active scan. Inside it, the rule injects its marker into the parameter and checks whether it comes back reflected — the exact Globomantics condition a generic rule would not look for.
+- **`raiseAlert(...)` / the alert name** — when the reflection is found, the rule raises *its own named finding*, `Globomantics unsafe reflection (custom rule)`, rather than a built-in XSS alert. A named, owned alert is what lets a pipeline reason about *your* issue specifically.
 
-<!-- student-location:start -->
-**Run in:** VS Code integrated Terminal.
+This runs on ZAP's **Python Scripting (jython)** add-on, so the file is Python 2.7 syntax executed by Jython — that is why the engine shows as `jython`, not CPython. Registering it compiles the script; a clean `error flag false` is your first proof the Jython loaded without a syntax problem.
 
-```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
-```
-<!-- student-location:end -->
+**Predict before you run:** you expect the jython add-on present, the rule registered as `globomantics-active-rule · type active · engine jython · enabled true`, the alert name read from the source, and the compile/run error flag `false`. Loading is not a finding — note that no alert has fired yet.
 
-### Run Command
+### Run command
 
-**Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo3-python-scanning-authentication`.
+**Where:** the VS Code integrated Terminal, in `demos/module1-demos/m1-demo3-python-scanning-authentication`.
 
 ```bash
 ./steps/01-load-python-active-scan-rule.sh
 ```
 
-<!-- student-proof:start -->
-**Where your result appears:** Show the completed active-rule source in VS Code before execution; after terminal registration, switch to http://localhost:8080/zap/, Scripts, Active Rules.
+Then open [ZAP — localhost:8080/zap/](http://localhost:8080/zap/) → **Scripts → Active Rules** and confirm the loaded rule and its name.
 
-**Inspect this evidence:** Actual loaded Jython rule, custom alert name and scan/alert-creation logic; loading is not a finding.
-<!-- student-proof:end -->
-
-### Expected Results
-
-The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
+### Expected result (the script's output contract — not your run)
 
 <table>
-<thead><tr><th>Displayed field</th><th>Example or expected value</th><th>What to check</th></tr></thead>
+<thead><tr><th>Displayed field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
 <tbody>
-<tr><td><b>Script name</b></td><td><code>globomantics-active-rule (active · Jython)</code></td><td>Correct script type and engine</td></tr>
-<tr><td><b>Alert it raises</b></td><td><code>Globomantics unsafe reflection (custom rule)</code></td><td>Named finding, not generic built-in XSS</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS custom active rule loaded</code></td><td>Loading alone is not a fired alert</td></tr>
+<tr><td><b>Python Scripting (jython) add-on</b></td><td><code>installed</code></td><td>The engine your rule needs</td></tr>
+<tr><td><b>Saved rule source</b></td><td><code>zap-scripts/globomantics-active-rule.py</code></td><td>The file you authored</td></tr>
+<tr><td><b>Alert name in the source</b></td><td><code>Globomantics unsafe reflection (custom rule)</code></td><td>A named finding, not built-in XSS</td></tr>
+<tr><td><b>Registered in ZAP</b></td><td><code>globomantics-active-rule · active · jython · enabled true</code></td><td>Type and engine correct</td></tr>
+<tr><td><b>Compile/run error flag</b></td><td><code>false</code></td><td>Jython loaded without errors</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS the Jython active rule is registered, enabled and loaded without errors</code></td><td>Loaded ≠ a fired alert</td></tr>
 </tbody></table>
 
-**Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
+### Investigate, then decide
 
-### Interpret Results
+Confirm the error flag is `false` and the registered type is `active` — a rule that compiled but registered as the wrong type will never run in a scan. The decision: *the house-specific check now exists inside ZAP's active scanner* — but it cannot reach the vulnerable page yet, because that page is behind a login.
 
-The custom rule is now registered with ZAP's active scanning mechanism, where it can inspect application-specific parameters.
+**On FAIL:** a true error flag points at the Jython source (Python 2.7 syntax), not at ZAP. Fix the script and reload rather than claiming it registered.
 
-**How this connects:** Provide the authentication sequence so the rule can reach the protected profile.
+**Next:** give ZAP a way to log in, so the rule can reach the protected profile.
 
 </details>
 
 <details>
-<summary><b>Step 2: Register the login script</b> — Script authentication</summary>
+<summary><b>Step 2 — Register the login script</b> · authentication + logged-in check</summary>
 
-### Learning Goal
+### What you are learning
 
-Manual cookie copying is unreliable in repeatable automated scanning.
+Automate the login with a ZAP authentication script, and give ZAP a reliable way to tell a logged-in page from a logged-out one. *(EO2c)*
 
-**Learning focus:** Apply scripting to authentication sequence automation *(EO2c)*
+### What we examine, and why
 
-### Demo Workspace
+Open `zap-scripts/globomantics-auth.py` and read the two pieces ZAP's authentication contract requires:
 
-**In VS Code**, inspect `zap-scripts/globomantics-auth.py`, focusing on `authenticate` and `getCredentialsParamsNames`. Use ZAP GUI → Scripts → Authentication for confirmation.
+- **`authenticate(helper, paramsValues, credentials)`** — submits the credentials, here a `POST /login` with the `username`. Scripting this is what makes the session *repeatable*: no operator pasting a cookie that expires an hour later.
+- **`getCredentialsParamsNames()`** plus a **logged-in indicator** — ZAP needs a signal that the login actually worked. The script pairs with a logged-in regex (`Signed in as`) so ZAP can verify success instead of assuming it.
 
-<!-- student-location:start -->
-**Run in:** VS Code integrated Terminal.
+The reason the logged-in check matters as much as the login itself: without it, ZAP cannot tell that a session went stale mid-scan, and a "successful" scan could silently be running logged-out. The step proves the regex matches a logged-in page (`1`) and not a logged-out one (`0`).
 
-```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
-```
-<!-- student-location:end -->
+**Predict before you run:** you expect `globomantics-auth` registered as type `authentication`, error flag `false`, a `/login POST username` submission, and the logged-in regex matching `1 / 0` (logged-in page / logged-out page). This simplified username-only login is a *training* model, not a production one.
 
-### Run Command
+### Run command
 
-**Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo3-python-scanning-authentication`.
+**Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
 ./steps/02-register-scripted-authentication.sh
 ```
 
-<!-- student-proof:start -->
-**Where your result appears:** Show the separate authentication source in VS Code; after terminal registration switch to http://localhost:8080/zap/, Scripts, Authentication.
+Then open [ZAP — localhost:8080/zap/](http://localhost:8080/zap/) → **Scripts → Authentication** to confirm the registered script.
 
-**Inspect this evidence:** Login submission and registered script identity; explicitly bound the simplified lab login.
-<!-- student-proof:end -->
-
-### Expected Results
-
-The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
+### Expected result (the script's output contract — not your run)
 
 <table>
-<thead><tr><th>Displayed field</th><th>Example or expected value</th><th>What to check</th></tr></thead>
+<thead><tr><th>Displayed field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
 <tbody>
-<tr><td><b>Script name</b></td><td><code>globomantics-auth (authentication · Jython)</code></td><td>Authentication script identity</td></tr>
-<tr><td><b>It submits</b></td><td><code>username=alice to POST /login</code></td><td>Training-only simplified login</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS authentication script registered</code></td><td>The protected endpoint remains to be tested</td></tr>
+<tr><td><b>Saved auth source</b></td><td><code>zap-scripts/globomantics-auth.py</code></td><td>The file you authored</td></tr>
+<tr><td><b>Credential submission in authenticate()</b></td><td><code>/login POST username</code></td><td>Training-only simplified login</td></tr>
+<tr><td><b>Registered in ZAP</b></td><td><code>globomantics-auth · authentication · error flag false</code></td><td>Identity and clean load</td></tr>
+<tr><td><b>Logged-in check (regex ZAP uses)</b></td><td><code>Signed in as</code> · matches <code>1 / 0</code></td><td>Distinguishes logged-in from logged-out</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS authentication script registered and its logged-in check tells a logged-in page from a logged-out one</code></td><td>The protected endpoint is still to be tested</td></tr>
 </tbody></table>
 
-**Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
+### Investigate, then decide
 
-### Interpret Results
+Confirm the logged-in regex matched `1` on the signed-in page and `0` on the signed-out one — that asymmetry is what makes the check trustworthy. The decision: *ZAP can now obtain and verify a session by running a script*, so access can be proven rather than assumed.
 
-ZAP can now obtain a session by running a script rather than accepting an operator's copied cookie. The course's simplified username-only login is not a production security model.
+**On FAIL:** a regex that matches both pages (or neither) is a broken indicator — fix the logged-in check, because every later step trusts it.
 
-**How this connects:** Prove the script really changes access to the protected page.
+**Next:** prove the login actually changes what ZAP can reach.
 
 </details>
 
 <details>
-<summary><b>Step 3: Compare unauthenticated and scripted access</b> — Prove protected access</summary>
+<summary><b>Step 3 — Compare unauthenticated and scripted access</b> · 401 → 200 as alice</summary>
 
-### Learning Goal
+### What you are learning
 
-A scan can incorrectly look clean if it never passes the login wall.
+Prove the scripted login changes access to the protected page, and that ZAP runs your rule *as the authenticated user* — with no cookie supplied by hand. *(EO2b · EO2c)*
 
-**Learning focus:** Verify scripted authentication effectiveness *(EO2c)*
+### What we examine, and why
 
-### Demo Workspace
+This step makes the before/after explicit. It requests `/account/profile` with no session, then lets ZAP's forced-user mechanism run the authentication script and request it again. The two status codes are the proof: `401` without login, `200` with ZAP's scripted user. Then it runs the custom rule *inside that authenticated scope* and shows the rule saw the logged-in page (the `note` parameter reflected).
 
-**In ZAP GUI**, inspect Globomantics context and user Alice. Then return to **VS Code Terminal** to run the comparison. No cookie is manually supplied by the shell probe.
+Why insist on the comparison? Because a clean scan report is meaningless if the scanner never passed the login wall. The `401`→`200` pair is how you rule out the most dangerous false negative in authenticated testing: a scan that looked fine only because it tested the login page over and over.
 
-<!-- student-location:start -->
-**Run in:** VS Code integrated Terminal.
+**Predict before you run:** you expect `/account/profile → 401` unauthenticated, `→ 200` as the forced user, an auth trace naming `user=alice`, and the custom-rule scan finishing against the logged-in page with `note` reflected. The session comes from ZAP running your script, not from a shell cookie.
 
-```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
-```
-<!-- student-location:end -->
+### Run command
 
-### Run Command
-
-**Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo3-python-scanning-authentication`.
+**Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
 ./steps/03-confirm-authenticated-profile-access.sh
 ```
 
-<!-- student-proof:start -->
-**Where your result appears:** Stay in the terminal for denied and authenticated profile requests and the authentication trace. Then show http://localhost:8080/zap/, Globomantics context, Users, Alice when verifying context state.
+Keep the denied and authenticated profile requests and the authentication trace visible together. Open [ZAP — localhost:8080/zap/](http://localhost:8080/zap/) → the **Globomantics context → Users → Alice** when you want to see the context ZAP authenticated as.
 
-**Inspect this evidence:** Real protected-profile HTTP responses and ZAP script execution, not a manually supplied shell cookie.
-<!-- student-proof:end -->
-
-### Expected Results
-
-The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
+### Expected result (the script's output contract — not your run)
 
 <table>
-<thead><tr><th>Displayed field</th><th>Example or expected value</th><th>What to check</th></tr></thead>
+<thead><tr><th>Displayed field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
 <tbody>
-<tr><td><b>Without login</b></td><td><code>/account/profile → HTTP 401</code></td><td>Endpoint truly protected</td></tr>
-<tr><td><b>ZAP forced-user script auth</b></td><td><code>/account/profile → HTTP 200</code></td><td>ZAP obtains valid session</td></tr>
-<tr><td><b>Auth script ran</b></td><td><code>authenticate: &lt;actual trace&gt;</code></td><td>Trace must prove script invocation</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS ZAP executed authentication script</code></td><td>Both HTTP status and auth trace required</td></tr>
+<tr><td><b>Without login</b></td><td><code>/account/profile → HTTP 401</code></td><td>The endpoint is truly protected</td></tr>
+<tr><td><b>ZAP forced-user (script auth)</b></td><td><code>/account/profile → HTTP 200</code></td><td>ZAP obtained a valid session</td></tr>
+<tr><td><b>Auth script ran</b></td><td><code>authenticate: user=alice login_url=&lt;login URL&gt;</code></td><td>The trace proves script invocation</td></tr>
+<tr><td><b>Custom rule scan as alice</b></td><td><code>scan &lt;id&gt; · finished · &lt;n&gt; probe requests</code></td><td>The rule ran in authenticated scope</td></tr>
+<tr><td><b>Rule saw the logged-in page</b></td><td><code>reflected: param=note</code></td><td>The vulnerable field was reached</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS ZAP authenticated with the script and ran the custom rule against the logged-in page</code></td><td>Both status codes <b>and</b> the auth trace</td></tr>
 </tbody></table>
 
-**Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
+### Investigate, then decide
 
-### Interpret Results
+Read the `401`/`200` pair together — the jump is the whole proof, and the auth trace confirms *why* it jumped. The decision: *the scanner can now reach and test the authenticated resource*, so a finding from this scope is meaningful. A `200` without the auth trace is not enough; you need both.
 
-HTTP 401 without login and HTTP 200 with ZAP's scripted user establish that the scanner can access the authenticated resource.
+**On FAIL:** if the protected request is not `401` without login, the app state is wrong and the comparison is void — reset rather than trusting a `200`.
 
-**How this connects:** Run the custom rule against the authenticated page, and reject stale findings.
+**Next:** require a *fresh* alert from the custom rule, so no stale finding can fake success.
 
 </details>
 
 <details>
-<summary><b>Step 4: Confirm a fresh custom scan alert</b> — Prove custom alert</summary>
+<summary><b>Step 4 — Confirm a fresh custom scan alert</b> · absent → present · rule 50000</summary>
 
-### Learning Goal
+### What you are learning
 
-A previous alert can make a new scan seem successful when the custom rule never ran.
+Require the custom rule to raise its named alert on *this* authenticated scan — absent before, present after — and record it for Module 2 to reuse. *(EO2b)*
 
-**Learning focus:** Demonstrate application-specific scanning proof *(EO2b)*
+### What we examine, and why
 
-### Demo Workspace
+The step clears the alert store, confirms the finding is **absent**, runs the authenticated scan, and then requires the named alert to be **present** — with its identity attached: `pluginId 50000`, alert `Globomantics unsafe reflection (custom rule)`, on `/account/profile` at parameter `note`, `Medium / Medium`. It saves that to `logs/custom-alert-record.json`.
 
-**Open ZAP GUI → Alerts** for the targeted profile. Run the command in **VS Code Terminal**, then return to the Alerts pane and inspect the newly produced named finding.
+The absent-before/present-after gate is the heart of the step. A leftover alert from an earlier run would let an unrun rule look successful — the single most common way scripted scans lie to you. Insisting the finding did not exist a moment ago is how you prove *this* scan produced it. And the `pluginId 50000` is not arbitrary: it is the stable identity Module 2 Demo 2 queries over the ZAP API, which is why the record is saved here.
 
-<!-- student-location:start -->
-**Run in:** VS Code integrated Terminal.
+**Predict before you run:** you expect `absent` before, then `pluginId 50000 · note · Medium / Medium` after, and a saved record at `logs/custom-alert-record.json`. A built-in XSS alert on the same page is *not* a substitute — it must be your named rule.
 
-```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
-```
-<!-- student-location:end -->
+### Run command
 
-### Run Command
-
-**Where to type it:** the VS Code integrated Terminal, while your current directory is `demos/module1-demos/m1-demo3-python-scanning-authentication`.
+**Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
 ./steps/04-confirm-custom-scan-alert.sh
 ```
 
-<!-- student-proof:start -->
-**Where your result appears:** Show absent-before and fresh-after terminal evidence. Switch to http://localhost:8080/zap/, Alerts, and select the newly named custom alert on /account/profile.
+Then open [ZAP — localhost:8080/zap/](http://localhost:8080/zap/) → **Alerts** and select the newly raised custom alert on `/account/profile`.
 
-**Inspect this evidence:** Fresh custom name, note parameter, risk and response evidence; built-in XSS is not equivalent.
-<!-- student-proof:end -->
+### Expected result (the script's output contract — not your run)
 
-### Expected Results
-
-The table shows the actual **field names and expected type of evidence** produced by the existing script. These are examples, **not results claimed from your computer**. Rule IDs and stable parameter names come from the demo; variable risk, request IDs and counters must be read from your live output.
+The reflected marker value is run-specific; read it from your output. The identity fields are the demo's.
 
 <table>
-<thead><tr><th>Displayed field</th><th>Example or expected value</th><th>What to check</th></tr></thead>
+<thead><tr><th>Displayed field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
 <tbody>
-<tr><td><b>Before scan</b></td><td><code>absent</code></td><td>Cleared alert store</td></tr>
-<tr><td><b>Scan target</b></td><td><code>/account/profile?note=seed (as alice)</code></td><td>Authorized authenticated parameter</td></tr>
-<tr><td><b>Alert</b></td><td><code>Globomantics unsafe reflection (custom rule)</code></td><td>Exact custom finding</td></tr>
-<tr><td><b>Risk / Parameter</b></td><td><code>&lt;actual risk&gt; / note</code></td><td>Current result, not placeholder</td></tr>
-<tr><td><b>Evidence</b></td><td><code>&lt;actual reflected marker&gt;</code></td><td>Evidence from real request</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS named alert raised on current scan</code></td><td>Absent before and present after</td></tr>
+<tr><td><b>Before the scan</b></td><td><code>absent</code></td><td>The alert store was cleared</td></tr>
+<tr><td><b>Alert · pluginId</b></td><td><code>Globomantics unsafe reflection (custom rule) · 50000</code></td><td>Your named rule, not built-in XSS</td></tr>
+<tr><td><b>URL · parameter</b></td><td><code>/account/profile?note=&lt;marker&gt; · note</code></td><td>The authenticated field</td></tr>
+<tr><td><b>Risk · confidence</b></td><td><code>Medium · Medium</code></td><td>The disposition Module 2 will read</td></tr>
+<tr><td><b>Alert record saved</b></td><td><code>logs/custom-alert-record.json</code></td><td>Handed forward to Module 2</td></tr>
+<tr><td><b>Result</b></td><td><code>✔ PASS the custom rule raised its named alert on this authenticated scan (absent before, present after) and the record is saved</code></td><td>Absent before and present after</td></tr>
 </tbody></table>
 
-**Do not continue on FAIL.** Read the command's diagnostic text and verify the right branch, app state, and script source instead of claiming an alert appeared.
+### Investigate, then decide
 
-### Interpret Results
+Confirm the finding was absent a moment ago and is now present as `pluginId 50000` on `note`. The decision this whole demo built to: *you have an application-specific finding, produced by your own rule, inside a scripted authenticated session, proven fresh* — and it is recorded under the identity Module 2 will query.
 
-A new authenticated scan now produces the required custom alert tied to `note`. Built-in XSS alerts are not substitutes.
+**On FAIL:** a finding present *before* the scan means the store was not cleared; a built-in XSS instead of `50000` means your rule did not fire. Neither is a pass — investigate rather than accept a lookalike.
 
-**How this connects:** The demo closes with repeatable authentication and an application-specific finding supported by a fresh scan.
+**Next:** you have a reusable custom rule and a scripted login, and the alert record that Module 2 Demo 2 reads back over the API.
 
 </details>
 
 <!-- student-achievement:start -->
-## What You Achieved
+## What you achieved
 
 You can now explain each learning objective with the evidence you captured:
 
-1. **(EO2b) You implemented a custom Jython active-scan rule.** It loaded with no script error and raised its own named alert (rule `50000`) on `/account/profile` (parameter `note`) at Medium/Medium — distinct from any built-in rule.
-2. **(EO2c) You automated the login and proved protected-page access.** The authentication script submitted `username=alice` to `POST /login`; `/account/profile` returned `401` unauthenticated and `200` as the scripted user, and the custom rule then ran inside that authenticated scope.
+1. **(EO2b) You implemented a custom Jython active-scan rule.** It loaded on the `jython` engine with the error flag `false` and raised its own named alert — `pluginId 50000`, `Globomantics unsafe reflection (custom rule)` — on `/account/profile` (parameter `note`) at `Medium / Medium`, absent before the scan and present after, distinct from any built-in rule.
+2. **(EO2c) You automated the login and proved protected-page access.** The authentication script submitted `username` to `POST /login`, its logged-in check told a signed-in page from a signed-out one (`1 / 0`), `/account/profile` returned `401` unauthenticated and `200` as the scripted user `alice`, and the custom rule then ran inside that authenticated scope.
 
-**Your final check:** Explain each numbered outcome using your own captured evidence from this run. A README example, a missing result or an earlier run does not satisfy this exercise.
+**How to apply it:** this is how you test anything behind a login with ZAP — script the authentication so it is repeatable and verifiable, encode your application's own checks as a named rule, and gate on a fresh finding so a stale alert can never fake a pass. The saved record (`pluginId 50000`) is the handoff into your Module 2 pipeline.
+
+**Your final check:** explain each numbered outcome using *your own* captured evidence from this run. A README example, a missing result, or an earlier run does not satisfy this exercise.
 <!-- student-achievement:end -->
 
-## Finish Your Lab
+## Finish your lab
 
-After Step 4, you should be able to explain why the named custom rule fired on an authenticated profile from real evidence rather than only recalling a command.
+After Step 4 you should be able to explain why the named custom rule fired on an authenticated profile — from the `401`/`200` pair, the auth trace and the fresh `50000` alert, not from recalling a command.
 
-**Stop the demo's containers** from the same demo directory:
+Stop the demo's containers from the same demo directory:
 
 ```bash
 ./scripts/demo_down.sh
 ```
 
-To inspect the finished example, switch to `m1-demo3-after` **after preserving any exercise changes**. Compare without modifying files using `git diff m1-demo3-before..m1-demo3-after -- demos/module1-demos/m1-demo3-python-scanning-authentication`. For operational-only demos, the important difference may be live scan evidence rather than source code.
+The `m1-demo3-after` branch holds the completed reference, including the finished rule and auth script. Preserve your changes first, then compare without modifying files: `git diff m1-demo3-before..m1-demo3-after -- demos/module1-demos/m1-demo3-python-scanning-authentication`.
 
 <!-- demo-navigation:start -->
 <p align="center"><b>Student exercise · Demo 3 of 6</b></p>
@@ -336,4 +305,3 @@ To inspect the finished example, switch to `m1-demo3-after` **after preserving a
 <!-- demo-navigation:end -->
 
 [← Module 1 demo catalog](../README.md) · [← Course home](../../../README.md)
-
