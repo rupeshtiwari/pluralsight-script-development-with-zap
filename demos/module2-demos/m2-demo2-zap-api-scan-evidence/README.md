@@ -68,7 +68,7 @@ cd demos/module2-demos/m2-demo2-zap-api-scan-evidence
 
 **Expected start:** the startup script reports healthy Globomantics, Postgres, MongoDB and ZAP services, and provisions this demo's authenticated scan so there is real evidence to query. If anything is not ready, stop and read the actual output before continuing.
 
-**URLs:** [Training application](http://localhost:8000/) · [ZAP GUI](http://localhost:8080/zap/) · [ZAP API and proxy](http://localhost:8090/). You will work from the terminal; the GUI is there only if you want to see the same data rendered.
+**URLs:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Training application</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API and proxy</a>. You will work from the terminal; the GUI is there only if you want to see the same data rendered.
 
 </details>
 
