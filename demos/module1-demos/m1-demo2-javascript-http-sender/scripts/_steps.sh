@@ -52,13 +52,40 @@ for pref in ("Graal.js", "graal", "ECMAScript", "JavaScript", "Nashorn"):
 print("")'
 }
 
-load_and_enable() { # <engine>
-    zap script/action/remove "scriptName=$(enc "${SCRIPT_NAME}")" >/dev/null 2>&1 || true
-    zap script/action/load \
-        "scriptName=$(enc "${SCRIPT_NAME}")&scriptType=httpsender&scriptEngine=$(enc "$1")&fileName=$(enc "${SCRIPT_FILE_ZAP}")&scriptDescription=$(enc 'Globomantics HTTP Sender marker (course demo)')" \
-        >/dev/null 2>&1 || return 1
-    zap script/action/enable "scriptName=$(enc "${SCRIPT_NAME}")" >/dev/null 2>&1 || return 1
+script_registered() { # is a script with this name already in ZAP (e.g. written in the Script Console)?
+    zap script/view/listScripts | python3 -c '
+import json,sys
+sys.exit(0 if any(r.get("name")==sys.argv[1] for r in json.load(sys.stdin).get("listScripts",[])) else 1)' "${SCRIPT_NAME}"
+}
+
+load_and_enable() { # <engine>  -> sets LOAD_SOURCE
+    # Never remove a script the author wrote in ZAP's Script Console: keep it and enable it.
+    if script_registered; then
+        LOAD_SOURCE="already in ZAP (Script Console)"
+    else
+        zap script/action/load \
+            "scriptName=$(enc "${SCRIPT_NAME}")&scriptType=httpsender&scriptEngine=$(enc "$1")&fileName=$(enc "${SCRIPT_FILE_ZAP}")&scriptDescription=$(enc 'Globomantics HTTP Sender marker (course demo)')" \
+            >/dev/null || return 1
+        LOAD_SOURCE="loaded from ${SCRIPT_FILE_ZAP}"
+    fi
+    zap script/action/enable "scriptName=$(enc "${SCRIPT_NAME}")" >/dev/null || return 1
     script_registration_valid
+}
+
+script_info() { # -> "name|type|engine|enabled|description"
+    zap script/view/listScripts | python3 -c '
+import json,sys
+for s in json.load(sys.stdin).get("listScripts",[]):
+    if s.get("name")==sys.argv[1]:
+        print("|".join(str(s.get(k,"")).replace("|","/") for k in ("name","type","engine","enabled","description"))); break
+' "${SCRIPT_NAME}"
+}
+
+console_line() { # the exact line the script printed last, stored by the script itself
+    zap script/view/globalVar "varKey=globo.marker.lastLine" | python3 -c '
+import json,sys
+try: print(json.load(sys.stdin).get("globalVar",""))
+except Exception: print("")'
 }
 
 script_registration_valid() {
@@ -73,16 +100,22 @@ sys.exit(1)' "${SCRIPT_NAME}"
 }
 
 send_probe() {
+    # Have ZAP ITSELF send the request (accessUrl). HTTP Sender scripts fire for
+    # requests ZAP sends, and the SENT request — carrying the marker header — is
+    # what ZAP records in History. (A client request proxied through ZAP records
+    # the client's original request, without the header the script adds on send.)
     PROBE_NAME="marker-$(date +%s)-${BASHPID:-$$}-${RANDOM}"
     PROBE_URL="${APP_INTERNAL}/greet?name=${PROBE_NAME}"
-    local status
-    status="$(curl --noproxy '' --proxy "${PROXY}" --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 20 "${PROBE_URL}")" || return 1
-    [ "${status}" = "200" ] || { echo "probe HTTP ${status}, expected 200" >&2; return 1; }
+    zap core/action/accessUrl "url=$(enc "${PROBE_URL}")&followRedirects=false" >/dev/null 2>&1 || return 1
 }
 
 
 marker_request_line() {
-    zap core/view/messages "baseurl=$(enc "${APP_INTERNAL}")&count=100" | python3 -c '
+    # Read the NEWEST messages: ZAP returns history oldest-first, so start near the end.
+    local total start
+    total="$(zap core/view/numberOfMessages "baseurl=$(enc "${APP_INTERNAL}")" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("numberOfMessages",0))' 2>/dev/null)"
+    start=$(( ${total:-0} > 50 ? ${total:-0} - 50 : 0 ))
+    zap core/view/messages "baseurl=$(enc "${APP_INTERNAL}")&start=${start}&count=50" | python3 -c '
 import json,sys
 want=sys.argv[1]
 try: ms=json.load(sys.stdin).get("messages",[])
@@ -135,19 +168,22 @@ ensure_ready() {
 step1_source() {
     fm header "The JavaScript HTTP Sender script" \
               "An HTTP Sender script runs for every message ZAP sends; this is where custom behavior lives (EO2a)."
-    local ok=1
+    local ok=1 sum
     grep -q 'function sendingRequest' "${SCRIPT_FILE_HOST}" || ok=0
     grep -q "setHeader(MARKER_HEADER" "${SCRIPT_FILE_HOST}" || ok=0
-    grep -q 'print(CONSOLE_TAG' "${SCRIPT_FILE_HOST}" || ok=0
-    fm star "Script name" "${SCRIPT_NAME}   (type: HTTP Sender · engine: ${JS_ENGINE:-GraalVM JS})"
-    fm star "Marker header it adds" "${MARKER_HEADER}: ${MARKER_VALUE}" focus
-    fm star "Named console line it prints" "${CONSOLE_TAG} added ${MARKER_HEADER}: ${MARKER_VALUE} to <url>" focus
+    grep -q 'print(' "${SCRIPT_FILE_HOST}" || ok=0
+    sum="$(sha256sum "${SCRIPT_FILE_HOST}" | cut -c1-12)"
+    fm star "Saved source file" "zap-scripts/globomantics-marker.js  (sha256 ${sum})"
+    fm star "sendingRequest() adds" "$(grep -o 'MARKER_HEADER *= *"[^"]*"' "${SCRIPT_FILE_HOST}" | head -1 | cut -d'"' -f2): $(grep -o 'MARKER_VALUE *= *"[^"]*"' "${SCRIPT_FILE_HOST}" | head -1 | cut -d'"' -f2)" focus
     if [ "${ok}" = 1 ] && load_and_enable "${JS_ENGINE}"; then
-        pass "script is a valid HTTP Sender action and loaded into ZAP"
+        local n t e en d; IFS='|' read -r n t e en d <<<"$(script_info)"
+        fm star "Registered in ZAP" "${n} · type ${t} · engine ${e} · enabled ${en}" focus
+        fm star "Source" "${LOAD_SOURCE}"
+        pass "script is a valid HTTP Sender action and registered in ZAP"
     else
-        fail "script did not validate or load" \
+        fail "script did not validate or register" \
              "the source is missing sendingRequest/setHeader/print, or ZAP rejected the load" \
-             "ask: 'the globomantics-marker HTTP Sender script failed to load in ZAP; check the engine name and script body'"
+             "check the engine name and script body, then save it again"
     fi
     return "${STEP_RC}"
 }
@@ -167,7 +203,7 @@ step2_modified_request() {
         fm star "Outbound request" "no marked request found"
         fail "no request carried the marker header" \
              "the script is not enabled, or the request did not pass through ZAP" \
-             "ask: 'the globomantics-marker script did not add the header to a proxied request; check it is enabled'"
+             "re-run Step 1, then retry"
     fi
     return "${STEP_RC}"
 }
@@ -178,17 +214,18 @@ step2_modified_request() {
 step3_console_output() {
     fm header "The named console output the script prints" \
               "A script that reports what it did is one you can trust and reuse (EO2a)."
-    # The live console line appears in ZAP's Script Console. Here we confirm the
-    # named line exists in the source and that the action runs (a fresh marked
-    # request), which is what produces that console line.
-    local rec; rec="$(probe_until_marked)"
-    fm star "Expected format (verify live ZAP Script Console)" "${CONSOLE_TAG} added ${MARKER_HEADER}: ${MARKER_VALUE} to <url>" focus
-    if grep -q "print(CONSOLE_TAG" "${SCRIPT_FILE_HOST}" && [ -n "${rec}" ]; then
-        pass "fresh marked request confirmed; verify emitted line in live ZAP Script Console"
+    local rec line
+    rec="$(probe_until_marked)"
+    line="$(console_line)"
+    fm star "Request that triggered the script" "${rec%% || *}"
+    fm star "Line the script printed (read back from ZAP)" "${line:-<none>}" focus
+    local probe; probe="$(printf '%s' "${rec}" | grep -o 'marker-[0-9A-Za-z_-]*' | head -1)"   # rec comes from a subshell
+    if [ -n "${probe}" ] && [[ "${line}" == *"${CONSOLE_TAG}"*"${probe}"* ]]; then
+        pass "the script printed its named line for this request; the same line is in ZAP's Script Console"
     else
-        fail "fresh marked request or print hook not confirmed" \
-             "the print() line is missing or the action did not run" \
-             "ask: 'the globomantics-marker script is not producing its named console line; check the print statement'"
+        fail "no console line from the script for this request" \
+             "the script is not enabled, or it does not print/store its line" \
+             "check the print() and ScriptVars lines in the script, then re-run Step 1"
     fi
     return "${STEP_RC}"
 }
@@ -199,33 +236,23 @@ step3_console_output() {
 step4_registration() {
     fm header "The saved, reusable script registration" \
               "A named, saved script is what the Automation Framework calls later (EO2a)."
-    local info; info="$(zap script/view/listScripts | python3 -c '
-import json,sys
-name = sys.argv[1]
-try:
-    data = json.load(sys.stdin)
-except Exception:
-    print(""); raise SystemExit
-for s in data.get("listScripts", []):
-    if s.get("name") == name:
-        print("%s|%s|%s|%s" % (s.get("name"), s.get("type"), s.get("engine"), s.get("enabled")))
-        raise SystemExit
-print("")' "${SCRIPT_NAME}")"
+    local info n t e en d sum
+    info="$(script_info)"
     if [ -n "${info}" ]; then
-        IFS='|' read -r n t e en <<<"${info}"
+        IFS='|' read -r n t e en d <<<"${info}"
+        sum="$(sha256sum "${SCRIPT_FILE_HOST}" | cut -c1-12)"
         fm star "Registered name" "${n}" focus
-        fm star "Type" "${t}"
-        fm star "Engine" "${e}"
-        fm star "Enabled" "${en}"
-        fm star "Path (repo)" "zap-scripts/globomantics-marker.js"
+        fm star "Type · engine · enabled" "${t} · ${e} · ${en}"
+        fm star "Saved file" "${SCRIPT_FILE_ZAP} in ZAP = zap-scripts/globomantics-marker.js in the demo folder (sha256 ${sum})" focus
+        fm section "What Module 2 reuses (Automation Framework script job)"
+        fm item "name: ${n} · type: ${t} · engine: ${e} · source: ${SCRIPT_FILE_ZAP}"
         if [ "${t}" = "httpsender" ] && [ "${en}" = "true" ] && [ -n "${e}" ]; then
-            pass "script registered and enabled as HTTP Sender"
+            pass "script saved and registered as an enabled HTTP Sender, ready for the Automation Framework"
         else
-            fail "script registration is incomplete" "type=${t} enabled=${en} engine=${e}" "run step 1"
+            fail "script registration is incomplete" "type=${t} enabled=${en} engine=${e}" "run Step 1"
         fi
     else
-        fail "script is not registered in ZAP" "the load step did not complete" \
-             "ask: 're-run step 1 to load and enable the globomantics-marker script'"
+        fail "script is not registered in ZAP" "Step 1 did not complete" "re-run Step 1"
     fi
     return "${STEP_RC}"
 }
