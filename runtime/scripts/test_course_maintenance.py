@@ -61,7 +61,7 @@ class SyncTests(unittest.TestCase):
         sync.run(['git','commit','-am','main conflict'],self.root);sync.run(['git','push','origin','main'],self.root)
         result=sync.synchronize(self.root,apply=True,validator=lambda root,branch:None)
         self.assertFalse(result['synchronization_verified'])
-        self.assertEqual(result['branches'][0]['status'],'CONFLICT — NOT PUSHED')
+        self.assertEqual(result['branches'][0]['status'],'CONFLICT, NOT PUSHED')
         self.assertEqual(result['branches'][0]['verified_remote_sha'],old)
 
 if __name__=='__main__':unittest.main()
