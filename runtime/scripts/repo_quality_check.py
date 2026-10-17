@@ -7,7 +7,7 @@ Reports, with actionable file paths and reasons:
   - Markdown that GitHub would show as literal text (e.g. "## Step" right under </details>)
   - demo branch naming compliance / missing demo branches (if a remote is given)
 
-This is maintainers' tooling. It does NOT run ZAP or validate runtime behavior —
+This is maintainers' tooling. It does NOT run ZAP or validate runtime behavior, 
 run each demo's four named steps on a Mac Docker host for that.
 
 Usage:
@@ -35,7 +35,7 @@ DEMOS = [
 ]
 
 # Internal production wording that must not appear in learner-facing docs.
-# Specific phrases only — NOT broad words like "record" (legitimate in
+# Specific phrases only, NOT broad words like "record" (legitimate in
 # "Record an alert disposition"), so legitimate technical language is kept.
 PROD_PATTERNS = [
     r"recording budget",
@@ -147,7 +147,7 @@ def main():
     order = {"BLOCKER": 0, "REQUIRED FIX": 1, "OPTIONAL POLISH": 2}
     errors.sort(key=lambda e: (order.get(e[0], 9), e[1]))
     if not errors:
-        print("repo_quality_check: PASS — no issues found")
+        print("repo_quality_check: PASS, no issues found")
         return 0
     counts = {}
     for sev, path, reason in errors:

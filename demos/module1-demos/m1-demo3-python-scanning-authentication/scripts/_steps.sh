@@ -235,7 +235,7 @@ enable_all_scanners() {
     zap ascan/action/enableScanners "ids=${SCRIPT_RULES_ID}" >/dev/null 2>&1 || true
 }
 # Build a focused policy that runs ONLY the Script Active Scan Rules plugin
-# (50000) at LOW threshold / MEDIUM strength — the same configuration the
+# (50000) at LOW threshold / MEDIUM strength, the same configuration the
 # Module 2 AF plan uses, which reliably routes the scan into the custom rule.
 # The default policy does not always invoke the script rule on a single node.
 build_script_policy() {
@@ -296,11 +296,11 @@ ensure_ready() {
 }
 
 # ===========================================================================
-# STEP 1 — Python active-rule source (EO2b)
+# STEP 1, Python active-rule source (EO2b)
 # ===========================================================================
 step1_active_rule_source() {
     fm header "The custom Python active-scan rule" \
-              "A Jython active rule runs your own check during an active scan — the house-specific test a built-in rule does not cover (EO2b)."
+              "A Jython active rule runs your own check during an active scan, the house-specific test a built-in rule does not cover (EO2b)."
     local ok=1 jv
     jv="$(addon_version jython)"
     fm star "Python Scripting (jython) add-on installed" "${jv:-NOT INSTALLED}" focus
@@ -329,7 +329,7 @@ step1_active_rule_source() {
 }
 
 # ===========================================================================
-# STEP 2 — Authentication script source (EO2c)
+# STEP 2, Authentication script source (EO2c)
 # ===========================================================================
 step2_auth_script_source() {
     fm header "The scripted authentication" \
@@ -366,11 +366,11 @@ step2_auth_script_source() {
 }
 
 # ===========================================================================
-# STEP 3 — Scripted authentication + custom rule on the authenticated endpoint (EO2b, EO2c)
+# STEP 3, Scripted authentication + custom rule on the authenticated endpoint (EO2b, EO2c)
 # ===========================================================================
 step3_auth_executes() {
     fm header "ZAP logs in with your script, then runs your rule as that user" \
-              "ZAP executes the login script to get a session and scans the logged-in-only page with the custom Python rule — no cookie supplied by us (EO2b, EO2c)."
+              "ZAP executes the login script to get a session and scans the logged-in-only page with the custom Python rule, no cookie supplied by us (EO2b, EO2c)."
     forced_user_mode false
     local gated; gated="$(status_no_cookie "${PROFILE_URL}")"
     setup_script_auth
@@ -396,7 +396,7 @@ step3_auth_executes() {
     local rtr; rtr="$(rule_trace)"
     forced_user_mode false
     fm star "Custom rule scan as user ${LOGIN_USER}" "scan ${sid:-none} · $([ "${done}" = 1 ] && echo finished || echo NOT finished) · ${sent} probe requests" focus
-    fm star "Rule saw the logged-in page (note reflected)" "$(echo "${rtr}" | grep -m1 -E '^(raised|reflected):' || echo 'no — rule trace: '"$(echo "${rtr}" | head -1)")"
+    fm star "Rule saw the logged-in page (note reflected)" "$(echo "${rtr}" | grep -m1 -E '^(raised|reflected):' || echo 'no, rule trace: '"$(echo "${rtr}" | head -1)")"
     mkdir -p "$(dirname "${STATE_FILE}")"
     printf 'before=%s\nscan=%s\n' "$([ -z "${before}" ] && echo absent || echo present)" "${sid}" > "${STATE_FILE}"
 
@@ -412,10 +412,10 @@ step3_auth_executes() {
 }
 
 # ===========================================================================
-# STEP 4 — The custom rule raised its intended alert; record it for reuse (EO2b)
+# STEP 4, The custom rule raised its intended alert; record it for reuse (EO2b)
 # ===========================================================================
 step4_fresh_alert() {
-    fm header "The custom alert the rule raised — recorded for the pipeline" \
+    fm header "The custom alert the rule raised, recorded for the pipeline" \
               "The rule raised its named alert on the authenticated scan; the record is saved so Module 2 can expect the same alert (EO2b)."
     local before="" scan=""
     [ -f "${STATE_FILE}" ] && { before="$(grep '^before=' "${STATE_FILE}" | cut -d= -f2)"; scan="$(grep '^scan=' "${STATE_FILE}" | cut -d= -f2)"; }

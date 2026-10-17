@@ -51,7 +51,7 @@ Imagine you're responsible for releasing the **Globomantics Store**. Its search 
 
 ## What Is OWASP ZAP?
 
-**OWASP ZAP (Zed Attack Proxy)** is an open-source web application security-testing tool. It can intercept HTTP requests and responses, run passive and active checks, expose results through an API, and execute custom scripts. Its Automation Framework lets you run the same controlled security checks without a GUI—for example inside GitHub Actions.
+**OWASP ZAP (Zed Attack Proxy)** is an open-source web application security-testing tool. It can intercept HTTP requests and responses, run passive and active checks, expose results through an API, and execute custom scripts. Its Automation Framework lets you run the same controlled security checks without a GUI, for example inside GitHub Actions.
 
 In these labs you'll use ZAP to:
 - test deliberately vulnerable application endpoints with *focused*, authorized scan rules
@@ -62,11 +62,11 @@ In these labs you'll use ZAP to:
 
 The training target is local and purpose-built. **Use these techniques only against the supplied Globomantics application or other systems you're explicitly authorized to test.**
 
-## What you will learn — grouped by demonstration
+## What you will learn, grouped by demonstration
 
 You don't need the separate course outline. The six demonstrations follow one engineering story: identify an application weakness, confirm it using HTTP evidence, then automate the security decision.
 
-### Module 1 · Demo 1 — Injection, XSS and CSRF
+### Module 1 · Demo 1, Injection, XSS and CSRF
 
 You will focus the scanner on the store's unsafe inputs and then validate each finding using the request, response and resulting application state.
 
@@ -76,31 +76,31 @@ You will focus the scanner on the store's unsafe inputs and then validate each f
 
 [Start Module 1 Demo 1 →](demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/README.md)
 
-### Module 1 · Demo 2 — JavaScript HTTP Sender
+### Module 1 · Demo 2, JavaScript HTTP Sender
 
 You will write a JavaScript extension that adds a stable marker to an authorized HTTP request. You will confirm the change in ZAP History, verify the Script Console line, and check the reusable registration *(EO2a)*.
 
 [Start Module 1 Demo 2 →](demos/module1-demos/m1-demo2-javascript-http-sender/README.md)
 
-### Module 1 · Demo 3 — Python scanning and authentication
+### Module 1 · Demo 3, Python scanning and authentication
 
 You will create an application-specific Jython active-scan rule *(EO2b)* and a separate scripted login *(EO2c)*. An authenticated request and a fresh named alert prove the two mechanisms work together.
 
 [Start Module 1 Demo 3 →](demos/module1-demos/m1-demo3-python-scanning-authentication/README.md)
 
-### Module 2 · Demo 1 — Authenticated CI scanning
+### Module 2 · Demo 1, Authenticated CI scanning
 
 You will configure an Automation Framework plan that runs ZAP headlessly in GitHub Actions *(EO3a)*. The evidence is a correctly authenticated target, the original reused scripts, and the named custom finding in the report.
 
 [Start Module 2 Demo 1 →](demos/module2-demos/m2-demo1-authenticated-zap-github-actions/README.md)
 
-### Module 2 · Demo 2 — ZAP API and reporting
+### Module 2 · Demo 2, ZAP API and reporting
 
 You will query ZAP programmatically *(EO3b)*, confirm a completed scan, inspect the named alert, reconcile the official JSON report and interpret scan-effectiveness Insights.
 
 [Start Module 2 Demo 2 →](demos/module2-demos/m2-demo2-zap-api-scan-evidence/README.md)
 
-### Module 2 · Demo 3 — Security quality gates
+### Module 2 · Demo 3, Security quality gates
 
 You will use a scoped alert filter and a threshold-based build gate *(EO3c)* to ensure a reviewed False Positive does not conceal a remaining High-risk issue. The final report and actual exit code explain the CI decision.
 
@@ -239,7 +239,7 @@ From the selected demo directory start with `./scripts/demo_up.sh` (or `demo_res
 <details>
 <summary><b>A script, alert, report, or Insights result is missing</b></summary>
 
-Confirm you checked out the correct demo branch, completed the preceding step, and produced fresh traffic. The `before` branch may intentionally omit the completed script or plan—create it as the exercise directs. Run the demo preflight and read its actual failed assertion in `logs/`; do not substitute a screenshot, stale finding, or generic statistics. A ZAP Script Console message must be verified in the GUI.
+Confirm you checked out the correct demo branch, completed the preceding step, and produced fresh traffic. The `before` branch may intentionally omit the completed script or plan, create it as the exercise directs. Run the demo preflight and read its actual failed assertion in `logs/`; do not substitute a screenshot, stale finding, or generic statistics. A ZAP Script Console message must be verified in the GUI.
 </details>
 
 <details>
@@ -268,6 +268,6 @@ Open [**Module 1 · Targeted Security Testing**](demos/module1-demos/README.md) 
 > - **Security weaknesses are included deliberately.** An insecure implementation here is part of the exercise, not an endorsement of that implementation.
 > - **Use this project only in an isolated, authorized lab.** Never point its active scanning scripts at systems you do not have explicit permission to test.
 >
-> The objective is to build security-testing knowledge and sound engineering judgment — not to provide production-certified code or replace established security assurance processes.
+> The objective is to build security-testing knowledge and sound engineering judgment, not to provide production-certified code or replace established security assurance processes.
 
 <div align="center"><sub>Maintained by <a href="https://github.com/rupeshtiwari">Rupesh Tiwari</a> · Authorized Globomantics practice only</sub></div>
