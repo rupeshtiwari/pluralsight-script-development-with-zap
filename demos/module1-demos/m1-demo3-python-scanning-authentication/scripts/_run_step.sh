@@ -32,12 +32,6 @@ if [ "${N}" != "1" ]; then
     zap script/action/enable "scriptName=$(enc "${RULE_NAME}")" >/dev/null 2>&1 || true
     load_script "${AUTH_NAME}" authentication "${JYTHON_ENGINE}" "${AUTH_FILE_ZAP}" >/dev/null 2>&1 || true
 fi
-# Step 4 scans as the authenticated user, so make sure the script-auth context
-# and forced user exist (step 3 is what demonstrates this on screen).
-if [ "${N}" = "4" ]; then
-    setup_script_auth >/dev/null 2>&1 || true
-    forced_user_mode true
-fi
 echo
 
 case "${N}" in
