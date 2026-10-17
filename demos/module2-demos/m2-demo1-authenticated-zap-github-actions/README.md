@@ -29,8 +29,8 @@ Your team needs the Store security checks on a hosted build runner. A successful
 
 You will turn interactive ZAP checks into an unattended security run:
 
-- Configure ZAP's Automation Framework plan for authenticated headless execution in CI/CD *(EO3a)*
-- Verify that the original custom scripts, authorized scope and expected finding actually reached the CI report *(EO3a)*
+1. Configure ZAP's Automation Framework plan for authenticated headless execution in CI/CD *(EO3a)*
+2. Verify that the original custom scripts, authorized scope and expected finding actually reached the CI report *(EO3a)*
 
 You do not need the separate course outline to understand the objective or follow the exercises.
 
@@ -294,9 +294,12 @@ The report's named custom finding, risk and affected parameter connect the headl
 <!-- student-achievement:start -->
 ## What You Achieved
 
-After the local checks and matching hosted run, you can explain how the Automation Framework binds user, authentication and scope, then prove the pipeline produced the intended custom finding. You can reject a stale report or a built-in alert offered as a substitute.
+You can now explain each learning objective with the evidence you captured:
 
-**Your final check:** Explain the result using your own captured evidence. A README example, missing result or earlier run does not satisfy this exercise.
+1. **(EO3a) You ran the Automation Framework plan headless in CI.** The `ubuntu-24.04` job for this exact commit launched ZAP with `-autorun` and finished green — the same checks, unattended.
+2. **(EO3a) You verified the pipeline reached the intended finding.** The authenticated context loaded (a custom alert appeared on a login-only path), both Module 1 scripts ran during the plan, and the hosted report check passed for the custom finding on `/account/profile` — a stale report or a built-in substitute would have failed it.
+
+**Your final check:** Explain each numbered outcome using your own captured evidence from this run. A README example, a missing result or an earlier run does not satisfy this exercise.
 <!-- student-achievement:end -->
 
 ## Finish Your Lab

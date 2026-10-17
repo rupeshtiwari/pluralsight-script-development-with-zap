@@ -75,13 +75,31 @@ for e in engs:
 print("")'
 }
 
-load_script() { # <name> <type> <engine> <fileName>
-    zap script/action/remove "scriptName=$(enc "$1")" >/dev/null 2>&1 || true
+load_script() { # <name> <type> <engine> <fileName>  -> sets LOAD_SOURCE
+    # Never remove a script the author wrote in ZAP's Script Console: keep it.
+    if [ -n "$(script_info "$1")" ]; then
+        LOAD_SOURCE="already in ZAP (Script Console)"; return 0
+    fi
     zap script/action/load \
         "scriptName=$(enc "$1")&scriptType=$(enc "$2")&scriptEngine=$(enc "$3")&fileName=$(enc "$4")&scriptDescription=$(enc 'Globomantics course demo')" \
-        >/dev/null 2>&1 || return 1
-    return 0
+        >/dev/null || return 1
+    LOAD_SOURCE="loaded from $4"
 }
+
+addon_version() { # <addon id> -> installed version (empty if absent)
+    zap autoupdate/view/installedAddons | python3 -c '
+import json,sys
+print(next((a.get("version","") for a in json.load(sys.stdin).get("installedAddons",[]) if a.get("id")==sys.argv[1]), ""))' "$1"
+}
+
+script_has_error() { # <name> -> "true" / "false" / "" (ZAP's own compile/run error flag)
+    zap script/view/listScripts | python3 -c '
+import json,sys
+for s in json.load(sys.stdin).get("listScripts",[]):
+    if s.get("name")==sys.argv[1]: print(str(s.get("error","")).lower()); break' "$1"
+}
+
+STATE_FILE="${DEMO_DIR}/logs/.m1demo3-state"   # carries absent-before + scan id from Step 3 to Step 4
 
 script_info() { # <name> -> name|type|engine|enabled (empty if absent)
     zap script/view/listScripts | python3 -c '
@@ -192,7 +210,11 @@ setup_script_auth() { # sets CTX_ID and USER_ID
         "contextId=${CTX_ID}&loggedInIndicatorRegex=$(enc 'Signed in as')" >/dev/null 2>&1 \
         || SETUP_ERRS="${SETUP_ERRS} loggedInIndicator"
 
-    USER_ID="$(zap users/action/newUser "contextId=${CTX_ID}&name=$(enc "${LOGIN_USER}")" 2>/dev/null | json_get userId)"
+    # Reuse the user if a previous run already created it (no duplicate users).
+    USER_ID="$(zap users/view/usersList "contextId=${CTX_ID}" | python3 -c '
+import json,sys
+print(next((u.get("id","") for u in json.load(sys.stdin).get("usersList",[]) if u.get("name")==sys.argv[1]), ""))' "${LOGIN_USER}")"
+    [ -n "${USER_ID}" ] || USER_ID="$(zap users/action/newUser "contextId=${CTX_ID}&name=$(enc "${LOGIN_USER}")" 2>/dev/null | json_get userId)"
     [ -n "${USER_ID}" ] || { SETUP_ERRS="${SETUP_ERRS} newUser"; return 1; }
 
     zap users/action/setAuthenticationCredentials \
@@ -279,19 +301,29 @@ ensure_ready() {
 step1_active_rule_source() {
     fm header "The custom Python active-scan rule" \
               "A Jython active rule runs your own check during an active scan — the house-specific test a built-in rule does not cover (EO2b)."
-    local ok=1
+    local ok=1 jv
+    jv="$(addon_version jython)"
+    fm star "Python Scripting (jython) add-on installed" "${jv:-NOT INSTALLED}" focus
     grep -q 'def scan(' "${RULE_FILE_HOST}" || ok=0
     grep -qE 'raiseAlert\(|newAlert\(' "${RULE_FILE_HOST}" || ok=0
-    grep -q 'Globomantics unsafe reflection' "${RULE_FILE_HOST}" || ok=0
-    fm star "Script name" "${RULE_NAME}   (type: active · engine: ${JYTHON_ENGINE:-Jython})"
-    fm star "Alert it raises" "${ALERT_NAME}" focus
-    if [ "${ok}" = 1 ] && load_script "${RULE_NAME}" "active" "${JYTHON_ENGINE}" "${RULE_FILE_ZAP}"; then
-        zap script/action/enable "scriptName=$(enc "${RULE_NAME}")" >/dev/null 2>&1 || true
-        pass "active-rule script is valid and loaded into ZAP as an active rule"
+    fm star "Saved rule source" "zap-scripts/globomantics-active-rule.py  (sha256 $(sha256sum "${RULE_FILE_HOST}" | cut -c1-12))"
+    fm star "Alert name in the source" "$(grep -o 'Globomantics unsafe reflection[^"]*' "${RULE_FILE_HOST}" | head -1)" focus
+    if [ "${ok}" = 1 ] && [ -n "${jv}" ] && load_script "${RULE_NAME}" "active" "${JYTHON_ENGINE}" "${RULE_FILE_ZAP}"; then
+        zap script/action/enable "scriptName=$(enc "${RULE_NAME}")" >/dev/null || ok=0
+        local info err; info="$(script_info "${RULE_NAME}")"; err="$(script_has_error "${RULE_NAME}")"
+        IFS='|' read -r n t e en <<<"${info}"
+        fm star "Registered in ZAP" "${n} · type ${t} · engine ${e} · enabled ${en}"
+        fm star "ZAP compile/run error flag" "${err:-unknown}" focus
+        fm star "Source" "${LOAD_SOURCE}"
+        if [ "${ok}" = 1 ] && [ "${t}" = "active" ] && [ "${en}" = "true" ] && [ "${err}" = "false" ]; then
+            pass "the Jython active rule is registered, enabled and loaded without errors"
+        else
+            fail "the active rule is not usable (type=${t} enabled=${en} error=${err})" "the Jython source has an error or did not register" "fix the script in the Script Console and save it again"
+        fi
     else
         fail "active-rule script did not validate or load" \
-             "the source is missing scan()/raiseAlert(), or ZAP rejected the load" \
-             "ask: 'the globomantics-active-rule Jython script failed to load; check the engine name and script body'"
+             "jython missing, the source lacks scan()/newAlert(), or ZAP rejected the load" \
+             "check the add-on and the script body"
     fi
     return "${STEP_RC}"
 }
@@ -301,153 +333,112 @@ step1_active_rule_source() {
 # ===========================================================================
 step2_auth_script_source() {
     fm header "The scripted authentication" \
-              "A ZAP authentication script logs in for you, so scans run as a real user (EO2c)."
+              "A ZAP authentication script submits the credentials; a logged-in check tells ZAP the login worked (EO2c)."
     local ok=1
     grep -q 'def authenticate(' "${AUTH_FILE_HOST}" || ok=0
     grep -q 'getCredentialsParamsNames' "${AUTH_FILE_HOST}" || ok=0
-    fm star "Script name" "${AUTH_NAME}   (type: authentication · engine: ${JYTHON_ENGINE:-Jython})"
-    fm star "It submits" "username=${LOGIN_USER} to POST /login, then ZAP reuses the session cookie" focus
+    fm star "Saved auth source" "zap-scripts/globomantics-auth.py  (sha256 $(sha256sum "${AUTH_FILE_HOST}" | cut -c1-12))"
+    fm star "Credential submission in authenticate()" "$(grep -oE 'POST|/login|username' "${AUTH_FILE_HOST}" | sort -u | tr '\n' ' ')" focus
     if [ "${ok}" = 1 ] && load_script "${AUTH_NAME}" "authentication" "${JYTHON_ENGINE}" "${AUTH_FILE_ZAP}"; then
-        local info; info="$(script_info "${AUTH_NAME}")"
-        if [ -n "${info}" ]; then
-            pass "authentication script is valid and registered in ZAP"
+        local err; err="$(script_has_error "${AUTH_NAME}")"
+        setup_script_auth || ok=0
+        local ind; ind="$(zap authentication/view/getLoggedInIndicator "contextId=${CTX_ID}" | json_get logged_in_regex)"
+        # Prove the logged-in check matches a real logged-in page and not a logged-out one.
+        local J=/tmp/.z3login page_in page_out
+        curl -s -o /dev/null -c "${J}" -X POST --data "username=${LOGIN_USER}" "http://localhost:8000/login" >/dev/null
+        page_in="$(curl -s -b "${J}" "http://localhost:8000/account/profile?note=x" | grep -c "${ind:-Signed in as}")"
+        page_out="$(curl -s "http://localhost:8000/account/profile?note=x" | grep -c "${ind:-Signed in as}")"
+        fm star "Registered in ZAP" "${AUTH_NAME} · type authentication · error flag ${err:-unknown}"
+        fm star "Logged-in verification (regex ZAP uses)" "${ind:-<none>}" focus
+        fm star "Regex matches logged-in page / logged-out page" "${page_in} / ${page_out}" focus
+        if [ "${ok}" = 1 ] && [ "${err}" = "false" ] && [ -n "${ind}" ] && [ "${page_in}" -ge 1 ] && [ "${page_out}" = 0 ]; then
+            pass "authentication script registered and its logged-in check tells a logged-in page from a logged-out one"
         else
-            fail "authentication script loaded but is not registered" "ZAP did not list it" \
-                 "ask: 're-load globomantics-auth with scriptType=authentication'"
+            fail "authentication setup incomplete (error=${err} indicator='${ind}' in=${page_in} out=${page_out}; failed calls:${SETUP_ERRS:- none})" \
+                 "the script or the logged-in check is not valid" "fix the script or the indicator, then re-run"
         fi
     else
         fail "authentication script did not validate or load" \
-             "the source is missing authenticate()/getCredentialsParamsNames(), or ZAP rejected the load" \
-             "ask: 'the globomantics-auth Jython script failed to load; check the engine name and script body'"
+             "the source lacks authenticate()/getCredentialsParamsNames(), or ZAP rejected the load" \
+             "check the engine name and script body"
     fi
     return "${STEP_RC}"
 }
 
 # ===========================================================================
-# STEP 3 — ZAP runs the authentication script and holds the session (EO2c)
+# STEP 3 — Scripted authentication + custom rule on the authenticated endpoint (EO2b, EO2c)
 # ===========================================================================
-# Prove that ZAP ITSELF authenticates by running the script: with a context
-# configured for script-based authentication and a forced user, a request that
-# carries NO cookie comes back 200, and the script's authenticate() leaves its
-# trace. Nothing here supplies a cookie — the session comes from the script.
 step3_auth_executes() {
-    fm header "ZAP runs your authentication script" \
-              "ZAP executes the login script to get a session, then reaches a page that only exists when logged in — no cookie supplied by us (EO2c)."
-
-    # Clean auth state so the gating probe is honest (a prior run may have left
-    # forced-user mode on).
+    fm header "ZAP logs in with your script, then runs your rule as that user" \
+              "ZAP executes the login script to get a session and scans the logged-in-only page with the custom Python rule — no cookie supplied by us (EO2b, EO2c)."
     forced_user_mode false
     local gated; gated="$(status_no_cookie "${PROFILE_URL}")"
-
     setup_script_auth
     reset_auth_trace
     forced_user_mode true
-
-    # Through the proxy, with NO cookie: forced-user mode makes ZAP authenticate
-    # via the script before sending, so this should come back 200.
     local authed; authed="$(status_no_cookie "${APP_INTERNAL}/account/profile?note=authprobe")"
     local tr; tr="$(auth_trace)"
+    fm star "Without login" "/account/profile -> HTTP ${gated}"
+    fm star "ZAP forced-user (script auth)" "/account/profile -> HTTP ${authed}" focus
+    fm star "Auth script ran" "$(echo "${tr}" | grep -m1 'authenticate:' | cut -c1-90)"
 
-    fm star "Without login" "/account/profile -> HTTP ${gated}  (gated)"
-    fm star "ZAP forced-user (script auth)" "/account/profile -> HTTP ${authed}  (reachable)" focus
+    # Fresh alert store, then the custom rule scans the page AS the scripted user.
+    del_all_alerts
+    local before; before="$(custom_alert)"
+    build_script_policy
+    reset_rule_trace
+    local sid="" i done=0
+    [ -n "${CTX_ID}" ] && [ -n "${USER_ID}" ] && sid="$(start_scan_as_user "${PROFILE_URL}" "${CTX_ID}" "${USER_ID}")"
+    if [ -n "${sid}" ]; then
+        for i in $(seq 1 90); do scan_done "${sid}" && { done=1; break; }; sleep 2; done
+    fi
+    local sent; sent="$(scan_messages_count "${sid:-0}")"
+    local rtr; rtr="$(rule_trace)"
+    forced_user_mode false
+    fm star "Custom rule scan as user ${LOGIN_USER}" "scan ${sid:-none} · $([ "${done}" = 1 ] && echo finished || echo NOT finished) · ${sent} probe requests" focus
+    fm star "Rule saw the logged-in page (note reflected)" "$(echo "${rtr}" | grep -m1 -E '^(raised|reflected):' || echo 'no — rule trace: '"$(echo "${rtr}" | head -1)")"
+    mkdir -p "$(dirname "${STATE_FILE}")"
+    printf 'before=%s\nscan=%s\n' "$([ -z "${before}" ] && echo absent || echo present)" "${sid}" > "${STATE_FILE}"
 
-    if [ "${gated}" = "401" ] && [ "${authed}" = "200" ] && echo "${tr}" | grep -q 'authenticate:'; then
-        fm star "Auth script ran" "$(echo "${tr}" | tr '\n' ' ')"
-        pass "ZAP executed the authentication script and holds the session (no cookie supplied by the preflight)"
+    if [ "${gated}" = "401" ] && [ "${authed}" = "200" ] && echo "${tr}" | grep -q 'authenticate:' \
+       && [ "${done}" = 1 ] && [ "${sent:-0}" -gt 0 ] && echo "${rtr}" | grep -qE '^(raised|reflected):'; then
+        pass "ZAP authenticated with the script and ran the custom rule against the logged-in page"
     else
-        fail "ZAP did not authenticate by running the script" \
-             "expected gated=401 and authed=200 with an authenticate() trace; got gated=${gated} authed=${authed}" \
-             "see the diagnosis below, then fix the context/auth setup (never weaken the check)"
-        fm section "Why auth did not work — diagnosis"
-        fm star "Context id" "${CTX_ID:-<none>}"
-        fm star "User id" "${USER_ID:-<none>}"
-        fm star "Setup calls that failed" "${SETUP_ERRS:- none}"
-        fm note "Auth-script trace (empty = ZAP never called authenticate()):"
-        echo "${tr:-<empty>}" | sed 's/^/      /'
+        fail "scripted authentication or the authenticated rule scan did not complete" \
+             "expected 401 → 200 with an authenticate() trace, then a finished scan with authenticated probes" \
+             "re-run Steps 1-2; check the context user (ctx=${CTX_ID:-none} user=${USER_ID:-none}; failed calls:${SETUP_ERRS:- none})"
     fi
     return "${STEP_RC}"
 }
 
 # ===========================================================================
-# STEP 4 — The custom rule raises a FRESH named alert on that scan (EO2b)
+# STEP 4 — The custom rule raised its intended alert; record it for reuse (EO2b)
 # ===========================================================================
-# Clear the alert store first and confirm the named alert is ABSENT, then scan
-# the gated page AS THE AUTHENTICATED USER (ZAP's script provides the session)
-# and confirm the alert is now PRESENT. Absent-before + present-after proves the
-# alert is from this scan, not a leftover from an earlier run.
 step4_fresh_alert() {
-    fm header "The custom alert the rule raises" \
-              "A rule you can trust raises a clear, named alert (EO2b). On screen it appears in ZAP's Alerts tab — the clip's proof artifact. We clear the store first so the alert is provably from this scan."
-
-    del_all_alerts
-    local before; before="$(custom_alert)"
-    fm star "Before scan (store cleared)" "$([ -z "${before}" ] && echo 'absent' || echo "${before}")"
-
-    build_script_policy
-    reset_rule_trace
-    # Seed the node as the forced user (no cookie), then scan it as that user.
-    status_no_cookie "${PROFILE_URL}" >/dev/null
-    local sid=""
-    if [ -n "${CTX_ID}" ] && [ -n "${USER_ID}" ]; then
-        sid="$(start_scan_as_user "${PROFILE_URL}" "${CTX_ID}" "${USER_ID}")"
+    fm header "The custom alert the rule raised — recorded for the pipeline" \
+              "The rule raised its named alert on the authenticated scan; the record is saved so Module 2 can expect the same alert (EO2b)."
+    local before="" scan=""
+    [ -f "${STATE_FILE}" ] && { before="$(grep '^before=' "${STATE_FILE}" | cut -d= -f2)"; scan="$(grep '^scan=' "${STATE_FILE}" | cut -d= -f2)"; }
+    local rec; rec="$(zap core/view/alerts | python3 -c '
+import json,sys
+for a in json.load(sys.stdin).get("alerts",[]):
+    if a.get("alert")==sys.argv[1]:
+        print(json.dumps({k:a.get(k,"") for k in ("alert","pluginId","url","param","risk","confidence","evidence")})); break' "${ALERT_NAME}")"
+    fm star "Before Step 3 scan" "${before:-unknown (run Step 3 first)}"
+    if [ -n "${rec}" ]; then
+        local f; for f in alert pluginId url param risk confidence; do
+            fm star "${f}" "$(printf '%s' "${rec}" | python3 -c 'import json,sys;print(json.load(sys.stdin)[sys.argv[1]])' "${f}")" $([ "${f}" = alert ] && echo focus)
+        done
+        local out="${DEMO_DIR}/logs/custom-alert-record.json"
+        printf '%s\n' "${rec}" | python3 -c 'import json,sys;d=json.load(sys.stdin);d["scanId"]=sys.argv[1];print(json.dumps(d,indent=2))' "${scan}" > "${out}"
+        fm star "Alert record saved for Module 2" "logs/custom-alert-record.json" focus
     fi
-    if [ -z "${sid}" ]; then
-        fail "could not start the authenticated active scan" \
-             "ascan/action/scanAsUser returned no scan id (context/user from step 3: ctx=${CTX_ID:-none} user=${USER_ID:-none})" \
-             "re-run after step 3 passes; the scan reuses the script-authenticated user"
-        forced_user_mode false
-        return "${STEP_RC}"
-    fi
-    local i
-    for i in $(seq 1 90); do scan_done "${sid}" && break; sleep 2; done
-    local sent; sent="$(scan_messages_count "${sid}")"
-    fm star "Scan target" "${PROFILE_URL} (param: note, as user ${LOGIN_USER})"
-    fm star "Probe requests the scan sent" "${sent}"
-
-    local after; after="$(custom_alert)"
-    forced_user_mode false   # leave ZAP as we found it
-
-    if [ -z "${before}" ] && [ -n "${after}" ]; then
-        IFS='|' read -r n r p e <<<"${after}"
-        fm star "Alert" "${n}" focus
-        fm star "Risk" "${r}"
-        fm star "Parameter" "${p}"
-        fm star "Evidence" "${e}"
-        pass "the custom rule RAISED its named alert on this scan — absent before, present after (verified via the ZAP API)"
-    elif [ -n "${before}" ]; then
-        fail "could not guarantee a fresh alert" \
-             "the named alert was already present BEFORE the scan despite clearing the store" \
-             "ask: 'core/action/deleteAllAlerts did not clear the store; check the ZAP API key and version'"
+    if [ "${before}" = "absent" ] && [ -n "${rec}" ]; then
+        pass "the custom rule raised its named alert on this authenticated scan (absent before, present after) and the record is saved"
     else
-        fail "the custom rule did not raise its named alert" \
-             "core/view/alerts has no '${ALERT_NAME}' after the authenticated scan" \
-             "see the diagnosis below, then fix accordingly (never weaken the check)"
-        local se tr
-        se="$(script_rules_enabled)"
-        tr="$(rule_trace)"
-        fm section "Why no alert — diagnosis"
-        fm star "Script Active Scan Rules (50000) enabled" "${se:-unknown}"
-        if [ -z "${tr}" ]; then
-            fm note "The rule left NO trace — the scanner never entered our script."
-            fm star "ZAP's record for this script" "$(script_error_json "${RULE_NAME}")"
-            fm item "If error=true, the script failed to compile for Jython 2.7. If error=false, plugin 50000 did not route this scan to our script."
-        elif echo "${tr}" | grep -q '^ERROR'; then
-            fm note "The rule ran but a probe step threw:"
-            echo "${tr}" | sed 's/^/      /'
-            fm item "Fix the named call in globomantics-active-rule.py."
-        elif echo "${tr}" | grep -q 'http=401'; then
-            fm note "The rule ran but its probe was NOT authenticated (HTTP 401) — the scan is not carrying the script session:"
-            echo "${tr}" | sed 's/^/      /'
-            fm item "Fix: ensure the scan runs as the context user so ZAP applies the script-obtained session to probe requests."
-        elif echo "${tr}" | grep -q '^raised:'; then
-            fm note "The rule detected and raised, yet the alert is absent from the store:"
-            echo "${tr}" | sed 's/^/      /'
-            fm item "Investigate alert persistence for this build before weakening the check."
-        else
-            fm note "The rule ran but did not detect a reflection:"
-            echo "${tr}" | sed 's/^/      /'
-            fm item "Confirm note is reflected on /account/profile while authenticated."
-        fi
+        fail "no fresh custom alert to record (before=${before:-unknown})" \
+             "Step 3 did not run, or the rule did not raise its alert" \
+             "run Step 3, then Step 4"
     fi
     return "${STEP_RC}"
 }
