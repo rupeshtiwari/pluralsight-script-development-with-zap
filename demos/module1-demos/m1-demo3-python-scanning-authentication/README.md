@@ -79,9 +79,88 @@ cd demos/module1-demos/m1-demo3-python-scanning-authentication
 
 Implement and register a custom Python active-scan rule — the application-specific test a built-in scanner does not cover. *(EO2b)*
 
+### ✍️ Author the rule (the `-before` branch ships without it)
+
+On `m1-demo3-before`, `zap-scripts/globomantics-active-rule.py` **does not exist** — you write it. This is **Jython** (Python 2.7 syntax run inside ZAP's Java engine), so no f-strings. The shape ZAP expects from an active-scan script:
+
+1. **`scan(sas, msg, param, value)`** — ZAP calls it once per parameter; and **`scanNode(sas, msg)`** — once per page. Run the same check from both so the rule does not depend on how ZAP enumerates parameters.
+2. **Build the probe by cloning the request** and rewriting its query string (not `sas.setParam()`, which needs per-parameter state only set up inside `scan()`), send it, and check whether the probe comes back **unescaped** in the response body.
+3. **Raise your own named alert** (`Globomantics unsafe reflection (custom rule)`) at Medium risk / Medium confidence when the reflection is found. `raise` is a reserved word in Python, so call the builder's `raise()` indirectly with `getattr`.
+
+<details><summary>📄 <b>Write this to <code>zap-scripts/globomantics-active-rule.py</code></b></summary>
+
+```python
+# Globomantics custom active-scan rule (ZAP "Active Rules" script, Jython 2.7.2).
+# During an active scan, for each query parameter it sends a distinctive probe
+# and checks whether the response reflects it verbatim. Unencoded reflection is
+# a strong indicator of reflected XSS; the rule flags it with a named alert.
+
+import sys
+
+PROBE = "GLOBOxss7marker"
+ALERT_NAME = "Globomantics unsafe reflection (custom rule)"
+DESCRIPTION = ("The parameter value is reflected in the HTML response without "
+               "output encoding. Returning attacker-controlled input unescaped "
+               "is a strong indicator of reflected XSS; whether injected script "
+               "executes depends on the exact output context and should be "
+               "confirmed with a context-specific payload.")
+
+
+def _probe_request(msg, target):
+    # Clone the request (keeps headers, including the session cookie) and put
+    # our probe into the target parameter.
+    probe = msg.cloneRequest()
+    pairs = []
+    for p in msg.getUrlParams():
+        value = PROBE if p.getName() == target else p.getValue()
+        pairs.append("%s=%s" % (p.getName(), value))
+    uri = probe.getRequestHeader().getURI()
+    uri.setQuery("&".join(pairs))
+    probe.getRequestHeader().setURI(uri)
+    return probe
+
+
+def _raise(sas, probe, param):
+    alert = (sas.newAlert()
+             .setRisk(2)          # 0 info 1 low 2 medium 3 high
+             .setConfidence(2)    # 0 fp 1 low 2 medium 3 high
+             .setName(ALERT_NAME)
+             .setDescription(DESCRIPTION)
+             .setParam(param)
+             .setAttack(PROBE)
+             .setEvidence(PROBE)
+             .setCweId(79)        # Cross-site Scripting
+             .setWascId(20)
+             .setMessage(probe))
+    # 'raise' is a reserved word in Python, so call raise() indirectly.
+    getattr(alert, "raise")()
+
+
+def _check(sas, msg, param):
+    try:
+        probe = _probe_request(msg, param)
+        sas.sendAndReceive(probe, False, False)
+        if PROBE in probe.getResponseBody().toString():
+            _raise(sas, probe, param)
+    except:  # noqa: E722  (Jython: a Java Throwable is not a Python Exception)
+        pass
+
+
+def scan(sas, msg, param, value):
+    _check(sas, msg, param)
+
+
+def scanNode(sas, msg):
+    for p in msg.getUrlParams():
+        _check(sas, msg, p.getName())
+```
+
+<sub>The `m1-demo3-after` branch keeps a couple of extra `/tmp` trace lines used only by the author's preflight; they have no effect on screen or on the scan, so your version above omits them.</sub>
+</details>
+
 ### What we examine, and why
 
-Open `zap-scripts/globomantics-active-rule.py` in VS Code and read the two functions that make it an active rule:
+With the file saved, read the two functions that make it an active rule:
 
 - **`scan(sas, msg, param, value)`** — ZAP calls this per parameter during an active scan. Inside it, the rule injects its marker into the parameter and checks whether it comes back reflected — the exact Globomantics condition a generic rule would not look for.
 - **`raiseAlert(...)` / the alert name** — when the reflection is found, the rule raises *its own named finding*, `Globomantics unsafe reflection (custom rule)`, rather than a built-in XSS alert. A named, owned alert is what lets a pipeline reason about *your* issue specifically.
@@ -130,9 +209,70 @@ Confirm the error flag is `false` and the registered type is `active` — a rule
 
 Automate the login with a ZAP authentication script, and give ZAP a reliable way to tell a logged-in page from a logged-out one. *(EO2c)*
 
+### ✍️ Author the login script (the `-before` branch ships without it)
+
+On `m1-demo3-before`, `zap-scripts/globomantics-auth.py` **does not exist** — you write this second Jython script. ZAP's authentication contract needs four functions:
+
+1. **`authenticate(helper, paramsValues, credentials)`** — builds and sends the same form `POST /login` the app's own login form sends, and returns the message. ZAP captures the `Set-Cookie` session and reuses it for every later request.
+2. **`getRequiredParamsNames()` / `getOptionalParamsNames()`** — the context parameters ZAP must supply (here, the `Login URL`).
+3. **`getCredentialsParamsNames()`** — the per-user credential fields (here, just `username` — a *training* simplification, not a production login).
+
+<details><summary>📄 <b>Write this to <code>zap-scripts/globomantics-auth.py</code></b></summary>
+
+```python
+# Globomantics scripted authentication (ZAP "Authentication" script, Jython 2.7.2).
+# Logs in by submitting the username to POST /login, exactly as the app's form
+# does. ZAP then reuses the returned session cookie so scans run logged in. The
+# context's logged-in indicator (e.g. "Signed in as") tells ZAP the session is valid.
+
+from org.apache.commons.httpclient import URI
+from org.parosproxy.paros.network import HttpRequestHeader, HttpHeader
+from java.net import URLEncoder
+from java.lang import String
+from jarray import array
+
+
+def authenticate(helper, paramsValues, credentials):
+    login_url = paramsValues.get("Login URL")
+    username = credentials.getParam("username")
+    print("[globo-auth] logging in as '%s' via %s" % (username, login_url))
+
+    # Build the same form POST the Globomantics login form sends.
+    body = "username=" + URLEncoder.encode(username, "UTF-8")
+    msg = helper.prepareMessage()
+    msg.setRequestHeader(
+        HttpRequestHeader(HttpRequestHeader.POST, URI(login_url, False), HttpHeader.HTTP11)
+    )
+    msg.getRequestHeader().setHeader(
+        HttpHeader.CONTENT_TYPE, "application/x-www-form-urlencoded"
+    )
+    msg.setRequestBody(body)
+    msg.getRequestHeader().setContentLength(msg.getRequestBody().length())
+
+    # Send it; ZAP captures the Set-Cookie session for later requests.
+    helper.sendAndReceive(msg)
+    print("[globo-auth] login response: %s" % msg.getResponseHeader().getStatusCode())
+    return msg
+
+
+def getRequiredParamsNames():
+    return array(["Login URL"], String)
+
+
+def getOptionalParamsNames():
+    return array([], String)
+
+
+def getCredentialsParamsNames():
+    return array(["username"], String)
+```
+
+<sub>As with the active rule, `m1-demo3-after` adds a couple of `/tmp` trace lines for the author's preflight only; omit them.</sub>
+</details>
+
 ### What we examine, and why
 
-Open `zap-scripts/globomantics-auth.py` and read the two pieces ZAP's authentication contract requires:
+With the file saved, read the two pieces ZAP's authentication contract requires:
 
 - **`authenticate(helper, paramsValues, credentials)`** — submits the credentials, here a `POST /login` with the `username`. Scripting this is what makes the session *repeatable*: no operator pasting a cookie that expires an hour later.
 - **`getCredentialsParamsNames()`** plus a **logged-in indicator** — ZAP needs a signal that the login actually worked. The script pairs with a logged-in regex (`Signed in as`) so ZAP can verify success instead of assuming it.
