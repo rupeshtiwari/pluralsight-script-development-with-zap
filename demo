@@ -27,6 +27,20 @@ case "$cmd" in
   down)  cd "$folder" && exec ./scripts/demo_down.sh ;;
   reset) cd "$folder" && exec ./scripts/demo_reset.sh ;;
   preflight)
+    # '--all' runs preflight for EVERY demo whose steps are present (e.g. on the integration branch
+    # that carries all authored files), so you can confirm the whole course in one go. Each demo saves
+    # its own logs/preflight-step-0N.log; a demo whose taught file is not authored on this branch is
+    # skipped with a note, never a crash.
+    if [ "${2:-}" = "--all" ]; then
+      allrc=0
+      for d in "$ROOT"/demos/*/*/; do
+        [ -d "${d}steps" ] || continue
+        echo "════════ preflight: ${d#"$ROOT"/} ════════"
+        "$ROOT/runtime/scripts/preflight_all_steps.sh" "${d%/}" || allrc=1
+        echo
+      done
+      exit "$allrc"
+    fi
     # Human-in-loop gate: re-run this demo's four real named steps and save each step's visible
     # output as logs/preflight-step-0N.log, then print the exact files to hand to the author.
     "$ROOT/runtime/scripts/preflight_all_steps.sh" "$folder"; rc=$?
