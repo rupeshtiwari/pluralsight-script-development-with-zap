@@ -1,0 +1,47 @@
+name: Demo end-to-end (real ZAP lab)
+
+# The automated end-to-end gate. On an -after branch this brings up the FULL Globomantics lab on a
+# hosted runner (app + postgres + mongo + ZAP 2.17 with its add-ons) and runs the demo's four real
+# named steps through ./demo preflight. Every step must print PASS, and the per-step logs are uploaded
+# as that demo's evidence. No human has to run the lab by hand: this proves the recorded demo works.
+#
+# Scope: -after branches only (the finished demo that must run end to end). The -before branches are
+# covered by the static before-never-breaks guardrail, so we do not spend a full ZAP boot just to reach
+# an intentional AUTHOR THIS FIRST cue.
+
+on:
+  push:
+    branches:
+      - 'm1-demo*-after'
+      - 'm2-demo*-after'
+  workflow_dispatch: {}
+
+jobs:
+  end-to-end:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out this demo branch
+        uses: actions/checkout@v4
+
+      - name: Bring up the full lab (app + DBs + ZAP), wait until healthy
+        run: HEALTH_TIMEOUT=900 ./demo up
+
+      - name: Run all four demo steps end to end (every step must PASS)
+        run: ./demo preflight
+
+      - name: Upload the per-step evidence (the saved step output)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preflight-evidence-${{ github.ref_name }}
+          path: demos/**/logs/preflight-*.log
+          if-no-files-found: warn
+
+      - name: Show the ZAP boot log if anything failed
+        if: failure()
+        run: docker compose logs --tail=200 zap || true
+
+      - name: Tear the lab down
+        if: always()
+        run: ./demo down || docker compose down -v --remove-orphans
