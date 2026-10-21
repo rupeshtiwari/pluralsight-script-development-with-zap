@@ -100,7 +100,13 @@ On the `m1-demo2-before` branch, `zap-scripts/globomantics-marker.js` **does not
 3. **Mutate the outbound request** with `msg.getRequestHeader().setHeader(...)`, this is the line that *changes* traffic, not just observes it.
 4. **Report what you did** with `print(...)`, and stash the exact line in a `ScriptVars` global so Step 3 can read it back from ZAP.
 
-<details><summary>📄 <b>Write this to <code>zap-scripts/globomantics-marker.js</code></b></summary>
+**Create the file now, step by step (nothing is hidden, do exactly this):**
+
+1. In **VS Code**, in the left **Explorer**, open the folder `demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/` (right now it has only a greyed-out `.gitkeep`).
+2. Right-click that `zap-scripts` folder → **New File** → name it exactly `globomantics-marker.js` and press Enter.
+3. Paste the **entire** script below into that new file, then **Save** (`Cmd`+`S`). That folder is mounted into the ZAP container, so the moment you save, ZAP can load it in the next step.
+
+> On camera (recording only): you type this same code in ZAP's **Script Console** instead, your Demo recorder page gives the exact ZAP clicks. For your own run here, the VS Code file above is the simplest reliable way, and `./steps/01` loads it either way.
 
 ```javascript
 // Globomantics HTTP Sender script (GraalVM JavaScript).
@@ -129,7 +135,6 @@ function sendingRequest(msg, initiator, helper) {
 function responseReceived(msg, initiator, helper) {
 }
 ```
-</details>
 
 ### What we examine, and why
 
@@ -151,6 +156,18 @@ Loading this file registers it with ZAP's **Graal.js** engine as an `httpsender`
 cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
 ./steps/01-load-javascript-http-sender.sh
 ```
+
+**Two outputs you may see, both are normal:**
+
+- **If you have NOT created the file yet** (you skipped the authoring step above), the step stops with a yellow cue, not an error. This is the lab telling you to go write the script first:
+
+  ```text
+  ✍️  AUTHOR THIS FIRST  you have not written the HTTP Sender script yet
+          how: author zap-scripts/globomantics-marker.js (this demo's README, Step 1); the finished reference is on the m1-demo2-after branch
+  ```
+  Go back up, create `zap-scripts/globomantics-marker.js` with the code shown, save it, and run the command again.
+
+- **After you have created and saved the file**, the same command loads it and prints a `✔ PASS`, the Expected result below.
 
 Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP, localhost:8080/zap/</a> → **Scripts → HTTP Sender → globomantics-marker** and read its name, engine and enabled state.
 
