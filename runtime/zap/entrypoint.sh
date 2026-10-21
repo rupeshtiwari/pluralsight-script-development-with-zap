@@ -16,12 +16,21 @@ API_PORT=8090
 #  - fixed API key and open API addresses (author tooling reaches it via 8090)
 #  - suppress the first-run "persist session?" dialog that otherwise blocks boot
 #  - skip update/add-on-update checks at startup for a deterministic boot
+#  - view.fontSize=24 enlarges the whole Swing UI so the GUI reads clearly on a
+#    recording (menus, tabs, tables, Quick Start). This is ZAP's REAL UI font,
+#    so it stays crisp in the Webswing canvas, unlike browser zoom which blurs.
+#    Override at run time with ZAP_UI_FONT_SIZE=NN ./demo up if you want a
+#    different size. The same control lives in the GUI at Tools > Options >
+#    Display > Font size; this just makes 24 the default for every boot.
+UI_FONT_SIZE="${ZAP_UI_FONT_SIZE:-24}"
 export ZAP_WEBSWING_OPTS="-host 0.0.0.0 -port ${API_PORT} \
 -config api.key=${API_KEY} \
 -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true \
 -config database.newsessionprompt=false \
 -config start.checkForUpdates=false \
 -config start.checkAddonUpdates=false \
+-config view.fontSize=${UI_FONT_SIZE} \
+-config view.scaleImages=true \
 -config connection.dnsTtlSuccessfulQueries=-1"
 
 # Persist the ZAP core after the kick browser disconnects.
