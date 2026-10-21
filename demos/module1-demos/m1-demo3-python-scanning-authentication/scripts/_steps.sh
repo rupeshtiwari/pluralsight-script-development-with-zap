@@ -296,10 +296,17 @@ ensure_ready() {
             "the m1-demo3-before branch ships without zap-scripts/globomantics-auth.py on purpose; writing it IS this demo" \
             "author zap-scripts/globomantics-auth.py (this demo's README, Step 2); the finished reference is on the m1-demo3-after branch"
         return 1; }
-    local eng; eng="$(detect_jython_engine)"
+    # ZAP's API answers a little BEFORE its boot-time add-ons register, so wait for the jython engine
+    # (up to ~90s) rather than failing the instant the stack reports up.
+    local eng _t=0; eng="$(detect_jython_engine)"
+    while [ -z "${eng}" ] && [ "${_t}" -lt 45 ]; do
+        [ "${_t}" -eq 0 ] && printf 'waiting for ZAP add-on Python Scripting (jython) to finish loading'
+        printf '.'; sleep 2; _t=$((_t + 1)); eng="$(detect_jython_engine)"
+    done
+    [ "${_t}" -gt 0 ] && echo
     [ -n "${eng}" ] || {
-        fail "no Python (jython) engine in ZAP" "the Python Scripting (jython) add-on is not installed" \
-             "recreate ZAP so the entrypoint installs it: docker compose up -d --force-recreate zap"; return 1; }
+        fail "no Python (jython) engine in ZAP" "the Python Scripting (jython) add-on did not load after waiting ~90s" \
+             "run ./demo down then ./demo up and wait for 'All services healthy', then retry; if it still fails send ./demo logs"; return 1; }
     JYTHON_ENGINE="${eng}"
     return 0
 }
