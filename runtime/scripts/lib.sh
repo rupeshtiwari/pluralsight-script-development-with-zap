@@ -15,6 +15,25 @@ fi
 
 COMPOSE="docker compose"
 
+# Print a ready-to-run command that drops a demo's finished reference file in from the matching
+# -after branch, so someone who is only SPOT-TESTING on a -before branch is never stuck at
+# "AUTHOR THIS FIRST". In the real clip you WRITE the file; this is only to unblock a quick test.
+# Prints nothing (so the banner shows no "try:" line) unless we are on a *-before branch and the
+# file is under the repo. Portable: no GNU-only realpath, works on macOS.
+author_try() {
+    local host="${1:-}"
+    [ -n "${host}" ] || return 0
+    local branch after rel
+    branch="$(git -C "${REPO_ROOT}" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+    case "${branch}" in
+        *-before) after="${branch%-before}-after" ;;
+        *) return 0 ;;
+    esac
+    rel="${host#"${REPO_ROOT}"/}"
+    [ "${rel}" != "${host}" ] || return 0   # not under the repo root; skip rather than print a wrong path
+    printf '(cd "%s" && git show origin/%s:%s > %s)' "${REPO_ROOT}" "${after}" "${rel}" "${rel}"
+}
+
 # Is the Docker engine reachable right now?
 docker_up() { docker info >/dev/null 2>&1; }
 
