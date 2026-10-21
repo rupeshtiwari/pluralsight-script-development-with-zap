@@ -5,7 +5,20 @@ name: Globomantics ZAP quality gate
 # not run on every push. Run it from the Actions tab to see the gate in action.
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch: {}        # run it on demand from the Actions tab
+  push:
+    branches:
+      - m2-demo3-after
+    paths:
+      # Keep a fresh covering run whenever the code the hosted-gate proof watches changes on -after, so
+      # the run's commit never drifts from the branch HEAD (drift is what made the proof read "covers: no").
+      # Mirrors HOSTED_PATHS in the m2-demo3 step script.
+      - "demos/module2-demos/m2-demo3-security-quality-gates/ci/**"
+      - "demos/module2-demos/m2-demo3-security-quality-gates/scripts/**"
+      - "runtime/**"
+      - "docker-compose.yaml"
+      - ".env"
+      - ".github/workflows/zap-quality-gate.yml"
 
 jobs:
   quality-gate:
