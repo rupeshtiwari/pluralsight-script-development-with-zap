@@ -93,7 +93,7 @@ def sync_one(root, main_sha, branch, old_sha, apply, validator=validate):
             added=True
             merged=run(['git','merge','--no-ff','--no-edit',main_sha],checkout,check=False)
             if merged.returncode:
-                row['status']='CONFLICT — NOT PUSHED'
+                row['status']='CONFLICT, NOT PUSHED'
                 row['conflicts']=run(['git','diff','--name-only','--diff-filter=U'],checkout).stdout.splitlines()
                 return row
             validator(checkout,branch)
@@ -108,7 +108,7 @@ def sync_one(root, main_sha, branch, old_sha, apply, validator=validate):
             run(['git','push','origin','HEAD:refs/heads/'+branch],checkout)
             row.update(after_sha=new,status='MERGED AND VALIDATED')
         except Exception as exc:
-            row.update(status='FAILED — REVIEW REQUIRED',error=str(exc))
+            row.update(status='FAILED, REVIEW REQUIRED',error=str(exc))
         finally:
             if added:
                 removed=run(['git','worktree','remove','--force',str(checkout)],root,check=False)
@@ -137,7 +137,7 @@ def synchronize(root, apply=False, repo=None, do_dispatch=False, validator=valid
         if do_dispatch and row['status'] in ('MERGED AND VALIDATED','ALREADY SYNCHRONIZED'):
             try:
                 dispatch(repo,branch)
-                row['ci_dispatch']='REQUESTED — CHECK RUN RESULT'
+                row['ci_dispatch']='REQUESTED, CHECK RUN RESULT'
             except Exception as exc:
                 row['ci_dispatch']='FAILED: '+str(exc)
         print(branch+': '+row['status'],flush=True)

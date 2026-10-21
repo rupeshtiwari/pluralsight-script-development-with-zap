@@ -31,6 +31,9 @@ ALERT_NAME="Globomantics unsafe reflection (custom rule)"
 PASS=0; FAIL=0; STEP_RC=0
 pass() { fm ok "$1"; PASS=$((PASS+1)); STEP_RC=0; }
 fail() { fm fail "$1" "${2:-}" "${3:-}"; FAIL=$((FAIL+1)); STEP_RC=1; }
+# A learner-authored deliverable is not written yet (expected on the -before branch, that IS the demo).
+# Not a failure: friendly guidance on how to author it and where the finished reference lives.
+need_author() { fm todo "$1" "${2:-}" "${3:-}"; STEP_RC=1; }
 enc()  { python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=""))' "$1"; }
 
 zap() { # <path> <query> -> body (asserts HTTP 200)
@@ -48,7 +51,7 @@ zap_container() { ( cd "${REPO_ROOT}" && docker compose ps -q zap 2>/dev/null ) 
 # aborts context creation ("A script with the same name already exists:
 # globomantics-auth.py") before any job runs. Remove the demo scripts first so
 # each run registers them cleanly, and make sure the report output dir exists and
-# is writable. CI is unaffected — it runs a fresh ZAP per run — so the plan file
+# is writable. CI is unaffected, it runs a fresh ZAP per run, so the plan file
 # itself is unchanged; this only makes the local re-runnable preflight reliable.
 reset_plan_state() {
     local c; c="$(zap_container)"
@@ -80,7 +83,7 @@ plan_finished() { plan_progress | grep -q '"finished"[^,]*[0-9T:-]'; }
 # Poll a no-arg producer function until it prints something, or a timeout
 # elapses. The AF plan can report "finished" a moment before the active scan's
 # alerts are queryable, so Steps 3/4 wait for the evidence instead of checking
-# once. Never weakens the check — it still requires the real alert.
+# once. Never weakens the check, it still requires the real alert.
 wait_nonempty() { # <seconds> <fn> -> prints fn's first non-empty output
     local secs="$1" fn="$2" out i=0
     while [ "${i}" -lt "${secs}" ]; do
@@ -120,9 +123,17 @@ ensure_ready() {
     zap core/view/version | grep -q '"version"' || {
         fail "ZAP API not reachable" "the stack may still be starting" "run scripts/demo_up.sh, wait for 'Up', then retry"; return 1; }
     [ -f "${AF_PLAN_HOST}" ] || {
-        fail "Automation Framework plan not found" "ci/af-plan.yaml is missing" "restore the file from the repo"; return 1; }
+        need_author "you have not written the Automation Framework plan yet" \
+            "the m2-demo1-before branch ships without ci/af-plan.yaml on purpose; writing it IS this demo" \
+            "author ci/af-plan.yaml (this demo's README, Step 1); the finished reference is on the m2-demo1-after branch"
+        return 1; }
+    # The workflow is shared course infrastructure (provided on every branch), NOT a file this demo
+    # authors (the demo authors only ci/af-plan.yaml). If it is missing, that is a real problem.
     [ -f "${WORKFLOW_HOST}" ] || {
-        fail "GitHub Actions workflow not found" ".github/workflows/zap-authenticated-scan.yml is missing" "restore the file from the repo"; return 1; }
+        fail "GitHub Actions workflow not found" \
+            ".github/workflows/zap-authenticated-scan.yml is missing (it is shared infrastructure, not authored in this demo)" \
+            "re-add it from the course repo (git checkout origin/main -- .github/workflows/zap-authenticated-scan.yml)"
+        return 1; }
     zap automation/view/planProgress "planId=0" >/dev/null 2>&1 || zap core/view/version >/dev/null || true
     return 0
 }
@@ -131,11 +142,11 @@ HOSTED_PATHS=(demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci d
 hosted() { python3 "${REPO_ROOT}/runtime/scripts/hosted_run.py" "${REPO_ROOT}" zap-authenticated-scan.yml m2-demo1-after "${HOSTED_PATHS[@]}" 2>/dev/null; }
 
 # ===========================================================================
-# STEP 1 — Headless Automation Framework run (EO3a)  → "GitHub Actions job log"
+# STEP 1, Headless Automation Framework run (EO3a)  → "GitHub Actions job log"
 # ===========================================================================
 step1_headless_run() {
     fm header "ZAP runs headless from the Automation Framework plan" \
-              "No GUI, no clicks — ZAP runs the whole scan from one config file. The GitHub Actions job log is the proof (EO3a)."
+              "No GUI, no clicks, ZAP runs the whole scan from one config file. The GitHub Actions job log is the proof (EO3a)."
     if ! run_plan; then
         fail "the Automation Framework plan did not start" "automation/action/runPlan returned no plan id" \
              "check the automation add-on and the plan path /af/af-plan.yaml"
@@ -146,7 +157,7 @@ step1_headless_run() {
     fm star "Local plan run" "plan ${PLAN_ID} · $(plan_finished && echo finished || echo NOT finished) · ${errs} errors · ${warns} warnings" focus
     local h id concl sha labels covers url steps
     h="$(hosted)"; IFS='|' read -r id concl sha labels covers url steps <<<"${h}"
-    fm section "Hosted proof — GitHub Actions (read from the Actions API)"
+    fm section "Hosted proof, GitHub Actions (read from the Actions API)"
     fm star "Workflow run" "${id:-none found} · ${concl:-?} · commit ${sha:-?}" focus
     fm star "Runner" "${labels:-?}"
     fm star "Headless ZAP step" "$(printf '%s' "${steps}" | tr ';' '\n' | grep -m1 '^Run ZAP headless' | cut -d= -f2 || echo '?')"
@@ -163,11 +174,11 @@ step1_headless_run() {
 }
 
 # ===========================================================================
-# STEP 2 — Authenticated context configuration (EO3a) → config artifact
+# STEP 2, Authenticated context configuration (EO3a) → config artifact
 # ===========================================================================
 step2_context_config() {
-    fm header "The authenticated context, declared as config — proven loaded by the hosted run" \
-              "The plan binds scope, scripted login and user BEFORE scanning. The hosted job runs this exact plan and raises the custom alert on a login-only page — which only happens when ZAP loaded the context, user and scripted auth (EO3a)."
+    fm header "The authenticated context, declared as config, proven loaded by the hosted run" \
+              "The plan binds scope, scripted login and user BEFORE scanning. The hosted job runs this exact plan and raises the custom alert on a login-only page, which only happens when ZAP loaded the context, user and scripted auth (EO3a)."
     local ctx auth engine user scope
     ctx="$(grep -A2 'contexts:' "${AF_PLAN_HOST}" | grep -m1 'name:' | sed 's/.*name: *//; s/"//g')"
     auth="$(awk '/authentication:/{f=1} f&&/method:/{print $2; exit}' "${AF_PLAN_HOST}" | tr -d '\"')"
@@ -213,11 +224,11 @@ for a in json.load(sys.stdin).get("alerts",[]):
 }
 
 # ===========================================================================
-# STEP 3 — Authenticated script job result (EO3a) → "Authenticated script job result"
+# STEP 3, Authenticated script job result (EO3a) → "Authenticated script job result"
 # ===========================================================================
 step3_script_job() {
     fm header "The Module 1 scripts running during the authenticated plan" \
-              "The JavaScript marker stamps the plan's requests, and the Python rule raises its alert on the login-only page — both from the same authenticated run (EO3a)."
+              "The JavaScript marker stamps the plan's requests, and the Python rule raises its alert on the login-only page, both from the same authenticated run (EO3a)."
     local js py h id concl sha labels covers url steps assert py_ok=""
     js="$(wait_nonempty 120 marker_on_auth_request)"
     py="$(wait_nonempty 120 custom_alert_present)"
@@ -237,11 +248,11 @@ step3_script_job() {
 }
 
 # ===========================================================================
-# STEP 4 — Authenticated custom alert record (EO3a) → "Authenticated custom alert record"
+# STEP 4, Authenticated custom alert record (EO3a) → "Authenticated custom alert record"
 # ===========================================================================
 step4_custom_alert() {
     fm header "The authenticated finding recorded by the pipeline" \
-              "The custom rule's named alert on the login-only page — from this plan run locally, and from the hosted job's fail-closed report check (EO3a)."
+              "The custom rule's named alert on the login-only page, from this plan run locally, and from the hosted job's fail-closed report check (EO3a)."
     local rec n r p h id concl sha labels covers url steps
     rec="$(wait_nonempty 180 custom_alert)"
     IFS='|' read -r n r p <<<"${rec}"

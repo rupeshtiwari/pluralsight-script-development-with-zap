@@ -7,7 +7,7 @@ Reports, with actionable file paths and reasons:
   - Markdown that GitHub would show as literal text (e.g. "## Step" right under </details>)
   - demo branch naming compliance / missing demo branches (if a remote is given)
 
-This is maintainers' tooling. It does NOT run ZAP or validate runtime behavior —
+This is maintainers' tooling. It does NOT run ZAP or validate runtime behavior, 
 run each demo's four named steps on a Mac Docker host for that.
 
 Usage:
@@ -35,7 +35,7 @@ DEMOS = [
 ]
 
 # Internal production wording that must not appear in learner-facing docs.
-# Specific phrases only — NOT broad words like "record" (legitimate in
+# Specific phrases only, NOT broad words like "record" (legitimate in
 # "Record an alert disposition"), so legitimate technical language is kept.
 PROD_PATTERNS = [
     r"recording budget",
@@ -137,17 +137,48 @@ def check_branches():
                 "old-style branch name still present: %s" % h)
 
 
+def check_demo_deliverable_guidance():
+    """A demo step that needs a file the LEARNER authors (absent on the -before branch by design) must
+    guide them to AUTHOR it (fm todo / need_author), never FAIL telling them to 'restore ... from the
+    repo'. That phrasing reads as a broken repository and shipped once as a real bug (m1-demo2 Step 1 on
+    the -before branch). Any recurrence is a BLOCKER.
+
+    Enforced two ways: ban the misleading phrase in any demo script, and require that every demo whose
+    _steps.sh checks a learner deliverable defines the friendly need_author helper."""
+    phrase = re.compile(r"restore\s+(?:the\s+\S+|it)\s+from\s+the\s+repo", re.I)
+    for folder, stem in DEMOS:
+        sdir = os.path.join(ROOT, folder, "scripts")
+        if not os.path.isdir(sdir):
+            continue
+        for name in sorted(os.listdir(sdir)):
+            if not name.endswith(".sh"):
+                continue
+            rel = os.path.relpath(os.path.join(sdir, name), ROOT)
+            text = read(os.path.join(sdir, name))
+            for m in phrase.finditer(text):
+                line = text[: m.start()].count("\n") + 1
+                add("BLOCKER", "%s:%d" % (rel, line),
+                    "a demo step tells the learner to 'restore ... from the repo'. A file the learner "
+                    "authors is absent on the -before branch BY DESIGN; guide them to write it with "
+                    "need_author (fm todo, '✍ AUTHOR THIS FIRST'), never FAIL as if the repo were broken.")
+            # If this _steps.sh gates on a learner deliverable, it must use the friendly helper.
+            if name == "_steps.sh" and "need_author " in text and "need_author()" not in text:
+                add("BLOCKER", rel,
+                    "calls need_author but never defines it; copy the helper next to pass()/fail().")
+
+
 def main():
     check_production_wording()
     check_demo_readmes()
     check_markdown_render()
+    check_demo_deliverable_guidance()
     if "--branches" in sys.argv:
         check_branches()
 
     order = {"BLOCKER": 0, "REQUIRED FIX": 1, "OPTIONAL POLISH": 2}
     errors.sort(key=lambda e: (order.get(e[0], 9), e[1]))
     if not errors:
-        print("repo_quality_check: PASS — no issues found")
+        print("repo_quality_check: PASS, no issues found")
         return 0
     counts = {}
     for sev, path, reason in errors:

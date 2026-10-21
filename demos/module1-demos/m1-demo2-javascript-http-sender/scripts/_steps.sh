@@ -32,6 +32,10 @@ CONSOLE_TAG="[globo-marker]"
 PASS=0; FAIL=0; STEP_RC=0
 pass() { fm ok "$1"; PASS=$((PASS+1)); STEP_RC=0; }
 fail() { fm fail "$1" "${2:-}" "${3:-}"; FAIL=$((FAIL+1)); STEP_RC=1; }
+# A learner-authored deliverable is not written yet (expected on the -before branch, that IS the demo).
+# Not a failure, so it does NOT count as FAIL; it just marks the step not-yet-done (STEP_RC=1) with
+# friendly guidance on how to author it and where the finished reference lives.
+need_author() { fm todo "$1" "${2:-}" "${3:-}"; STEP_RC=1; }
 enc()  { python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=""))' "$1"; }
 
 zap() { # <path> <query> -> body (asserts HTTP 200)
@@ -101,7 +105,7 @@ sys.exit(1)' "${SCRIPT_NAME}"
 
 send_probe() {
     # Have ZAP ITSELF send the request (accessUrl). HTTP Sender scripts fire for
-    # requests ZAP sends, and the SENT request — carrying the marker header — is
+    # requests ZAP sends, and the SENT request, carrying the marker header, is
     # what ZAP records in History. (A client request proxied through ZAP records
     # the client's original request, without the header the script adds on send.)
     PROBE_NAME="marker-$(date +%s)-${BASHPID:-$$}-${RANDOM}"
@@ -133,7 +137,7 @@ sys.exit(1)' "${PROBE_NAME}"
 # Send a fresh probe and look for its marked request, retrying briefly. Right
 # after Step 1 enables the HTTP Sender script via the API, ZAP can take a moment
 # to activate it on the sending path, so a single immediate probe may miss it.
-# Each attempt sends a NEW uniquely-named probe. This never weakens the check —
+# Each attempt sends a NEW uniquely-named probe. This never weakens the check, 
 # it still requires a real proxied request carrying the exact marker header.
 probe_until_marked() { # -> prints "request-line || header" on success; empty on failure
     local i rec
@@ -153,7 +157,10 @@ ensure_ready() {
     zap core/view/version | grep -q '"version"' || {
         fail "ZAP API not reachable" "the stack may still be starting" "run scripts/demo_up.sh, wait for 'Up', then retry"; return 1; }
     [ -f "${SCRIPT_FILE_HOST}" ] || {
-        fail "script file not found" "zap-scripts/globomantics-marker.js is missing" "restore the file from the repo"; return 1; }
+        need_author "you have not written the HTTP Sender script yet" \
+            "the m1-demo2-before branch ships without zap-scripts/globomantics-marker.js on purpose; writing it IS this demo" \
+            "author zap-scripts/globomantics-marker.js (this demo's README, Step 1); the finished reference is on the m1-demo2-after branch"
+        return 1; }
     local eng; eng="$(detect_js_engine)"
     [ -n "${eng}" ] || {
         fail "no JavaScript engine in ZAP" "the GraalVM JavaScript add-on is not installed" \
@@ -163,7 +170,7 @@ ensure_ready() {
 }
 
 # ===========================================================================
-# STEP 1 — JavaScript source file (EO2a)
+# STEP 1, JavaScript source file (EO2a)
 # ===========================================================================
 step1_source() {
     fm header "The JavaScript HTTP Sender script" \
@@ -189,11 +196,11 @@ step1_source() {
 }
 
 # ===========================================================================
-# STEP 2 — Modified HTTP request (EO2a)
+# STEP 2, Modified HTTP request (EO2a)
 # ===========================================================================
 step2_modified_request() {
     fm header "The marker header on an outbound request" \
-              "Confirms the script actually changes messages ZAP sends — not just that it loaded (EO2a)."
+              "Confirms the script actually changes messages ZAP sends, not just that it loaded (EO2a)."
     local rec; rec="$(probe_until_marked)"
     if [ -n "${rec}" ]; then
         fm star "Outbound request" "${rec%% || *}"
@@ -209,7 +216,7 @@ step2_modified_request() {
 }
 
 # ===========================================================================
-# STEP 3 — Script console output (EO2a)
+# STEP 3, Script console output (EO2a)
 # ===========================================================================
 step3_console_output() {
     fm header "The named console output the script prints" \
@@ -231,7 +238,7 @@ step3_console_output() {
 }
 
 # ===========================================================================
-# STEP 4 — Saved script registration (EO2a)
+# STEP 4, Saved script registration (EO2a)
 # ===========================================================================
 step4_registration() {
     fm header "The saved, reusable script registration" \

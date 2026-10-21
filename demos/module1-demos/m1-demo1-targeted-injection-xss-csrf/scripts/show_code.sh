@@ -1,5 +1,5 @@
 #!/bin/bash
-# OPTIONAL reference — NOT a recorded demo step.
+# OPTIONAL reference, NOT a recorded demo step.
 #
 # Shows the exact vulnerable line(s) in runtime/app/main.py behind a finding, so a
 # beginner can see *why* it is exploitable. Snippets are read live from the
@@ -26,8 +26,8 @@ case "${1:-}" in
     *) echo "usage: show_code.sh {sqli|nosql|cmd|xss|csrf}"; exit 2;;
 esac
 
-fm header "Vulnerable code — ${TITLE}" \
-          "The line(s) that make the app exploitable — this is why ZAP's alert fired."
+fm header "Vulnerable code, ${TITLE}" \
+          "The line(s) that make the app exploitable, this is why ZAP's alert fired."
 echo
 # Line numbers so you can jump straight to it in the editor (VS Code: Ctrl+G).
 awk -v a="${ANCHOR}" -v n="${N}" '
