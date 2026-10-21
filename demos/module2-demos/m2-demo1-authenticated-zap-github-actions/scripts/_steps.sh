@@ -33,7 +33,7 @@ pass() { fm ok "$1"; PASS=$((PASS+1)); STEP_RC=0; }
 fail() { fm fail "$1" "${2:-}" "${3:-}"; FAIL=$((FAIL+1)); STEP_RC=1; }
 # A learner-authored deliverable is not written yet (expected on the -before branch, that IS the demo).
 # Not a failure: friendly guidance on how to author it and where the finished reference lives.
-need_author() { fm todo "$1" "${2:-}" "${3:-}"; STEP_RC=1; }
+need_author() { fm todo "$1" "${2:-}" "${3:-}" "$(author_try "${4:-}")"; STEP_RC=1; }
 enc()  { python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=""))' "$1"; }
 
 zap() { # <path> <query> -> body (asserts HTTP 200)
@@ -125,7 +125,8 @@ ensure_ready() {
     [ -f "${AF_PLAN_HOST}" ] || {
         need_author "you have not written the Automation Framework plan yet" \
             "the m2-demo1-before branch ships without ci/af-plan.yaml on purpose; writing it IS this demo" \
-            "author ci/af-plan.yaml (this demo's README, Step 1); the finished reference is on the m2-demo1-after branch"
+            "author ci/af-plan.yaml (this demo's README, Step 1); the finished reference is on the m2-demo1-after branch" \
+            "${AF_PLAN_HOST}"
         return 1; }
     # The workflow is shared course infrastructure (provided on every branch), NOT a file this demo
     # authors (the demo authors only ci/af-plan.yaml). If it is missing, that is a real problem.
