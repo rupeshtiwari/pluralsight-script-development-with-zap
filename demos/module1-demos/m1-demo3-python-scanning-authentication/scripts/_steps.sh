@@ -50,6 +50,9 @@ USER_ID=""
 PASS=0; FAIL=0; STEP_RC=0
 pass() { fm ok "$1"; PASS=$((PASS+1)); STEP_RC=0; }
 fail() { fm fail "$1" "${2:-}" "${3:-}"; FAIL=$((FAIL+1)); STEP_RC=1; }
+# A learner-authored deliverable is not written yet (expected on the -before branch, that IS the demo).
+# Not a failure: friendly guidance on how to author it and where the finished reference lives.
+need_author() { fm todo "$1" "${2:-}" "${3:-}"; STEP_RC=1; }
 enc()  { python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=""))' "$1"; }
 
 zap() { # <path> <query> -> body (asserts HTTP 200)
@@ -284,9 +287,15 @@ ensure_ready() {
     zap core/view/version | grep -q '"version"' || {
         fail "ZAP API not reachable" "the stack may still be starting" "run scripts/demo_up.sh, wait for 'Up', then retry"; return 1; }
     [ -f "${RULE_FILE_HOST}" ] || {
-        fail "active-rule script not found" "zap-scripts/globomantics-active-rule.py is missing" "restore the file from the repo"; return 1; }
+        need_author "you have not written the Jython active-scan rule yet" \
+            "the m1-demo3-before branch ships without zap-scripts/globomantics-active-rule.py on purpose; writing it IS this demo" \
+            "author zap-scripts/globomantics-active-rule.py (this demo's README, Step 1); the finished reference is on the m1-demo3-after branch"
+        return 1; }
     [ -f "${AUTH_FILE_HOST}" ] || {
-        fail "authentication script not found" "zap-scripts/globomantics-auth.py is missing" "restore the file from the repo"; return 1; }
+        need_author "you have not written the authentication script yet" \
+            "the m1-demo3-before branch ships without zap-scripts/globomantics-auth.py on purpose; writing it IS this demo" \
+            "author zap-scripts/globomantics-auth.py (this demo's README, Step 2); the finished reference is on the m1-demo3-after branch"
+        return 1; }
     local eng; eng="$(detect_jython_engine)"
     [ -n "${eng}" ] || {
         fail "no Python (jython) engine in ZAP" "the Python Scripting (jython) add-on is not installed" \
