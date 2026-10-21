@@ -152,16 +152,21 @@ def bad(msg: str, reason: str = "", fix: str = "") -> None:
         print(f"        {_w('fix', 'fix: ')}{_w('fix', fix)}")
 
 
-def todo(msg: str, reason: str = "", fix: str = "") -> None:
+def todo(msg: str, reason: str = "", fix: str = "", try_cmd: str = "") -> None:
     """A learner-authored deliverable has not been written yet. This is the demo's own work on the
     `-before` branch, NOT a broken repo, so it is rendered in brand yellow and never in Stop Red (which
     is reserved strictly for a real failed check). The `fix` line says how to author it and where the
-    finished reference lives, never 'restore the file from the repo'."""
+    finished reference lives, never 'restore the file from the repo'. The optional `try` line is a
+    ready-to-run command that drops the finished reference in from the `-after` branch, so someone who is
+    only spot-testing (not recording) is never stuck; in the actual clip you WRITE the file, you do not
+    copy it."""
     print(f"{_w('todo', '✍️  AUTHOR THIS FIRST')}  {msg}")
     if reason:
         print(f"        {_w('muted', 'why: ')}{reason}")
     if fix:
         print(f"        {_w('fix', 'how: ')}{_w('fix', fix)}")
+    if try_cmd:
+        print(f"        {_w('muted', 'try: ')}{_w('header', try_cmd)}")
 
 
 def note(text: str) -> None:
@@ -199,7 +204,8 @@ def _main(argv) -> int:
     elif cmd == "fail":
         bad(args[0], args[1] if len(args) > 1 else "", args[2] if len(args) > 2 else "")
     elif cmd == "todo":
-        todo(args[0], args[1] if len(args) > 1 else "", args[2] if len(args) > 2 else "")
+        todo(args[0], args[1] if len(args) > 1 else "", args[2] if len(args) > 2 else "",
+             args[3] if len(args) > 3 else "")
     elif cmd == "note":
         note(args[0])
     elif cmd == "json":
