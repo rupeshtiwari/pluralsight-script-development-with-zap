@@ -73,7 +73,7 @@ ensure_ready() {
     [ -f "${GATE_PLAN_HOST}" ] || {
         need_author "you have not written the quality-gate plan yet" \
             "the m2-demo3-before branch ships without ci/gate-plan.yaml on purpose; writing it IS this demo" \
-            "author ci/gate-plan.yaml (this demo's README, Step 1); the finished reference is on the m2-demo3-after branch" \
+            "author ci/gate-plan.yaml (this demo's README, Step 1)" \
             "${GATE_PLAN_HOST}"
         return 1; }
     # Gate execution belongs to named Step 3, not hidden readiness.
