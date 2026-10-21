@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Run THIS demo from anywhere in the repo. Your branch (e.g. m1-demo2-before) picks the demo folder,
+# so you never have to cd by hand or remember the long path.
+#
+#   ./demo up        bring up the lab (Docker + ZAP), wait until ready
+#   ./demo 1         run step 1  (the same ./steps/01-...sh shown in the walk-through)
+#   ./demo 2|3|4     run step 2 / 3 / 4
+#   ./demo down      stop the lab
+#   ./demo reset     reset the lab
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+branch="$(git -C "$ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+stem="${branch%-before}"; stem="${stem%-after}"
+folder=""
+for d in "$ROOT"/demos/*/"${stem}"-*/; do [ -d "$d" ] && folder="${d%/}" && break; done
+if [ -z "$folder" ]; then
+  echo "Can't tell which demo to run from branch '${branch:-unknown}'."
+  echo "Switch to a demo branch first, for example:  git switch m1-demo2-before"
+  exit 2
+fi
+cmd="${1:-}"
+case "$cmd" in
+  up)    cd "$folder" && exec ./scripts/demo_up.sh ;;
+  down)  cd "$folder" && exec ./scripts/demo_down.sh ;;
+  reset) cd "$folder" && exec ./scripts/demo_reset.sh ;;
+  1|2|3|4)
+    s="$(ls "$folder"/steps/0"$cmd"-*.sh 2>/dev/null | head -1)"
+    [ -n "$s" ] || { echo "No step $cmd found in ${folder#"$ROOT"/}/steps"; exit 2; }
+    cd "$folder" && exec "$s" ;;
+  *) echo "usage: ./demo <up|1|2|3|4|down|reset>   (demo picked from branch: ${stem:-unknown})"; exit 2 ;;
+esac
