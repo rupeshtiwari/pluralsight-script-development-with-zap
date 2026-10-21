@@ -35,7 +35,7 @@ fail() { fm fail "$1" "${2:-}" "${3:-}"; FAIL=$((FAIL+1)); STEP_RC=1; }
 # A learner-authored deliverable is not written yet (expected on the -before branch, that IS the demo).
 # Not a failure, so it does NOT count as FAIL; it just marks the step not-yet-done (STEP_RC=1) with
 # friendly guidance on how to author it and where the finished reference lives.
-need_author() { fm todo "$1" "${2:-}" "${3:-}"; STEP_RC=1; }
+need_author() { fm todo "$1" "${2:-}" "${3:-}" "$(author_try "${4:-}")"; STEP_RC=1; }
 enc()  { python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=""))' "$1"; }
 
 zap() { # <path> <query> -> body (asserts HTTP 200)
@@ -159,7 +159,8 @@ ensure_ready() {
     [ -f "${SCRIPT_FILE_HOST}" ] || {
         need_author "you have not written the HTTP Sender script yet" \
             "the m1-demo2-before branch ships without zap-scripts/globomantics-marker.js on purpose; writing it IS this demo" \
-            "author zap-scripts/globomantics-marker.js (this demo's README, Step 1); the finished reference is on the m1-demo2-after branch"
+            "author zap-scripts/globomantics-marker.js (this demo's README, Step 1); the finished reference is on the m1-demo2-after branch" \
+            "${SCRIPT_FILE_HOST}"
         return 1; }
     local eng; eng="$(detect_js_engine)"
     [ -n "${eng}" ] || {
