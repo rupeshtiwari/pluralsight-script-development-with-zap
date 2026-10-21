@@ -33,7 +33,8 @@ case "$cmd" in
     if [ "$rc" -eq 0 ]; then
       echo
       echo "Preflight PASSED. Upload these evidence files to the author:"
-      for f in "$folder"/logs/preflight-step-0*.log; do [ -f "$f" ] && echo "    $f"; done
+      # print repo-relative paths only, never the absolute path (it would show the machine username)
+      for f in "$folder"/logs/preflight-step-0*.log; do [ -f "$f" ] && echo "    ${f#"$ROOT"/}"; done
       echo "The author compares them against the committed evidence and reconciles any difference."
     else
       echo
