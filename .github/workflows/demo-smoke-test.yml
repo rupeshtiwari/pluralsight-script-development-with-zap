@@ -45,6 +45,19 @@ jobs:
             fi
           done
           echo "taught files authored in: ${authored}"
+          # Commit the authored file locally (NOT pushed) so this checkout's HEAD now carries exactly the
+          # code the recorder has on camera after the AUTHOR THIS FIRST beat. The hosted-run proof in
+          # ./demo preflight (m2-demo1, m2-demo3) compares the committed HEAD's watched paths against the
+          # covering -after run: with the taught file absent from the commit, that diff is dirty and the
+          # proof reads "covers this code: no". Committing it here makes HEAD match -after for the taught
+          # path, so the only thing that can still break the proof is a genuine workflow drift.
+          if [ "${authored}" -gt 0 ]; then
+            git config user.name "globo-smoke"
+            git config user.email "smoke@globomantics.test"
+            git add -A
+            git commit -q -m "smoke: author the taught file (local only, mirrors the on-camera AUTHOR THIS FIRST beat)"
+            echo "committed ${authored} authored file(s) onto the smoke HEAD"
+          fi
 
       - name: Bring up the full lab (app + DBs + ZAP), wait until healthy
         run: HEALTH_TIMEOUT=900 ./demo up
