@@ -154,16 +154,22 @@ def bad(msg: str, reason: str = "", fix: str = "") -> None:
 
 def todo(msg: str, reason: str = "", fix: str = "", try_cmd: str = "") -> None:
     """A learner-authored deliverable has not been written yet. This is the demo's own work on the
-    `-before` branch, NOT a broken repo, so it is rendered in brand yellow and never in Stop Red (which
-    is reserved strictly for a real failed check). The `fix` line points at THIS demo's README step,
-    which is self-sufficient: it shows the exact file to create and the code to paste. We do NOT tell a
-    learner to switch to or copy from the -after branch, switching branches mid-practice is a bad idea.
-    `try_cmd` is accepted for backward compatibility and intentionally ignored."""
+    `-before` branch, NOT a broken repo, so it is a teaching moment, rendered in brand yellow and never
+    in Stop Red (which is reserved strictly for a real failed check). The banner says plainly that this
+    is expected, teaches why it appears, and gives the next action: author it (the README step shows the
+    code), or bring the whole file in with the one-line `try_cmd` copy, which stays on THIS branch (it
+    does not switch branches). Then re-run the same step and it passes."""
     print(f"{_w('todo', '✍️  AUTHOR THIS FIRST')}  {msg}")
+    print(f"        {_w('todo', '✅ this is EXPECTED on the -before branch, not an error')} "
+          f"{_w('muted', '— writing this file is the demo itself.')}")
     if reason:
-        print(f"        {_w('muted', 'why: ')}{reason}")
+        print(f"        {_w('muted', '💡 why you see it: ')}{reason}")
     if fix:
-        print(f"        {_w('fix', 'how: ')}{_w('fix', fix)}")
+        print(f"        {_w('fix', '✍️  how to author it (you learn it): ')}{_w('fix', fix)}")
+    if try_cmd:
+        print(f"        {_w('header', '⚡ or bring the whole file in with one command (stays on this branch):')}")
+        print(f"        {_w('header', try_cmd)}")
+        print(f"        {_w('muted', '↻ then run this SAME step again, and it passes.')}")
 
 
 def note(text: str) -> None:
