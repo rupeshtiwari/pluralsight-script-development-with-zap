@@ -97,6 +97,7 @@ Three different interpreters, a SQL database, a document database, and a shell, 
 **Where:** the VS Code integrated Terminal, in `demos/module1-demos/m1-demo1-targeted-injection-xss-csrf`.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
 ./steps/01-run-targeted-injection-scan.sh
 ```
 
@@ -152,6 +153,7 @@ The step sends one context-matched request per sink and shows the response line 
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
 ./steps/02-verify-reflected-xss-contexts.sh
 ```
 
@@ -208,6 +210,7 @@ The step runs all four and shows session B's stored email before and after, so t
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
 ./steps/03-test-cross-session-csrf-token.sh
 ```
 
@@ -261,6 +264,7 @@ A rule ID is a lead; a disposition is a decision with the evidence attached. Kee
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
 ./steps/04-reconcile-security-alerts.sh
 ```
 
@@ -320,6 +324,7 @@ After Step 4 you should be able to say *why* each finding deserves a confirmed d
 Stop the demo's containers from the same demo directory:
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
 ./scripts/demo_down.sh
 ```
 
