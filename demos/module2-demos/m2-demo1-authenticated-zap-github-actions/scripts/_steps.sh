@@ -31,6 +31,9 @@ ALERT_NAME="Globomantics unsafe reflection (custom rule)"
 PASS=0; FAIL=0; STEP_RC=0
 pass() { fm ok "$1"; PASS=$((PASS+1)); STEP_RC=0; }
 fail() { fm fail "$1" "${2:-}" "${3:-}"; FAIL=$((FAIL+1)); STEP_RC=1; }
+# A learner-authored deliverable is not written yet (expected on the -before branch, that IS the demo).
+# Not a failure: friendly guidance on how to author it and where the finished reference lives.
+need_author() { fm todo "$1" "${2:-}" "${3:-}"; STEP_RC=1; }
 enc()  { python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=""))' "$1"; }
 
 zap() { # <path> <query> -> body (asserts HTTP 200)
@@ -120,9 +123,17 @@ ensure_ready() {
     zap core/view/version | grep -q '"version"' || {
         fail "ZAP API not reachable" "the stack may still be starting" "run scripts/demo_up.sh, wait for 'Up', then retry"; return 1; }
     [ -f "${AF_PLAN_HOST}" ] || {
-        fail "Automation Framework plan not found" "ci/af-plan.yaml is missing" "restore the file from the repo"; return 1; }
+        need_author "you have not written the Automation Framework plan yet" \
+            "the m2-demo1-before branch ships without ci/af-plan.yaml on purpose; writing it IS this demo" \
+            "author ci/af-plan.yaml (this demo's README, Step 1); the finished reference is on the m2-demo1-after branch"
+        return 1; }
+    # The workflow is shared course infrastructure (provided on every branch), NOT a file this demo
+    # authors (the demo authors only ci/af-plan.yaml). If it is missing, that is a real problem.
     [ -f "${WORKFLOW_HOST}" ] || {
-        fail "GitHub Actions workflow not found" ".github/workflows/zap-authenticated-scan.yml is missing" "restore the file from the repo"; return 1; }
+        fail "GitHub Actions workflow not found" \
+            ".github/workflows/zap-authenticated-scan.yml is missing (it is shared infrastructure, not authored in this demo)" \
+            "re-add it from the course repo (git checkout origin/main -- .github/workflows/zap-authenticated-scan.yml)"
+        return 1; }
     zap automation/view/planProgress "planId=0" >/dev/null 2>&1 || zap core/view/version >/dev/null || true
     return 0
 }
