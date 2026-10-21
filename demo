@@ -2,13 +2,14 @@
 # Run THIS demo from anywhere in the repo. Your branch (e.g. m1-demo2-before) picks the demo folder,
 # so you never have to cd by hand or remember the long path.
 #
-#   ./demo up        bring up the lab (Docker + ZAP), wait until ready
-#   ./demo 1         run step 1  (the same ./steps/01-...sh shown in the walk-through)
-#   ./demo 2|3|4     run step 2 / 3 / 4
-#   ./demo down      stop the lab
-#   ./demo reset     reset the lab
-#   ./demo logs      show ZAP's boot log (add 'app'/'postgres'/'mongo' for another service)
-#   ./demo status    show the containers and their health
+#   ./demo up         bring up the lab (Docker + ZAP), wait until ready
+#   ./demo 1          run step 1  (the same ./steps/01-...sh shown in the walk-through)
+#   ./demo 2|3|4      run step 2 / 3 / 4
+#   ./demo preflight  run all four steps and SAVE each step's output as evidence to upload
+#   ./demo down       stop the lab
+#   ./demo reset      reset the lab
+#   ./demo logs       show ZAP's boot log (add 'app'/'postgres'/'mongo' for another service)
+#   ./demo status     show the containers and their health
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 branch="$(git -C "$ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
@@ -25,11 +26,26 @@ case "$cmd" in
   up)    cd "$folder" && exec ./scripts/demo_up.sh ;;
   down)  cd "$folder" && exec ./scripts/demo_down.sh ;;
   reset) cd "$folder" && exec ./scripts/demo_reset.sh ;;
+  preflight)
+    # Human-in-loop gate: re-run this demo's four real named steps and save each step's visible
+    # output as logs/preflight-step-0N.log, then print the exact files to hand to the author.
+    "$ROOT/runtime/scripts/preflight_all_steps.sh" "$folder"; rc=$?
+    if [ "$rc" -eq 0 ]; then
+      echo
+      echo "Preflight PASSED. Upload these evidence files to the author:"
+      for f in "$folder"/logs/preflight-step-0*.log; do [ -f "$f" ] && echo "    $f"; done
+      echo "The author compares them against the committed evidence and reconciles any difference."
+    else
+      echo
+      echo "Preflight did NOT pass. Fix the environment (re-run ./setup/setup-macos.sh) or the"
+      echo "authored file the failing step named, then run ./demo preflight again."
+    fi
+    exit "$rc" ;;
   logs)   cd "$ROOT" && exec docker compose logs --tail="${3:-200}" "${2:-zap}" ;;
   status) cd "$ROOT" && exec docker compose ps ;;
   1|2|3|4)
     s="$(ls "$folder"/steps/0"$cmd"-*.sh 2>/dev/null | head -1)"
     [ -n "$s" ] || { echo "No step $cmd found in ${folder#"$ROOT"/}/steps"; exit 2; }
     cd "$folder" && exec "$s" ;;
-  *) echo "usage: ./demo <up|1|2|3|4|down|reset|logs|status>   (demo picked from branch: ${stem:-unknown})"; exit 2 ;;
+  *) echo "usage: ./demo <up|1|2|3|4|preflight|down|reset|logs|status>   (demo picked from branch: ${stem:-unknown})"; exit 2 ;;
 esac
