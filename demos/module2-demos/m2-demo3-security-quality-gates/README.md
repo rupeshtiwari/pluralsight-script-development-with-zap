@@ -96,6 +96,7 @@ This is a disposition-as-code: the judgment is written once, in the plan, review
 **Where:** the VS Code integrated Terminal, in `demos/module2-demos/m2-demo3-security-quality-gates`.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
 ./steps/01-inspect-false-positive-filter.sh
 ```
 
@@ -142,6 +143,7 @@ The step checks the plan against the Module 2 architecture's job order (`passive
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
 ./steps/02-check-automation-job-order.sh
 ```
 
@@ -185,6 +187,7 @@ The discipline this step enforces is *attribution*: an arbitrary nonzero exit co
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
 ./steps/03-run-security-quality-gate.sh
 ```
 
@@ -234,6 +237,7 @@ Seeing both in one report is the point. The filter did not weaken the gate again
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
 ./steps/04-verify-filtered-alert-report.sh
 ```
 
@@ -277,6 +281,7 @@ The gate blocks because a genuine High risk remains after the benign alert was r
 From the same demo directory, stop the local services:
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
 ./scripts/demo_down.sh
 ```
 
