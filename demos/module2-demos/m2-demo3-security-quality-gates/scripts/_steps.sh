@@ -54,7 +54,7 @@ run_gate() {
     cp "${GATE_PLAN_HOST}" "${GATE_DIR}/gate-plan.yaml"
     chmod -R 0777 "${GATE_DIR}"
     docker run --rm --network "${net}" -v "${GATE_DIR}:/zap/wrk:rw" \
-        -v "${REPO_ROOT}/demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts:/zap-scripts:ro" "${img}" \
+        -v "${DEMO_DIR}/zap-scripts:/zap-scripts:ro" "${img}" \
         zap.sh -cmd -autorun "${GATE_PLAN_ZAP}" >"${GATE_DIR}/run.log" 2>&1
     local code=$?
     echo "${code}" > "${GATE_EXIT_FILE}"
