@@ -127,10 +127,12 @@ ensure_ready() {
             "the m2-demo1-before branch ships without ci/af-plan.yaml on purpose; writing it IS this demo" \
             "author ci/af-plan.yaml (this demo's README, Step 1); the finished reference is on the m2-demo1-after branch"
         return 1; }
+    # The workflow is shared course infrastructure (provided on every branch), NOT a file this demo
+    # authors (the demo authors only ci/af-plan.yaml). If it is missing, that is a real problem.
     [ -f "${WORKFLOW_HOST}" ] || {
-        need_author "you have not written the GitHub Actions workflow yet" \
-            "the m2-demo1-before branch ships without .github/workflows/zap-authenticated-scan.yml on purpose; writing it IS this demo" \
-            "author .github/workflows/zap-authenticated-scan.yml (this demo's README, Step 1); the finished reference is on the m2-demo1-after branch"
+        fail "GitHub Actions workflow not found" \
+            ".github/workflows/zap-authenticated-scan.yml is missing (it is shared infrastructure, not authored in this demo)" \
+            "re-add it from the course repo (git checkout origin/main -- .github/workflows/zap-authenticated-scan.yml)"
         return 1; }
     zap automation/view/planProgress "planId=0" >/dev/null 2>&1 || zap core/view/version >/dev/null || true
     return 0
