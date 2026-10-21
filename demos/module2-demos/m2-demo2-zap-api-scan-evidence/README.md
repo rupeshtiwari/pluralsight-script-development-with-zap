@@ -96,6 +96,7 @@ The script asks ZAP three questions over HTTP, and each one exists for a reason:
 **Where:** macOS Terminal, in `demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo2-zap-api-scan-evidence"
 ./steps/01-check-zap-scan-status.sh
 ```
 
@@ -141,6 +142,7 @@ The script calls **`GET core/view/alerts?baseurl=<authenticated profile URL>`** 
 **Where:** macOS Terminal, in `demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo2-zap-api-scan-evidence"
 ./steps/02-query-custom-rule-alert.sh
 ```
 
@@ -183,6 +185,7 @@ Why go to this trouble? Because **a report is a file, and files go stale.** The 
 **Where:** macOS Terminal, in `demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo2-zap-api-scan-evidence"
 ./steps/03-reconcile-json-report.sh
 ```
 
@@ -225,6 +228,7 @@ Here is why this is the step people skip and shouldn't. **A scan can come back w
 **Where:** macOS Terminal, in `demos/module2-demos/m2-demo2-zap-api-scan-evidence`.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo2-zap-api-scan-evidence"
 ./steps/04-read-zap-insights.sh
 ```
 
@@ -269,6 +273,7 @@ A report is trustworthy only when its custom finding, its rating, and its scan-q
 From the same demo directory, stop the local services:
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo2-zap-api-scan-evidence"
 ./scripts/demo_down.sh
 ```
 

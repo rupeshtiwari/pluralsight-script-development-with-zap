@@ -136,6 +136,7 @@ Loading this file registers it with ZAP's **Graal.js** engine as an `httpsender`
 **Where:** the VS Code integrated Terminal, in `demos/module1-demos/m1-demo2-javascript-http-sender`.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
 ./steps/01-load-javascript-http-sender.sh
 ```
 
@@ -182,6 +183,7 @@ Why does this matter more than Step 1? Because registration and execution fail i
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
 ./steps/02-prove-outbound-marker-header.sh
 ```
 
@@ -229,6 +231,7 @@ Here is the discipline I want you to keep: the terminal can happily print the *e
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
 ./steps/03-check-live-script-console.sh
 ```
 
@@ -272,6 +275,7 @@ Reusable automation does not point at a file path and hope; it calls a *register
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
 ./steps/04-verify-enabled-script-registration.sh
 ```
 
@@ -319,6 +323,7 @@ After Step 4 you should be able to explain how the JavaScript hook changed a rea
 Stop the demo's containers from the same demo directory:
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
 ./scripts/demo_down.sh
 ```
 
