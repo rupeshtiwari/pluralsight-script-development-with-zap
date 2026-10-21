@@ -148,26 +148,34 @@ Loading this file registers it with ZAP's **Graal.js** engine as an `httpsender`
 
 **Predict before you run:** you expect ZAP to list `globomantics-marker` as type `httpsender`, engine `Graal.js`, enabled `true`, loaded from `/zap-scripts/globomantics-marker.js`, and to report the header it *intends* to add. Note what you do **not** yet have: a request that carried it.
 
-### Run command
+### Run the step: three moves, run → bring the code → run again
 
-**Where:** the VS Code integrated Terminal, in `demos/module1-demos/m1-demo2-javascript-http-sender`.
+Do these three in order in the **VS Code integrated Terminal**. Do not skip move 2, it is the fix. (You do not need to read any terminal message to know what to do, every action is written here.)
+
+**Move 1. Run it. The first run stops on purpose.**
 
 ```bash
 cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
 ./steps/01-load-javascript-http-sender.sh
 ```
 
-**Two outputs you may see, both are normal:**
+It stops with a **yellow `✍️ AUTHOR THIS FIRST`** message (not red, not an error). On the `-before` branch the script file does not exist yet, because *writing it is the whole point of this demo*. This is expected. Do move 2 next.
 
-- **If you have NOT created the file yet** (you skipped the authoring step above), the step stops with a yellow cue, not an error. This is the lab telling you to go write the script first:
+**Move 2. Bring the script in with one command (this is the fix).** Copy-paste this exactly. It copies the finished script into your working folder, and you **stay on the `-before` branch**, there is no branch switch:
 
-  ```text
-  ✍️  AUTHOR THIS FIRST  you have not written the HTTP Sender script yet
-          how: author zap-scripts/globomantics-marker.js (this demo's README, Step 1); the finished reference is on the m1-demo2-after branch
-  ```
-  Go back up, create `zap-scripts/globomantics-marker.js` with the code shown, save it, and run the command again.
+```bash
+cd "$HOME/pluralsight-script-development-with-zap" && git show origin/m1-demo2-after:demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/globomantics-marker.js > demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/globomantics-marker.js && cd demos/module1-demos/m1-demo2-javascript-http-sender
+```
 
-- **After you have created and saved the file**, the same command loads it and prints a `✔ PASS`, the Expected result below.
+(Prefer to type the script yourself and really learn it? Create `zap-scripts/globomantics-marker.js` and paste the code shown above instead, that is exactly what you do on camera. Either way the file now exists.)
+
+**Move 3. Run the SAME command again. Now it passes.**
+
+```bash
+./steps/01-load-javascript-http-sender.sh
+```
+
+This time it loads the script and prints a `✔ PASS`, the Expected result below. Continue to Step 2.
 
 Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP, localhost:8080/zap/</a> → **Scripts → HTTP Sender → globomantics-marker** and read its name, engine and enabled state.
 
