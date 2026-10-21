@@ -92,6 +92,7 @@ The step does two things, and the distinction is the lesson: it runs the plan **
 **Where:** the VS Code integrated Terminal, in `demos/module2-demos/m2-demo1-authenticated-zap-github-actions`.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
 ./steps/01-run-headless-automation-plan.sh
 ```
 
@@ -138,6 +139,7 @@ Configuration on its own, though, is just text, it does not prove ZAP logged in.
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
 ./steps/02-inspect-authenticated-scan-context.sh
 ```
 
@@ -182,6 +184,7 @@ The step shows both scripts executing in the authenticated run: the JS marker st
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
 ./steps/03-verify-reused-security-scripts.sh
 ```
 
@@ -225,6 +228,7 @@ The reason this is the last step, not the first: it is the payoff of every prior
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
 ./steps/04-confirm-authenticated-custom-alert.sh
 ```
 
@@ -268,6 +272,7 @@ A headless scan is useful only when its reported target, authentication and cust
 From the same demo directory, stop the local services:
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-authenticated-zap-github-actions"
 ./scripts/demo_down.sh
 ```
 
