@@ -125,7 +125,7 @@ ensure_ready() {
     [ -f "${AF_PLAN_HOST}" ] || {
         need_author "you have not written the Automation Framework plan yet" \
             "the m2-demo1-before branch ships without ci/af-plan.yaml on purpose; writing it IS this demo" \
-            "author ci/af-plan.yaml (this demo's README, Step 1); the finished reference is on the m2-demo1-after branch" \
+            "author ci/af-plan.yaml (this demo's README, Step 1)" \
             "${AF_PLAN_HOST}"
         return 1; }
     # The workflow is shared course infrastructure (provided on every branch), NOT a file this demo
