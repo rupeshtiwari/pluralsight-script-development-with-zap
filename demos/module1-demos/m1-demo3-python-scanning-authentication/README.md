@@ -174,6 +174,7 @@ This runs on ZAP's **Python Scripting (jython)** add-on, so the file is Python 2
 **Where:** the VS Code integrated Terminal, in `demos/module1-demos/m1-demo3-python-scanning-authentication`.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
 ./steps/01-load-python-active-scan-rule.sh
 ```
 
@@ -286,6 +287,7 @@ The reason the logged-in check matters as much as the login itself: without it, 
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
 ./steps/02-register-scripted-authentication.sh
 ```
 
@@ -333,6 +335,7 @@ Why insist on the comparison? Because a clean scan report is meaningless if the 
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
 ./steps/03-confirm-authenticated-profile-access.sh
 ```
 
@@ -381,6 +384,7 @@ The absent-before/present-after gate is the heart of the step. A leftover alert 
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
 ./steps/04-confirm-custom-scan-alert.sh
 ```
 
@@ -431,6 +435,7 @@ After Step 4 you should be able to explain why the named custom rule fired on an
 Stop the demo's containers from the same demo directory:
 
 ```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
 ./scripts/demo_down.sh
 ```
 
