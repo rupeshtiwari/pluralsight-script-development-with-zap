@@ -54,6 +54,9 @@ services:
     entrypoint: ["/bin/bash", "/zap-entrypoint.sh"]
     environment:
       ZAP_API_KEY: ${ZAP_API_KEY}
+      # UI font size for the Webswing GUI (recording-friendly default 24; override with
+      # ZAP_UI_FONT_SIZE=NN ./demo up). Same setting as Tools > Options > Display > Font size.
+      ZAP_UI_FONT_SIZE: ${ZAP_UI_FONT_SIZE:-24}
     volumes:
       - ./runtime/zap/entrypoint.sh:/zap-entrypoint.sh:ro
       # Course ZAP scripts. Writable so a script written in ZAP's Script Console can be
