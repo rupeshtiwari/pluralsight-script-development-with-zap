@@ -1,5 +1,17 @@
 # Module 1 · Demo 2, Extend ZAP with JavaScript
 
+> ⚡ **Run from anywhere (shortcut).** You keep landing at the repo root, which is fine: the `./demo` helper there picks THIS demo from your branch, so you never fight directories.
+>
+> ```bash
+> cd "$HOME/pluralsight-script-development-with-zap"   # the repo root (where ./demo lives)
+> ./demo up      # start the lab (first time; waits until ready)
+> ./demo 1       # run step 1   (then ./demo 2, ./demo 3, ./demo 4)
+> ./demo down    # stop the lab when you are done
+> ```
+>
+> The walk-through below shows each command as `./steps/0N-...sh` (run inside the demo folder, this is what you record); `./demo N` runs exactly that after cd-ing there for you.
+
+
 <div align="center">
 
 ![Training](https://img.shields.io/badge/Globomantics-Authorized_Lab-130F25?style=for-the-badge)
