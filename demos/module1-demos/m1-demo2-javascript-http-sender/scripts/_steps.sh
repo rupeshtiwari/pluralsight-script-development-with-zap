@@ -159,7 +159,7 @@ ensure_ready() {
     [ -f "${SCRIPT_FILE_HOST}" ] || {
         need_author "you have not written the HTTP Sender script yet" \
             "the m1-demo2-before branch ships without zap-scripts/globomantics-marker.js on purpose; writing it IS this demo" \
-            "author zap-scripts/globomantics-marker.js (this demo's README, Step 1); the finished reference is on the m1-demo2-after branch" \
+            "author zap-scripts/globomantics-marker.js (this demo's README, Step 1)" \
             "${SCRIPT_FILE_HOST}"
         return 1; }
     local eng; eng="$(detect_js_engine)"
