@@ -49,9 +49,21 @@ ensure_ready() {
              "run scripts/demo_up.sh, wait for 'Up', then retry"
         return 1
     }
+    # ZAP's API answers a little BEFORE its boot-time add-ons finish registering, so a step run the
+    # instant the stack reports up can miss rule 40033. Wait for it (up to ~90s) instead of failing
+    # immediately; only fail if ascanrulesBeta genuinely never loads.
+    if ! zap ascan/view/scanners | grep -q '"id":"40033"'; then
+        local _t=0
+        printf 'waiting for ZAP add-on ascanrulesBeta (rule 40033) to finish loading'
+        until zap ascan/view/scanners | grep -q '"id":"40033"'; do
+            _t=$((_t + 1)); [ "${_t}" -ge 45 ] && break
+            printf '.'; sleep 2
+        done
+        echo
+    fi
     zap ascan/view/scanners | grep -q '"id":"40033"' || {
-        fail "NoSQL rule 40033 not installed" "ascanrulesBeta did not install" \
-             "check the zap container log for the add-on install step"
+        fail "NoSQL rule 40033 not installed" "ascanrulesBeta did not load after waiting ~90s" \
+             "run ./demo down then ./demo up and wait for 'All services healthy', then retry; if it still fails send ./demo logs"
         return 1
     }
     return 0
