@@ -35,12 +35,21 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: preflight-evidence-${{ github.ref_name }}
-          path: demos/**/logs/preflight-*.log
+          # the per-step logs, plus the gate/producer sub-logs (hidden dirs) so a failure is diagnosable
+          path: |
+            demos/**/logs/preflight-*.log
+            demos/**/logs/.gate/*.log
+            demos/**/logs/.producer/*.log
+          include-hidden-files: true
           if-no-files-found: warn
 
-      - name: Show the ZAP boot log if anything failed
+      - name: Show the gate run log and ZAP boot log if anything failed
         if: failure()
-        run: docker compose logs --tail=200 zap || true
+        run: |
+          echo "===== gate run.log (if present) ====="
+          find demos -path '*/logs/.gate/run.log' -exec cat {} \; 2>/dev/null || true
+          echo "===== ZAP boot log ====="
+          docker compose logs --tail=200 zap || true
 
       - name: Tear the lab down
         if: always()
