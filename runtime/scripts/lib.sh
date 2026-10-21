@@ -31,7 +31,10 @@ author_try() {
     esac
     rel="${host#"${REPO_ROOT}"/}"
     [ "${rel}" != "${host}" ] || return 0   # not under the repo root; skip rather than print a wrong path
-    printf '(cd "%s" && git show origin/%s:%s > %s)' "${REPO_ROOT}" "${after}" "${rel}" "${rel}"
+    # Build the command with `git rev-parse --show-toplevel`, never the absolute repo path: the absolute
+    # path contains the machine's home/username (e.g. /Users/<name>/...), which must NEVER appear on a
+    # recording (owner rule F). This form has no username and works wherever the repo was cloned.
+    printf '(cd "$(git rev-parse --show-toplevel)" && git show origin/%s:%s > %s)' "${after}" "${rel}" "${rel}"
 }
 
 # Is the Docker engine reachable right now?
