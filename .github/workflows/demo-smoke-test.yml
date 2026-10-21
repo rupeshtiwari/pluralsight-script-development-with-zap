@@ -89,3 +89,28 @@ jobs:
       - name: Tear the lab down
         if: always()
         run: ./demo down || docker compose down -v --remove-orphans
+
+  # After a GREEN smoke run, tell the author repo to resync its evidence + screens from this CI run, so
+  # the recorder/narrator/editor pages always show the newest real output (owner "job zero": evidence =
+  # latest CI). Needs the COURSE_SYNC_TOKEN secret (a PAT that can repository_dispatch the author repo).
+  # If the secret is absent the step is skipped, so forks and the open-source repo stay green.
+  notify-author-repo:
+    needs: end-to-end
+    if: success()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Dispatch the author repo's evidence sync
+        env:
+          TOKEN: ${{ secrets.COURSE_SYNC_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${TOKEN}" ]; then
+            echo "COURSE_SYNC_TOKEN not set; skipping author-repo sync dispatch"
+            exit 0
+          fi
+          curl -sS -X POST \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/rupeshtiwari/pluralsight-script-development-with-zap-production/dispatches \
+            -d '{"event_type":"code-synced","client_payload":{"branch":"${{ github.ref_name }}"}}'
+          echo "dispatched code-synced to the author repo"
