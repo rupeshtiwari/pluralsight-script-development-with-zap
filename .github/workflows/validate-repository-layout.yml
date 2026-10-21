@@ -28,3 +28,18 @@ jobs:
         run: python3 runtime/scripts/check_repository_layout.py
       - name: Validate learner documentation
         run: python3 runtime/scripts/repo_quality_check.py
+
+  before-never-breaks:
+    # Hard rule: a student who switches to a -before branch and follows the steps must never hit a
+    # break, only the friendly AUTHOR THIS FIRST cue for the one artifact that clip teaches on camera.
+    # This guardrail compares every -before against its -after, so it needs all branch refs.
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out with full history and all branches
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch every branch ref
+        run: git fetch origin '+refs/heads/*:refs/remotes/origin/*'
+      - name: Validate that no -before branch can break for a student
+        run: python3 runtime/scripts/check_before_never_breaks.py
