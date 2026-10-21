@@ -1,19 +1,21 @@
-name: Demo end-to-end (real ZAP lab)
+name: Demo end-to-end (real ZAP lab, -before)
 
-# The automated end-to-end gate. On an -after branch this brings up the FULL Globomantics lab on a
-# hosted runner (app + postgres + mongo + ZAP 2.17 with its add-ons) and runs the demo's four real
-# named steps through ./demo preflight. Every step must print PASS, and the per-step logs are uploaded
-# as that demo's evidence. No human has to run the lab by hand: this proves the recorded demo works.
+# The automated end-to-end gate, run on the -before branches, the surface we record from. It reproduces
+# exactly what the recorder does on camera: bring up the full Globomantics lab on a hosted runner
+# (app + postgres + mongo + ZAP 2.17 with its add-ons), AUTHOR the one taught file this clip teaches
+# (by copying it in from the matching -after branch, the same git show the AUTHOR THIS FIRST banner
+# prints), then run the demo's four real named steps through ./demo preflight. Every step must print
+# PASS, and the per-step logs are uploaded as that demo's evidence. No human runs the lab by hand.
 #
-# Scope: -after branches only (the finished demo that must run end to end). The -before branches are
-# covered by the static before-never-breaks guardrail, so we do not spend a full ZAP boot just to reach
-# an intentional AUTHOR THIS FIRST cue.
+# Why -before and not -after: -before is what the student switches to and what we record. Authoring the
+# taught file here and then passing all four steps proves the real recording flow end to end; a demo
+# with no taught file (m1-demo1, m2-demo2) just runs directly.
 
 on:
   push:
     branches:
-      - 'm1-demo*-after'
-      - 'm2-demo*-after'
+      - 'm1-demo*-before'
+      - 'm2-demo*-before'
   workflow_dispatch: {}
 
 jobs:
@@ -21,8 +23,28 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - name: Check out this demo branch
+      - name: Check out this -before demo branch
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Author the taught file(s) from the matching -after branch (what the recorder types on camera)
+        run: |
+          set -euo pipefail
+          stem="${GITHUB_REF_NAME%-before}"
+          after="${stem}-after"
+          git fetch origin "${after}" --quiet
+          authored=0
+          # Any file the -after branch has under demos/ that -before lacks is the on-camera taught artifact.
+          for f in $(git diff --name-only "HEAD" "origin/${after}" -- demos/); do
+            if [ ! -e "$f" ] && git cat-file -e "origin/${after}:$f" 2>/dev/null; then
+              mkdir -p "$(dirname "$f")"
+              git show "origin/${after}:$f" > "$f"
+              echo "authored (from ${after}): $f"
+              authored=$((authored + 1))
+            fi
+          done
+          echo "taught files authored in: ${authored}"
 
       - name: Bring up the full lab (app + DBs + ZAP), wait until healthy
         run: HEALTH_TIMEOUT=900 ./demo up
