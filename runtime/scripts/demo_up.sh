@@ -9,7 +9,10 @@ ensure_docker
 
 BUILD="${APP_BUILD:-vulnerable}"
 log "Starting demo stack (APP_BUILD=${BUILD})..."
-APP_BUILD="${BUILD}" ${COMPOSE} up -d --build
+# --force-recreate so a stale, UNHEALTHY container from an earlier run (e.g. a ZAP that never finished
+# booting and sat "Up (unhealthy)") is replaced with a fresh one instead of silently reused. Data lives
+# in named volumes, so Postgres/Mongo keep their seed; ZAP has no volume, so it gets a clean boot.
+APP_BUILD="${BUILD}" ${COMPOSE} up -d --build --force-recreate --remove-orphans
 
 SERVICES="postgres mongo app zap"
 log "Waiting for services to become healthy: ${SERVICES}"
@@ -34,7 +37,20 @@ while :; do
     if [ "${now}" -ge "${deadline}" ]; then
         warn "Timed out after ${WAIT_SECS}s. Current status:"
         ${COMPOSE} ps
-        die "Stack did not become healthy in time. ZAP's first boot can be slow on a cold engine, re-run ./scripts/demo_up.sh, or give it longer with: HEALTH_TIMEOUT=900 ./scripts/demo_up.sh"
+        echo
+        warn "Logs from the service(s) that never became healthy, this shows WHERE startup stuck:"
+        for tok in ${pending}; do
+            svc="${tok%%(*}"
+            echo "----- ${svc}, last 100 lines ---------------------------------------------"
+            ${COMPOSE} logs --tail=100 "${svc}" 2>&1 || true
+            echo "-------------------------------------------------------------------------"
+        done
+        echo
+        warn "The stack is LEFT RUNNING so you can inspect it. Useful next steps:"
+        echo "    ${COMPOSE} logs -f zap        # follow ZAP's boot (add-on download / core boot)"
+        echo "    HEALTH_TIMEOUT=1200 ./scripts/demo_up.sh   # give a cold first boot more time"
+        echo "    ./scripts/demo_down.sh        # tear everything down when done"
+        die "Stack did not become healthy in time. The ZAP log above shows the cause (usually a slow or blocked marketplace add-on download, or the ZAP core not staying up after first boot)."
     fi
     if [ $(( now - last_beat )) -ge 30 ]; then
         log "still starting ($(( now - start ))s elapsed), waiting on:${pending}"
