@@ -52,7 +52,7 @@ pass() { fm ok "$1"; PASS=$((PASS+1)); STEP_RC=0; }
 fail() { fm fail "$1" "${2:-}" "${3:-}"; FAIL=$((FAIL+1)); STEP_RC=1; }
 # A learner-authored deliverable is not written yet (expected on the -before branch, that IS the demo).
 # Not a failure: friendly guidance on how to author it and where the finished reference lives.
-need_author() { fm todo "$1" "${2:-}" "${3:-}"; STEP_RC=1; }
+need_author() { fm todo "$1" "${2:-}" "${3:-}" "$(author_try "${4:-}")"; STEP_RC=1; }
 enc()  { python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=""))' "$1"; }
 
 zap() { # <path> <query> -> body (asserts HTTP 200)
@@ -289,12 +289,14 @@ ensure_ready() {
     [ -f "${RULE_FILE_HOST}" ] || {
         need_author "you have not written the Jython active-scan rule yet" \
             "the m1-demo3-before branch ships without zap-scripts/globomantics-active-rule.py on purpose; writing it IS this demo" \
-            "author zap-scripts/globomantics-active-rule.py (this demo's README, Step 1); the finished reference is on the m1-demo3-after branch"
+            "author zap-scripts/globomantics-active-rule.py (this demo's README, Step 1); the finished reference is on the m1-demo3-after branch" \
+            "${RULE_FILE_HOST}"
         return 1; }
     [ -f "${AUTH_FILE_HOST}" ] || {
         need_author "you have not written the authentication script yet" \
             "the m1-demo3-before branch ships without zap-scripts/globomantics-auth.py on purpose; writing it IS this demo" \
-            "author zap-scripts/globomantics-auth.py (this demo's README, Step 2); the finished reference is on the m1-demo3-after branch"
+            "author zap-scripts/globomantics-auth.py (this demo's README, Step 2); the finished reference is on the m1-demo3-after branch" \
+            "${AUTH_FILE_HOST}"
         return 1; }
     # ZAP's API answers a little BEFORE its boot-time add-ons register, so wait for the jython engine
     # (up to ~90s) rather than failing the instant the stack reports up.
