@@ -30,6 +30,9 @@ ZAP_IMAGE_D="${ZAP_IMAGE:-ghcr.io/zaproxy/zaproxy:stable}"
 PASS=0; FAIL=0; STEP_RC=0
 pass() { fm ok "$1"; PASS=$((PASS+1)); STEP_RC=0; }
 fail() { fm fail "$1" "${2:-}" "${3:-}"; FAIL=$((FAIL+1)); STEP_RC=1; }
+# A learner-authored deliverable is not written yet (expected on the -before branch, that IS the demo).
+# Not a failure: friendly guidance on how to author it and where the finished reference lives.
+need_author() { fm todo "$1" "${2:-}" "${3:-}"; STEP_RC=1; }
 jq_py() { python3 -c "$1"; }
 
 # Select the ZAP SERVICE container specifically. The compose project name
@@ -67,7 +70,11 @@ ensure_gate() { # reuse the last gate run, or run it once
 ensure_ready() {
     command -v docker >/dev/null 2>&1 || { fail "docker is not available" "the demo runs the gate in a container" "install/start Docker (Colima) and retry"; return 1; }
     [ -n "$(zap_container)" ] || { fail "the ZAP stack is not running" "no zap container found" "run scripts/demo_up.sh, wait for 'Up', then retry"; return 1; }
-    [ -f "${GATE_PLAN_HOST}" ] || { fail "gate plan not found" "ci/gate-plan.yaml is missing" "restore the file from the repo"; return 1; }
+    [ -f "${GATE_PLAN_HOST}" ] || {
+        need_author "you have not written the quality-gate plan yet" \
+            "the m2-demo3-before branch ships without ci/gate-plan.yaml on purpose; writing it IS this demo" \
+            "author ci/gate-plan.yaml (this demo's README, Step 1); the finished reference is on the m2-demo3-after branch"
+        return 1; }
     # Gate execution belongs to named Step 3, not hidden readiness.
     return 0
 }

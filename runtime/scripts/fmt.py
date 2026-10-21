@@ -44,6 +44,7 @@ PALETTE = {
     "focus":    "pink",         # primary Transform Pink: one precise on-screen value
     "pass":     "green",        # a check that passed
     "fail":     "red",          # a check that failed (stop red; never decorative)
+    "todo":     "yellow",       # a learner-authored deliverable not written yet (NOT a failure)
     "fix":      "orange",       # the suggested fix / prompt
     "muted":    "gray_medium",  # secondary text (the WHY line, notes, reasons)
     "emphasis": "pink",         # reserved for important emphasis (used sparingly)
@@ -151,6 +152,18 @@ def bad(msg: str, reason: str = "", fix: str = "") -> None:
         print(f"        {_w('fix', 'fix: ')}{_w('fix', fix)}")
 
 
+def todo(msg: str, reason: str = "", fix: str = "") -> None:
+    """A learner-authored deliverable has not been written yet. This is the demo's own work on the
+    `-before` branch, NOT a broken repo, so it is rendered in brand yellow and never in Stop Red (which
+    is reserved strictly for a real failed check). The `fix` line says how to author it and where the
+    finished reference lives, never 'restore the file from the repo'."""
+    print(f"{_w('todo', '✍️  AUTHOR THIS FIRST')}  {msg}")
+    if reason:
+        print(f"        {_w('muted', 'why: ')}{reason}")
+    if fix:
+        print(f"        {_w('fix', 'how: ')}{_w('fix', fix)}")
+
+
 def note(text: str) -> None:
     print(_w("muted", text))
 
@@ -170,7 +183,7 @@ def _wrap(text: str, width: int):
 # --- CLI so bash scripts can call the same formatter ------------------------
 def _main(argv) -> int:
     if not argv:
-        print("usage: fmt.py {header|star|section|item|ok|fail|note|json} ...", file=sys.stderr)
+        print("usage: fmt.py {header|star|section|item|ok|fail|todo|note|json} ...", file=sys.stderr)
         return 2
     cmd, args = argv[0], argv[1:]
     if cmd == "header":
@@ -185,6 +198,8 @@ def _main(argv) -> int:
         ok(args[0])
     elif cmd == "fail":
         bad(args[0], args[1] if len(args) > 1 else "", args[2] if len(args) > 2 else "")
+    elif cmd == "todo":
+        todo(args[0], args[1] if len(args) > 1 else "", args[2] if len(args) > 2 else "")
     elif cmd == "note":
         note(args[0])
     elif cmd == "json":
