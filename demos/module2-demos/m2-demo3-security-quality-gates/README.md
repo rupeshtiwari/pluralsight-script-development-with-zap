@@ -78,7 +78,7 @@ cd demos/module2-demos/m2-demo3-security-quality-gates
 
 **Expected start:** the startup script reports healthy Globomantics, Postgres, MongoDB and ZAP services. If anything is not ready, stop and read the actual output before continuing.
 
-**Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Training application</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API and proxy</a>, plus **GitHub → Actions → quality-gate** for the hosted proof. The `-before` branch deliberately omits the finished `ci/gate-plan.yaml`, author it from the exercise before running the gate.
+**Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Training application</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API and proxy</a>, plus **GitHub → Actions → quality-gate** for the hosted proof. The `-before` branch deliberately omits the finished `ci/gate-plan.yaml`; you bring it in with one command in Step 1, then open and read it, before running the gate.
 
 </details>
 
@@ -92,6 +92,12 @@ cd demos/module2-demos/m2-demo3-security-quality-gates
 Record a reviewed disposition for one benign finding, scoped to one path, without suppressing that rule anywhere else. *(EO3c)*
 
 ### What we examine, and why
+
+On `m2-demo3-before` the finished `ci/gate-plan.yaml` does not exist yet, so Step 1 stops at a yellow author gate until it does. **Bring it in with this one command**, then open it in VS Code and read it, that reading is the lesson:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap" && git show origin/m2-demo3-after:demos/module2-demos/m2-demo3-security-quality-gates/ci/gate-plan.yaml > demos/module2-demos/m2-demo3-security-quality-gates/ci/gate-plan.yaml && cd demos/module2-demos/m2-demo3-security-quality-gates
+```
 
 Open `ci/gate-plan.yaml` in VS Code at the `alertFilter` job and read three fields together, because they are the difference between an exception and a blind spot:
 
