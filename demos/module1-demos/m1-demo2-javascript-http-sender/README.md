@@ -82,31 +82,67 @@ cd demos/module1-demos/m1-demo2-javascript-http-sender
 ./scripts/lab-up.sh
 ```
 
-**Expected start:** the startup script brings up the Globomantics app and ZAP and reports readiness. Continue only after it does, a failed startup is not one of the four teaching steps.
+**Expected start:** the startup script brings up the Globomantics app and ZAP and reports readiness. Continue only after it does, a failed startup is not one of the seven teaching steps.
 
 **Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Globomantics app, localhost:8000</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI, localhost:8080/zap/</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API/proxy, localhost:8090</a>. You author the script in **VS Code** (`zap-scripts/globomantics-marker.js`) and inspect its effects in **ZAP's browser GUI** (History and Script Console). The `-before` branch deliberately ships without the finished JavaScript, create it from the example before expecting the verification steps to pass.
 
 </details>
 
-## Your four steps
+## Your seven steps
+
+Steps 1 to 4 are the authoring beat, every on-camera action numbered: run the first step and meet the yellow author gate, bring the file in, open and read it, then run the same step again and watch it pass. Steps 5 to 7 then prove the script on real traffic. You run the same four `./steps` scripts the recording uses, in the same order.
 
 <details open>
-<summary><b>Step 1, Load the JavaScript HTTP Sender script</b> · source → ZAP</summary>
+<summary><b>Step 1, Run it first and meet the yellow author gate</b> · nothing written yet</summary>
 
 ### What you are learning
 
-Register a JavaScript HTTP Sender hook, and understand why a file in the repo is not yet an extension that modifies traffic. *(EO2a)*
+Why a verification step cannot pass before the file exists, and what the non-alarming author gate looks like. *(EO2a)*
 
-### ✍️ Bring in the script this clip teaches (the `-before` branch ships without it)
+### Run it. The first run stops on purpose.
 
-On the `m1-demo2-before` branch, `zap-scripts/globomantics-marker.js` **does not exist**, `zap-scripts/` holds only a `.gitkeep`. In **Step 1 below you bring this file in with one command**, then open it in VS Code and read what each part does, **that reading is the lesson**. Here is what the script does, so you know exactly what to look for when you open it:
+Do this in the **VS Code integrated Terminal**:
 
-1. **Names the hook ZAP calls.** An HTTP Sender script contracts with ZAP through one function name: `sendingRequest(msg, initiator, helper)`, which ZAP runs for every message it is about to send.
-2. **Pulls the marker out as constants**, so there is one obvious place to change it.
-3. **Mutates the outbound request** with `msg.getRequestHeader().setHeader(...)`, this is the line that *changes* traffic, not just observes it.
-4. **Reports what you did** with `print(...)`, and stashes the exact line in a `ScriptVars` global so Step 3 can read it back from ZAP.
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
+./steps/01-load-javascript-http-sender.sh
+```
 
-> The `zap-scripts/` folder is mounted into the ZAP container, so the file you bring in is exactly what `./steps/01` loads. (ZAP's Script Console is where you later *see* the script's own output at run time, in Step 3, not where you write it.)
+It stops with a **yellow `✍️ AUTHOR THIS FIRST`** message (not red, not an error): on the `m1-demo2-before` branch `zap-scripts/globomantics-marker.js` does not exist yet, `zap-scripts/` holds only a `.gitkeep`. That yellow gate is the cue to author the file, which is the whole point of this exercise.
+
+**Next:** bring the finished file in with one command.
+
+</details>
+
+<details>
+<summary><b>Step 2, Bring in the file this clip teaches</b> · one copy command</summary>
+
+### What you are learning
+
+The exercise is to understand the script, not to type it from memory, so you bring the finished file in with one command and read it. *(EO2a)*
+
+### Bring the script in with one command
+
+Copy-paste this exactly. It copies the finished script into your working folder from the completed branch, and you **stay on the `-before` branch**, there is no branch switch:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap" && git show origin/m1-demo2-after:demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/globomantics-marker.js > demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/globomantics-marker.js && cd demos/module1-demos/m1-demo2-javascript-http-sender
+```
+
+The `zap-scripts/` folder is mounted into the ZAP container, so the file you just brought in is exactly what `./steps/01` loads in Step 4.
+
+**Next:** open the file and read what each part does.
+
+</details>
+
+<details>
+<summary><b>Step 3, Open the file and read what each part does</b> · this reading is the lesson</summary>
+
+### What you are learning
+
+Where in ZAP's message lifecycle your code runs, read straight from the source, that understanding *is* the objective. *(EO2a)*
+
+Open `zap-scripts/globomantics-marker.js` in VS Code and read it:
 
 ```javascript
 // Globomantics HTTP Sender script (GraalVM JavaScript).
@@ -138,44 +174,34 @@ function responseReceived(msg, initiator, helper) {
 
 ### What we examine, and why
 
-With the file saved, read the parts that make it an HTTP Sender script, not just any JavaScript:
+Read the parts that make it an HTTP Sender script, not just any JavaScript:
 
 - **`sendingRequest(msg, initiator, helper)`**, this is the hook. ZAP calls it for *every message it is about to send*, which is exactly the moment to stamp a header. (There is a matching `responseReceived` for the other direction.) Understanding that the function name *is* the contract with ZAP is the whole lesson of the step.
 - **`MARKER_HEADER` / `MARKER_VALUE`**, the constants `X-Globomantics-Marker` and `GLOBO-DEMO`, kept at the top so the marker is one obvious thing to change.
 - **`msg.getRequestHeader().setHeader(...)`**, the line that actually mutates the outgoing request. Reading this is how you know the script *changes* traffic rather than just observing it.
+- **`print(...)` and `ScriptVars`**, the script writes its own line to the Script Console and stashes it in a global so Step 6 can read it back from ZAP.
 
 Loading this file registers it with ZAP's **Graal.js** engine as an `httpsender` action. Registration means ZAP knows the script and will call `sendingRequest`, but it has not called it yet.
 
-**Predict before you run:** you expect ZAP to list `globomantics-marker` as type `httpsender`, engine `Graal.js`, enabled `true`, loaded from `/zap-scripts/globomantics-marker.js`, and to report the header it *intends* to add. Note what you do **not** yet have: a request that carried it.
+**Next:** run the step again, and this time it passes.
 
-### Run the step: four moves, run → bring the file → read it → run again
+</details>
 
-Do these four in order in the **VS Code integrated Terminal**. **Every command is written out here** — you do not need to read any terminal message to know what to do.
+<details>
+<summary><b>Step 4, Run it again and watch it pass</b> · source → ZAP</summary>
 
-**Move 1. Run it. The first run stops on purpose.**
+### What you are learning
+
+Register the JavaScript HTTP Sender hook, and understand why the file is only now an extension ZAP will call on outgoing messages. *(EO2a)*
+
+**Predict before you run:** you expect ZAP to list `globomantics-marker` as type `httpsender`, engine `Graal.js`, enabled `true`, loaded from `/zap-scripts/globomantics-marker.js`. Note what you do **not** yet have: a request that carried it.
+
+### Run the SAME command again. Now it passes.
 
 ```bash
 cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
 ./steps/01-load-javascript-http-sender.sh
 ```
-
-It stops with a **yellow `✍️ AUTHOR THIS FIRST`** message (not red, not an error): on the `-before` branch the script file does not exist yet. This is expected. Do move 2 next.
-
-**Move 2. Bring the script in with one command.** Copy-paste this exactly. It copies the finished script into your working folder, and you **stay on the `-before` branch**, there is no branch switch:
-
-```bash
-cd "$HOME/pluralsight-script-development-with-zap" && git show origin/m1-demo2-after:demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/globomantics-marker.js > demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/globomantics-marker.js && cd demos/module1-demos/m1-demo2-javascript-http-sender
-```
-
-**Move 3. Open the file and read it, this is the lesson.** Open `zap-scripts/globomantics-marker.js` in VS Code and read each part against the four points above: the `sendingRequest` hook, the marker constants, the `setHeader` line that changes the request, and the `print` plus `ScriptVars` that report it.
-
-**Move 4. Run the SAME command again. Now it passes.**
-
-```bash
-./steps/01-load-javascript-http-sender.sh
-```
-
-This time it loads the script and prints a `✔ PASS`, the Expected result below. Continue to Step 2.
 
 Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP, localhost:8080/zap/</a> → **Scripts → HTTP Sender → globomantics-marker** and read its name, engine and enabled state.
 
@@ -205,7 +231,7 @@ Match the registered `httpsender` type to the `sendingRequest` hook you read in 
 </details>
 
 <details>
-<summary><b>Step 2, Prove the marker on an outbound request</b> · header on the wire</summary>
+<summary><b>Step 5, Prove the marker on an outbound request</b> · header on the wire</summary>
 
 ### What you are learning
 
@@ -215,7 +241,7 @@ Confirm the hook ran by finding its header on a request ZAP actually sent, not b
 
 This step sends a fresh request through ZAP and then reads the *outbound* message back. The thing to examine is the request line and its headers: a new `GET /greet?name=marker-<id>` carrying `X-Globomantics-Marker: GLOBO-DEMO`. The `marker-<id>` is unique per run on purpose, it guarantees you are looking at *this* request, not a stale one left in History, which is the single most common way people fool themselves here.
 
-Why does this matter more than Step 1? Because registration and execution fail independently. A script can be enabled and still never fire (wrong initiator, disabled mid-session, an exception swallowed). The header on the wire is the first evidence that `sendingRequest` truly ran.
+Why does this matter more than loading it? Because registration and execution fail independently. A script can be enabled and still never fire (wrong initiator, disabled mid-session, an exception swallowed). The header on the wire is the first evidence that `sendingRequest` truly ran.
 
 **Predict before you run:** you expect a brand-new `/greet?name=marker-<id>` request whose headers include `X-Globomantics-Marker: GLOBO-DEMO`. If the header is missing, the hook did not run on this message, a different problem from "it didn't load."
 
@@ -254,7 +280,7 @@ Confirm the `marker-<id>` in ZAP's History matches the one the terminal reported
 </details>
 
 <details>
-<summary><b>Step 3, Verify the live Script Console output</b> · the script's own line</summary>
+<summary><b>Step 6, Verify the live Script Console output</b> · the script's own line</summary>
 
 ### What you are learning
 
@@ -294,7 +320,7 @@ Your terminal prints exactly this. Every value is the real captured output, veri
 
 ### Investigate, then decide
 
-Line the console URL up with the `marker-<id>` from Step 2, same request, reported by the script itself. The decision: *the script observably executed and reported its own work*, which is what makes it trustworthy to reuse. Never let the terminal's expected-format line stand in for the live console.
+Line the console URL up with the `marker-<id>` from Step 5, same request, reported by the script itself. The decision: *the script observably executed and reported its own work*, which is what makes it trustworthy to reuse. Never let the terminal's expected-format line stand in for the live console.
 
 **On FAIL:** no fresh console line means the print did not run or you are reading an old line. Re-trigger and read the console, rather than accepting the terminal's expected string.
 
@@ -303,7 +329,7 @@ Line the console URL up with the `marker-<id>` from Step 2, same request, report
 </details>
 
 <details>
-<summary><b>Step 4, Verify the script registration</b> · named · enabled · reusable</summary>
+<summary><b>Step 7, Verify the script registration</b> · named · enabled · reusable</summary>
 
 ### What you are learning
 
@@ -366,7 +392,7 @@ You can now explain each learning objective with the evidence you captured:
 
 ## Finish your lab
 
-After Step 4 you should be able to explain how the JavaScript hook changed a real proxied request, from the header, the console line and the registration, not from recalling a command.
+After Step 7 you should be able to explain how the JavaScript hook changed a real proxied request, from the header, the console line and the registration, not from recalling a command.
 
 Stop the demo's containers from the same demo directory:
 
