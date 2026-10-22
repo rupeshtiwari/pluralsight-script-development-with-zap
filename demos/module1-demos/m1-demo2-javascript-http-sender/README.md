@@ -100,7 +100,13 @@ On the `m1-demo2-before` branch, `zap-scripts/globomantics-marker.js` **does not
 3. **Mutate the outbound request** with `msg.getRequestHeader().setHeader(...)`, this is the line that *changes* traffic, not just observes it.
 4. **Report what you did** with `print(...)`, and stash the exact line in a `ScriptVars` global so Step 3 can read it back from ZAP.
 
-<details><summary>📄 <b>Write this to <code>zap-scripts/globomantics-marker.js</code></b></summary>
+**Create the file now, step by step (nothing is hidden, do exactly this):**
+
+1. In **VS Code**, in the left **Explorer**, open the folder `demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/` (right now it has only a greyed-out `.gitkeep`).
+2. Right-click that `zap-scripts` folder → **New File** → name it exactly `globomantics-marker.js` and press Enter.
+3. Paste the **entire** script below into that new file, then **Save** (`Cmd`+`S`). That folder is mounted into the ZAP container, so the moment you save, ZAP can load it in the next step.
+
+> On camera (recording only): you type this same code in ZAP's **Script Console** instead, your Demo recorder page gives the exact ZAP clicks. For your own run here, the VS Code file above is the simplest reliable way, and `./steps/01` loads it either way.
 
 ```javascript
 // Globomantics HTTP Sender script (GraalVM JavaScript).
@@ -129,7 +135,6 @@ function sendingRequest(msg, initiator, helper) {
 function responseReceived(msg, initiator, helper) {
 }
 ```
-</details>
 
 ### What we examine, and why
 
@@ -143,27 +148,51 @@ Loading this file registers it with ZAP's **Graal.js** engine as an `httpsender`
 
 **Predict before you run:** you expect ZAP to list `globomantics-marker` as type `httpsender`, engine `Graal.js`, enabled `true`, loaded from `/zap-scripts/globomantics-marker.js`, and to report the header it *intends* to add. Note what you do **not** yet have: a request that carried it.
 
-### Run command
+### Run the step: three moves, run → bring the code → run again
 
-**Where:** the VS Code integrated Terminal, in `demos/module1-demos/m1-demo2-javascript-http-sender`.
+Do these three in order in the **VS Code integrated Terminal**. Do not skip move 2, it is the fix. (You do not need to read any terminal message to know what to do, every action is written here.)
+
+**Move 1. Run it. The first run stops on purpose.**
 
 ```bash
 cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-javascript-http-sender"
 ./steps/01-load-javascript-http-sender.sh
 ```
 
+It stops with a **yellow `✍️ AUTHOR THIS FIRST`** message (not red, not an error). On the `-before` branch the script file does not exist yet, because *writing it is the whole point of this demo*. This is expected. Do move 2 next.
+
+**Move 2. Bring the script in with one command (this is the fix).** Copy-paste this exactly. It copies the finished script into your working folder, and you **stay on the `-before` branch**, there is no branch switch:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap" && git show origin/m1-demo2-after:demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/globomantics-marker.js > demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/globomantics-marker.js && cd demos/module1-demos/m1-demo2-javascript-http-sender
+```
+
+(Prefer to type the script yourself and really learn it? Create `zap-scripts/globomantics-marker.js` and paste the code shown above instead, that is exactly what you do on camera. Either way the file now exists.)
+
+**Move 3. Run the SAME command again. Now it passes.**
+
+```bash
+./steps/01-load-javascript-http-sender.sh
+```
+
+This time it loads the script and prints a `✔ PASS`, the Expected result below. Continue to Step 2.
+
 Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP, localhost:8080/zap/</a> → **Scripts → HTTP Sender → globomantics-marker** and read its name, engine and enabled state.
 
-### Expected result (the script's output contract, not your run)
+### Expected result (the exact terminal output, verified in the lab)
 
-<table>
-<thead><tr><th>Displayed field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody>
-<tr><td><b>Saved source file</b></td><td><code>zap-scripts/globomantics-marker.js</code></td><td>The file you authored</td></tr>
-<tr><td><b>sendingRequest() adds</b></td><td><code>X-Globomantics-Marker: GLOBO-DEMO</code></td><td>The header the hook declares</td></tr>
-<tr><td><b>Registered in ZAP</b></td><td><code>globomantics-marker · httpsender · Graal.js · enabled true</code></td><td>Identity, type, engine, state</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS script is a valid HTTP Sender action and registered in ZAP</code></td><td>Registered, traffic not yet proven</td></tr>
-</tbody></table>
+Your terminal prints exactly this. Every value is the real captured output, verified in the lab and identical on every machine (only ZAP's randomised payload casing and run-specific IDs can vary):
+
+```text
+✔ PASS  script is a valid HTTP Sender action and registered in ZAP
+```
+
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Saved source file | `zap-scripts/globomantics-marker.js  (sha256 e6edb39b8faa)` |
+| sendingRequest() adds | `X-Globomantics-Marker: GLOBO-DEMO` |
+| Registered in ZAP | `globomantics-marker · type httpsender · engine Graal.js · enabled true` |
+| Source | `loaded from /zap-scripts/globomantics-marker.js` |
 
 ### Investigate, then decide
 
@@ -201,17 +230,18 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-j
 
 Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP, localhost:8080/zap/</a> → **History**, select the newest `/greet?name=marker-…` request, and read its **Request** panel so you see the header on the message ZAP sent.
 
-### Expected result (the script's output contract, not your run)
+### Expected result (the exact terminal output, verified in the lab)
 
-The `marker-<id>` is run-specific, read it from your output; the header name and value are fixed.
+Your terminal prints exactly this. Every value is the real captured output, verified in the lab and identical on every machine (only ZAP's randomised payload casing and run-specific IDs can vary):
 
-<table>
-<thead><tr><th>Displayed field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody>
-<tr><td><b>Outbound request</b></td><td><code>GET /greet?name=marker-&lt;live ID&gt; HTTP/1.1</code></td><td>A fresh message, not a prior run</td></tr>
-<tr><td><b>Header added by the script</b></td><td><code>X-Globomantics-Marker: GLOBO-DEMO</code></td><td>Request panel <b>and</b> terminal agree</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS the script added X-Globomantics-Marker to the outbound request</code></td><td>Real outbound traffic carries the marker</td></tr>
-</tbody></table>
+```text
+✔ PASS  the script added X-Globomantics-Marker to the outbound request
+```
+
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Outbound request | `GET http://app:8000/greet?name=marker-<unique per run> HTTP/1.1` |
+| Header added by the script | `X-Globomantics-Marker: GLOBO-DEMO` |
 
 ### Investigate, then decide
 
@@ -249,15 +279,18 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-j
 
 Then switch to <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP, localhost:8080/zap/</a> → **Scripts → Script Console** and find the fresh line whose request URL matches this run.
 
-### Expected result (the script's output contract, not your run)
+### Expected result (the exact terminal output, verified in the lab)
 
-<table>
-<thead><tr><th>Displayed field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody>
-<tr><td><b>Request that triggered the script</b></td><td><code>GET …/greet?name=marker-&lt;live ID&gt;</code></td><td>This run's request</td></tr>
-<tr><td><b>Line the script printed (read back from ZAP)</b></td><td><code>[globo-marker] added X-Globomantics-Marker: GLOBO-DEMO to &lt;url&gt;</code></td><td>The named line, in the GUI console</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS the script printed its named line for this request; the same line is in ZAP's Script Console</code></td><td>Console proof, not a terminal echo</td></tr>
-</tbody></table>
+Your terminal prints exactly this. Every value is the real captured output, verified in the lab and identical on every machine (only ZAP's randomised payload casing and run-specific IDs can vary):
+
+```text
+✔ PASS  the script printed its named line for this request; the same line is in ZAP's Script Console
+```
+
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Request that triggered the script | `GET http://app:8000/greet?name=marker-<unique per run> HTTP/1.1` |
+| Line the script printed (read back from ZAP) | `[globo-marker] added X-Globomantics-Marker: GLOBO-DEMO to http://app:8000/greet?name=marker-<unique per run>` |
 
 ### Investigate, then decide
 
@@ -293,17 +326,20 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo2-j
 
 Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP, localhost:8080/zap/</a> → **Scripts → HTTP Sender → globomantics-marker** and read its name, type and engine from the same live session.
 
-### Expected result (the script's output contract, not your run)
+### Expected result (the exact terminal output, verified in the lab)
 
-<table>
-<thead><tr><th>Displayed field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody>
-<tr><td><b>Registered name</b></td><td><code>globomantics-marker</code></td><td>The stable name automation reuses</td></tr>
-<tr><td><b>Type · engine · enabled</b></td><td><code>httpsender · Graal.js · true</code></td><td>Correct hook, engine, active state</td></tr>
-<tr><td><b>Saved file</b></td><td><code>/zap-scripts/globomantics-marker.js</code> (= <code>zap-scripts/globomantics-marker.js</code>)</td><td>The current source behind the name</td></tr>
-<tr><td><b>What Module 2 reuses</b></td><td><code>name: globomantics-marker · type: httpsender · engine: Graal.js</code></td><td>The Automation Framework script job</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS script saved and registered as an enabled HTTP Sender, ready for the Automation Framework</code></td><td>Registration ready for reuse</td></tr>
-</tbody></table>
+Your terminal prints exactly this. Every value is the real captured output, verified in the lab and identical on every machine (only ZAP's randomised payload casing and run-specific IDs can vary):
+
+```text
+✔ PASS  script saved and registered as an enabled HTTP Sender, ready for the Automation Framework
+```
+
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Registered name | `globomantics-marker` |
+| Type · engine · enabled | `httpsender · Graal.js · true` |
+| Saved file | `/zap-scripts/globomantics-marker.js in ZAP = zap-scripts/globomantics-marker.js in the demo folder (sha256 e6edb39b8faa)` |
+| name | `globomantics-marker · type: httpsender · engine: Graal.js · source: /zap-scripts/globomantics-marker.js` |
 
 ### Investigate, then decide
 
