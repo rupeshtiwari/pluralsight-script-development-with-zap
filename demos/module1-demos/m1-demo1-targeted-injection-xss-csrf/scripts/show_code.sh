@@ -22,7 +22,7 @@ case "${1:-}" in
     nosql) ANCHOR="VULNERABLE: the query string is parsed qs-style";  N=15; TITLE="NoSQL injection · account lookup";;
     cmd)   ANCHOR="VULNERABLE: host interpolated into a shell command"; N=5; TITLE="Command injection · admin ping";;
     xss)   ANCHOR="VULNERABLE: raw reflection into HTML body";        N=4; TITLE="Reflected XSS · greeting";;
-    csrf)  ANCHOR="VULNERABLE: token presence/validity is checked";   N=4; TITLE="CSRF · email change";;
+    csrf)  ANCHOR="record = CSRF_TOKENS.get(csrf_token)";             N=11; TITLE="CSRF · email change";;
     *) echo "usage: show_code.sh {sqli|nosql|cmd|xss|csrf}"; exit 2;;
 esac
 
