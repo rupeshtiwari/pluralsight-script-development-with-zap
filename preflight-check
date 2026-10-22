@@ -6,8 +6,8 @@
 # demo, in order. Pass a scope to check just one module or one demo:
 #
 #   ./preflight-check              the entire course, all demos, in order (default)
-#   ./preflight-check --module1    every demo in Module 1
-#   ./preflight-check --module2    every demo in Module 2
+#   ./preflight-check --m1         every demo in Module 1
+#   ./preflight-check --m2         every demo in Module 2
 #   ./preflight-check --m1d1       only Module 1, Demo 1   (and --m1d2, --m1d3, --m2d1, --m2d2, --m2d3)
 #
 # It writes one text file, course-evidence.txt, with every step's real output, and for any demo that
@@ -23,18 +23,18 @@ engine="$ROOT/runtime/scripts/preflight_course.sh"
 
 arg="${1:-}"
 case "$arg" in
-  ""|--all|--course)
+  "")
     exec "$engine" "$ROOT" "" "the entire course, every module and every demo, in order" ;;
-  --module1|--module2)
-    m="${arg#--module}"
+  --m[12])
+    m="${arg#--m}"
     exec "$engine" "$ROOT" "/module${m}-demos/" "Module ${m}, every demo" ;;
   --m[12]d[1-9])
     mod="${arg:3:1}"; dem="${arg:5:1}"
     exec "$engine" "$ROOT" "/m${mod}-demo${dem}-" "Module ${mod}, Demo ${dem}" ;;
   -h|--help)
-    sed -n '2,25p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    sed -n '2,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
   *)
     echo "preflight-check: unknown option '$arg'"
-    echo "usage: ./preflight-check [--module1|--module2|--m1d1|--m1d2|--m1d3|--m2d1|--m2d2|--m2d3]   (no option = whole course)"
+    echo "usage: ./preflight-check [--m1|--m2|--m1d1|--m1d2|--m1d3|--m2d1|--m2d2|--m2d3]   (no option = whole course)"
     exit 2 ;;
 esac
