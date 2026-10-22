@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# preflight-check — the OFF-CAMERA self-test for this course.
+#
+# Run it before you record (or before you follow the steps by hand) to confirm every step actually
+# works and prints the expected output. By DEFAULT it runs the WHOLE course, every module and every
+# demo, in order. Pass a scope to check just one module or one demo:
+#
+#   ./preflight-check              the entire course, all demos, in order (default)
+#   ./preflight-check --module1    every demo in Module 1
+#   ./preflight-check --module2    every demo in Module 2
+#   ./preflight-check --m1d1       only Module 1, Demo 1   (and --m1d2, --m1d3, --m2d1, --m2d2, --m2d3)
+#
+# It writes one text file, course-evidence.txt, with every step's real output, and for any demo that
+# fails it also writes FAIL-<module>-<demo>.log naming the module, demo and failing step. It exits
+# non-zero if anything failed, so a red preflight is a hard stop: fix the step before recording.
+#
+# This is NOT an on-camera command — it is the check you run first, off camera. The on-camera commands
+# are ./lab up and ./lab step N.
+set -uo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+engine="$ROOT/runtime/scripts/preflight_course.sh"
+[ -x "$engine" ] || { echo "preflight-check: cannot find runtime/scripts/preflight_course.sh" >&2; exit 2; }
+
+arg="${1:-}"
+case "$arg" in
+  ""|--all|--course)
+    exec "$engine" "$ROOT" "" "the entire course, every module and every demo, in order" ;;
+  --module1|--module2)
+    m="${arg#--module}"
+    exec "$engine" "$ROOT" "/module${m}-demos/" "Module ${m}, every demo" ;;
+  --m[12]d[1-9])
+    mod="${arg:3:1}"; dem="${arg:5:1}"
+    exec "$engine" "$ROOT" "/m${mod}-demo${dem}-" "Module ${mod}, Demo ${dem}" ;;
+  -h|--help)
+    sed -n '2,25p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+  *)
+    echo "preflight-check: unknown option '$arg'"
+    echo "usage: ./preflight-check [--module1|--module2|--m1d1|--m1d2|--m1d3|--m2d1|--m2d2|--m2d3]   (no option = whole course)"
+    exit 2 ;;
+esac
