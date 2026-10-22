@@ -121,7 +121,7 @@ print("")' "${ALERT_NAME}"
 ensure_ready() {
     [ -n "${K}" ] || { fail "ZAP_API_KEY is not set" "the .env file is missing or not loaded" "run from the repo so .env loads"; return 1; }
     zap core/view/version | grep -q '"version"' || {
-        fail "ZAP API not reachable" "the stack may still be starting" "run scripts/demo_up.sh, wait for 'Up', then retry"; return 1; }
+        fail "ZAP API not reachable" "the stack may still be starting" "run scripts/lab-up.sh, wait for 'Up', then retry"; return 1; }
     [ -f "${AF_PLAN_HOST}" ] || {
         need_author "you have not written the Automation Framework plan yet" \
             "the m2-demo1-before branch ships without ci/af-plan.yaml on purpose; writing it IS this demo" \

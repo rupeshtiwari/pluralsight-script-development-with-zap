@@ -152,9 +152,9 @@ cd pluralsight-script-development-with-zap</pre></td></tr>
 <tr><td>③</td><td><b>Select the demo you want to learn</b><pre>git fetch origin
 git switch m1-demo1-before</pre>Each <code>*-before</code> branch is an independent exercise starter. You can choose any other demo from the table below.</td></tr>
 <tr><td>④</td><td><b>Run its four understandable commands</b><pre>cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
-./scripts/demo_reset.sh
+./scripts/lab-reset.sh
 ./steps/01-run-targeted-injection-scan.sh</pre>Follow that demo's README for Steps 2–4 and exactly what evidence should appear.</td></tr>
-<tr><td>⑤</td><td><b>Observe the result and clean up</b><pre>./scripts/demo_down.sh</pre>Record the actual displayed evidence.</td></tr>
+<tr><td>⑤</td><td><b>Observe the result and clean up</b><pre>./scripts/lab-down.sh</pre>Record the actual displayed evidence.</td></tr>
 </table>
 
 **Different demo?** Return to the repository root, save any personal changes, switch to its `*-before` branch, then follow its own README. Don't reuse scan history from another demo.
@@ -216,7 +216,7 @@ Each demo's README lists the branch-specific source, commands, expected evidence
 |---|---|
 | `README.md` | Exact student instructions and evidence to inspect |
 | `steps/01-*.sh` through `steps/04-*.sh` | Four short commands with meaningful, readable names |
-| `scripts/demo_up.sh`, `demo_reset.sh`, `demo_down.sh` | Start, reset and stop that demo's environment |
+| `scripts/lab-up.sh`, `lab-reset.sh`, `lab-down.sh` | Start, reset and stop that demo's environment |
 | `scripts/_steps.sh` | Implementation used by the named steps |
 | `logs/` | Locally generated validation logs |
 
@@ -233,7 +233,7 @@ From the repository root run `./setup/setup-macos.sh` again, read the readiness 
 <details>
 <summary><b>The application, ZAP GUI or API is unavailable</b></summary>
 
-From the selected demo directory start with `./scripts/demo_up.sh` (or `demo_reset.sh` where its README specifies), wait for readiness, then check `docker compose ps` from the repository root. The local interfaces are the training app at <http://localhost:8000/>, ZAP GUI at <http://localhost:8080/zap/>, and ZAP API/proxy at <http://localhost:8090/>. Check for host-port conflicts before starting multiple demo stacks on one computer.
+From the selected demo directory start with `./scripts/lab-up.sh` (or `lab-reset.sh` where its README specifies), wait for readiness, then check `docker compose ps` from the repository root. The local interfaces are the training app at <http://localhost:8000/>, ZAP GUI at <http://localhost:8080/zap/>, and ZAP API/proxy at <http://localhost:8090/>. Check for host-port conflicts before starting multiple demo stacks on one computer.
 </details>
 
 <details>
