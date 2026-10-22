@@ -28,6 +28,6 @@ The Globomantics Store has several distinct input boundaries. Maya must test the
 
 ## Start an exercise
 
-Prepare your Mac **once** using `./setup/setup-macos.sh` from the repository root. Follow the chosen demo README to select its starter branch, start its local app and ZAP with `./scripts/demo_up.sh` or `demo_reset.sh`, and run its four concept-named steps in order.
+Prepare your Mac **once** using `./setup/setup-macos.sh` from the repository root. Follow the chosen demo README to select its starter branch, start its local app and ZAP with `./scripts/lab-up.sh` or `lab-reset.sh`, and run its four concept-named steps in order.
 
 [← Course home](../../README.md)

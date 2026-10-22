@@ -1,15 +1,15 @@
 # Module 1 · Demo 3, Script a scan rule and authentication
 
-> ⚡ **Run from anywhere (shortcut).** You keep landing at the repo root, which is fine: the `./demo` helper there picks THIS demo from your branch, so you never fight directories.
+> ⚡ **Run from anywhere (shortcut).** You keep landing at the repo root, which is fine: the `./lab` helper there picks THIS demo from your branch, so you never fight directories.
 >
 > ```bash
-> cd "$HOME/pluralsight-script-development-with-zap"   # the repo root (where ./demo lives)
-> ./demo up      # start the lab (first time; waits until ready)
-> ./demo 1       # run step 1   (then ./demo 2, ./demo 3, ./demo 4)
-> ./demo down    # stop the lab when you are done
+> cd "$HOME/pluralsight-script-development-with-zap"   # the repo root (where ./lab lives)
+> ./lab up      # start the lab (first time; waits until ready)
+> ./lab step 1       # run step 1   (then ./lab step 2, ./lab step 3, ./lab step 4)
+> ./lab down    # stop the lab when you are done
 > ```
 >
-> The walk-through below shows each command as `./steps/0N-...sh` (run inside the demo folder, this is what you record); `./demo N` runs exactly that after cd-ing there for you.
+> The walk-through below shows each command as `./steps/0N-...sh` (run inside the demo folder, this is what you record); `./lab step N` runs exactly that after cd-ing there for you.
 
 
 <div align="center">
@@ -73,7 +73,7 @@ cd "$HOME/pluralsight-script-development-with-zap"
 git fetch origin
 git switch m1-demo3-before
 cd demos/module1-demos/m1-demo3-python-scanning-authentication
-./scripts/demo_reset.sh
+./scripts/lab-reset.sh
 ```
 
 **Expected start:** the reset script prints a clean-slate message and brings up the vulnerable Globomantics build. Continue only after it reports readiness, a failed startup is not one of the four teaching steps.
@@ -472,7 +472,7 @@ Stop the demo's containers from the same demo directory:
 
 ```bash
 cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
-./scripts/demo_down.sh
+./scripts/lab-down.sh
 ```
 
 The `m1-demo3-after` branch holds the completed reference, including the finished rule and auth script. Preserve your changes first, then compare without modifying files: `git diff m1-demo3-before..m1-demo3-after -- demos/module1-demos/m1-demo3-python-scanning-authentication`.
