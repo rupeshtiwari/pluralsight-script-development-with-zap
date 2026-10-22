@@ -78,7 +78,7 @@ cd demos/module2-demos/m2-demo1-authenticated-zap-github-actions
 
 **Expected start:** the startup script reports healthy Globomantics, Postgres, MongoDB and ZAP services. If anything is not ready, stop and read the actual output before continuing.
 
-**Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Training application</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API and proxy</a>, plus **GitHub → Actions → authenticated-scan** for the hosted proof. The `-before` branch ships the Module 1 scripting assets but deliberately omits the finished `ci/af-plan.yaml`, author it from the approved example before expecting the plan check to pass. Hosted GitHub Actions proof is separate from the local check.
+**Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Training application</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API and proxy</a>, plus **GitHub → Actions → authenticated-scan** for the hosted proof. The `-before` branch ships the Module 1 scripting assets but deliberately omits the finished `ci/af-plan.yaml`; you bring it in with one command in Step 1, then open and read it, before the plan check passes. Hosted GitHub Actions proof is separate from the local check.
 
 </details>
 
@@ -92,6 +92,12 @@ cd demos/module2-demos/m2-demo1-authenticated-zap-github-actions
 Move the scan into a versioned plan ZAP can run headless, and confirm the hosted `ubuntu-24.04` job ran it for this exact code. *(EO3a)*
 
 ### What we examine, and why
+
+On `m2-demo1-before` the finished `ci/af-plan.yaml` does not exist yet, so Step 1 stops at a yellow author gate until it does. **Bring it in with this one command**, then open it in VS Code and read it, that reading is the lesson:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap" && git show origin/m2-demo1-after:demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci/af-plan.yaml > demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci/af-plan.yaml && cd demos/module2-demos/m2-demo1-authenticated-zap-github-actions
+```
 
 Open `ci/af-plan.yaml` and `.github/workflows/zap-authenticated-scan.yml` in VS Code. The plan is the scan written as *configuration*, an ordered list of jobs (load scripts, define context, spider, active-scan, report) that ZAP executes with `zap.sh -cmd -autorun`. No clicks, so it is repeatable; in version control, so it is reviewable. The workflow is what runs that plan on a hosted runner on every change.
 
