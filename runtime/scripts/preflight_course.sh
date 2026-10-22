@@ -20,17 +20,22 @@
 set -uo pipefail
 
 ROOT="${1:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+# Optional scope: $2 is a grep -E pattern matched against each demo's repo-relative path (empty = the
+# whole course); $3 is a human label for the header. The ./preflight-check front door translates
+# --module1 / --m1d1 into these, so this engine stays one simple, filterable loop.
+FILTER="${2:-}"
+SCOPE_LABEL="${3:-every module, every demo, every step, in recorder order}"
 cd "$ROOT" || exit 2
 
 EVIDENCE="$ROOT/course-evidence.txt"
 runner="$ROOT/runtime/scripts/preflight_all_steps.sh"
 [ -x "$runner" ] || { echo "cannot find preflight_all_steps.sh" >&2; exit 2; }
 
-# Start clean: one evidence file per course run, and no stale FAIL logs from an earlier run.
+# Start clean: one evidence file per run, and no stale FAIL logs from an earlier run.
 rm -f "$ROOT"/FAIL-*.log
 : > "$EVIDENCE"
 {
-  echo "COURSE PREFLIGHT · every module, every demo, every step, in recorder order"
+  echo "PREFLIGHT CHECK · ${SCOPE_LABEL}"
   echo "Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "Evidence is restricted to the authorized local Globomantics application."
   echo
@@ -79,7 +84,13 @@ while IFS= read -r stepsdir; do
     { echo "RESULT for ${demo}: FAIL (see FAIL-${module}-${demo}.log)"; echo; } >> "$EVIDENCE"
   fi
   echo
-done < <(find "$ROOT"/demos -type d -name steps | sort)
+done < <(find "$ROOT"/demos -type d -name steps | sort | { if [ -n "$FILTER" ]; then grep -E "$FILTER"; else cat; fi; })
+
+if [ "$total" -eq 0 ]; then
+  echo "No demo matched the requested scope${FILTER:+ (filter: $FILTER)}."
+  { echo "No demo matched the requested scope."; } >> "$EVIDENCE"
+  exit 2
+fi
 
 summary="COURSE PREFLIGHT SUMMARY · ${total} demo(s): ${passed} passed, ${failed} failed, ${skipped} skipped"
 echo "$summary"
