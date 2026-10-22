@@ -4,7 +4,7 @@ name: Demo end-to-end (real ZAP lab, -before)
 # exactly what the recorder does on camera: bring up the full Globomantics lab on a hosted runner
 # (app + postgres + mongo + ZAP 2.17 with its add-ons), AUTHOR the one taught file this clip teaches
 # (by copying it in from the matching -after branch, the same git show the AUTHOR THIS FIRST banner
-# prints), then run the demo's four real named steps through ./demo preflight. Every step must print
+# prints), then run the demo's four real named steps through ./lab preflight. Every step must print
 # PASS, and the per-step logs are uploaded as that demo's evidence. No human runs the lab by hand.
 #
 # Why -before and not -after: -before is what the student switches to and what we record. Authoring the
@@ -47,7 +47,7 @@ jobs:
           echo "taught files authored in: ${authored}"
           # Commit the authored file locally (NOT pushed) so this checkout's HEAD now carries exactly the
           # code the recorder has on camera after the AUTHOR THIS FIRST beat. The hosted-run proof in
-          # ./demo preflight (m2-demo1, m2-demo3) compares the committed HEAD's watched paths against the
+          # ./lab preflight (m2-demo1, m2-demo3) compares the committed HEAD's watched paths against the
           # covering -after run: with the taught file absent from the commit, that diff is dirty and the
           # proof reads "covers this code: no". Committing it here makes HEAD match -after for the taught
           # path, so the only thing that can still break the proof is a genuine workflow drift.
@@ -60,10 +60,10 @@ jobs:
           fi
 
       - name: Bring up the full lab (app + DBs + ZAP), wait until healthy
-        run: HEALTH_TIMEOUT=900 ./demo up
+        run: HEALTH_TIMEOUT=900 ./lab up
 
       - name: Run all four demo steps end to end (every step must PASS)
-        run: ./demo preflight
+        run: ./lab preflight
 
       - name: Upload the per-step evidence (the saved step output)
         if: always()
@@ -88,7 +88,7 @@ jobs:
 
       - name: Tear the lab down
         if: always()
-        run: ./demo down || docker compose down -v --remove-orphans
+        run: ./lab down || docker compose down -v --remove-orphans
 
   # After a GREEN smoke run, tell the author repo to resync its evidence + screens from this CI run, so
   # the recorder/narrator/editor pages always show the newest real output (owner "job zero": evidence =
