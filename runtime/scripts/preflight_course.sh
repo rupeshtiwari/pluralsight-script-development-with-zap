@@ -3,8 +3,9 @@
 # exact output format a recorder would see, so you confirm the entire course in one command instead
 # of testing each demo by hand.
 #
-#   ./lab preflight --all            (from the repo root; same as calling this script)
-#   runtime/scripts/preflight_course.sh [REPO_ROOT]
+#   ./preflight-check                (from the repo root; the whole course — same as calling this script)
+#   ./preflight-check --m1           (scope to one module; --m1d1 scopes to one demo)
+#   runtime/scripts/preflight_course.sh [REPO_ROOT] [FILTER] [SCOPE_LABEL]
 #
 # What it writes (at the repo root, so you can hand them straight back):
 #   course-evidence.txt      one text file with every demo's four steps and their real output,
@@ -22,7 +23,7 @@ set -uo pipefail
 ROOT="${1:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 # Optional scope: $2 is a grep -E pattern matched against each demo's repo-relative path (empty = the
 # whole course); $3 is a human label for the header. The ./preflight-check front door translates
-# --module1 / --m1d1 into these, so this engine stays one simple, filterable loop.
+# --m1 / --m1d1 into these, so this engine stays one simple, filterable loop.
 FILTER="${2:-}"
 SCOPE_LABEL="${3:-every module, every demo, every step, in recorder order}"
 cd "$ROOT" || exit 2
