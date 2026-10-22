@@ -82,24 +82,48 @@ cd demos/module1-demos/m1-demo3-python-scanning-authentication
 ./scripts/lab-reset.sh
 ```
 
-**Expected start:** the reset script prints a clean-slate message and brings up the vulnerable Globomantics build. Continue only after it reports readiness, a failed startup is not one of the four teaching steps.
+**Expected start:** the reset script prints a clean-slate message and brings up the vulnerable Globomantics build. Continue only after it reports readiness, a failed startup is not one of the seven teaching steps.
 
 **Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Globomantics app, localhost:8000</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI, localhost:8080/zap/</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API/proxy, localhost:8090</a>. You author the two Python scripts in **VS Code** and inspect them in **ZAP's GUI** (Scripts → Active Rules, Scripts → Authentication, the Globomantics context, and Alerts). The `-before` branch omits the finished rule and auth script, create them before the later checks.
 
 </details>
 
-## Your four steps
+## Your seven steps
+
+Steps 1 to 4 are the authoring beat, every on-camera action numbered: run the first step and meet the yellow author gate, bring the two Python files in, open and read the active-scan rule, then run the same step again and watch it load. Steps 5 to 7 then register the login script and prove the rule under authentication. You run the same four `./steps` scripts the recording uses, in the same order.
 
 <details open>
-<summary><b>Step 1, Register a custom Jython active-scan rule</b> · the house-specific check</summary>
+<summary><b>Step 1, Run it first and meet the yellow author gate</b> · nothing written yet</summary>
 
 ### What you are learning
 
-Implement and register a custom Python active-scan rule, the application-specific test a built-in scanner does not cover. *(EO2b)*
+Why the scan rule cannot load before the file exists, and what the non-alarming author gate looks like. *(EO2b)*
 
-### ✍️ Bring in the two scripts this clip teaches (the `-before` branch ships without them)
+### Run it. The first run stops on purpose.
 
-On `m1-demo3-before`, neither `zap-scripts/globomantics-active-rule.py` nor `zap-scripts/globomantics-auth.py` exists, and **Step 1 needs both present**. Bring both in now with these commands, then open each in VS Code and read it, **that reading is the lesson** (you read the rule here, the login script in Step 2):
+Do this in the **VS Code integrated Terminal**:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
+./steps/01-load-python-active-scan-rule.sh
+```
+
+It stops with a **yellow `✍️ AUTHOR THIS FIRST`** message (not red, not an error): on `m1-demo3-before` neither `zap-scripts/globomantics-active-rule.py` nor `zap-scripts/globomantics-auth.py` exists yet. That yellow gate is the cue to author the files, which is the whole point of this exercise.
+
+**Next:** bring both finished files in with two commands.
+
+</details>
+
+<details>
+<summary><b>Step 2, Bring in the two scripts this clip teaches</b> · two copy commands</summary>
+
+### What you are learning
+
+The exercise is to understand the two scripts, not to type them from memory, so you bring the finished files in and read them. *(EO2b · EO2c)*
+
+### Bring both scripts in
+
+Copy-paste these exactly. They copy the finished scripts into your working folder from the completed branch; you **stay on the `-before` branch**, there is no branch switch:
 
 ```bash
 cd "$HOME/pluralsight-script-development-with-zap"
@@ -108,7 +132,20 @@ git show origin/m1-demo3-after:demos/module1-demos/m1-demo3-python-scanning-auth
 cd demos/module1-demos/m1-demo3-python-scanning-authentication
 ```
 
-Now open `zap-scripts/globomantics-active-rule.py` and read it. It is **Jython** (Python 2.7 syntax run inside ZAP's Java engine), so no f-strings. Read it against the shape ZAP expects from an active-scan script:
+Both files now exist in the demo folder. You read the active-scan rule next; you read the login script when you register it in Step 5.
+
+**Next:** open the active-scan rule and read what each part does.
+
+</details>
+
+<details>
+<summary><b>Step 3, Open the active-scan rule and read what each part does</b> · this reading is the lesson</summary>
+
+### What you are learning
+
+How a custom Jython active-scan rule is shaped, read straight from the source, that understanding *is* the objective. *(EO2b)*
+
+Open `zap-scripts/globomantics-active-rule.py` and read it. It is **Jython** (Python 2.7 syntax run inside ZAP's Java engine), so no f-strings. Read it against the shape ZAP expects from an active-scan script:
 
 1. **`scan(sas, msg, param, value)`**, ZAP calls it once per parameter; and **`scanNode(sas, msg)`**, once per page. Run the same check from both so the rule does not depend on how ZAP enumerates parameters.
 2. **Build the probe by cloning the request** and rewriting its query string (not `sas.setParam()`, which needs per-parameter state only set up inside `scan()`), send it, and check whether the probe comes back **unescaped** in the response body.
@@ -192,11 +229,24 @@ With the file saved, read the two functions that make it an active rule:
 - **`scan(sas, msg, param, value)`**, ZAP calls this per parameter during an active scan. Inside it, the rule injects its marker into the parameter and checks whether it comes back reflected, the exact Globomantics condition a generic rule would not look for.
 - **`raiseAlert(...)` / the alert name**, when the reflection is found, the rule raises *its own named finding*, `Globomantics unsafe reflection (custom rule)`, rather than a built-in XSS alert. A named, owned alert is what lets a pipeline reason about *your* issue specifically.
 
-This runs on ZAP's **Python Scripting (jython)** add-on, so the file is Python 2.7 syntax executed by Jython, that is why the engine shows as `jython`, not CPython. Registering it compiles the script; a clean `error flag false` is your first proof the Jython loaded without a syntax problem.
+This runs on ZAP's **Python Scripting (jython)** add-on, so the file is Python 2.7 syntax executed by Jython, that is why the engine shows as `jython`, not CPython.
+
+**Next:** run the step again, and this time the rule loads.
+
+</details>
+
+<details>
+<summary><b>Step 4, Run it again and watch the rule load</b> · the house-specific check</summary>
+
+### What you are learning
+
+Register the custom Jython active-scan rule, the application-specific test a built-in scanner does not cover. *(EO2b)*
+
+Registering it compiles the script; a clean `error flag false` is your first proof the Jython loaded without a syntax problem.
 
 **Predict before you run:** you expect the jython add-on present, the rule registered as `globomantics-active-rule · type active · engine jython · enabled true`, the alert name read from the source, and the compile/run error flag `false`. Loading is not a finding, note that no alert has fired yet.
 
-### Run command
+### Run the SAME command again. Now it loads.
 
 **Where:** the VS Code integrated Terminal, in `demos/module1-demos/m1-demo3-python-scanning-authentication`.
 
@@ -235,7 +285,7 @@ Confirm the error flag is `false` and the registered type is `active`, a rule th
 </details>
 
 <details>
-<summary><b>Step 2, Register the login script</b> · authentication + logged-in check</summary>
+<summary><b>Step 5, Register the login script</b> · authentication + logged-in check</summary>
 
 ### What you are learning
 
@@ -243,7 +293,7 @@ Automate the login with a ZAP authentication script, and give ZAP a reliable way
 
 ### ✍️ Read the login script you brought in
 
-You already brought `zap-scripts/globomantics-auth.py` in with the second command in Step 1. Open it in VS Code now and read it, this is a second Jython script. Read it against ZAP's authentication contract, which needs four functions:
+You already brought `zap-scripts/globomantics-auth.py` in with the second command in Step 2. Open it in VS Code now and read it, this is a second Jython script. Read it against ZAP's authentication contract, which needs four functions:
 
 1. **`authenticate(helper, paramsValues, credentials)`**, builds and sends the same form `POST /login` the app's own login form sends, and returns the message. ZAP captures the `Set-Cookie` session and reuses it for every later request.
 2. **`getRequiredParamsNames()` / `getOptionalParamsNames()`**, the context parameters ZAP must supply (here, the `Login URL`).
@@ -351,7 +401,7 @@ Confirm the logged-in regex matched `1` on the signed-in page and `0` on the sig
 </details>
 
 <details>
-<summary><b>Step 3, Compare unauthenticated and scripted access</b> · 401 → 200 as alice</summary>
+<summary><b>Step 6, Compare unauthenticated and scripted access</b> · 401 → 200 as alice</summary>
 
 ### What you are learning
 
@@ -403,7 +453,7 @@ Read the `401`/`200` pair together, the jump is the whole proof, and the auth tr
 </details>
 
 <details>
-<summary><b>Step 4, Confirm a fresh custom scan alert</b> · absent → present · rule 50000</summary>
+<summary><b>Step 7, Confirm a fresh custom scan alert</b> · absent → present · rule 50000</summary>
 
 ### What you are learning
 
@@ -438,7 +488,7 @@ Your terminal prints exactly this. Every value is the real captured output, veri
 
 | OBSERVED FIELD | ACTUAL VALUE |
 |---|---|
-| Before Step 3 scan | `absent` |
+| Before the authenticated scan | `absent` |
 | alert | `Globomantics unsafe reflection (custom rule)` |
 | pluginId | `50000` |
 | url | `http://app:8000/account/profile?note=GLOBOxss7marker` |
@@ -472,7 +522,7 @@ You can now explain each learning objective with the evidence you captured:
 
 ## Finish your lab
 
-After Step 4 you should be able to explain why the named custom rule fired on an authenticated profile, from the `401`/`200` pair, the auth trace and the fresh `50000` alert, not from recalling a command.
+After Step 7 you should be able to explain why the named custom rule fired on an authenticated profile, from the `401`/`200` pair, the auth trace and the fresh `50000` alert, not from recalling a command.
 
 Stop the demo's containers from the same demo directory:
 
