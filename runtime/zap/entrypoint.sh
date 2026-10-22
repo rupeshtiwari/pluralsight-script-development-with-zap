@@ -19,7 +19,7 @@ API_PORT=8090
 #  - view.fontSize=24 enlarges the whole Swing UI so the GUI reads clearly on a
 #    recording (menus, tabs, tables, Quick Start). This is ZAP's REAL UI font,
 #    so it stays crisp in the Webswing canvas, unlike browser zoom which blurs.
-#    Override at run time with ZAP_UI_FONT_SIZE=NN ./demo up if you want a
+#    Override at run time with ZAP_UI_FONT_SIZE=NN ./lab up if you want a
 #    different size. The same control lives in the GUI at Tools > Options >
 #    Display > Font size; this just makes 24 the default for every boot.
 UI_FONT_SIZE="${ZAP_UI_FONT_SIZE:-24}"
