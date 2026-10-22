@@ -1,15 +1,15 @@
 # Module 2 · Demo 2, Query the ZAP API and evidence reports
 
-> ⚡ **Run from anywhere (shortcut).** You keep landing at the repo root, which is fine: the `./demo` helper there picks THIS demo from your branch, so you never fight directories.
+> ⚡ **Run from anywhere (shortcut).** You keep landing at the repo root, which is fine: the `./lab` helper there picks THIS demo from your branch, so you never fight directories.
 >
 > ```bash
-> cd "$HOME/pluralsight-script-development-with-zap"   # the repo root (where ./demo lives)
-> ./demo up      # start the lab (first time; waits until ready)
-> ./demo 1       # run step 1   (then ./demo 2, ./demo 3, ./demo 4)
-> ./demo down    # stop the lab when you are done
+> cd "$HOME/pluralsight-script-development-with-zap"   # the repo root (where ./lab lives)
+> ./lab up      # start the lab (first time; waits until ready)
+> ./lab step 1       # run step 1   (then ./lab step 2, ./lab step 3, ./lab step 4)
+> ./lab down    # stop the lab when you are done
 > ```
 >
-> The walk-through below shows each command as `./steps/0N-...sh` (run inside the demo folder, this is what you record); `./demo N` runs exactly that after cd-ing there for you.
+> The walk-through below shows each command as `./steps/0N-...sh` (run inside the demo folder, this is what you record); `./lab step N` runs exactly that after cd-ing there for you.
 
 
 <div align="center">
@@ -75,7 +75,7 @@ cd "$HOME/pluralsight-script-development-with-zap"
 git fetch origin
 git switch m2-demo2-before
 cd demos/module2-demos/m2-demo2-zap-api-scan-evidence
-./scripts/demo_up.sh
+./scripts/lab-up.sh
 ```
 
 **Expected start:** the startup script reports healthy Globomantics, Postgres, MongoDB and ZAP services, and provisions this demo's authenticated scan so there is real evidence to query. If anything is not ready, stop and read the actual output before continuing.
@@ -296,7 +296,7 @@ From the same demo directory, stop the local services:
 
 ```bash
 cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo2-zap-api-scan-evidence"
-./scripts/demo_down.sh
+./scripts/lab-down.sh
 ```
 
 The `m2-demo2-after` branch holds the completed reference. Preserve your changes before switching branches. For a safe comparison, run `git diff m2-demo2-before..m2-demo2-after -- demos/module2-demos/m2-demo2-zap-api-scan-evidence` from the repository root; this is an operational demo, so the difference is in the captured evidence, not in source files.
