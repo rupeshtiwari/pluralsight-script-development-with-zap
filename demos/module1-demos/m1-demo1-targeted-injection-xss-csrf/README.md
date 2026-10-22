@@ -115,19 +115,20 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-t
 
 Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP, localhost:8080/zap/</a> → **Alerts**, select each SQL, NoSQL and command finding, and read its **Request** and **Response**, match the rule to its `q`, `username` or `host` parameter.
 
-### Expected result (the script's output contract, not your run)
+### Expected result (the exact terminal output, verified in the lab)
 
-Rule IDs and parameter names come from the demo; the `<…>` risk/confidence values must be read from your own output.
+Every value below is deterministic and identical on every machine and every run: the rule IDs, the parameters, and the `High/Medium`-style risk/confidence ratings. Your terminal prints exactly this:
 
-<table>
-<thead><tr><th>Displayed field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody>
-<tr><td><b>Policy rules enabled</b></td><td><code>40018 40019 40020 40021 40022 40027 40033 90020 90037</code></td><td>A focused injection policy, not everything</td></tr>
-<tr><td><b>SQL injection · /search (q)</b></td><td><code>alert 40018 · &lt;live risk&gt;/&lt;live confidence&gt;</code></td><td>Correlate the SQL alert with <code>q</code></td></tr>
-<tr><td><b>NoSQL injection · /api/account (username)</b></td><td><code>alert 40033 · &lt;live risk&gt;/&lt;live confidence&gt;</code></td><td>Correlate NoSQL with <code>username</code></td></tr>
-<tr><td><b>Command injection · /admin/ping (host)</b></td><td><code>alert 90020 · &lt;live risk&gt;/&lt;live confidence&gt;</code></td><td>Correlate OS command with <code>host</code></td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS targeted scan raised all three injection alerts</code></td><td>Only a pass with three real findings</td></tr>
-</tbody></table>
+```text
+✔ PASS  targeted scan raised all three injection alerts
+```
+
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Policy m1demo1 · rules ZAP reports enabled | `40018 40019 40020 40021 40022 40027 40033 90020 90037` |
+| SQL injection · /search (q) | `alert 40018 · High/Medium` |
+| NoSQL injection · /api/account (username) | `alert 40033 · High/High` |
+| Command injection · /admin/ping (host) | `alert 90020 · High/Medium` |
 
 ### Read your output, then decide
 
@@ -171,26 +172,32 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-t
 
 Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP, localhost:8080/zap/</a> → **History**, find the matching `/greet` request, and read **Request**/**Response** so you can see the injected `name` value sitting in the output context.
 
-### Expected result (the script's output contract, not your run)
+### Expected result (the exact terminal output, verified in the lab)
 
-The injected payload is run-specific, read it from your output; the rule ID, parameter and alert name are the demo's.
+The alert name, the rule, the `name` parameter and the `High/Medium` rating are deterministic. The three response-body rows are a fixed 90-character window centred on your payload, so each shows it reflected **unescaped** in that context. The only thing that varies between runs is the letter-case of the payload ZAP injects (ZAP randomises it, for example `scrIpt`/`scRipt`). Your terminal prints exactly this:
 
-<table>
-<thead><tr><th>Displayed field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody>
-<tr><td><b>HTML body · request → response</b></td><td><code>GET /greet?name=&lt;script&gt;alert(1)&lt;/script&gt;</code> reflected in the body</td><td>The body sink</td></tr>
-<tr><td><b>HTML attribute · request → response</b></td><td><code>GET /greet?name="&gt;&lt;svg onload=alert(1)&gt;</code> reflected in the attribute</td><td>The quoted-attribute sink</td></tr>
-<tr><td><b>JavaScript string · request → response</b></td><td><code>GET /greet?name=";alert(1);//</code> reflected in the script</td><td>The JS-string sink</td></tr>
-<tr><td><b>ZAP alert</b></td><td><code>Cross Site Scripting (Reflected) · &lt;live risk&gt;/&lt;live confidence&gt;</code></td><td>The named rule <code>40012</code></td></tr>
-<tr><td><b>Affected parameter · payload</b></td><td><code>name</code> · <code>&lt;actual injected payload&gt;</code></td><td>Use the real payload from your run</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS context-matched payloads reflected unescaped; rule 40012 confirmed</code></td><td>A real payload and reflected evidence</td></tr>
-</tbody></table>
+```text
+✔ PASS  all three context-matched payloads reflected unescaped, and ZAP rule 40012 confirmed reflected XSS on 'name'
+```
+
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| HTML body · request | `GET /greet?name=<script>alert(1)</script>` |
+| HTML body · response body | `/header><main class="wrap"><div class="card"><p>Hello <script>alert(1)</script></p><input type="text" value="<script>alert(1` |
+| HTML attribute · request | `GET /greet?name="><svg onload=alert(1)>` |
+| HTML attribute · response body | `><svg onload=alert(1)></p><input type="text" value=""><svg onload=alert(1)>"><script>var greeting = ""><svg onload=alert` |
+| JavaScript string · request | `GET /greet?name=";alert(1);//` |
+| JavaScript string · response body | `ype="text" value="";alert(1);//"><script>var greeting = "";alert(1);//"; </script></div></main><footer class="foot"` |
+| Alert | `Cross Site Scripting (Reflected) · High/Medium` |
+| Affected parameter | `name` |
+| Payload ZAP injected | `</p><scrIpt>alert(1);</scRipt><p>` |
+| Evidence (reflected in the response) | `</p><scrIpt>alert(1);</scRipt><p>` |
 
 ### Read your output, then decide
 
 In the last step a scan *reported* a lead; here your output has to show the lead is real, line by line.
 
-- The three **request → response** rows are the heart of it. For each one, find your injected `name` value sitting **unescaped** in the response, a `<script>` in the body row, a broken-out attribute in the attribute row, a closed JS string in the script row. Why three rows and not one? Because the same input lands in three different places, and each needed a different payload to escape it. Seeing the payload survive in its own context is the proof that "reflected" has become "executable here."
+- The three request / response-body pairs are the heart of it. For each one, find your injected `name` value sitting **unescaped** in the response, a `<script>` in the body row, a broken-out attribute in the attribute row, a closed JS string in the script row. Why three rows and not one? Because the same input lands in three different places, and each needed a different payload to escape it. Seeing the payload survive in its own context is the proof that "reflected" has become "executable here."
 - The **ZAP alert** row (`40012` on `name`) is the engine agreeing with you independently. Notice it cites the *same* parameter you just traced, your manual reading and ZAP's automated rule are pointing at one defect, from two directions.
 - The **payload** row is run-specific on purpose: read it from *your* output, not from this page, so the evidence is yours.
 
@@ -228,19 +235,22 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-t
 
 Keep the valid-token control, missing-token control, replay, cross-session request and the before/after email rows visible together. The browser form at <a href="http://localhost:8000/account/email" target="_blank" rel="noopener">localhost:8000/account/email</a> is context, not the proof, the terminal rows are.
 
-### Expected result (the script's output contract, not your run)
+### Expected result (the exact terminal output, verified in the lab)
 
-<table>
-<thead><tr><th>Displayed field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody>
-<tr><td><b>Valid token (session B's own, first use)</b></td><td><code>200</code></td><td>Legitimate control accepted</td></tr>
-<tr><td><b>Missing token</b></td><td><code>403</code></td><td>Missing-token control rejected</td></tr>
-<tr><td><b>Replayed used token (same token, second use)</b></td><td><code>200 (should be rejected)</code></td><td>Token is not single-use</td></tr>
-<tr><td><b>Email after the replay</b></td><td><code>alice@globomantics.example → &lt;changed address&gt;</code></td><td>State actually changed</td></tr>
-<tr><td><b>Token from session A with B's cookie</b></td><td><code>200 (should be rejected)</code></td><td>Token is not session-bound</td></tr>
-<tr><td><b>Email after the cross-session request</b></td><td><code>&lt;attacker address&gt;</code></td><td>The victim's record was overwritten</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS used token accepted again and a cross-session token accepted, tokens are neither single-use nor session-bound</code></td><td>Status <b>and</b> changed email</td></tr>
-</tbody></table>
+Every value is deterministic: the three status codes, and session B's email moving from `alice@globomantics.example` to `replayed@evil.example` and then to `attacker@evil.example`. Your terminal prints exactly this:
+
+```text
+✔ PASS  the used token was accepted again (200) and changed the email; a token from another session was also accepted, tokens are neither single-use nor session-bound
+```
+
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| valid token (session B's own, first use) | `200` |
+| missing token | `403` |
+| replayed used token (same token, second use) | `200  (should be rejected)` |
+| session B's email: before → after the replay | `alice@globomantics.example → replayed@evil.example` |
+| token from session A, submitted with session B's cookie | `200  (should be rejected)` |
+| session B's email after the cross-session request | `attacker@evil.example` |
 
 ### Read your output, then decide
 
@@ -282,21 +292,22 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-t
 
 Use <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP, localhost:8080/zap/</a> → **Alerts** and the matching **Request/Response** to corroborate each finding, and open `logs/alert-disposition.md` in VS Code to read the decision the step recorded.
 
-### Expected result (the script's output contract, not your run)
+### Expected result (the exact terminal output, verified in the lab)
 
-The error text and account counts are run-specific; read them from your output. Each row must reconcile against a real effect.
+Every value is deterministic for these fixed inputs: the Postgres parse error, the account count `1 → 4`, the injected marker `ZAP_CMD_PROOF`, and each `True Positive` disposition. Your terminal prints exactly this:
 
-<table>
-<thead><tr><th>Displayed field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody>
-<tr><td><b>40018 SQL injection · /search (q)</b></td><td><code>True Positive, DB error: &lt;actual SQL parse error&gt;</code></td><td>Request/response supports the SQL issue</td></tr>
-<tr><td><b>40033 NoSQL injection · /api/account (username)</b></td><td><code>True Positive, accounts &lt;before&gt; → &lt;after&gt;</code></td><td>Operator injection changed the match count</td></tr>
-<tr><td><b>90020 Command injection · /admin/ping (host)</b></td><td><code>True Positive, injected shell marker: ZAP_CMD_PROOF</code></td><td>The injected host request, not a normal ping</td></tr>
-<tr><td><b>40012 Reflected XSS · /greet (name)</b></td><td><code>True Positive, payload reflected unescaped</code></td><td>The real payload and response evidence</td></tr>
-<tr><td><b>CSRF · /account/email (csrf_token)</b></td><td><code>True Positive, used token accepted twice (200, 200)</code></td><td>Status and the changed email</td></tr>
-<tr><td><b>Disposition record written</b></td><td><code>logs/alert-disposition.md</code></td><td>A reviewable artifact, not a recollection</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS every alert and the CSRF case reconciled and recorded</code></td><td>Evidence before disposition</td></tr>
-</tbody></table>
+```text
+✔ PASS  every ZAP alert and the CSRF case reconciled with observed behavior and recorded
+```
+
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| 40018 SQL injection · /search (q) | `True Positive, DB error: unterminated quoted string at or near "'"` |
+| 40033 NoSQL injection · /api/account (username) | `True Positive, accounts 1 → 4` |
+| 90020 Command injection · /admin/ping (host) | `True Positive, injected shell marker: ZAP_CMD_PROOF` |
+| 40012 Reflected XSS · /greet (name) | `True Positive, payload reflected unescaped` |
+| CSRF · /account/email (csrf_token) | `True Positive, used token accepted twice (200, 200)` |
+| Disposition record written | `logs/alert-disposition.md` |
 
 ### Read your output, then decide
 
