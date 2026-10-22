@@ -10,6 +10,12 @@
 > ```
 >
 > The walk-through below shows each command as `./steps/0N-...sh` (run inside the demo folder, this is what you record); `./lab step N` runs exactly that after cd-ing there for you.
+>
+> 🧪 **Before you record, self-test off camera.** `preflight-check` is NOT an on-camera command. Run it first to confirm every step works and prints the expected output, then record. It writes `course-evidence.txt`, and names any broken step in a `FAIL-*.log`.
+> ```bash
+> ./preflight-check --m1d3      # just this demo
+> ./preflight-check             # or the whole course, every demo in order
+> ```
 
 
 <div align="center">
