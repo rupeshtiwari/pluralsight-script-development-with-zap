@@ -124,7 +124,7 @@ status_no_cookie() {  # <url> -> HTTP code (through the ZAP proxy)
 }
 
 # --- container diagnostics (author-only) ------------------------------------
-# Resolve the running ZAP container id the same way demo_up.sh brought it up:
+# Resolve the running ZAP container id the same way lab-up.sh brought it up:
 # docker compose from the repo root, so the project name matches.
 zap_container() {
     ( cd "${REPO_ROOT}" && docker compose ps -q zap 2>/dev/null ) | head -1
@@ -285,7 +285,7 @@ print("")' "${ALERT_NAME}"
 ensure_ready() {
     [ -n "${K}" ] || { fail "ZAP_API_KEY is not set" "the .env file is missing or not loaded" "run from the repo so .env loads"; return 1; }
     zap core/view/version | grep -q '"version"' || {
-        fail "ZAP API not reachable" "the stack may still be starting" "run scripts/demo_up.sh, wait for 'Up', then retry"; return 1; }
+        fail "ZAP API not reachable" "the stack may still be starting" "run scripts/lab-up.sh, wait for 'Up', then retry"; return 1; }
     [ -f "${RULE_FILE_HOST}" ] || {
         need_author "you have not written the Jython active-scan rule yet" \
             "the m1-demo3-before branch ships without zap-scripts/globomantics-active-rule.py on purpose; writing it IS this demo" \
@@ -308,7 +308,7 @@ ensure_ready() {
     [ "${_t}" -gt 0 ] && echo
     [ -n "${eng}" ] || {
         fail "no Python (jython) engine in ZAP" "the Python Scripting (jython) add-on did not load after waiting ~90s" \
-             "run ./demo down then ./demo up and wait for 'All services healthy', then retry; if it still fails send ./demo logs"; return 1; }
+             "run ./lab down then ./lab up and wait for 'All services healthy', then retry; if it still fails send ./lab logs"; return 1; }
     JYTHON_ENGINE="${eng}"
     return 0
 }

@@ -2,14 +2,14 @@
 # Run THIS demo from anywhere in the repo. Your branch (e.g. m1-demo2-before) picks the demo folder,
 # so you never have to cd by hand or remember the long path.
 #
-#   ./demo up         bring up the lab (Docker + ZAP), wait until ready
-#   ./demo 1          run step 1  (the same ./steps/01-...sh shown in the walk-through)
-#   ./demo 2|3|4      run step 2 / 3 / 4
-#   ./demo preflight  run all four steps and SAVE each step's output as evidence to upload
-#   ./demo down       stop the lab
-#   ./demo reset      reset the lab
-#   ./demo logs       show ZAP's boot log (add 'app'/'postgres'/'mongo' for another service)
-#   ./demo status     show the containers and their health
+#   ./lab up         bring up the lab (Docker + ZAP), wait until ready
+#   ./lab step 1          run step 1  (the same ./steps/01-...sh shown in the walk-through)
+#   ./lab step 2|3|4      run step 2 / 3 / 4
+#   ./lab preflight  run all four steps and SAVE each step's output as evidence to upload
+#   ./lab down       stop the lab
+#   ./lab reset      reset the lab
+#   ./lab logs       show ZAP's boot log (add 'app'/'postgres'/'mongo' for another service)
+#   ./lab status     show the containers and their health
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 branch="$(git -C "$ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
@@ -23,9 +23,9 @@ if [ -z "$folder" ]; then
 fi
 cmd="${1:-}"
 case "$cmd" in
-  up)    cd "$folder" && exec ./scripts/demo_up.sh ;;
-  down)  cd "$folder" && exec ./scripts/demo_down.sh ;;
-  reset) cd "$folder" && exec ./scripts/demo_reset.sh ;;
+  up)    cd "$folder" && exec ./scripts/lab-up.sh ;;
+  down)  cd "$folder" && exec ./scripts/lab-down.sh ;;
+  reset) cd "$folder" && exec ./scripts/lab-reset.sh ;;
   preflight)
     # '--all' runs preflight for EVERY demo whose steps are present (e.g. on the integration branch
     # that carries all authored files), so you can confirm the whole course in one go. Each demo saves
@@ -53,14 +53,20 @@ case "$cmd" in
     else
       echo
       echo "Preflight did NOT pass. Fix the environment (re-run ./setup/setup-macos.sh) or the"
-      echo "authored file the failing step named, then run ./demo preflight again."
+      echo "authored file the failing step named, then run ./lab preflight again."
     fi
     exit "$rc" ;;
   logs)   cd "$ROOT" && exec docker compose logs --tail="${3:-200}" "${2:-zap}" ;;
   status) cd "$ROOT" && exec docker compose ps ;;
-  1|2|3|4)
+  step)
+    n="${2:-}"
+    case "$n" in 1|2|3|4) ;; *) echo "usage: ./lab step <1|2|3|4>"; exit 2 ;; esac
+    s="$(ls "$folder"/steps/0"$n"-*.sh 2>/dev/null | head -1)"
+    [ -n "$s" ] || { echo "No step $n found in ${folder#"$ROOT"/}/steps"; exit 2; }
+    cd "$folder" && exec "$s" ;;
+  1|2|3|4)   # back-compat: ./lab 1 still runs step 1
     s="$(ls "$folder"/steps/0"$cmd"-*.sh 2>/dev/null | head -1)"
     [ -n "$s" ] || { echo "No step $cmd found in ${folder#"$ROOT"/}/steps"; exit 2; }
     cd "$folder" && exec "$s" ;;
-  *) echo "usage: ./demo <up|1|2|3|4|preflight|down|reset|logs|status>   (demo picked from branch: ${stem:-unknown})"; exit 2 ;;
+  *) echo "usage: ./lab <up|step N|preflight|down|reset|logs|status>   (clip picked from branch: ${stem:-unknown})"; exit 2 ;;
 esac
