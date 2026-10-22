@@ -49,7 +49,7 @@ compose_net() {
 # Run the gate plan HEADLESS, exactly as CI does, and capture its exit code.
 run_gate() {
     local net img; net="$(compose_net)"; img="${ZAP_IMAGE_D}"
-    [ -n "${net}" ] || { fail "could not find the ZAP container network" "is the stack up?" "run scripts/demo_up.sh and retry"; return 1; }
+    [ -n "${net}" ] || { fail "could not find the ZAP container network" "is the stack up?" "run scripts/lab-up.sh and retry"; return 1; }
     mkdir -p "${GATE_DIR}"; rm -f "${GATE_REPORT}"
     cp "${GATE_PLAN_HOST}" "${GATE_DIR}/gate-plan.yaml"
     chmod -R 0777 "${GATE_DIR}"
@@ -69,7 +69,7 @@ ensure_gate() { # reuse the last gate run, or run it once
 
 ensure_ready() {
     command -v docker >/dev/null 2>&1 || { fail "docker is not available" "the demo runs the gate in a container" "install/start Docker (Colima) and retry"; return 1; }
-    [ -n "$(zap_container)" ] || { fail "the ZAP stack is not running" "no zap container found" "run scripts/demo_up.sh, wait for 'Up', then retry"; return 1; }
+    [ -n "$(zap_container)" ] || { fail "the ZAP stack is not running" "no zap container found" "run scripts/lab-up.sh, wait for 'Up', then retry"; return 1; }
     [ -f "${GATE_PLAN_HOST}" ] || {
         need_author "you have not written the quality-gate plan yet" \
             "the m2-demo3-before branch ships without ci/gate-plan.yaml on purpose; writing it IS this demo" \
