@@ -120,12 +120,15 @@ For the hosted proof, open the <a href="https://github.com/rupeshtiwari/pluralsi
 
 The hosted run ID and commit are specific to your run, read them from your output. The named values are what a healthy run shows.
 
-<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody><tr><td><b>Local plan run</b></td><td><code>plan &lt;id&gt; · finished · 0 errors · 0 warnings</code></td><td>The plan executes cleanly, headless</td></tr>
-<tr><td><b>Hosted workflow run</b></td><td><code>&lt;run id&gt; · success · commit &lt;sha&gt;</code></td><td>A real GitHub Actions run, from the API</td></tr>
-<tr><td><b>Runner</b></td><td><code>ubuntu-24.04</code></td><td>The hosted platform the course targets</td></tr>
-<tr><td><b>Headless ZAP step · covers this code</b></td><td><code>success · branch</code></td><td>The run applies to your current checkout</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS the plan ran headless with no errors, and the hosted ubuntu-24.04 job for this code succeeded</code></td><td>Local <b>and</b> hosted, same plan</td></tr></tbody></table>
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Local plan run | `plan 0 · finished · 0 errors · 0 warnings` |
+| Workflow run | `<run id> · success · commit <sha>` |
+| Runner | `ubuntu-24.04` |
+| Headless ZAP step | `success` |
+| Run covers this code | `yes` |
+
+**`✔ PASS`** the plan ran headless with no errors, and the hosted ubuntu-24.04 job for this code succeeded.
 
 ### Investigate, then decide
 
@@ -165,12 +168,14 @@ Keep `ci/af-plan.yaml` open at `env.contexts`, the script, user `alice` and incl
 
 ### Expected result (the script's output contract, not your run)
 
-<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody><tr><td><b>Context · authentication · engine</b></td><td><code>Globomantics · script · python : jython</code></td><td>The scripted login from Module 1</td></tr>
-<tr><td><b>User · scope</b></td><td><code>alice · http://app:8000/account/profile.*</code></td><td>Bounded, authorized target</td></tr>
-<tr><td><b>Local authenticated request</b></td><td><code>GET /account/profile?note=seed</code></td><td>The login-only page was reached</td></tr>
-<tr><td><b>Hosted run proved it loaded</b></td><td><code>custom alert on login-only page · covers this code</code></td><td>The context loaded in CI, not just on disk</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS the plan declares the authenticated context and the hosted run proves ZAP loaded it</code></td><td>A finding on a login-only page</td></tr></tbody></table>
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Context · authentication · engine (ci/af-plan.yaml) | `Globomantics · script · python : jython` |
+| User · scope | `alice · http://app:8000/account/profile.*` |
+| Local: authenticated request reached the login-only page | `GET http://app:8000/account/profile?note=seed HTTP/1.1` |
+| Hosted run proved it loaded (run `<run id>`) | `custom alert on login-only page: assert=success · covers this code: yes` |
+
+**`✔ PASS`** the plan declares the authenticated context and the hosted run proves ZAP loaded it (authenticated custom alert on a login-only page).
 
 ### Investigate, then decide
 
@@ -210,11 +215,12 @@ Keep the plan's script jobs and requestor configuration visible in VS Code; the 
 
 ### Expected result (the script's output contract, not your run)
 
-<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody><tr><td><b>JavaScript check (globomantics-marker)</b></td><td><code>marker header on an authenticated request: GET /account/profile?note=seed</code></td><td>The JS hook fired in the plan</td></tr>
-<tr><td><b>Python check (globomantics-active-rule)</b></td><td><code>custom alert 50000 · Medium/Medium</code></td><td>The Module 1 rule fired, by identity</td></tr>
-<tr><td><b>Ran authenticated against</b></td><td><code>/account/profile (note parameter)</code></td><td>Protected page, authorized scope</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS both Module 1 scripts ran during the authenticated plan</code></td><td>Reuse by name, not a rewrite</td></tr></tbody></table>
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| JavaScript check (globomantics-marker) | `marker header on an authenticated request: GET http://app:8000/account/profile?note=seed HTTP/1.1` |
+| Python check (globomantics-active-rule) | `local custom alert 50000 · Medium/Medium` |
+
+**`✔ PASS`** both Module 1 scripts ran during the authenticated plan (JS stamped an authenticated request; the Python rule raised its alert on the login-only page).
 
 ### Investigate, then decide
 
@@ -254,11 +260,13 @@ Then open the same hosted run → **Artifacts → globo-ci-report**, download th
 
 ### Expected result (the script's output contract, not your run)
 
-<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody><tr><td><b>Alert (this plan run; store cleared first)</b></td><td><code>Globomantics unsafe reflection (custom rule)</code></td><td>The exact named Python finding</td></tr>
-<tr><td><b>Risk · parameter</b></td><td><code>Medium · note</code></td><td>The protected-page input</td></tr>
-<tr><td><b>Hosted report check</b></td><td><code>success · covers this code: branch</code></td><td>Fail-closed check for this commit</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS the custom alert was raised by this authenticated run, and the hosted job's report check passed for this code</code></td><td>Named finding, not built-in XSS</td></tr></tbody></table>
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Alert (this plan run; store was cleared first) | `Globomantics unsafe reflection (custom rule)` |
+| Risk · parameter | `Medium · note` |
+| Hosted report check (run `<run id>`) | `success · covers this code: yes` |
+
+**`✔ PASS`** the custom alert was raised by this authenticated run, and the hosted job's report check passed for this code.
 
 ### Investigate, then decide
 
