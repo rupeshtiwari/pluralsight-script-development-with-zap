@@ -106,7 +106,7 @@ On the `m1-demo2-before` branch, `zap-scripts/globomantics-marker.js` **does not
 2. Right-click that `zap-scripts` folder → **New File** → name it exactly `globomantics-marker.js` and press Enter.
 3. Paste the **entire** script below into that new file, then **Save** (`Cmd`+`S`). That folder is mounted into the ZAP container, so the moment you save, ZAP can load it in the next step.
 
-> On camera (recording only): you type this same code in ZAP's **Script Console** instead, your Demo recorder page gives the exact ZAP clicks. For your own run here, the VS Code file above is the simplest reliable way, and `./steps/01` loads it either way.
+> You author this in **VS Code** for your own run and on camera alike; the `zap-scripts/` folder is mounted into the ZAP container, so `./steps/01` loads the file you save. (ZAP's Script Console is where you later *see* the script's own output at run time, in Step 3, not where you write it.)
 
 ```javascript
 // Globomantics HTTP Sender script (GraalVM JavaScript).
