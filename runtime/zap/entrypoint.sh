@@ -85,31 +85,48 @@ echo "[zap-entrypoint] ZAP core is up: $(curl -s "http://localhost:${API_PORT}/J
 kill "${KICK_PID}" >/dev/null 2>&1 || true
 
 api() {
+    # Bounded time so a stalled ZAP or marketplace call can never hang the whole boot:
+    # --connect-timeout caps the connect, --max-time caps the entire call. A single
+    # installAddon call with no cap used to block here until the outer health timeout
+    # killed the container (seen on CI: 16 minutes stuck at "installing ascanrulesBeta").
     # `|| true` so a transient curl failure never trips `set -e`.
-    curl -s "http://localhost:${API_PORT}/JSON/$1/?apikey=${API_KEY}&${2:-}" || true
+    curl -s --connect-timeout 10 --max-time 120 \
+        "http://localhost:${API_PORT}/JSON/$1/?apikey=${API_KEY}&${2:-}" || true
 }
 
-# Install ascanrulesBeta (provides NoSQL MongoDB rule 40033) unless already present.
-if api autoupdate/view/installedAddons | grep -q '"ascanrulesBeta"'; then
-    echo "[zap-entrypoint] ascanrulesBeta already installed."
-else
-    echo "[zap-entrypoint] installing ascanrulesBeta from the marketplace..."
-    api autoupdate/action/installAddon "id=ascanrulesBeta" >/dev/null
-fi
-
-# Wait for the add-on to register (marketplace download can take ~30s).
-BETA_OK=""
-for _ in $(seq 1 90); do
-    if api autoupdate/view/installedAddons | grep -q '"ascanrulesBeta"'; then
-        BETA_OK=1
-        break
+# Install a marketplace add-on, then wait until <check-fn> passes. The marketplace
+# download is network-dependent and occasionally STALLS; firing the install once and
+# waiting on it forever is what hung boot. Instead re-kick the install each attempt,
+# with every attempt bounded, so a transient stall costs ~a minute and a retry, not
+# the whole health budget. Args: <addon-id> <human-name> <check-fn>
+install_addon() {
+    local id="$1" name="$2" check="$3" attempt i
+    if api autoupdate/view/installedAddons | grep -q "\"${id}\""; then
+        echo "[zap-entrypoint] ${name} already installed."
+        return 0
     fi
-    sleep 2
-done
-if [ -z "${BETA_OK}" ]; then
-    echo "[zap-entrypoint] ERROR: ascanrulesBeta did not install" >&2
-    exit 1
-fi
+    for attempt in 1 2 3; do
+        echo "[zap-entrypoint] installing ${name} from the marketplace (attempt ${attempt})..."
+        api autoupdate/action/installAddon "id=${id}" >/dev/null
+        for i in $(seq 1 30); do          # ~60s per attempt
+            if "${check}"; then
+                echo "[zap-entrypoint] ${name} installed."
+                return 0
+            fi
+            sleep 2
+        done
+        echo "[zap-entrypoint] ${name} not registered after attempt ${attempt}; re-kicking the install..." >&2
+    done
+    echo "[zap-entrypoint] ERROR: ${name} did not install after 3 attempts (marketplace unreachable?)" >&2
+    return 1
+}
+
+beta_present()       { api autoupdate/view/installedAddons | grep -q '"ascanrulesBeta"'; }
+jython_present()     { api script/view/listEngines         | grep -iq 'jython'; }
+automation_present() { api autoupdate/view/installedAddons | grep -q '"automation"'; }
+
+# ascanrulesBeta provides the NoSQL MongoDB rule 40033.
+install_addon ascanrulesBeta "ascanrulesBeta" beta_present || exit 1
 
 # Verify NoSQL rule 40033 is now available as an active-scan rule.
 RULE_OK=""
@@ -139,43 +156,14 @@ if [ -n "${BETA_MAJOR}" ] && [ "${BETA_MAJOR}" -lt 66 ] 2>/dev/null; then
 fi
 echo "[zap-entrypoint] ascanrulesBeta v${BETA_VER:-unknown} installed; NoSQL rule 40033 available."
 
-# Install Python Scripting (jython) so ZAP can run Jython 2.7.2 scripts
-# (custom active-scan rules and authentication scripts) unless already present.
-if api autoupdate/view/installedAddons | grep -q '"jython"'; then
-    echo "[zap-entrypoint] Python Scripting (jython) already installed."
-else
-    echo "[zap-entrypoint] installing Python Scripting (jython) from the marketplace..."
-    api autoupdate/action/installAddon "id=jython" >/dev/null
-fi
-
-# Wait for the Jython script engine to register (marketplace download can take ~30s).
-JYTHON_OK=""
-for _ in $(seq 1 90); do
-    if api script/view/listEngines | grep -iq 'jython'; then
-        JYTHON_OK=1
-        break
-    fi
-    sleep 2
-done
-if [ -z "${JYTHON_OK}" ]; then
-    echo "[zap-entrypoint] ERROR: Python (jython) script engine did not become available" >&2
-    exit 1
-fi
+# Python Scripting (jython) so ZAP can run Jython 2.7.2 scripts (custom active-scan
+# rules and authentication scripts). Registration is proven by the engine appearing.
+install_addon jython "Python Scripting (jython)" jython_present || exit 1
 echo "[zap-entrypoint] Python Scripting (jython) installed; Jython engine available."
 
-# Ensure the Automation Framework add-on is present so the author preflight can
-# run the Module 2 AF plan via the ZAP API (it ships by default, but install to
-# be safe).
-if api autoupdate/view/installedAddons | grep -q '"automation"'; then
-    echo "[zap-entrypoint] Automation Framework already installed."
-else
-    echo "[zap-entrypoint] installing Automation Framework from the marketplace..."
-    api autoupdate/action/installAddon "id=automation" >/dev/null
-    for _ in $(seq 1 30); do
-        api autoupdate/view/installedAddons | grep -q '"automation"' && break
-        sleep 2
-    done
-fi
+# Automation Framework so the author preflight can run the Module 2 AF plan via the
+# ZAP API (it ships by default, but install to be safe).
+install_addon automation "Automation Framework" automation_present || exit 1
 echo "[zap-entrypoint] Automation Framework available."
 
 touch /tmp/zap-ready
