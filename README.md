@@ -161,7 +161,7 @@ git switch m1-demo1-before</pre>Each <code>*-before</code> branch is an independ
 >
 > ```bash
 > ./preflight-check            # the whole course, every demo, in order
-> ./preflight-check --m1d1     # or just one demo (--m1d1 … --m2d3), or --module1 / --module2
+> ./preflight-check --m1       # a whole module (--m1 / --m2), or one demo (--m1d1 … --m2d3)
 > ```
 
 **Different demo?** Return to the repository root, save any personal changes, switch to its `*-before` branch, then follow its own README. Don't reuse scan history from another demo.
