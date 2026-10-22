@@ -84,26 +84,63 @@ cd demos/module2-demos/m2-demo3-security-quality-gates
 
 **Expected start:** the startup script reports healthy Globomantics, Postgres, MongoDB and ZAP services. If anything is not ready, stop and read the actual output before continuing.
 
-**Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Training application</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API and proxy</a>, plus **GitHub → Actions → quality-gate** for the hosted proof. The `-before` branch deliberately omits the finished `ci/gate-plan.yaml`; you bring it in with one command in Step 1, then open and read it, before running the gate.
+**Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Training application</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API and proxy</a>, plus **GitHub → Actions → quality-gate** for the hosted proof. The `-before` branch deliberately omits the finished `ci/gate-plan.yaml`; you bring it in with one command in Step 2, then open and read it, before running the gate.
 
 </details>
 
-## Your four steps
+## Your seven steps
+
+Steps 1 to 4 are the authoring beat, every on-camera action numbered: run the first step and meet the yellow author gate, bring the quality-gate plan in, open and read the False Positive filter, then run the same step again and watch the filter validate. Steps 5 to 7 then prove the job order, the blocking exit code, and the reconciled report. You run the same four `./steps` scripts the recording uses, in the same order.
 
 <details open>
-<summary><b>Step 1, Inspect the False Positive filter</b> · scoped exception</summary>
+<summary><b>Step 1, Run it first and meet the yellow author gate</b> · nothing written yet</summary>
 
 ### What you are learning
 
-Record a reviewed disposition for one benign finding, scoped to one path, without suppressing that rule anywhere else. *(EO3c)*
+Why the gate check cannot pass before `ci/gate-plan.yaml` exists, and what the non-alarming author gate looks like. *(EO3c)*
 
-### What we examine, and why
+### Run it. The first run stops on purpose.
 
-On `m2-demo3-before` the finished `ci/gate-plan.yaml` does not exist yet, so Step 1 stops at a yellow author gate until it does. **Bring it in with this one command**, then open it in VS Code and read it, that reading is the lesson:
+Do this in the **VS Code integrated Terminal**:
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
+./steps/01-inspect-false-positive-filter.sh
+```
+
+It stops with a **yellow `✍️ AUTHOR THIS FIRST`** message (not red, not an error): on `m2-demo3-before` the finished `ci/gate-plan.yaml` does not exist yet. That yellow gate is the cue to author the plan, which is the whole point of this exercise.
+
+**Next:** bring the finished plan in with one command.
+
+</details>
+
+<details>
+<summary><b>Step 2, Bring in the quality-gate plan</b> · one copy command</summary>
+
+### What you are learning
+
+The exercise is to understand the gate plan, not to type it from memory, so you bring the finished file in with one command and read it. *(EO3c)*
+
+### Bring the plan in with one command
+
+Copy-paste this exactly. It copies the finished plan into your working folder from the completed branch; you **stay on the `-before` branch**, there is no branch switch:
 
 ```bash
 cd "$HOME/pluralsight-script-development-with-zap" && git show origin/m2-demo3-after:demos/module2-demos/m2-demo3-security-quality-gates/ci/gate-plan.yaml > demos/module2-demos/m2-demo3-security-quality-gates/ci/gate-plan.yaml && cd demos/module2-demos/m2-demo3-security-quality-gates
 ```
+
+The file now exists in the demo folder, and the filter check in Step 4 reads it.
+
+**Next:** open the plan and read the False Positive filter.
+
+</details>
+
+<details>
+<summary><b>Step 3, Open the plan and read the False Positive filter</b> · this reading is the lesson</summary>
+
+### What you are learning
+
+Record a reviewed disposition for one benign finding, scoped to one path, without suppressing that rule anywhere else, read straight from the source. *(EO3c)*
 
 Open `ci/gate-plan.yaml` in VS Code at the `alertFilter` job and read three fields together, because they are the difference between an exception and a blind spot:
 
@@ -113,9 +150,20 @@ Open `ci/gate-plan.yaml` in VS Code at the `alertFilter` job and read three fiel
 
 This is a disposition-as-code: the judgment is written once, in the plan, reviewed in a pull request, and applied on every run, not clicked away in a GUI where no one can audit it.
 
-**Predict before you run:** you expect `ruleId 10021`, `newRisk False Positive`, scope `/greet.*`. The YAML proves the exception is *configured*; whether it actually took effect is something only the report (Step 4) can prove.
+**Next:** run the step again, and this time the filter validates.
 
-### Run command
+</details>
+
+<details>
+<summary><b>Step 4, Run it again and watch the filter validate</b> · scoped exception</summary>
+
+### What you are learning
+
+Confirm the reviewed False Positive is configured correctly, scoped to one path, before anything is scanned or judged. *(EO3c)*
+
+**Predict before you run:** you expect `ruleId 10021`, `newRisk False Positive`, scope `/greet.*`. The YAML proves the exception is *configured*; whether it actually took effect is something only the report (Step 7) can prove.
+
+### Run the SAME command again. Now it validates.
 
 **Where:** the VS Code integrated Terminal, in `demos/module2-demos/m2-demo3-security-quality-gates`.
 
@@ -138,7 +186,7 @@ Keep `ci/gate-plan.yaml` open at `alertFilter`, rule ID, `newRisk` and the scope
 
 ### Investigate, then decide
 
-Confirm the `url` scope is present, a filter without it is a global suppression wearing a disguise. The decision: *this is a reviewed exception for one finding on one path*, narrow enough that it cannot hide the same issue elsewhere. Configured is not yet applied; hold that distinction for Step 4.
+Confirm the `url` scope is present, a filter without it is a global suppression wearing a disguise. The decision: *this is a reviewed exception for one finding on one path*, narrow enough that it cannot hide the same issue elsewhere. Configured is not yet applied; hold that distinction for Step 7.
 
 **On FAIL:** a missing scope or wrong rule ID is a filter you should not ship. Fix the `alertFilter` block rather than accepting it.
 
@@ -147,7 +195,7 @@ Confirm the `url` scope is present, a filter without it is a global suppression 
 </details>
 
 <details>
-<summary><b>Step 2, Verify scan and gate order</b> · filter before scan · gate last</summary>
+<summary><b>Step 5, Verify scan and gate order</b> · filter before scan · gate last</summary>
 
 ### What you are learning
 
@@ -196,7 +244,7 @@ Confirm both invariants, filter early, gate last. The decision: *the plan is seq
 </details>
 
 <details>
-<summary><b>Step 3, Run the gate and read its actual exit code</b> · exit 1 on a real High</summary>
+<summary><b>Step 6, Run the gate and read its actual exit code</b> · exit 1 on a real High</summary>
 
 ### What you are learning
 
@@ -245,7 +293,7 @@ Read the exit `1` next to a positive High count and the hosted gate failure, the
 </details>
 
 <details>
-<summary><b>Step 4, Reconcile filtered and remaining findings</b> · FP held · High kept</summary>
+<summary><b>Step 7, Reconcile filtered and remaining findings</b> · FP held · High kept</summary>
 
 ### What you are learning
 
@@ -255,12 +303,12 @@ Confirm from the official report that the scoped False Positive held *and* the g
 
 A failed job, on its own, cannot tell you *why* it failed. This step reads the two findings that explain the decision, from the same report the gate judged:
 
-- **rule `10021`**, *X-Content-Type-Options Header Missing*, now `Low (False Positive)`. The filter from Step 1 held: the finding is still in the report (not hidden), but carries the reviewed disposition, so the gate did not count it.
+- **rule `10021`**, *X-Content-Type-Options Header Missing*, now `Low (False Positive)`. The filter from Step 4 held: the finding is still in the report (not hidden), but carries the reviewed disposition, so the gate did not count it.
 - **rule `40012`**, *Cross Site Scripting (Reflected)*, `High (Medium)`. The genuine High the team must not ship, untouched by the filter, which is exactly why the gate blocked.
 
 Seeing both in one report is the point. The filter did not weaken the gate against real risk; it only removed reviewed noise. That is the sentence you could put in a release-block ticket and have another engineer agree with.
 
-**Predict before you run:** you expect `10021, Low (False Positive)` and `40012, High (Medium)` in the same report, reconciling with the exit `1` from Step 3. If `10021` is missing entirely, your filter over-suppressed; if `40012` is gone, the gate had no business passing.
+**Predict before you run:** you expect `10021, Low (False Positive)` and `40012, High (Medium)` in the same report, reconciling with the exit `1` from Step 6. If `10021` is missing entirely, your filter over-suppressed; if `40012` is gone, the gate had no business passing.
 
 ### Run command
 
