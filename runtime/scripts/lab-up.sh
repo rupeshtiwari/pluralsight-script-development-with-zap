@@ -1,6 +1,6 @@
 #!/bin/bash
 # Bring the demo stack up and wait for all four services to be healthy.
-#   APP_BUILD=vulnerable|remediated ./scripts/demo_up.sh
+#   APP_BUILD=vulnerable|remediated ./scripts/lab-up.sh
 set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 cd "${REPO_ROOT}"
@@ -48,8 +48,8 @@ while :; do
         echo
         warn "The stack is LEFT RUNNING so you can inspect it. Useful next steps:"
         echo "    ${COMPOSE} logs -f zap        # follow ZAP's boot (add-on download / core boot)"
-        echo "    HEALTH_TIMEOUT=1200 ./scripts/demo_up.sh   # give a cold first boot more time"
-        echo "    ./scripts/demo_down.sh        # tear everything down when done"
+        echo "    HEALTH_TIMEOUT=1200 ./scripts/lab-up.sh   # give a cold first boot more time"
+        echo "    ./scripts/lab-down.sh        # tear everything down when done"
         die "Stack did not become healthy in time. The ZAP log above shows the cause (usually a slow or blocked marketplace add-on download, or the ZAP core not staying up after first boot)."
     fi
     if [ $(( now - last_beat )) -ge 30 ]; then
