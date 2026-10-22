@@ -5,11 +5,11 @@
 > ```bash
 > cd "$HOME/pluralsight-script-development-with-zap"   # the repo root (where ./lab lives)
 > ./lab up      # start the lab (first time; waits until ready)
-> ./lab step 1       # run step 1   (then ./lab step 2, ./lab step 3, ./lab step 4)
+> ./lab run load-python-active-scan-rule   # run the first step (each step’s name is in the walk-through below)
 > ./lab down    # stop the lab when you are done
 > ```
 >
-> The walk-through below shows each command as `./steps/0N-...sh` (run inside the demo folder, this is what you record); `./lab step N` runs exactly that after cd-ing there for you.
+> The walk-through below shows each command as `./steps/0N-...sh` (run inside the demo folder, this is what you record); `./lab run <name>` runs that same step from the repo root (it cd’s into the demo folder for you).
 >
 > 🧪 **Before you record, self-test off camera.** `preflight-check` is NOT an on-camera command. Run it first to confirm every step works and prints the expected output, then record. It writes `course-evidence.txt`, and names any broken step in a `FAIL-*.log`.
 > ```bash
