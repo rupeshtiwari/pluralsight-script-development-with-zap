@@ -1,4 +1,4 @@
-name: Demo end-to-end (real ZAP lab, -before)
+name: Lab end-to-end (real ZAP, -before)
 
 # The automated end-to-end gate, run on the -before branches, the surface we record from. It reproduces
 # exactly what the recorder does on camera: bring up the full Globomantics lab on a hosted runner
@@ -63,6 +63,11 @@ jobs:
         run: HEALTH_TIMEOUT=900 ./lab up
 
       - name: Run all four demo steps end to end (every step must PASS)
+        # Authenticate the GitHub Actions API that the hosted-run proof (m2-demo1, m2-demo3) reads. Without
+        # a token the call is anonymous and shares a 60-request/hour budget across all runner IPs, so it is
+        # throttled at random and the proof flips red; github.token gives this job the 5000/hour budget.
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           # The course self-test is one off-camera command: ./preflight-check. Scope it to THIS -before
