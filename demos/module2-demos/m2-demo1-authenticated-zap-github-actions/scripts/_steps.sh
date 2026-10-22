@@ -237,7 +237,7 @@ step3_script_job() {
     assert="$(printf '%s' "${steps}" | tr ';' '\n' | grep -m1 '^Assert the authenticated custom alert' | cut -d= -f2)"
     { [ -n "${py}" ] || { [ "${assert}" = "success" ] && { [ "${covers}" = "yes" ] || [ "${covers}" = "branch" ]; }; }; } && py_ok=1
     fm star "JavaScript check (globomantics-marker)" "${js:+marker header on an authenticated request: }${js:-no marked authenticated request}" focus
-    fm star "Python check (globomantics-active-rule)" "${py:+local custom alert ${py}}${py:-hosted report custom alert (assert=${assert:-none})}" focus
+    fm star "Python check (globomantics-active-rule)" "${py:+local custom alert }${py:-hosted report custom alert (assert=${assert:-none})}" focus
     if [ -n "${js}" ] && [ -n "${py_ok}" ]; then
         pass "both Module 1 scripts ran during the authenticated plan (JS stamped an authenticated request; the Python rule raised its alert on the login-only page)"
     else
