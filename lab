@@ -5,11 +5,13 @@
 #   ./lab up         bring up the lab (Docker + ZAP), wait until ready
 #   ./lab step 1          run step 1  (the same ./steps/01-...sh shown in the walk-through)
 #   ./lab step 2|3|4      run step 2 / 3 / 4
-#   ./lab preflight  run all four steps and SAVE each step's output as evidence to upload
 #   ./lab down       stop the lab
 #   ./lab reset      reset the lab
 #   ./lab logs       show ZAP's boot log (add 'app'/'postgres'/'mongo' for another service)
 #   ./lab status     show the containers and their health
+#
+# The course self-test is a SEPARATE, off-camera command: ./preflight-check (whole course by default,
+# or --m1 / --m1d1 to scope it). It is not part of ./lab and is never run on camera.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 branch="$(git -C "$ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
@@ -26,31 +28,6 @@ case "$cmd" in
   up)    cd "$folder" && exec ./scripts/lab-up.sh ;;
   down)  cd "$folder" && exec ./scripts/lab-down.sh ;;
   reset) cd "$folder" && exec ./scripts/lab-reset.sh ;;
-  preflight)
-    # '--all' runs preflight for EVERY demo whose steps are present (e.g. on the integration branch
-    # that carries all authored files), so you can confirm the whole course in one go. Each demo saves
-    # its own logs/preflight-step-0N.log; a demo whose taught file is not authored on this branch is
-    # skipped with a note, never a crash.
-    if [ "${2:-}" = "--all" ] || [ "${2:-}" = "--course" ]; then
-      # Whole course in one go. The course-wide, scopable self-test lives in ./preflight-check
-      # (./preflight-check, or --module1 / --m1d1 ...); this is a convenience alias to it.
-      exec "$ROOT/preflight-check"
-    fi
-    # Human-in-loop gate: re-run this demo's four real named steps and save each step's visible
-    # output as logs/preflight-step-0N.log, then print the exact files to hand to the author.
-    "$ROOT/runtime/scripts/preflight_all_steps.sh" "$folder"; rc=$?
-    if [ "$rc" -eq 0 ]; then
-      echo
-      echo "Preflight PASSED. Upload these evidence files to the author:"
-      # print repo-relative paths only, never the absolute path (it would show the machine username)
-      for f in "$folder"/logs/preflight-step-0*.log; do [ -f "$f" ] && echo "    ${f#"$ROOT"/}"; done
-      echo "The author compares them against the committed evidence and reconciles any difference."
-    else
-      echo
-      echo "Preflight did NOT pass. Fix the environment (re-run ./setup/setup-macos.sh) or the"
-      echo "authored file the failing step named, then run ./lab preflight again."
-    fi
-    exit "$rc" ;;
   logs)   cd "$ROOT" && exec docker compose logs --tail="${3:-200}" "${2:-zap}" ;;
   status) cd "$ROOT" && exec docker compose ps ;;
   step)
@@ -63,5 +40,5 @@ case "$cmd" in
     s="$(ls "$folder"/steps/0"$cmd"-*.sh 2>/dev/null | head -1)"
     [ -n "$s" ] || { echo "No step $cmd found in ${folder#"$ROOT"/}/steps"; exit 2; }
     cd "$folder" && exec "$s" ;;
-  *) echo "usage: ./lab <up|step N|preflight|down|reset|logs|status>   (clip picked from branch: ${stem:-unknown})"; exit 2 ;;
+  *) echo "usage: ./lab <up|step N|down|reset|logs|status>   (clip picked from branch: ${stem:-unknown})"; exit 2 ;;
 esac
