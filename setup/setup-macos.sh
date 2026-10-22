@@ -179,7 +179,7 @@ done
 echo
 if [ "${ready}" = "1" ]; then
     echo "${C_OK}All components are READY. You can start the demo:${C_RST}"
-    echo "    ./demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/scripts/demo_up.sh"
+    echo "    ./demos/module1-demos/m1-demo1-targeted-injection-xss-csrf/scripts/lab-up.sh"
     echo
     echo "${C_MUT}Full transcript: ${LOG}${C_RST}"
     exit 0
