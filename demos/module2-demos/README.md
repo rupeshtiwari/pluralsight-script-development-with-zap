@@ -12,7 +12,7 @@
 
 The Globomantics release team needs repeatable security checks in CI. Its pipeline must authenticate, retrieve the right custom finding, and enforce a risk policy that ignores only reviewed benign noise.
 
-> 🧪 **Self-test off camera first:** `./preflight-check --module2` runs every Module 2 demo's steps and writes `course-evidence.txt` (and a `FAIL-<module>-<demo>.log` for anything broken). Use `./preflight-check` for the whole course, or `--m2d1 … --m2d3` for one demo. It is not an on-camera step.
+> 🧪 **Self-test off camera first:** `./preflight-check --m2` runs every Module 2 demo's steps and writes `course-evidence.txt` (and a `FAIL-<module>-<demo>.log` for anything broken). Use `./preflight-check` for the whole course, or `--m2d1 … --m2d3` for one demo. It is not an on-camera step.
 
 ## What you will learn
 
