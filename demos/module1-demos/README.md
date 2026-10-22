@@ -12,6 +12,8 @@
 
 The Globomantics Store has several distinct input boundaries. Maya must test them precisely, extend ZAP with custom scripts, and prove the scanner reached the authenticated code she intended to assess.
 
+> 🧪 **Self-test off camera first:** `./preflight-check --module1` runs every Module 1 demo's steps and writes `course-evidence.txt` (and a `FAIL-<module>-<demo>.log` for anything broken). Use `./preflight-check` for the whole course, or `--m1d1 … --m1d3` for one demo. It is not an on-camera step.
+
 ## What you will learn
 
 **Demo 1, Validate injection, XSS and CSRF.** A focused ZAP policy detects three types of injection; context-specific payloads validate XSS, and two sessions reveal the CSRF token-binding failure. These findings are then reconciled with real application behavior *(EO1a, EO1b, EO1c)*.
