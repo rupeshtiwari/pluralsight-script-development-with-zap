@@ -46,7 +46,7 @@ ensure_ready() {
     }
     zap core/view/version | grep -q '"version"' || {
         fail "ZAP API not reachable" "the stack may still be starting" \
-             "run scripts/demo_up.sh, wait for 'Up', then retry"
+             "run scripts/lab-up.sh, wait for 'Up', then retry"
         return 1
     }
     # ZAP's API answers a little BEFORE its boot-time add-ons finish registering, so a step run the
@@ -63,7 +63,7 @@ ensure_ready() {
     fi
     zap ascan/view/scanners | grep -q '"id":"40033"' || {
         fail "NoSQL rule 40033 not installed" "ascanrulesBeta did not load after waiting ~90s" \
-             "run ./demo down then ./demo up and wait for 'All services healthy', then retry; if it still fails send ./demo logs"
+             "run ./lab down then ./lab up and wait for 'All services healthy', then retry; if it still fails send ./lab logs"
         return 1
     }
     return 0
@@ -182,7 +182,7 @@ print_reference() {
 step1_injection() {
     fm header "Targeted injection scan, one policy, three endpoints" \
               "Proves ZAP detects SQL, NoSQL, and command injection as real findings (EO1a)."
-    clear_alerts || { fail "could not clear old alerts" "ZAP API refused deleteAllAlerts" "restart ZAP with ./scripts/demo_reset.sh"; return 1; }
+    clear_alerts || { fail "could not clear old alerts" "ZAP API refused deleteAllAlerts" "restart ZAP with ./scripts/lab-reset.sh"; return 1; }
     build_policy_quiet || { fail "ZAP rejected the scan policy" "a rule ID is not installed" "check ascanrulesBeta (40033) is installed"; return 1; }
     local rules; rules="$(enabled_rules "${POLICY}")"
     fm star "Policy ${POLICY} · rules ZAP reports enabled" "${rules:-<none>}"
@@ -229,7 +229,7 @@ step1_injection() {
 step2_xss() {
     fm header "Reflected XSS, a context-matched payload, then ZAP confirms it" \
               "The output context decides the payload; ZAP's reflected-XSS rule 40012 then confirms the finding (EO1b)."
-    clear_alerts_for "${APP_INTERNAL}/greet" 40012 || { fail "could not clear old XSS alerts" "ZAP API refused deleteAlert" "restart ZAP with ./scripts/demo_reset.sh"; return 1; }
+    clear_alerts_for "${APP_INTERNAL}/greet" 40012 || { fail "could not clear old XSS alerts" "ZAP API refused deleteAlert" "restart ZAP with ./scripts/lab-reset.sh"; return 1; }
 
     # Part A, Maya's context-matched cases. Each payload is sent through ZAP; the
     # exact request and the response line that reflects it are printed.

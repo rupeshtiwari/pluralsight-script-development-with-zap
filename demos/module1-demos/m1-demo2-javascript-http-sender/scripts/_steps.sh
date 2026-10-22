@@ -155,7 +155,7 @@ probe_until_marked() { # -> prints "request-line || header" on success; empty on
 ensure_ready() {
     [ -n "${K}" ] || { fail "ZAP_API_KEY is not set" "the .env file is missing or not loaded" "run from the repo so .env loads"; return 1; }
     zap core/view/version | grep -q '"version"' || {
-        fail "ZAP API not reachable" "the stack may still be starting" "run scripts/demo_up.sh, wait for 'Up', then retry"; return 1; }
+        fail "ZAP API not reachable" "the stack may still be starting" "run scripts/lab-up.sh, wait for 'Up', then retry"; return 1; }
     [ -f "${SCRIPT_FILE_HOST}" ] || {
         need_author "you have not written the HTTP Sender script yet" \
             "the m1-demo2-before branch ships without zap-scripts/globomantics-marker.js on purpose; writing it IS this demo" \
