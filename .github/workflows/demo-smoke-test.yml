@@ -87,9 +87,15 @@ jobs:
           include-hidden-files: true
           if-no-files-found: warn
 
-      - name: Show the gate run log and ZAP boot log if anything failed
+      - name: Show the self-test evidence, gate run log and ZAP boot log if anything failed
         if: failure()
         run: |
+          echo "===== course-evidence.txt (the self-test's full per-step output) ====="
+          cat course-evidence.txt 2>/dev/null || echo "(no course-evidence.txt)"
+          echo "===== FAIL-*.log (the failing demo and step) ====="
+          for f in FAIL-*.log; do [ -f "$f" ] && { echo "--- $f ---"; cat "$f"; }; done 2>/dev/null || true
+          echo "===== per-step preflight logs ====="
+          find demos -path '*/logs/preflight-*.log' -exec sh -c 'echo "--- $1 ---"; cat "$1"' _ {} \; 2>/dev/null || true
           echo "===== gate run.log (if present) ====="
           find demos -path '*/logs/.gate/run.log' -exec cat {} \; 2>/dev/null || true
           echo "===== ZAP boot log ====="
