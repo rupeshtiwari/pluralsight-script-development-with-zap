@@ -46,17 +46,51 @@ if not repo:
     sys.exit(1)
 
 def api(path):
-    req = urllib.request.Request("https://api.github.com/repos/%s/%s" % (repo, path),
-                                 headers={"Accept": "application/vnd.github+json", "User-Agent": "globo-demo"})
-    tok = os.environ.get("GITHUB_TOKEN")
-    if tok:
-        req.add_header("Authorization", "Bearer " + tok)
-    with urllib.request.urlopen(req, timeout=20) as r:
-        return json.load(r)
+    # The GitHub Actions API is called from inside CI (and locally). Two transient conditions make a
+    # single call unreliable and used to flip the hosted proof red at random: an UNAUTHENTICATED call
+    # (no GITHUB_TOKEN) shares a 60-request/hour budget across GitHub's runner IPs and is throttled with
+    # HTTP 403, and the ?branch= filter is eventually consistent, so it can briefly return an empty list
+    # right after a push. Retry transient HTTP (403/429/5xx), network errors and timeouts with backoff so
+    # a hiccup does not read as "no hosted run exists". A 404 (genuinely absent) is not retried.
+    import time, urllib.error
+    last = None
+    for attempt in range(5):
+        req = urllib.request.Request("https://api.github.com/repos/%s/%s" % (repo, path),
+                                     headers={"Accept": "application/vnd.github+json", "User-Agent": "globo-demo"})
+        tok = os.environ.get("GITHUB_TOKEN")
+        if tok:
+            req.add_header("Authorization", "Bearer " + tok)
+        try:
+            with urllib.request.urlopen(req, timeout=20) as r:
+                return json.load(r)
+        except urllib.error.HTTPError as e:
+            last = e
+            if e.code in (403, 429, 500, 502, 503, 504) and attempt < 4:
+                time.sleep(2 ** attempt); continue
+            raise
+        except Exception as e:  # URLError, timeout, transient JSON/read errors
+            last = e
+            if attempt < 4:
+                time.sleep(2 ** attempt); continue
+            raise
+    if last:
+        raise last
+    return {}
 
-try:
-    runs = api("actions/workflows/%s/runs?branch=%s&status=completed&per_page=20" % (wf, branch)).get("workflow_runs", [])
-except Exception:
+# Fetch the completed runs for this workflow + branch. The branch filter is eventually consistent, so an
+# empty list right after a push is not proof that no run exists: retry a few times before giving up.
+runs = []
+import time as _time
+for _attempt in range(5):
+    try:
+        runs = api("actions/workflows/%s/runs?branch=%s&status=completed&per_page=20" % (wf, branch)).get("workflow_runs", [])
+    except Exception:
+        sys.exit(1)
+    if runs:
+        break
+    if _attempt < 4:
+        _time.sleep(2 ** _attempt)
+if not runs:
     sys.exit(1)
 for run in runs:
     sha = run["head_sha"]
