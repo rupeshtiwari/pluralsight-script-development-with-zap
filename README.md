@@ -157,6 +157,13 @@ git switch m1-demo1-before</pre>Each <code>*-before</code> branch is an independ
 <tr><td>⑤</td><td><b>Observe the result and clean up</b><pre>./scripts/lab-down.sh</pre>Record the actual displayed evidence.</td></tr>
 </table>
 
+> 🧪 **Self-test first (off camera).** Before you follow the steps by hand, run the self-test to confirm every step works and prints the expected output. It is NOT a lab step — it just runs the real steps for you and writes `course-evidence.txt` (and a `FAIL-<module>-<demo>.log` naming any broken step):
+>
+> ```bash
+> ./preflight-check            # the whole course, every demo, in order
+> ./preflight-check --m1d1     # or just one demo (--m1d1 … --m2d3), or --module1 / --module2
+> ```
+
 **Different demo?** Return to the repository root, save any personal changes, switch to its `*-before` branch, then follow its own README. Don't reuse scan history from another demo.
 
 ## Your Six Hands-On Demos
