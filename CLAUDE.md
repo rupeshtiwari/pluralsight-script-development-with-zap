@@ -89,7 +89,7 @@ Key constraints from the outline:
 
 ## Binding code rules (October 16, 2026)
 
-- **Proven worktree defect fix:** Every demo `scripts/demo_up.sh`, `demo_down.sh`, and `demo_reset.sh` must resolve the repository root from exactly four parent levels below `demos/moduleN-demos/<demo>/scripts/`, not five. Keep the offline executable-wrapper test; a GitHub layout check cannot detect a broken runtime path by itself.
+- **Proven worktree defect fix:** Every demo `scripts/lab-up.sh`, `lab-down.sh`, and `lab-reset.sh` must resolve the repository root from exactly four parent levels below `demos/moduleN-demos/<demo>/scripts/`, not five. Keep the offline executable-wrapper test; a GitHub layout check cannot detect a broken runtime path by itself.
 - **Security evidence exception:** A routine ping of `/admin/ping` cannot establish command injection. The approved fourth step now confirms a harmless injected marker from the authorized training target. Preserve this genuine proof, not a speculative `✔ PASS`.
 
 ## Public and private repositories (owner rule, 2026-10-16)
