@@ -3,8 +3,9 @@
 # so you never have to cd by hand or remember the long path.
 #
 #   ./lab up         bring up the lab (Docker + ZAP), wait until ready
-#   ./lab step 1          run step 1  (the same ./steps/01-...sh shown in the walk-through)
-#   ./lab step 2|3|4      run step 2 / 3 / 4
+#   ./lab run <name>      run a step by its name, e.g. ./lab run load-javascript-http-sender
+#                         (the names are the ./steps/ scripts shown in this demo's README walk-through;
+#                          it cd's into the demo folder for you, so you can run it from the repo root)
 #   ./lab down       stop the lab
 #   ./lab reset      reset the lab
 #   ./lab logs       show ZAP's boot log (add 'app'/'postgres'/'mongo' for another service)
@@ -30,15 +31,21 @@ case "$cmd" in
   reset) cd "$folder" && exec ./scripts/lab-reset.sh ;;
   logs)   cd "$ROOT" && exec docker compose logs --tail="${3:-200}" "${2:-zap}" ;;
   status) cd "$ROOT" && exec docker compose ps ;;
-  step)
+  run)   # run a step by its conceptual name: ./lab run load-javascript-http-sender
+    slug="${2:-}"
+    [ -n "$slug" ] || { echo "usage: ./lab run <step-name>   (the names are the ./steps/ scripts in this demo's README walk-through, e.g. ./lab run load-javascript-http-sender)"; exit 2; }
+    s="$(ls "$folder"/steps/[0-9][0-9]-"$slug".sh 2>/dev/null | head -1)"
+    [ -n "$s" ] || { echo "No step named '$slug' in ${folder#"$ROOT"/}/steps. The exact names are in this demo's README walk-through."; exit 2; }
+    cd "$folder" && exec "$s" ;;
+  step)   # hidden back-compat for the numeric form; the documented command is ./lab run <name>
     n="${2:-}"
-    case "$n" in 1|2|3|4) ;; *) echo "usage: ./lab step <1|2|3|4>"; exit 2 ;; esac
+    case "$n" in 1|2|3|4) ;; *) echo "usage: ./lab run <step-name>   (see the README walk-through for the names)"; exit 2 ;; esac
     s="$(ls "$folder"/steps/0"$n"-*.sh 2>/dev/null | head -1)"
     [ -n "$s" ] || { echo "No step $n found in ${folder#"$ROOT"/}/steps"; exit 2; }
     cd "$folder" && exec "$s" ;;
-  1|2|3|4)   # back-compat: ./lab 1 still runs step 1
+  1|2|3|4)   # hidden back-compat: ./lab 1 still runs the first step
     s="$(ls "$folder"/steps/0"$cmd"-*.sh 2>/dev/null | head -1)"
     [ -n "$s" ] || { echo "No step $cmd found in ${folder#"$ROOT"/}/steps"; exit 2; }
     cd "$folder" && exec "$s" ;;
-  *) echo "usage: ./lab <up|step N|down|reset|logs|status>   (clip picked from branch: ${stem:-unknown})"; exit 2 ;;
+  *) echo "usage: ./lab <up|run <name>|down|reset|logs|status>   (clip picked from branch: ${stem:-unknown})"; exit 2 ;;
 esac
