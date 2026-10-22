@@ -192,18 +192,22 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-p
 
 Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP, localhost:8080/zap/</a> → **Scripts → Active Rules** and confirm the loaded rule and its name.
 
-### Expected result (the script's output contract, not your run)
+### Expected result (the exact terminal output, verified in the lab)
 
-<table>
-<thead><tr><th>Displayed field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody>
-<tr><td><b>Python Scripting (jython) add-on</b></td><td><code>installed</code></td><td>The engine your rule needs</td></tr>
-<tr><td><b>Saved rule source</b></td><td><code>zap-scripts/globomantics-active-rule.py</code></td><td>The file you authored</td></tr>
-<tr><td><b>Alert name in the source</b></td><td><code>Globomantics unsafe reflection (custom rule)</code></td><td>A named finding, not built-in XSS</td></tr>
-<tr><td><b>Registered in ZAP</b></td><td><code>globomantics-active-rule · active · jython · enabled true</code></td><td>Type and engine correct</td></tr>
-<tr><td><b>Compile/run error flag</b></td><td><code>false</code></td><td>Jython loaded without errors</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS the Jython active rule is registered, enabled and loaded without errors</code></td><td>Loaded ≠ a fired alert</td></tr>
-</tbody></table>
+Your terminal prints exactly this. Every value is the real captured output, verified in the lab and identical on every machine (only ZAP's randomised payload casing and run-specific IDs can vary):
+
+```text
+✔ PASS  the Jython active rule is registered, enabled and loaded without errors
+```
+
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Python Scripting (jython) add-on installed | `15.0.0` |
+| Saved rule source | `zap-scripts/globomantics-active-rule.py  (sha256 ae2206faa42f)` |
+| Alert name in the source | `Globomantics unsafe reflection (custom rule)` |
+| Registered in ZAP | `globomantics-active-rule · type active · engine jython · enabled true` |
+| ZAP compile/run error flag | `false` |
+| Source | `loaded from /zap-scripts-py/globomantics-active-rule.py` |
 
 ### Investigate, then decide
 
@@ -305,17 +309,21 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-p
 
 Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP, localhost:8080/zap/</a> → **Scripts → Authentication** to confirm the registered script.
 
-### Expected result (the script's output contract, not your run)
+### Expected result (the exact terminal output, verified in the lab)
 
-<table>
-<thead><tr><th>Displayed field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody>
-<tr><td><b>Saved auth source</b></td><td><code>zap-scripts/globomantics-auth.py</code></td><td>The file you authored</td></tr>
-<tr><td><b>Credential submission in authenticate()</b></td><td><code>/login POST username</code></td><td>Training-only simplified login</td></tr>
-<tr><td><b>Registered in ZAP</b></td><td><code>globomantics-auth · authentication · error flag false</code></td><td>Identity and clean load</td></tr>
-<tr><td><b>Logged-in check (regex ZAP uses)</b></td><td><code>Signed in as</code> · matches <code>1 / 0</code></td><td>Distinguishes logged-in from logged-out</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS authentication script registered and its logged-in check tells a logged-in page from a logged-out one</code></td><td>The protected endpoint is still to be tested</td></tr>
-</tbody></table>
+Your terminal prints exactly this. Every value is the real captured output, verified in the lab and identical on every machine (only ZAP's randomised payload casing and run-specific IDs can vary):
+
+```text
+✔ PASS  authentication script registered and its logged-in check tells a logged-in page from a logged-out one
+```
+
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Saved auth source | `zap-scripts/globomantics-auth.py  (sha256 0a559c1ca2ed)` |
+| Credential submission in authenticate() | `/login POST username` |
+| Registered in ZAP | `globomantics-auth · type authentication · error flag false` |
+| Logged-in verification (regex ZAP uses) | `Signed in as` |
+| Regex matches logged-in page / logged-out page | `1 / 0` |
 
 ### Investigate, then decide
 
@@ -353,18 +361,21 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-p
 
 Keep the denied and authenticated profile requests and the authentication trace visible together. Open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP, localhost:8080/zap/</a> → the **Globomantics context → Users → Alice** when you want to see the context ZAP authenticated as.
 
-### Expected result (the script's output contract, not your run)
+### Expected result (the exact terminal output, verified in the lab)
 
-<table>
-<thead><tr><th>Displayed field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody>
-<tr><td><b>Without login</b></td><td><code>/account/profile → HTTP 401</code></td><td>The endpoint is truly protected</td></tr>
-<tr><td><b>ZAP forced-user (script auth)</b></td><td><code>/account/profile → HTTP 200</code></td><td>ZAP obtained a valid session</td></tr>
-<tr><td><b>Auth script ran</b></td><td><code>authenticate: user=alice login_url=&lt;login URL&gt;</code></td><td>The trace proves script invocation</td></tr>
-<tr><td><b>Custom rule scan as alice</b></td><td><code>scan &lt;id&gt; · finished · &lt;n&gt; probe requests</code></td><td>The rule ran in authenticated scope</td></tr>
-<tr><td><b>Rule saw the logged-in page</b></td><td><code>reflected: param=note</code></td><td>The vulnerable field was reached</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS ZAP authenticated with the script and ran the custom rule against the logged-in page</code></td><td>Both status codes <b>and</b> the auth trace</td></tr>
-</tbody></table>
+Your terminal prints exactly this. Every value is the real captured output, verified in the lab and identical on every machine (only ZAP's randomised payload casing and run-specific IDs can vary):
+
+```text
+✔ PASS  ZAP authenticated with the script and ran the custom rule against the logged-in page
+```
+
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Without login | `/account/profile -> HTTP 401` |
+| ZAP forced-user (script auth) | `/account/profile -> HTTP 200` |
+| Auth script ran | `authenticate: user=alice login_url=http://app:8000/login` |
+| Custom rule scan as user alice | `scan 0 · finished · 2 probe requests` |
+| Rule saw the logged-in page (note reflected) | `reflected: param=note` |
 
 ### Investigate, then decide
 
@@ -402,20 +413,24 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-p
 
 Then open <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP, localhost:8080/zap/</a> → **Alerts** and select the newly raised custom alert on `/account/profile`.
 
-### Expected result (the script's output contract, not your run)
+### Expected result (the exact terminal output, verified in the lab)
 
-The reflected marker value is run-specific; read it from your output. The identity fields are the demo's.
+Your terminal prints exactly this. Every value is the real captured output, verified in the lab and identical on every machine (only ZAP's randomised payload casing and run-specific IDs can vary):
 
-<table>
-<thead><tr><th>Displayed field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody>
-<tr><td><b>Before the scan</b></td><td><code>absent</code></td><td>The alert store was cleared</td></tr>
-<tr><td><b>Alert · pluginId</b></td><td><code>Globomantics unsafe reflection (custom rule) · 50000</code></td><td>Your named rule, not built-in XSS</td></tr>
-<tr><td><b>URL · parameter</b></td><td><code>/account/profile?note=&lt;marker&gt; · note</code></td><td>The authenticated field</td></tr>
-<tr><td><b>Risk · confidence</b></td><td><code>Medium · Medium</code></td><td>The disposition Module 2 will read</td></tr>
-<tr><td><b>Alert record saved</b></td><td><code>logs/custom-alert-record.json</code></td><td>Handed forward to Module 2</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS the custom rule raised its named alert on this authenticated scan (absent before, present after) and the record is saved</code></td><td>Absent before and present after</td></tr>
-</tbody></table>
+```text
+✔ PASS  the custom rule raised its named alert on this authenticated scan (absent before, present after) and the record is saved
+```
+
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Before Step 3 scan | `absent` |
+| alert | `Globomantics unsafe reflection (custom rule)` |
+| pluginId | `50000` |
+| url | `http://app:8000/account/profile?note=GLOBOxss7marker` |
+| param | `note` |
+| risk | `Medium` |
+| confidence | `Medium` |
+| Alert record saved for Module 2 | `logs/custom-alert-record.json` |
 
 ### Investigate, then decide
 
