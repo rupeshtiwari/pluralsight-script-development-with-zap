@@ -92,11 +92,11 @@ def check_demo_readmes():
         low = text.lower()
         if "## setup" not in low and "setup" not in low:
             add("REQUIRED FIX", "%s/README.md" % folder, "no Setup section")
-        if "demo_down.sh" not in text:
+        if "lab-down.sh" not in text:
             add("REQUIRED FIX", "%s/README.md" % folder,
-                "no cleanup reference (scripts/demo_down.sh)")
+                "no cleanup reference (scripts/lab-down.sh)")
         # setup / cleanup scripts present on disk
-        for script in ("demo_up.sh", "demo_down.sh"):
+        for script in ("lab-up.sh", "lab-down.sh"):
             sp = os.path.join(ROOT, folder, "scripts", script)
             if not os.path.exists(sp):
                 add("REQUIRED FIX", "%s/scripts/%s" % (folder, script),
