@@ -122,11 +122,13 @@ Keep `ci/gate-plan.yaml` open at `alertFilter`, rule ID, `newRisk` and the scope
 
 ### Expected result (the script's output contract, not your run)
 
-<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody><tr><td><b>Filtered rule (ruleId)</b></td><td><code>10021 (X-Content-Type-Options Header Missing)</code></td><td>Exactly which finding</td></tr>
-<tr><td><b>New disposition (newRisk)</b></td><td><code>False Positive</code></td><td>Reviewed, not deleted</td></tr>
-<tr><td><b>Scope (url)</b></td><td><code>http://app:8000/greet.*</code></td><td>One path, not a global disable</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS the plan marks rule 10021 as a False Positive, scoped to http://app:8000/greet.*</code></td><td>The report still must confirm it applied</td></tr></tbody></table>
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Filtered rule  (ruleId) | `10021  (X-Content-Type-Options Header Missing)` |
+| New disposition  (newRisk) | `False Positive` |
+| Scope  (url) | `http://app:8000/greet.*` |
+
+**`✔ PASS`** the plan marks rule 10021 as a False Positive, scoped to http://app:8000/greet.*
 
 ### Investigate, then decide
 
@@ -169,11 +171,13 @@ Keep the ordered `jobs` list in `ci/gate-plan.yaml` visible while you read the r
 
 ### Expected result (the script's output contract, not your run)
 
-<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody><tr><td><b>Job order</b></td><td><code>… alertFilter → … → activeScan → … → report → exitStatus</code></td><td>Matches the Module 2 architecture</td></tr>
-<tr><td><b>alertFilter before activeScan</b></td><td><code>yes</code></td><td>New alerts inherit the disposition</td></tr>
-<tr><td><b>exitStatus runs last</b></td><td><code>yes</code></td><td>The gate uses the final alert set</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS the plan follows the architecture job order: filter before scanning, gate last</code></td><td>Config proof, not yet an exit code</td></tr></tbody></table>
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Job order (ci/gate-plan.yaml) | `passiveScan-config → alertFilter → script → script → spider → passiveScan-wait → activeScan-policy → activeScan → passiveScan-wait → report → exitStatus` |
+| Architecture order (Module 2) | `passiveScan-config → alertFilter → script → spider → passiveScan-wait → activeScan-policy → activeScan → passiveScan-wait → report → exitStatus` |
+| alertFilter before activeScan · exitStatus last | `yes · yes` |
+
+**`✔ PASS`** the plan follows the architecture job order: filter before scanning, gate last.
 
 ### Investigate, then decide
 
@@ -215,12 +219,14 @@ For the hosted proof, open the <a href="https://github.com/rupeshtiwari/pluralsi
 
 The High-risk count and hosted run ID/commit are run-specific, read them from your output.
 
-<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody><tr><td><b>Gate thresholds (errorLevel · warnLevel)</b></td><td><code>HIGH · MEDIUM</code></td><td>The declared release policy</td></tr>
-<tr><td><b>High-risk alerts after filtering</b></td><td><code>&lt;count&gt;</code> (≥ 1, genuine)</td><td>A real remaining High finding</td></tr>
-<tr><td><b>Process exit code</b></td><td><code>1</code></td><td>The expected security block</td></tr>
-<tr><td><b>Hosted gate run</b></td><td><code>&lt;run id&gt; · gate step failure · commit &lt;sha&gt; · covers this code</code></td><td>The hosted gate blocked for this code</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS the gate exited 1 for a real High-risk alert, and the hosted gate job blocked the build for this code</code></td><td>A generic nonzero does not pass</td></tr></tbody></table>
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Gate thresholds from the plan  (errorLevel · warnLevel) | `HIGH · MEDIUM` |
+| High-risk alerts after filtering (report) | `3` |
+| Process exit code  (echo $?) | `1` |
+| Hosted gate run (GitHub Actions) | `<run id> · gate step failure · commit <sha> · covers this code: yes` |
+
+**`✔ PASS`** the gate exited 1 for a real High-risk alert, and the hosted gate job blocked the build for this code.
 
 ### Investigate, then decide
 
@@ -263,11 +269,13 @@ For the hosted proof, open the same Actions run → **Artifacts → globo-gate-r
 
 ### Expected result (the script's output contract, not your run)
 
-<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody><tr><td><b>Benign finding (rule 10021)</b></td><td><code>X-Content-Type-Options Header Missing, Low (False Positive)</code></td><td>The filter held, finding still shown</td></tr>
-<tr><td><b>Real finding (rule 40012)</b></td><td><code>Cross Site Scripting (Reflected), High (Medium)</code></td><td>The genuine High remained</td></tr>
-<tr><td><b>Gate outcome</b></td><td><code>exit 1 → build blocked</code></td><td>Both records explain the block</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS the filtered report shows the benign finding as False Positive and the High kept, the reason the gate blocked</code></td><td>No fabricated fallback values</td></tr></tbody></table>
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Benign finding  (rule 10021) | `X-Content-Type-Options Header Missing, Low (False Positive)` |
+| Real finding  (rule 40012) | `Cross Site Scripting (Reflected), High (Medium)` |
+| Gate outcome (from this run) | `exit 1 → build blocked` |
+
+**`✔ PASS`** the filtered report shows the benign finding as False Positive and the High kept, the reason the gate blocked.
 
 ### Investigate, then decide
 

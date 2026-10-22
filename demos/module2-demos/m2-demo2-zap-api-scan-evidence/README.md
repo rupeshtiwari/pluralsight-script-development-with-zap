@@ -116,11 +116,14 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo2-z
 
 Values in `<…>` are run-specific and must be read from your own output. The named values are what the API returns on a healthy run.
 
-<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody><tr><td><b>ZAP runtime (GET core/view/version)</b></td><td><code>2.17.0</code></td><td>The engine that produced the findings</td></tr>
-<tr><td><b>Authenticated plan (automation/view/planProgress)</b></td><td><code>plan &lt;id&gt; · finished · 0 errors · scanning as alice</code></td><td>The plan completed, and as the real user</td></tr>
-<tr><td><b>Active scan (GET ascan/view/scans)</b></td><td><code>id=&lt;live scan ID&gt; · progress=100% · state=FINISHED</code></td><td>A finished scan, not merely a reachable API</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS API reports a finished authenticated scan</code></td><td>Machine-readable readiness</td></tr></tbody></table>
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| ZAP runtime  (GET core/view/version) | `2.17.0` |
+| Authenticated plan  (automation/view/planProgress) | `plan 0 · finished · 0 errors · scanning as alice` |
+| Active scan  (GET ascan/view/scans) | `id=0 · progress=100% · state=FINISHED` |
+| Requests the scan sent | `<live count>` |
+
+**`✔ PASS`** the API reports the ZAP runtime and a finished authenticated scan.
 
 ### Investigate, then decide
 
@@ -160,12 +163,14 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo2-z
 
 ### Expected result (the script's output contract, not your run)
 
-<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody><tr><td><b>Rule identity (pluginId · alertRef)</b></td><td><code>50000 · 50000</code></td><td>Your Jython rule, not a built-in</td></tr>
-<tr><td><b>Alert name</b></td><td><code>Globomantics unsafe reflection (custom rule)</code></td><td>The name your rule set</td></tr>
-<tr><td><b>Disposition (risk · confidence)</b></td><td><code>Medium · Medium</code></td><td>Two separate axes, read both</td></tr>
-<tr><td><b>Parameter</b></td><td><code>note</code></td><td>The profile input the rule probes</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS API returns the named custom alert</code></td><td>Identity, not a count</td></tr></tbody></table>
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Rule identity  (pluginId · alertRef) | `50000 · 50000` |
+| Alert | `Globomantics unsafe reflection (custom rule)  (alert id <id>)` |
+| Disposition  (risk · confidence) | `Medium · Medium` |
+| Parameter | `note` |
+
+**`✔ PASS`** the API returns the script-generated alert's rule identity and disposition.
 
 ### Investigate, then decide
 
@@ -203,12 +208,13 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo2-z
 
 ### Expected result (the script's output contract, not your run)
 
-<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody><tr><td><b>Report template</b></td><td><code>traditional-json</code></td><td>ZAP's official report type</td></tr>
-<tr><td><b>Report alert (pluginid · name)</b></td><td><code>50000 · Globomantics unsafe reflection (custom rule)</code></td><td>Same rule as the live API</td></tr>
-<tr><td><b>Report rating (riskdesc)</b></td><td><code>Medium (Medium)</code></td><td>Must equal Step 2's risk · confidence</td></tr>
-<tr><td><b>Reconciliation</b></td><td><code>report pluginid/riskdesc/param == API</code></td><td>Field-by-field agreement</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS JSON report reconciled with the API</code></td><td>Archived and live evidence agree</td></tr></tbody></table>
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Report  pluginid · riskdesc · param | `50000 · Medium (Medium) · note` |
+| API (Step 2)  pluginId · risk (confidence) · param | `50000 · Medium (Medium) · note` |
+| Fields that match | `3 of 3` |
+
+**`✔ PASS`** the official JSON report matches the API alert on rule ID, risk/confidence and parameter.
 
 ### Investigate, then decide
 
@@ -248,10 +254,14 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo2-z
 
 Insight values are genuinely run-specific; read yours from the output. The contract is that a real, non-empty insight must be present.
 
-<table><thead><tr><th>Output field</th><th>Expected value or example</th><th>What to inspect</th></tr></thead>
-<tbody><tr><td><b>Insight (level · key)</b></td><td><code>&lt;actual level&gt; · &lt;actual insight key&gt;</code></td><td>Must come from a non-empty insights[]</td></tr>
-<tr><td><b>Statistic · meaning</b></td><td><code>&lt;actual value&gt; · &lt;real description&gt;</code></td><td>Evidence about scan coverage/health</td></tr>
-<tr><td><b>Result</b></td><td><code>✔ PASS report Insights returned</code></td><td>Never substitute an unrelated counter</td></tr></tbody></table>
+| OBSERVED FIELD | ACTUAL VALUE |
+|---|---|
+| Insight  (level · key) | `<level> · <insight key>` |
+| Statistic · meaning | `<value> · <description>` |
+
+The report lists one of these pairs per insight (for example `Low · insight.log.error` with its count, or `Info · insight.code.2xx`); the exact keys and values are genuinely run-specific, so read yours from the output.
+
+**`✔ PASS`** the report's own Insights section reports scan effectiveness.
 
 ### Investigate, then decide
 
