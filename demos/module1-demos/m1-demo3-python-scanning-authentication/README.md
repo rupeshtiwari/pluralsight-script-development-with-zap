@@ -91,9 +91,18 @@ cd demos/module1-demos/m1-demo3-python-scanning-authentication
 
 Implement and register a custom Python active-scan rule, the application-specific test a built-in scanner does not cover. *(EO2b)*
 
-### ✍️ Author the rule (the `-before` branch ships without it)
+### ✍️ Bring in the two scripts this clip teaches (the `-before` branch ships without them)
 
-On `m1-demo3-before`, `zap-scripts/globomantics-active-rule.py` **does not exist**, you write it. This is **Jython** (Python 2.7 syntax run inside ZAP's Java engine), so no f-strings. The shape ZAP expects from an active-scan script:
+On `m1-demo3-before`, neither `zap-scripts/globomantics-active-rule.py` nor `zap-scripts/globomantics-auth.py` exists, and **Step 1 needs both present**. Bring both in now with these commands, then open each in VS Code and read it, **that reading is the lesson** (you read the rule here, the login script in Step 2):
+
+```bash
+cd "$HOME/pluralsight-script-development-with-zap"
+git show origin/m1-demo3-after:demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts/globomantics-active-rule.py > demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts/globomantics-active-rule.py
+git show origin/m1-demo3-after:demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts/globomantics-auth.py > demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts/globomantics-auth.py
+cd demos/module1-demos/m1-demo3-python-scanning-authentication
+```
+
+Now open `zap-scripts/globomantics-active-rule.py` and read it. It is **Jython** (Python 2.7 syntax run inside ZAP's Java engine), so no f-strings. Read it against the shape ZAP expects from an active-scan script:
 
 1. **`scan(sas, msg, param, value)`**, ZAP calls it once per parameter; and **`scanNode(sas, msg)`**, once per page. Run the same check from both so the rule does not depend on how ZAP enumerates parameters.
 2. **Build the probe by cloning the request** and rewriting its query string (not `sas.setParam()`, which needs per-parameter state only set up inside `scan()`), send it, and check whether the probe comes back **unescaped** in the response body.
@@ -167,7 +176,7 @@ def scanNode(sas, msg):
         _check(sas, msg, p.getName())
 ```
 
-<sub>The `m1-demo3-after` branch keeps a couple of extra `/tmp` trace lines used only by the author's preflight; they have no effect on screen or on the scan, so your version above omits them.</sub>
+<sub>The file you brought in from `m1-demo3-after` carries a couple of extra `/tmp` trace lines the author used in preflight; they have no effect on screen or on the scan, ignore them, the essential shape is what is shown above.</sub>
 </details>
 
 ### What we examine, and why
@@ -226,9 +235,9 @@ Confirm the error flag is `false` and the registered type is `active`, a rule th
 
 Automate the login with a ZAP authentication script, and give ZAP a reliable way to tell a logged-in page from a logged-out one. *(EO2c)*
 
-### ✍️ Author the login script (the `-before` branch ships without it)
+### ✍️ Read the login script you brought in
 
-On `m1-demo3-before`, `zap-scripts/globomantics-auth.py` **does not exist**, you write this second Jython script. ZAP's authentication contract needs four functions:
+You already brought `zap-scripts/globomantics-auth.py` in with the second command in Step 1. Open it in VS Code now and read it, this is a second Jython script. Read it against ZAP's authentication contract, which needs four functions:
 
 1. **`authenticate(helper, paramsValues, credentials)`**, builds and sends the same form `POST /login` the app's own login form sends, and returns the message. ZAP captures the `Set-Cookie` session and reuses it for every later request.
 2. **`getRequiredParamsNames()` / `getOptionalParamsNames()`**, the context parameters ZAP must supply (here, the `Login URL`).
@@ -284,7 +293,7 @@ def getCredentialsParamsNames():
     return array(["username"], String)
 ```
 
-<sub>As with the active rule, `m1-demo3-after` adds a couple of `/tmp` trace lines for the author's preflight only; omit them.</sub>
+<sub>As with the active rule, the file you brought in from `m1-demo3-after` has a couple of `/tmp` trace lines for the author's preflight only; they are harmless, ignore them.</sub>
 </details>
 
 ### What we examine, and why
