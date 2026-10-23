@@ -104,7 +104,6 @@ Why the scan rule cannot load before the file exists, and what the non-alarming 
 Do this in the **VS Code integrated Terminal**:
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
 ./steps/01-load-python-active-scan-rule.sh
 ```
 
@@ -249,7 +248,6 @@ Registering it compiles the script; a clean `error flag false` is your first pro
 **Where:** the VS Code integrated Terminal, in `demos/module1-demos/m1-demo3-python-scanning-authentication`.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
 ./steps/01-load-python-active-scan-rule.sh
 ```
 
@@ -366,7 +364,6 @@ The reason the logged-in check matters as much as the login itself: without it, 
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
 ./steps/02-register-scripted-authentication.sh
 ```
 
@@ -418,7 +415,6 @@ Why insist on the comparison? Because a clean scan report is meaningless if the 
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
 ./steps/03-confirm-authenticated-profile-access.sh
 ```
 
@@ -470,7 +466,6 @@ The absent-before/present-after gate is the heart of the step. A leftover alert 
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo3-python-scanning-authentication"
 ./steps/04-confirm-custom-scan-alert.sh
 ```
 
