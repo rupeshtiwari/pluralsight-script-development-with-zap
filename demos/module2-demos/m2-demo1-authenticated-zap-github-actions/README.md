@@ -115,7 +115,7 @@ The first run stops on purpose, with a **yellow `✍️ AUTHOR THIS FIRST`** mes
 Copy-paste this exactly. It copies the finished plan into your working folder from the completed branch; you **stay on the `-before` branch**, there is no branch switch:
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap" && git show origin/m2-demo1-after:demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci/af-plan.yaml > demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci/af-plan.yaml && cd demos/module2-demos/m2-demo1-authenticated-zap-github-actions
+(cd "$(git rev-parse --show-toplevel)" && git show origin/m2-demo1-after:demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci/af-plan.yaml > demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci/af-plan.yaml)
 ```
 
 The exercise is to understand the plan, not to type it from memory, so you bring the finished file in and read it. The file now exists in the demo folder, and the plan check below loads it.
