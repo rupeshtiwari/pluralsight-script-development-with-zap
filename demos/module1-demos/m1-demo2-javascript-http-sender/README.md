@@ -88,9 +88,9 @@ cd demos/module1-demos/m1-demo2-javascript-http-sender
 
 </details>
 
-## Your seven steps
+## Your six steps
 
-Steps 1 to 4 are the authoring beat, every on-camera action numbered: run the first step and meet the yellow author gate, bring the file in, open and read it, then run the same step again and watch it pass. Steps 5 to 7 then prove the script on real traffic. You run the same four `./steps` scripts the recording uses, in the same order.
+Steps 1 to 3 are the authoring beat: run the first step and meet the yellow author gate, **copy the script and then open and explain it in one step**, then run the same step again and watch it pass. Steps 4 to 6 then prove the script on real traffic. You run the same four `./steps` scripts the recording uses, in the same order.
 
 <details open>
 <summary><b>Step 1, Run it first and meet the yellow author gate</b> · nothing written yet</summary>
@@ -115,32 +115,32 @@ It stops with a **yellow `✍️ AUTHOR THIS FIRST`** message (not red, not an e
 </details>
 
 <details>
-<summary><b>Step 2, Bring in the file this clip teaches</b> · one copy command</summary>
+<summary><b>Step 2, Copy the script, then open and explain it</b> · copy in the terminal, read in the editor</summary>
 
 ### What you are learning
 
-The exercise is to understand the script, not to type it from memory, so you bring the finished file in with one command and read it. *(EO2a)*
+The exercise is to understand the script, not to type it from memory, so in one step you copy the finished file in and then read it. Where in ZAP's message lifecycle your code runs, read straight from the source, that understanding *is* the objective. *(EO2a)*
 
-### Bring the script in with one command
+### Part A, in the VS Code terminal: copy the script in with one command
 
-Copy-paste this exactly. It copies the finished script into your working folder from the completed branch, and you **stay on the `-before` branch**, there is no branch switch:
+Copy-paste this exactly. It copies the finished script into your working folder from the completed branch, verifies the file is there, and prints a success line. You **stay on the `-before` branch**, there is no branch switch:
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap" && git show origin/m1-demo2-after:demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/globomantics-marker.js > demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/globomantics-marker.js && cd demos/module1-demos/m1-demo2-javascript-http-sender
+(cd "$(git rev-parse --show-toplevel)" && git show origin/m1-demo2-after:demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/globomantics-marker.js > demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/globomantics-marker.js && test -s demos/module1-demos/m1-demo2-javascript-http-sender/zap-scripts/globomantics-marker.js && echo "Script copied: zap-scripts/globomantics-marker.js" || { echo "Copy failed: zap-scripts/globomantics-marker.js is missing or empty"; false; })
 ```
 
-The `zap-scripts/` folder is mounted into the ZAP container, so the file you just brought in is exactly what `./steps/01` loads in Step 4.
+**Confirm the copy worked.** The terminal prints exactly:
 
-**Next:** open the file and read what each part does.
+```text
+Script copied: zap-scripts/globomantics-marker.js
+```
 
-</details>
+If instead you see `Copy failed: …`, the file did not arrive, re-run the command before continuing; do not move on until you see the success line. The `zap-scripts/` folder is mounted into the ZAP container, so the file you just brought in is exactly what `./steps/01` loads in Step 3.
 
-<details>
-<summary><b>Step 3, Open the file and read what each part does</b> · this reading is the lesson</summary>
+### Part B, in the VS Code editor: open the file and read what each part does
 
-### What you are learning
-
-Where in ZAP's message lifecycle your code runs, read straight from the source, that understanding *is* the objective. *(EO2a)*
+> [!IMPORTANT]
+> **The code shown below is file content, not terminal output. Do not paste this JavaScript into the terminal. The script has not been loaded into ZAP yet.** You run the copy command above in the terminal; you read the code below in the editor.
 
 Open `zap-scripts/globomantics-marker.js` in VS Code and read it:
 
@@ -179,7 +179,7 @@ Read the parts that make it an HTTP Sender script, not just any JavaScript:
 - **`sendingRequest(msg, initiator, helper)`**, this is the hook. ZAP calls it for *every message it is about to send*, which is exactly the moment to stamp a header. (There is a matching `responseReceived` for the other direction.) Understanding that the function name *is* the contract with ZAP is the whole lesson of the step.
 - **`MARKER_HEADER` / `MARKER_VALUE`**, the constants `X-Globomantics-Marker` and `GLOBO-DEMO`, kept at the top so the marker is one obvious thing to change.
 - **`msg.getRequestHeader().setHeader(...)`**, the line that actually mutates the outgoing request. Reading this is how you know the script *changes* traffic rather than just observing it.
-- **`print(...)` and `ScriptVars`**, the script writes its own line to the Script Console and stashes it in a global so Step 6 can read it back from ZAP.
+- **`print(...)` and `ScriptVars`**, the script writes its own line to the Script Console and stashes it in a global so Step 5 can read it back from ZAP.
 
 Loading this file registers it with ZAP's **Graal.js** engine as an `httpsender` action. Registration means ZAP knows the script and will call `sendingRequest`, but it has not called it yet.
 
@@ -188,7 +188,7 @@ Loading this file registers it with ZAP's **Graal.js** engine as an `httpsender`
 </details>
 
 <details>
-<summary><b>Step 4, Run it again and watch it pass</b> · source → ZAP</summary>
+<summary><b>Step 3, Run it again and watch it pass</b> · source → ZAP</summary>
 
 ### What you are learning
 
@@ -231,7 +231,7 @@ Match the registered `httpsender` type to the `sendingRequest` hook you read in 
 </details>
 
 <details>
-<summary><b>Step 5, Prove the marker on an outbound request</b> · header on the wire</summary>
+<summary><b>Step 4, Prove the marker on an outbound request</b> · header on the wire</summary>
 
 ### What you are learning
 
@@ -280,7 +280,7 @@ Confirm the `marker-<id>` in ZAP's History matches the one the terminal reported
 </details>
 
 <details>
-<summary><b>Step 6, Verify the live Script Console output</b> · the script's own line</summary>
+<summary><b>Step 5, Verify the live Script Console output</b> · the script's own line</summary>
 
 ### What you are learning
 
@@ -320,7 +320,7 @@ Your terminal prints exactly this. Every value is the real captured output, veri
 
 ### Investigate, then decide
 
-Line the console URL up with the `marker-<id>` from Step 5, same request, reported by the script itself. The decision: *the script observably executed and reported its own work*, which is what makes it trustworthy to reuse. Never let the terminal's expected-format line stand in for the live console.
+Line the console URL up with the `marker-<id>` from Step 4, same request, reported by the script itself. The decision: *the script observably executed and reported its own work*, which is what makes it trustworthy to reuse. Never let the terminal's expected-format line stand in for the live console.
 
 **On FAIL:** no fresh console line means the print did not run or you are reading an old line. Re-trigger and read the console, rather than accepting the terminal's expected string.
 
@@ -329,7 +329,7 @@ Line the console URL up with the `marker-<id>` from Step 5, same request, report
 </details>
 
 <details>
-<summary><b>Step 7, Verify the script registration</b> · named · enabled · reusable</summary>
+<summary><b>Step 6, Verify the script registration</b> · named · enabled · reusable</summary>
 
 ### What you are learning
 
@@ -392,7 +392,7 @@ You can now explain each learning objective with the evidence you captured:
 
 ## Finish your lab
 
-After Step 7 you should be able to explain how the JavaScript hook changed a real proxied request, from the header, the console line and the registration, not from recalling a command.
+After Step 6 you should be able to explain how the JavaScript hook changed a real proxied request, from the header, the console line and the registration, not from recalling a command.
 
 Stop the demo's containers from the same demo directory:
 
