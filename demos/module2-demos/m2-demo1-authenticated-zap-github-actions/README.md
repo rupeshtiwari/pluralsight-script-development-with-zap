@@ -84,22 +84,22 @@ cd demos/module2-demos/m2-demo1-authenticated-zap-github-actions
 
 **Expected start:** the startup script reports healthy Globomantics, Postgres, MongoDB and ZAP services. If anything is not ready, stop and read the actual output before continuing.
 
-**Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Training application</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API and proxy</a>, plus **GitHub → Actions → authenticated-scan** for the hosted proof. The `-before` branch ships the Module 1 scripting assets but deliberately omits the finished `ci/af-plan.yaml`; you bring it in with one command in Step 2, then open and read it, before the plan check passes in Step 4. Hosted GitHub Actions proof is separate from the local check.
+**Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Training application</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API and proxy</a>, plus **GitHub → Actions → authenticated-scan** for the hosted proof. The `-before` branch ships the Module 1 scripting assets but deliberately omits the finished `ci/af-plan.yaml`; in Step 1 you bring it in with one command, open and read it, then watch the plan check pass. Hosted GitHub Actions proof is separate from the local check.
 
 </details>
 
-## Your seven steps
+## Your four steps
 
-Steps 1 to 4 are the authoring beat, every on-camera action numbered: run the first step and meet the yellow author gate, bring the Automation Framework plan in, open and read it, then run the same step again and watch it run clean locally and on the hosted runner. Steps 5 to 7 then prove the run was authenticated, that your scripts ran, and that the custom finding is in the report. You run the same four `./steps` scripts the recording uses, in the same order.
+Four on-camera steps, each one a `./steps` script you run and verify. **Step 1** is the whole authoring beat in one: you run the plan check before the plan exists and meet the yellow author gate, bring the Automation Framework plan into the folder with one command, open and read it, then run the same check again and watch it pass locally and on the hosted GitHub Actions runner. **Steps 2 to 4** then prove the run was authenticated, that your Module 1 scripts actually ran, and that your named finding reached the hosted report. You run the same four `./steps` scripts the recording uses, in the same order.
 
 <details open>
-<summary><b>Step 1, Run it first and meet the yellow author gate</b> · nothing written yet</summary>
+<summary><b>Step 1, Author the Automation Framework plan and run it headless, locally and in GitHub Actions</b> · local + hosted</summary>
 
 ### What you are learning
 
-Why the plan check cannot pass before `ci/af-plan.yaml` exists, and what the non-alarming author gate looks like. *(EO3a)*
+Configure ZAP's Automation Framework plan (`ci/af-plan.yaml`) for authenticated headless execution, and confirm the hosted `ubuntu-24.04` job ran it for this exact code. This one step carries the whole authoring arc: meet the author gate, bring the plan in, read it, then watch it run clean locally and in CI. *(EO3a)*
 
-### Run it. The first run stops on purpose.
+#### 1a · Run it first, and meet the yellow author gate
 
 Do this in the **VS Code integrated Terminal**:
 
@@ -108,20 +108,9 @@ cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo1-a
 ./steps/01-run-headless-automation-plan.sh
 ```
 
-It stops with a **yellow `✍️ AUTHOR THIS FIRST`** message (not red, not an error): on `m2-demo1-before` the finished `ci/af-plan.yaml` does not exist yet. That yellow gate is the cue to author the plan, which is the whole point of this exercise.
+The first run stops on purpose, with a **yellow `✍️ AUTHOR THIS FIRST`** message (not red, not an error): on `m2-demo1-before` the finished `ci/af-plan.yaml` does not exist yet. That yellow gate is the cue to author the plan, which is the whole point of this exercise.
 
-**Next:** bring the finished plan in with one command.
-
-</details>
-
-<details>
-<summary><b>Step 2, Bring in the Automation Framework plan</b> · one copy command</summary>
-
-### What you are learning
-
-The exercise is to understand the plan, not to type it from memory, so you bring the finished file in with one command and read it. *(EO3a)*
-
-### Bring the plan in with one command
+#### 1b · Bring the plan into the folder with one command
 
 Copy-paste this exactly. It copies the finished plan into your working folder from the completed branch; you **stay on the `-before` branch**, there is no branch switch:
 
@@ -129,37 +118,17 @@ Copy-paste this exactly. It copies the finished plan into your working folder fr
 cd "$HOME/pluralsight-script-development-with-zap" && git show origin/m2-demo1-after:demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci/af-plan.yaml > demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci/af-plan.yaml && cd demos/module2-demos/m2-demo1-authenticated-zap-github-actions
 ```
 
-The file now exists in the demo folder, and the plan check in Step 4 loads it.
+The exercise is to understand the plan, not to type it from memory, so you bring the finished file in and read it. The file now exists in the demo folder, and the plan check below loads it.
 
-**Next:** open the plan and read what each part does.
+#### 1c · Open the plan and read what each part does
 
-</details>
+Open `ci/af-plan.yaml` and `.github/workflows/zap-authenticated-scan.yml` in VS Code. The plan is the scan written as *configuration*: an ordered list of jobs (load scripts, define context, spider, active-scan, report) that ZAP executes with `zap.sh -cmd -autorun`. No clicks, so it is repeatable; in version control, so it is reviewable. The workflow is what runs that plan on a hosted runner on every change. This reading *is* the learning objective.
 
-<details>
-<summary><b>Step 3, Open the plan and read what each part does</b> · this reading is the lesson</summary>
+#### 1d · Run the same check again, and watch it pass, locally and hosted
 
-### What you are learning
-
-How the scan reads as versioned configuration ZAP runs headless, read straight from the source, that understanding *is* the objective. *(EO3a)*
-
-Open `ci/af-plan.yaml` and `.github/workflows/zap-authenticated-scan.yml` in VS Code. The plan is the scan written as *configuration*, an ordered list of jobs (load scripts, define context, spider, active-scan, report) that ZAP executes with `zap.sh -cmd -autorun`. No clicks, so it is repeatable; in version control, so it is reviewable. The workflow is what runs that plan on a hosted runner on every change.
-
-**Next:** run the step again, and this time the plan runs clean, locally and on the hosted runner.
-
-</details>
-
-<details>
-<summary><b>Step 4, Run it again and watch the plan run</b> · local + hosted job</summary>
-
-### What you are learning
-
-Move the scan into a versioned plan ZAP runs headless, and confirm the hosted `ubuntu-24.04` job ran it for this exact code. *(EO3a)*
-
-The step does two things, and the distinction is the lesson: it runs the plan **locally** to prove it executes cleanly, and it reads the **hosted GitHub Actions API** to confirm a real `ubuntu-24.04` run of this plan succeeded *for your code*. "For your code" is doing real work, the helper checks the hosted run's commit, and if the watched files (the plan, the workflow, the scripts) have not changed since that run, the run still covers your current checkout. That is how a local green and a hosted green become one claim instead of two hopes.
+Now the plan exists, run the SAME command again. It does two things, and the distinction is the lesson: it runs the plan **locally** to prove it executes cleanly, and it reads the **hosted GitHub Actions API** to confirm a real `ubuntu-24.04` run of this plan succeeded *for your code*. "For your code" is doing real work, the helper checks the hosted run's commit, and if the watched files (the plan, the workflow, the scripts) have not changed since that run, the run still covers your current checkout. That is how a local green and a hosted green become one claim instead of two hopes.
 
 **Predict before you run:** you expect the local plan to finish with `0 errors`, and the hosted run to show `ubuntu-24.04`, a successful headless ZAP step, and `covers this code`. A local pass alone is only half the proof.
-
-### Run the SAME command again. Now it runs clean.
 
 **Where:** the VS Code integrated Terminal, in `demos/module2-demos/m2-demo1-authenticated-zap-github-actions`.
 
@@ -188,14 +157,14 @@ The hosted run ID and commit are specific to your run, read them from your outpu
 
 Read the local `0 errors` next to the hosted `success · covers this code`. The decision: *the scan is now an unattended, versioned control*, not a thing you have to be present to run. If the hosted run does not cover your code, your latest change has not been proven in CI yet; push and let it run rather than claiming the old run speaks for it.
 
-**On FAIL:** a local plan error points at `ci/af-plan.yaml`; a missing or non-covering hosted run means CI has not validated this commit. Treat them as the different problems they are.
+**On FAIL:** a yellow author gate means the plan is not in the folder yet, redo 1b; a local plan error points at `ci/af-plan.yaml`; a missing or non-covering hosted run means CI has not validated this commit. Treat them as the different problems they are.
 
 **Next:** prove the plan did not just run, that it ran *authenticated*.
 
 </details>
 
 <details>
-<summary><b>Step 5, Inspect the authenticated scan context</b> · context · user · auth</summary>
+<summary><b>Step 2, Inspect the authenticated scan context</b> · context · user · auth</summary>
 
 ### What you are learning
 
@@ -242,7 +211,7 @@ Tie the config (`alice`, scripted auth, profile scope) to the login-only finding
 </details>
 
 <details>
-<summary><b>Step 6, Verify the scripts run in the authenticated scope</b> · JS marker · Python rule</summary>
+<summary><b>Step 3, Verify the reused Module 1 scripts actually ran</b> · JS marker · Python rule</summary>
 
 ### What you are learning
 
@@ -287,7 +256,7 @@ Confirm the `50000` identity matches the rule you wrote in Module 1 Demo 3, same
 </details>
 
 <details>
-<summary><b>Step 7, Confirm the custom Python alert in the report</b> · custom finding in the report</summary>
+<summary><b>Step 4, Confirm the custom finding in the hosted report</b> · custom finding in the report</summary>
 
 ### What you are learning
 
@@ -297,7 +266,7 @@ Require the named custom finding in the CI report, tied to this commit, because 
 
 The step clears the alert store, runs the authenticated plan, and requires `Globomantics unsafe reflection (custom rule)` on `/account/profile` at parameter `note`, `Medium`, and confirms the **hosted job's report check** passed for this code. That hosted check is *fail-closed*: if the named finding is missing from the report, the job fails. This is the opposite of trusting a green badge, the badge is green *because* the finding was verified present, not in spite of it being absent.
 
-The reason this is the last step, not the first: it is the payoff of every prior check. The plan ran (Step 4), authenticated (Step 5), with your scripts (Step 6), and now the application-specific finding they produce is in the report that a release decision would read. A historical green run does not prove a newer commit; the `covers this code` check is what keeps you honest.
+The reason this is the last step, not the first: it is the payoff of every prior check. The plan ran (Step 1), authenticated (Step 2), with your scripts (Step 3), and now the application-specific finding they produce is in the report that a release decision would read. A historical green run does not prove a newer commit; the `covers this code` check is what keeps you honest.
 
 **Predict before you run:** you expect the named alert on `note` at `Medium`, and the hosted report check `success · covers this code`. A built-in XSS alert in its place is a fail, not a near-miss.
 
