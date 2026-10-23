@@ -104,7 +104,6 @@ Why the gate check cannot pass before `ci/gate-plan.yaml` exists, and what the n
 Do this in the **VS Code integrated Terminal**:
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
 ./steps/01-inspect-false-positive-filter.sh
 ```
 
@@ -168,7 +167,6 @@ Confirm the reviewed False Positive is configured correctly, scoped to one path,
 **Where:** the VS Code integrated Terminal, in `demos/module2-demos/m2-demo3-security-quality-gates`.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
 ./steps/01-inspect-false-positive-filter.sh
 ```
 
@@ -217,7 +215,6 @@ The step checks the plan against the Module 2 architecture's job order (`passive
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
 ./steps/02-check-automation-job-order.sh
 ```
 
@@ -263,7 +260,6 @@ The discipline this step enforces is *attribution*: an arbitrary nonzero exit co
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
 ./steps/03-run-security-quality-gate.sh
 ```
 
@@ -315,7 +311,6 @@ Seeing both in one report is the point. The filter did not weaken the gate again
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module2-demos/m2-demo3-security-quality-gates"
 ./steps/04-verify-filtered-alert-report.sh
 ```
 
