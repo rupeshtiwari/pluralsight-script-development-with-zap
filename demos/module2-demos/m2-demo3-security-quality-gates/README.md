@@ -90,7 +90,7 @@ cd demos/module2-demos/m2-demo3-security-quality-gates
 
 ## Your seven steps
 
-Steps 1 to 4 are the authoring beat, every on-camera action numbered: run the first step and meet the yellow author gate, bring the quality-gate plan in, open and read the False Positive filter, then run the same step again and watch the filter validate. Steps 5 to 7 then prove the job order, the blocking exit code, and the reconciled report. You run the same four `./steps` scripts the recording uses, in the same order.
+Steps 1 to 3 are the authoring beat, the setup actions that are not yet a lab PASS: run the first step and meet the yellow author gate, bring the quality-gate plan in, then open and read the False Positive filter. Step 4 runs the same step again and the filter validates, your first real PASS. Steps 5 to 7 then prove the job order, the blocking exit code, and the reconciled report. You run the same four `./steps` scripts the recording uses, in the same order.
 
 <details open>
 <summary><b>Step 1, Run it first and meet the yellow author gate</b> · nothing written yet</summary>
@@ -126,7 +126,7 @@ The exercise is to understand the gate plan, not to type it from memory, so you 
 Copy-paste this exactly. It copies the finished plan into your working folder from the completed branch; you **stay on the `-before` branch**, there is no branch switch:
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap" && git show origin/m2-demo3-after:demos/module2-demos/m2-demo3-security-quality-gates/ci/gate-plan.yaml > demos/module2-demos/m2-demo3-security-quality-gates/ci/gate-plan.yaml && cd demos/module2-demos/m2-demo3-security-quality-gates
+(cd "$(git rev-parse --show-toplevel)" && git show origin/m2-demo3-after:demos/module2-demos/m2-demo3-security-quality-gates/ci/gate-plan.yaml > demos/module2-demos/m2-demo3-security-quality-gates/ci/gate-plan.yaml)
 ```
 
 The file now exists in the demo folder, and the filter check in Step 4 reads it.

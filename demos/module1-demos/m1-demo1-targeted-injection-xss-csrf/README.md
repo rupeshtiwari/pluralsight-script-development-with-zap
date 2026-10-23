@@ -41,7 +41,7 @@
 
 A scan of the Globomantics Store just came back with a wall of alerts, and someone has to decide what is actually broken before the team can act. That someone is you. A severity label on its own is not a decision, a "High" that you cannot reproduce wastes a developer's afternoon, and a real defect buried in the list ships to production. What turns an alert into a decision is a request you sent, a response you read, and a change you can see in the application.
 
-So in this demo you and I are not going to collect alerts, we are going to *prove* three specific defects and write down why each one is real. We will narrow ZAP to the injection rules that matter for three different endpoints, watch a reflected-XSS payload come back unescaped in the exact context it was injected into, replay a CSRF token where it should have been rejected, and finish by reconciling every finding against what the app actually did. The source code is open in VS Code the whole time, because you cannot explain a finding you have not traced back to the line that caused it.
+So in this demo you and I are not going to collect alerts, we are going to *prove* three specific defects and write down why each one is real. We will narrow ZAP to the injection rules that matter for three different endpoints, watch a reflected-XSS payload come back unescaped in the exact context it was injected into, replay a CSRF token where it should have been rejected, and finish by reconciling every finding against what the app actually did. Keep the vulnerable source handy in VS Code as you go, because you cannot explain a finding you have not traced back to the line that caused it.
 
 ## Your learning goals
 
@@ -73,7 +73,7 @@ The Mac prerequisite installer, `setup/setup-macos.sh`, is a **one-time** prepar
 <details open>
 <summary><b>Open the exact branch, folder and runtime for Module 1 Demo 1</b></summary>
 
-**Where:** the VS Code integrated Terminal, starting in the root of your existing local repository. This demo shows source code, so work in VS Code throughout.
+**Where:** the VS Code integrated Terminal, starting in the root of your existing local repository. You trace findings back to the vulnerable source as you go, so keep VS Code open.
 
 ```bash
 cd "$HOME/pluralsight-script-development-with-zap"
@@ -115,7 +115,6 @@ Three different interpreters, a SQL database, a document database, and a shell, 
 **Where:** the VS Code integrated Terminal, in `demos/module1-demos/m1-demo1-targeted-injection-xss-csrf`.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
 ./steps/01-run-targeted-injection-scan.sh
 ```
 
@@ -172,7 +171,6 @@ The step sends one context-matched request per sink and shows the response line 
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
 ./steps/02-verify-reflected-xss-contexts.sh
 ```
 
@@ -235,7 +233,6 @@ The step runs all four and shows session B's stored email before and after, so t
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
 ./steps/03-test-cross-session-csrf-token.sh
 ```
 
@@ -292,7 +289,6 @@ A rule ID is a lead; a disposition is a decision with the evidence attached. Kee
 **Where:** the VS Code integrated Terminal, in the same demo folder.
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap/demos/module1-demos/m1-demo1-targeted-injection-xss-csrf"
 ./steps/04-reconcile-security-alerts.sh
 ```
 
