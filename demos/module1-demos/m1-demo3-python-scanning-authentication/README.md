@@ -126,10 +126,8 @@ The exercise is to understand the two scripts, not to type them from memory, so 
 Copy-paste these exactly. They copy the finished scripts into your working folder from the completed branch; you **stay on the `-before` branch**, there is no branch switch:
 
 ```bash
-cd "$HOME/pluralsight-script-development-with-zap"
-git show origin/m1-demo3-after:demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts/globomantics-active-rule.py > demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts/globomantics-active-rule.py
-git show origin/m1-demo3-after:demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts/globomantics-auth.py > demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts/globomantics-auth.py
-cd demos/module1-demos/m1-demo3-python-scanning-authentication
+(cd "$(git rev-parse --show-toplevel)" && git show origin/m1-demo3-after:demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts/globomantics-active-rule.py > demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts/globomantics-active-rule.py)
+(cd "$(git rev-parse --show-toplevel)" && git show origin/m1-demo3-after:demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts/globomantics-auth.py > demos/module1-demos/m1-demo3-python-scanning-authentication/zap-scripts/globomantics-auth.py)
 ```
 
 Both files now exist in the demo folder. You read the active-scan rule next; you read the login script when you register it in Step 5.
