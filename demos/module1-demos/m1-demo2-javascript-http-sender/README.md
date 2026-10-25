@@ -5,7 +5,7 @@
 > ```bash
 > cd "$HOME/pluralsight-script-development-with-zap"   # the repo root (where ./lab lives)
 > ./lab up      # start the lab (first time; waits until ready)
-> ./lab run load-javascript-http-sender   # run the first step (each step’s name is in the walk-through below)
+> ./lab run load-javascript-http-sender   # run the first check (use the matching script name below)
 > ./lab down    # stop the lab when you are done
 > ```
 >
@@ -78,22 +78,56 @@ The Mac prerequisite installer, `setup/setup-macos.sh`, is a **one-time** prepar
 cd "$HOME/pluralsight-script-development-with-zap"
 git fetch origin
 git switch m1-demo2-before
-cd demos/module1-demos/m1-demo2-javascript-http-sender
-./scripts/lab-up.sh
+(cd demos/module1-demos/m1-demo2-javascript-http-sender && ./scripts/lab-up.sh)
 ```
 
-**Expected start:** the startup script brings up the Globomantics app and ZAP and reports readiness. Continue only after it does, a failed startup is not one of the seven teaching steps.
+**Expected start:** the startup script brings up the Globomantics app and ZAP and reports readiness. Continue only after it does, a failed startup must be fixed before starting the numbered steps.
 
 **Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Globomantics app, localhost:8000</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI, localhost:8080/zap/</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API/proxy, localhost:8090</a>. You author the script in **VS Code** (`zap-scripts/globomantics-marker.js`) and inspect its effects in **ZAP's browser GUI** (History and Script Console). The `-before` branch deliberately ships without the finished JavaScript, create it from the example before expecting the verification steps to pass.
 
 </details>
 
-## Your six steps
+## Your steps
 
-Steps 1 to 3 are the authoring beat: run the first step and meet the yellow author gate, **copy the script and then open and explain it in one step**, then run the same step again and watch it pass. Steps 4 to 6 then prove the script on real traffic. You run the same four `./steps` scripts the recording uses, in the same order.
+<!-- learner-command-steps:start -->
 
-<details open>
-<summary><b>Step 1, Run it first and meet the yellow author gate</b> · nothing written yet</summary>
+Follow one numbered action set at a time. Opening the terminal, pasting a command and pressing Enter belong to the same step. Reading its source and interpreting its result stay with that step. Script filenames retain their stable 01–04 identifiers. Check numbers printed by the scripts identify those underlying lab checks, not the parent step numbers below. The numbered walkthrough steps also include entering the folder, reference copies and reruns where needed.
+
+| Step | Action |
+|---|---|
+| [Step 1](#step-1) | directory change command |
+| [Step 2](#step-2) | load javascript http sender script |
+| [Step 3](#step-3) | reference copy command |
+| [Step 4](#step-4) | load javascript http sender script |
+| [Step 5](#step-5) | prove outbound marker header script |
+| [Step 6](#step-6) | live script console |
+| [Step 7](#step-7) | enabled script registration |
+
+<a id="step-1"></a>
+
+## Step 1: directory change command
+
+[All steps](#your-steps) · [Next step 2 →](#step-2)
+
+1. Open the VS Code integrated Terminal at the repository root after the lab setup above.
+2. Paste this command and press Enter.
+
+```bash
+cd demos/module1-demos/m1-demo2-javascript-http-sender
+```
+
+Confirm the returned prompt is inside `demos/module1-demos/m1-demo2-javascript-http-sender` before running the first check. Stop if the directory change fails. This folder entry is Step 1; pasting and executing each later command is one new step, with its teaching and results kept together.
+
+[All steps](#your-steps) · [Next step 2 →](#step-2)
+
+<a id="step-2"></a>
+
+## Step 2: load javascript http sender script
+
+[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
+
+<details>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -113,8 +147,16 @@ It stops with a **yellow `✍️ AUTHOR THIS FIRST`** message (not red, not an e
 
 </details>
 
+[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
+
+<a id="step-3"></a>
+
+## Step 3: reference copy command
+
+[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
+
 <details>
-<summary><b>Step 2, Copy the script, then open and explain it</b> · copy in the terminal, read in the editor</summary>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -134,7 +176,7 @@ Copy-paste this exactly. It copies the finished script into your working folder 
 Script copied: zap-scripts/globomantics-marker.js
 ```
 
-If instead you see `Copy failed: …`, the file did not arrive, re-run the command before continuing; do not move on until you see the success line. The `zap-scripts/` folder is mounted into the ZAP container, so the file you just brought in is exactly what `./steps/01` loads in Step 3.
+If instead you see `Copy failed: …`, the file did not arrive, re-run the command before continuing; do not move on until you see the success line. The `zap-scripts/` folder is mounted into the ZAP container, so the file you just brought in is exactly what `./steps/01` loads in Step 4.
 
 ### Part B, in the VS Code editor: open the file and read what each part does
 
@@ -178,7 +220,7 @@ Read the parts that make it an HTTP Sender script, not just any JavaScript:
 - **`sendingRequest(msg, initiator, helper)`**, this is the hook. ZAP calls it for *every message it is about to send*, which is exactly the moment to stamp a header. (There is a matching `responseReceived` for the other direction.) Understanding that the function name *is* the contract with ZAP is the whole lesson of the step.
 - **`MARKER_HEADER` / `MARKER_VALUE`**, the constants `X-Globomantics-Marker` and `GLOBO-DEMO`, kept at the top so the marker is one obvious thing to change.
 - **`msg.getRequestHeader().setHeader(...)`**, the line that actually mutates the outgoing request. Reading this is how you know the script *changes* traffic rather than just observing it.
-- **`print(...)` and `ScriptVars`**, the script writes its own line to the Script Console and stashes it in a global so Step 5 can read it back from ZAP.
+- **`print(...)` and `ScriptVars`**, the script writes its own line to the Script Console and stashes it in a global so Step 6 can read it back from ZAP.
 
 Loading this file registers it with ZAP's **Graal.js** engine as an `httpsender` action. Registration means ZAP knows the script and will call `sendingRequest`, but it has not called it yet.
 
@@ -186,8 +228,16 @@ Loading this file registers it with ZAP's **Graal.js** engine as an `httpsender`
 
 </details>
 
+[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
+
+<a id="step-4"></a>
+
+## Step 4: load javascript http sender script
+
+[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
+
 <details>
-<summary><b>Step 3, Run it again and watch it pass</b> · source → ZAP</summary>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -228,8 +278,16 @@ Match the registered `httpsender` type to the `sendingRequest` hook you read in 
 
 </details>
 
+[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
+
+<a id="step-5"></a>
+
+## Step 5: prove outbound marker header script
+
+[← Previous step 4](#step-4) · [All steps](#your-steps) · [Next step 6 →](#step-6)
+
 <details>
-<summary><b>Step 4, Prove the marker on an outbound request</b> · header on the wire</summary>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -276,8 +334,16 @@ Confirm the `marker-<id>` in ZAP's History matches the one the terminal reported
 
 </details>
 
+[← Previous step 4](#step-4) · [All steps](#your-steps) · [Next step 6 →](#step-6)
+
+<a id="step-6"></a>
+
+## Step 6: live script console
+
+[← Previous step 5](#step-5) · [All steps](#your-steps) · [Next step 7 →](#step-7)
+
 <details>
-<summary><b>Step 5, Verify the live Script Console output</b> · the script's own line</summary>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -316,7 +382,7 @@ Your terminal prints exactly this. Every value is the real captured output, veri
 
 ### Investigate, then decide
 
-Line the console URL up with the `marker-<id>` from Step 4, same request, reported by the script itself. The decision: *the script observably executed and reported its own work*, which is what makes it trustworthy to reuse. Never let the terminal's expected-format line stand in for the live console.
+Line the console URL up with the `marker-<id>` from Step 5, same request, reported by the script itself. The decision: *the script observably executed and reported its own work*, which is what makes it trustworthy to reuse. Never let the terminal's expected-format line stand in for the live console.
 
 **On FAIL:** no fresh console line means the print did not run or you are reading an old line. Re-trigger and read the console, rather than accepting the terminal's expected string.
 
@@ -324,8 +390,16 @@ Line the console URL up with the `marker-<id>` from Step 4, same request, report
 
 </details>
 
+[← Previous step 5](#step-5) · [All steps](#your-steps) · [Next step 7 →](#step-7)
+
+<a id="step-7"></a>
+
+## Step 7: enabled script registration
+
+[← Previous step 6](#step-6) · [All steps](#your-steps)
+
 <details>
-<summary><b>Step 6, Verify the script registration</b> · named · enabled · reusable</summary>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -372,6 +446,10 @@ Confirm the name and type match what the Module-2 reuse line expects. The decisi
 
 </details>
 
+[← Previous step 6](#step-6) · [All steps](#your-steps)
+
+<!-- learner-command-steps:end -->
+
 <!-- student-achievement:start -->
 ## What you achieved
 
@@ -387,7 +465,7 @@ You can now explain each learning objective with the evidence you captured:
 
 ## Finish your lab
 
-After Step 6 you should be able to explain how the JavaScript hook changed a real proxied request, from the header, the console line and the registration, not from recalling a command.
+After Step 7 you should be able to explain how the JavaScript hook changed a real proxied request, from the header, the console line and the registration, not from recalling a command.
 
 Stop the demo's containers from the same demo directory:
 
