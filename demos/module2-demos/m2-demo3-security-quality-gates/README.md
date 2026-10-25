@@ -41,13 +41,13 @@
 
 This is the last mile: the Globomantics pipeline has to *decide*. A scan that produces a report but never blocks anything is a smoke detector with no battery. Your job in this demo is to turn ZAP's findings into a build outcome the team can defend, one that fails the release for a genuine High-risk vulnerability, but does **not** fail it over a benign finding the team already reviewed and accepted.
 
-That tension is the whole lesson, and it is where teams get it wrong in two opposite directions. Silence the noisy finding globally and you blind the gate to that same issue everywhere else in the app. Leave it in and the gate cries wolf until someone disables it entirely, and then a real High sails through. So you and I are going to do the disciplined thing: a **scoped** False Positive filter for the one benign finding on the one path it is benign, jobs ordered so the filter applies *before* scanning, a real gate exit that blocks on a genuine High, and a report that *explains* the decision. A red build is not the deliverable. A red build you can justify from evidence is.
+That tension is the whole lesson, and it is where teams get it wrong in two opposite directions. Disable the noisy rule outright and you blind the gate to that same issue everywhere, even where it would be dangerous. Leave the noise in and the gate cries wolf until someone switches it off entirely, and then a real High sails through. So you and I are going to do the disciplined thing: a reviewed **False Positive** disposition for the one benign finding the team has already accepted, so it stays visible in the report but stops inflating the gate, while the rule stays live and the genuine Highs still block. The jobs are ordered so the filter applies *before* scanning, the gate exit blocks on a real High, and the report *explains* the decision. A red build is not the deliverable. A red build you can justify from evidence is.
 
 ## Your learning goals
 
 You will make a release decision from the final alert set instead of simply reacting to a red build:
 
-1. Apply a scoped alert filter rather than ignoring an entire security rule *(EO3c)*
+1. Record a reviewed False-Positive disposition as code, rather than disabling an entire security rule *(EO3c)*
 2. Order the automation jobs, verify final High-risk evidence, and confirm the CI exit status *(EO3c)*
 
 You do not need the separate course outline, each step states what you are checking and why.
@@ -56,14 +56,14 @@ You do not need the separate course outline, each step states what you are check
 
 ```mermaid
 flowchart LR
-  S1["Review the scoped filter<br/>(10021 → FP on /greet)"]
+  S1["Review the alert filter<br/>(10021 → False Positive)"]
   S2["Inspect job order<br/>(filter before scan · gate last)"]
   S3["Prove the blocked build<br/>(exit 1 on a real High)"]
   S4["Verify the final report<br/>(FP held · High kept)"]
   S1 --> S2 --> S3 --> S4
 ```
 
-Read it as building a defensible decision: scope the exception, order the plan so it takes effect, run the real gate, then prove from the report that both the benign and the genuine finding were handled exactly as intended.
+Read it as building a defensible decision: record the exception, order the plan so it takes effect, run the real gate, then prove from the report that both the benign and the genuine findings were handled exactly as intended.
 
 ## Start your lab
 
@@ -176,13 +176,14 @@ The file now exists in the demo folder, and the filter check in Step 4 reads it.
 
 ### What you are learning
 
-Record a reviewed disposition for one benign finding, scoped to one path, without suppressing that rule anywhere else, read straight from the source. *(EO3c)*
+Record a reviewed disposition for one benign finding without disabling that rule, read straight from the source. *(EO3c)*
 
-Open `ci/gate-plan.yaml` in VS Code at the `alertFilter` job and read three fields together, because they are the difference between an exception and a blind spot:
+Open `ci/gate-plan.yaml` in VS Code at the `alertFilter` job and read the fields together, because they are the difference between a reviewed exception and a blind spot:
 
-- **`ruleId: 10021`**, *X-Content-Type-Options Header Missing*. A real finding, but on the Globomantics `/greet` page the team has reviewed it and accepted it as benign.
-- **`newRisk: False Positive`**, the disposition. It does not delete the finding; it re-labels it as reviewed-and-accepted, so the gate stops counting it while the report still *shows* it.
-- **`url: http://app:8000/greet.*`**, the scope, and the most important field of the three. Because the filter is pinned to this path, the exact same `10021` on any *other* page still counts. A global ignore would have thrown that safety away.
+- **`ruleId: 10021`**, *X-Content-Type-Options Header Missing*. A real finding the Globomantics team has reviewed and accepted: the store is served only to trusted internal traffic here, so the missing header is noise, not a risk.
+- **`newRisk: False Positive`**, the disposition. It does not delete the finding or disable the rule; it re-labels the alert as reviewed-and-accepted, so the gate stops *counting* it while the report still *shows* it.
+
+Notice what is *not* here: a `url`. This is a **rule-level** disposition, and that is a deliberate choice. A missing security header is an app-wide configuration fact, so the team has accepted it everywhere and records the exception for the rule. You would reach for a URL-scoped filter (`url` plus `urlRegex: true`) only for a finding that is benign on *one specific path* yet still dangerous elsewhere, and even then a ZAP alert-filter URL regex must be escaped and full-matched, so you would always confirm in the report that it landed where you meant (Step 7 is exactly that habit). A scope you cannot verify is worse than none: it reads as safety while quietly hiding real findings.
 
 This is a disposition-as-code: the judgment is written once, in the plan, reviewed in a pull request, and applied on every run, not clicked away in a GUI where no one can audit it.
 
@@ -203,9 +204,9 @@ This is a disposition-as-code: the judgment is written once, in the plan, review
 
 ### What you are learning
 
-Confirm the reviewed False Positive is configured correctly, scoped to one path, before anything is scanned or judged. *(EO3c)*
+Confirm the reviewed False Positive is configured correctly before anything is scanned or judged. *(EO3c)*
 
-**Predict before you run:** you expect `ruleId 10021`, `newRisk False Positive`, scope `/greet.*`. The YAML proves the exception is *configured*; whether it actually took effect is something only the report (Step 7) can prove.
+**Predict before you run:** you expect `ruleId 10021` and `newRisk False Positive`, a rule-level disposition with no `url` scope. The YAML proves the exception is *configured*; whether it actually took effect is something only the report (Step 7) can prove.
 
 ### Run the SAME command again. Now it validates.
 
@@ -215,7 +216,7 @@ Confirm the reviewed False Positive is configured correctly, scoped to one path,
 ./steps/01-inspect-false-positive-filter.sh
 ```
 
-Keep `ci/gate-plan.yaml` open at `alertFilter`, rule ID, `newRisk` and the scoped URL, while you read the result.
+Keep `ci/gate-plan.yaml` open at `alertFilter`, rule ID and `newRisk`, while you read the result.
 
 ### Expected result (the script's output contract, not your run)
 
@@ -223,15 +224,15 @@ Keep `ci/gate-plan.yaml` open at `alertFilter`, rule ID, `newRisk` and the scope
 |---|---|
 | Filtered rule  (ruleId) | `10021  (X-Content-Type-Options Header Missing)` |
 | New disposition  (newRisk) | `False Positive` |
-| Scope  (url) | `http://app:8000/greet.*` |
+| Applies to | `all in-scope pages (rule-level: the header is missing app-wide, benign everywhere the team reviewed)` |
 
-**`✔ PASS`** the plan marks rule 10021 as a False Positive, scoped to http://app:8000/greet.*
+**`✔ PASS`** the plan marks rule 10021 as a reviewed False Positive
 
 ### Investigate, then decide
 
-Confirm the `url` scope is present, a filter without it is a global suppression wearing a disguise. The decision: *this is a reviewed exception for one finding on one path*, narrow enough that it cannot hide the same issue elsewhere. Configured is not yet applied; hold that distinction for Step 7.
+Confirm the rule ID and disposition are exactly what you reviewed. The decision: *this is a reviewed exception for one finding the team has accepted app-wide*, re-labelled so it stays visible but is not counted, with the rule still live for anything new. Configured is not yet applied; hold that distinction for Step 7, where the report proves where the disposition actually landed.
 
-**On FAIL:** a missing scope or wrong rule ID is a filter you should not ship. Fix the `alertFilter` block rather than accepting it.
+**On FAIL:** a wrong rule ID, or a `newRisk` that is not `False Positive`, is a filter you should not ship. Fix the `alertFilter` block rather than accepting it.
 
 **Next:** make sure the filter actually runs *before* ZAP creates alerts.
 
@@ -362,18 +363,18 @@ Read the exit `1` next to a positive High count and the hosted gate failure, the
 
 ### What you are learning
 
-Confirm from the official report that the scoped False Positive held *and* the genuine High remained, the evidence that makes the blocked build defensible. *(EO3c)*
+Confirm from the official report that the reviewed False Positive held *and* the genuine High remained, the evidence that makes the blocked build defensible. *(EO3c)*
 
 ### What we examine, and why
 
 A failed job, on its own, cannot tell you *why* it failed. This step reads the two findings that explain the decision, from the same report the gate judged:
 
-- **rule `10021`**, *X-Content-Type-Options Header Missing*, now `Low (False Positive)`. The filter from Step 4 held: the finding is still in the report (not hidden), but carries the reviewed disposition, so the gate did not count it.
-- **rule `40012`**, *Cross Site Scripting (Reflected)*, `High (Medium)`. The genuine High the team must not ship, untouched by the filter, which is exactly why the gate blocked.
+- **rule `10021`**, *X-Content-Type-Options Header Missing*, now `Low (False Positive)`. The filter held: the finding is still in the report (not hidden), but carries the reviewed disposition, so the gate did not count it. This is where you *verify the disposition landed where you intended*, the report shows it re-labelled on the pages where the header was flagged.
+- **rule `40012`**, *Cross Site Scripting (Reflected)*, `High (Medium)`. One of the genuine Highs the team must not ship (the scan also raises DOM-based XSS `40026` and SQL injection `40018`), untouched by the filter, which is exactly why the gate blocked.
 
-Seeing both in one report is the point. The filter did not weaken the gate against real risk; it only removed reviewed noise. That is the sentence you could put in a release-block ticket and have another engineer agree with.
+Seeing both in one report is the point. The filter did not weaken the gate against real risk; it only re-labelled reviewed noise. That is the sentence you could put in a release-block ticket and have another engineer agree with.
 
-**Predict before you run:** you expect `10021, Low (False Positive)` and `40012, High (Medium)` in the same report, reconciling with the exit `1` from Step 6. If `10021` is missing entirely, your filter over-suppressed; if `40012` is gone, the gate had no business passing.
+**Predict before you run:** you expect `10021, Low (False Positive)` and `40012, High (Medium)` in the same report, reconciling with the exit `1` from Step 6. If `10021` still reads `Low (Medium)`, the disposition did not apply; if `40012` is gone, the gate had no business passing.
 
 ### Run command
 
@@ -401,7 +402,7 @@ Read the two findings side by side and tie them to the exit code: benign re-labe
 
 **On FAIL:** a missing `10021` means the filter was too broad; a missing `40012` means the gate would wrongly pass. Either is a real finding about your plan, fix it rather than accept the build outcome.
 
-**Next:** you have a complete, defensible quality gate, scoped exception, correct order, real block, report that explains it.
+**Next:** you have a complete, defensible quality gate, reviewed exception, correct order, real block, report that explains it.
 
 </details>
 
@@ -414,17 +415,17 @@ Read the two findings side by side and tie them to the exit code: benign re-labe
 
 You can now explain each learning objective with the evidence you captured:
 
-1. **(EO3c) You applied a scoped exception, not a blanket suppression.** The alert filter set rule `10021` to `False Positive` scoped to `/greet.*`, and the report still shows that finding as `Low (False Positive)`, the rule is untouched everywhere else.
+1. **(EO3c) You recorded a reviewed disposition, not a blanket suppression.** The alert filter set rule `10021` to `False Positive` as a rule-level reviewed exception, and the report still shows that finding as `Low (False Positive)`, the rule stays live for anything new.
 2. **(EO3c) You made the release decision from final evidence.** With the jobs ordered so the filter applied before scanning and the gate ran last, the gate exited `1` on a genuine High (reflected XSS `40012, High (Medium)`) while `10021` stayed `False Positive` in the same report, and the hosted `quality-gate` job blocked the build for this commit, a security decision, not an infrastructure failure.
 
-**How to apply it:** this is how you make ZAP a real release gate, encode reviewed exceptions as scoped filters in version control, order the plan so they take effect, and block on genuine risk with a report that explains the call. A red build is only useful when you can defend it from evidence.
+**How to apply it:** this is how you make ZAP a real release gate, encode reviewed exceptions as filters in version control, order the plan so they take effect, and block on genuine risk with a report that explains the call. A red build is only useful when you can defend it from evidence.
 
 **Your final check:** explain each numbered outcome using *your own* captured evidence from this run. A README example, a missing result, or an earlier run does not satisfy this exercise.
 <!-- student-achievement:end -->
 
 ## Finish your lab
 
-The gate blocks because a genuine High risk remains after the benign alert was reviewed and scoped out, which is exactly what the report proves.
+The gate blocks because genuine High risks remain after the benign alert was reviewed and re-labelled, which is exactly what the report proves.
 
 From the same demo directory, stop the local services:
 
