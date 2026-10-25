@@ -5,7 +5,7 @@
 > ```bash
 > cd "$HOME/pluralsight-script-development-with-zap"   # the repo root (where ./lab lives)
 > ./lab up      # start the lab (first time; waits until ready)
-> ./lab run inspect-false-positive-filter   # run the first step (each step’s name is in the walk-through below)
+> ./lab run inspect-false-positive-filter   # run the first check (use the matching script name below)
 > ./lab down    # stop the lab when you are done
 > ```
 >
@@ -78,22 +78,56 @@ Mac dependencies are prepared **once for the course** with `setup/setup-macos.sh
 cd "$HOME/pluralsight-script-development-with-zap"
 git fetch origin
 git switch m2-demo3-before
-cd demos/module2-demos/m2-demo3-security-quality-gates
-./scripts/lab-up.sh
+(cd demos/module2-demos/m2-demo3-security-quality-gates && ./scripts/lab-up.sh)
 ```
 
 **Expected start:** the startup script reports healthy Globomantics, Postgres, MongoDB and ZAP services. If anything is not ready, stop and read the actual output before continuing.
 
-**Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Training application</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API and proxy</a>, plus **GitHub → Actions → quality-gate** for the hosted proof. The `-before` branch deliberately omits the finished `ci/gate-plan.yaml`; you bring it in with one command in Step 2, then open and read it, before running the gate.
+**Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Training application</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API and proxy</a>, plus **GitHub → Actions → quality-gate** for the hosted proof. The `-before` branch deliberately omits the finished `ci/gate-plan.yaml`; you bring it in with one command in Step 3, then open and read it, before running the gate.
 
 </details>
 
-## Your seven steps
+## Your steps
 
-Steps 1 to 3 are the authoring beat, the setup actions that are not yet a lab PASS: run the first step and meet the yellow author gate, bring the quality-gate plan in, then open and read the False Positive filter. Step 4 runs the same step again and the filter validates, your first real PASS. Steps 5 to 7 then prove the job order, the blocking exit code, and the reconciled report. You run the same four `./steps` scripts the recording uses, in the same order.
+<!-- learner-command-steps:start -->
 
-<details open>
-<summary><b>Step 1, Run it first and meet the yellow author gate</b> · nothing written yet</summary>
+Follow one numbered action set at a time. Opening the terminal, pasting a command and pressing Enter belong to the same step. Reading its source and interpreting its result stay with that step. Script filenames retain their stable 01–04 identifiers. Check numbers printed by the scripts identify those underlying lab checks, not the parent step numbers below. The numbered walkthrough steps also include entering the folder, reference copies and reruns where needed.
+
+| Step | Action |
+|---|---|
+| [Step 1](#step-1) | directory change command |
+| [Step 2](#step-2) | false positive filter script |
+| [Step 3](#step-3) | reference copy command |
+| [Step 4](#step-4) | false positive filter script |
+| [Step 5](#step-5) | automation job order script |
+| [Step 6](#step-6) | security quality gate script |
+| [Step 7](#step-7) | filtered alert report script |
+
+<a id="step-1"></a>
+
+## Step 1: directory change command
+
+[All steps](#your-steps) · [Next step 2 →](#step-2)
+
+1. Open the VS Code integrated Terminal at the repository root after the lab setup above.
+2. Paste this command and press Enter.
+
+```bash
+cd demos/module2-demos/m2-demo3-security-quality-gates
+```
+
+Confirm the returned prompt is inside `demos/module2-demos/m2-demo3-security-quality-gates` before running the first check. Stop if the directory change fails. This folder entry is Step 1; pasting and executing each later command is one new step, with its teaching and results kept together.
+
+[All steps](#your-steps) · [Next step 2 →](#step-2)
+
+<a id="step-2"></a>
+
+## Step 2: false positive filter script
+
+[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
+
+<details>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -113,8 +147,16 @@ It stops with a **yellow `✍️ AUTHOR THIS FIRST`** message (not red, not an e
 
 </details>
 
+[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
+
+<a id="step-3"></a>
+
+## Step 3: reference copy command
+
+[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
+
 <details>
-<summary><b>Step 2, Bring in the quality-gate plan</b> · one copy command</summary>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -132,11 +174,6 @@ The file now exists in the demo folder, and the filter check in Step 4 reads it.
 
 **Next:** open the plan and read the False Positive filter.
 
-</details>
-
-<details>
-<summary><b>Step 3, Open the plan and read the False Positive filter</b> · this reading is the lesson</summary>
-
 ### What you are learning
 
 Record a reviewed disposition for one benign finding, scoped to one path, without suppressing that rule anywhere else, read straight from the source. *(EO3c)*
@@ -153,8 +190,16 @@ This is a disposition-as-code: the judgment is written once, in the plan, review
 
 </details>
 
+[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
+
+<a id="step-4"></a>
+
+## Step 4: false positive filter script
+
+[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
+
 <details>
-<summary><b>Step 4, Run it again and watch the filter validate</b> · scoped exception</summary>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -192,8 +237,16 @@ Confirm the `url` scope is present, a filter without it is a global suppression 
 
 </details>
 
+[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
+
+<a id="step-5"></a>
+
+## Step 5: automation job order script
+
+[← Previous step 4](#step-4) · [All steps](#your-steps) · [Next step 6 →](#step-6)
+
 <details>
-<summary><b>Step 5, Verify scan and gate order</b> · filter before scan · gate last</summary>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -240,8 +293,16 @@ Confirm both invariants, filter early, gate last. The decision: *the plan is seq
 
 </details>
 
+[← Previous step 4](#step-4) · [All steps](#your-steps) · [Next step 6 →](#step-6)
+
+<a id="step-6"></a>
+
+## Step 6: security quality gate script
+
+[← Previous step 5](#step-5) · [All steps](#your-steps) · [Next step 7 →](#step-7)
+
 <details>
-<summary><b>Step 6, Run the gate and read its actual exit code</b> · exit 1 on a real High</summary>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -288,8 +349,16 @@ Read the exit `1` next to a positive High count and the hosted gate failure, the
 
 </details>
 
+[← Previous step 5](#step-5) · [All steps](#your-steps) · [Next step 7 →](#step-7)
+
+<a id="step-7"></a>
+
+## Step 7: filtered alert report script
+
+[← Previous step 6](#step-6) · [All steps](#your-steps)
+
 <details>
-<summary><b>Step 7, Reconcile filtered and remaining findings</b> · FP held · High kept</summary>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -335,6 +404,10 @@ Read the two findings side by side and tie them to the exit code: benign re-labe
 **Next:** you have a complete, defensible quality gate, scoped exception, correct order, real block, report that explains it.
 
 </details>
+
+[← Previous step 6](#step-6) · [All steps](#your-steps)
+
+<!-- learner-command-steps:end -->
 
 <!-- student-achievement:start -->
 ## What you achieved
