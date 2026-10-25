@@ -5,7 +5,7 @@
 > ```bash
 > cd "$HOME/pluralsight-script-development-with-zap"   # the repo root (where ./lab lives)
 > ./lab up      # start the lab (first time; waits until ready)
-> ./lab run check-zap-scan-status   # run the first step (each step’s name is in the walk-through below)
+> ./lab run check-zap-scan-status   # run the first check (use the matching script name below)
 > ./lab down    # stop the lab when you are done
 > ```
 >
@@ -80,8 +80,7 @@ Mac dependencies are prepared **once for the course** with `setup/setup-macos.sh
 cd "$HOME/pluralsight-script-development-with-zap"
 git fetch origin
 git switch m2-demo2-before
-cd demos/module2-demos/m2-demo2-zap-api-scan-evidence
-./scripts/lab-up.sh
+(cd demos/module2-demos/m2-demo2-zap-api-scan-evidence && ./scripts/lab-up.sh)
 ```
 
 **Expected start:** the startup script reports healthy Globomantics, Postgres, MongoDB and ZAP services, and provisions this demo's authenticated scan so there is real evidence to query. If anything is not ready, stop and read the actual output before continuing.
@@ -90,10 +89,45 @@ cd demos/module2-demos/m2-demo2-zap-api-scan-evidence
 
 </details>
 
-## Your four steps
+## Your steps
 
-<details open>
-<summary><b>Step 1, Ask the API whether the scan actually finished</b> · version · plan · scan state</summary>
+<!-- learner-command-steps:start -->
+
+Follow one numbered action set at a time. Opening the terminal, pasting a command and pressing Enter belong to the same step. Reading its source and interpreting its result stay with that step. Script filenames retain their stable 01–04 identifiers. Check numbers printed by the scripts identify those underlying lab checks, not the parent step numbers below. The numbered walkthrough steps also include entering the folder, reference copies and reruns where needed.
+
+| Step | Action |
+|---|---|
+| [Step 1](#step-1) | directory change command |
+| [Step 2](#step-2) | zap scan status script |
+| [Step 3](#step-3) | query custom rule alert script |
+| [Step 4](#step-4) | reconcile json report script |
+| [Step 5](#step-5) | zap insights script |
+
+<a id="step-1"></a>
+
+## Step 1: directory change command
+
+[All steps](#your-steps) · [Next step 2 →](#step-2)
+
+1. Open the VS Code integrated Terminal at the repository root after the lab setup above.
+2. Paste this command and press Enter.
+
+```bash
+cd demos/module2-demos/m2-demo2-zap-api-scan-evidence
+```
+
+Confirm the returned prompt is inside `demos/module2-demos/m2-demo2-zap-api-scan-evidence` before running the first check. Stop if the directory change fails. This folder entry is Step 1; pasting and executing each later command is one new step, with its teaching and results kept together.
+
+[All steps](#your-steps) · [Next step 2 →](#step-2)
+
+<a id="step-2"></a>
+
+## Step 2: zap scan status script
+
+[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
+
+<details>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -140,8 +174,16 @@ Read your own output against the prediction. If `state` is not `FINISHED` or `pr
 
 </details>
 
+[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
+
+<a id="step-3"></a>
+
+## Step 3: query custom rule alert script
+
+[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
+
 <details>
-<summary><b>Step 2, Pull the custom finding and read its disposition</b> · rule identity · risk · confidence</summary>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -180,14 +222,22 @@ The script calls **`GET core/view/alerts?baseurl=<authenticated profile URL>`** 
 
 Confirm the identity is `50000`, not a built-in reflected-XSS rule that happens to be on the same page. That connection, *this API alert is the rule I wrote*, is what makes the finding yours to own. The decision this authorizes: a pipeline routes and gates on **rule identity and disposition**, never on a raw alert count, because only identity tells you *what* broke and only risk-with-confidence tells you *how much to care*.
 
-**On FAIL:** the API returned no `50000` on the profile URL. That usually means the authenticated scan did not reach the protected page (go back to Step 1), not that the rule is wrong.
+**On FAIL:** the API returned no `50000` on the profile URL. That usually means the authenticated scan did not reach the protected page (go back to Step 2), not that the rule is wrong.
 
 **Next:** prove the report you would hand to a release owner says the same thing the live engine just said.
 
 </details>
 
+[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
+
+<a id="step-4"></a>
+
+## Step 4: reconcile json report script
+
+[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
+
 <details>
-<summary><b>Step 3, Reconcile the official JSON report with the live API</b> · report vs engine</summary>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -195,7 +245,7 @@ Generate an official report and reconcile it, field by field, against the live A
 
 ### What we examine, and why
 
-The script calls **`reports/action/generate` with the `traditional-json` template**, ZAP's official machine-readable report, the artifact a pipeline stores and attaches to a release. Then it reads back the same finding from that report (`pluginid`, `riskdesc`, and the instance `param`) and compares them to the values you captured from the live API in Step 2.
+The script calls **`reports/action/generate` with the `traditional-json` template**, ZAP's official machine-readable report, the artifact a pipeline stores and attaches to a release. Then it reads back the same finding from that report (`pluginid`, `riskdesc`, and the instance `param`) and compares them to the values you captured from the live API in Step 3.
 
 Why go to this trouble? Because **a report is a file, and files go stale.** The most dangerous mistake in this whole workflow is attaching last week's report to this week's release, the vulnerability you believe is fixed may simply have been scanned before the fix existed. Reconciliation is how you prove the archived evidence and the live engine are describing the same scan.
 
@@ -214,14 +264,14 @@ Why go to this trouble? Because **a report is a file, and files go stale.** The 
 | OBSERVED FIELD | ACTUAL VALUE |
 |---|---|
 | Report  pluginid · riskdesc · param | `50000 · Medium (Medium) · note` |
-| API (Step 2)  pluginId · risk (confidence) · param | `50000 · Medium (Medium) · note` |
+| API (Step 3)  pluginId · risk (confidence) · param | `50000 · Medium (Medium) · note` |
 | Fields that match | `3 of 3` |
 
 **`✔ PASS`** the official JSON report matches the API alert on rule ID, risk/confidence and parameter.
 
 ### Investigate, then decide
 
-Look at the three fields side by side with your Step 2 values. If any of identity, scope, or rating disagrees, you do **not** have evidence, you have a question to chase (a stale file, a different scan, a scope mismatch). The decision: *a report is only release-grade when it reconciles with the current engine.* That sentence is the entire reason this step exists.
+Look at the three fields side by side with your Step 3 values. If any of identity, scope, or rating disagrees, you do **not** have evidence, you have a question to chase (a stale file, a different scan, a scope mismatch). The decision: *a report is only release-grade when it reconciles with the current engine.* That sentence is the entire reason this step exists.
 
 **On FAIL:** either the report failed to generate (check the reports add-on and Docker access to the ZAP container) or it disagreed with the API. A disagreement is a real finding about your process, not something to edit away.
 
@@ -229,8 +279,16 @@ Look at the three fields side by side with your Step 2 values. If any of identit
 
 </details>
 
+[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
+
+<a id="step-5"></a>
+
+## Step 5: zap insights script
+
+[← Previous step 4](#step-4) · [All steps](#your-steps)
+
 <details>
-<summary><b>Step 4, Read the report's scan-effectiveness Insights</b> · was the scan healthy?</summary>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -274,6 +332,10 @@ Read the real insight and say what it tells you about the scan's reach. The deci
 **Next:** you now have all four pieces, finished, found, reconciled, healthy, the complete programmatic evidence a pipeline needs.
 
 </details>
+
+[← Previous step 4](#step-4) · [All steps](#your-steps)
+
+<!-- learner-command-steps:end -->
 
 <!-- student-achievement:start -->
 ## What you achieved
