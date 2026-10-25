@@ -261,17 +261,19 @@ Insight values are genuinely run-specific; read yours from the output. The contr
 | Insight  (level · key) | `<level> · <insight key>` |
 | Statistic · meaning | `<value> · <description>` |
 
-The report lists one of these pairs per insight (for example `Low · insight.log.error` with its count, or `Info · insight.code.2xx`); the exact keys and values are genuinely run-specific, so read yours from the output.
+The report lists one pair per insight. In the verified reference run the three top insights were `Low · insight.log.error` (`5`, ZAP errors logged), `Low · insight.log.warn` (`5`, ZAP warnings logged) and `Info · insight.code.2xx` (`68`, percentage of responses with a 2xx status). The exact keys and counts are genuinely run-specific, so read yours from the output, but notice that two of these three are *operational issues*, not a clean bill of health. The step also prints the report's path inside the ZAP container and a `logs/` copy saved on your Mac, so you can open the actual JSON and the referenced `zap.log` yourself.
 
-**`✔ PASS`** the report's own Insights section reports scan effectiveness.
+**`✔ PASS`** the report's own Insights section reports scan effectiveness (interpret each entry; it is not a clean bill of health).
 
 ### Investigate, then decide
 
-Read the real insight and say what it tells you about the scan's reach. The decision this authorizes is the one that protects you from false confidence: *a clean result is only trustworthy next to evidence the scan actually did its job.* If Insights is empty, the correct move is to investigate the run, never to invent a number so the step looks complete.
+Read the real insights and say what each tells you about the scan's reach, then interpret the operational ones rather than glossing them green. The `insight.log.error` and `insight.log.warn` counts are lines ZAP wrote to its own `zap.log` during this run; the count alone does not say whether they hurt coverage, so you open the saved report and `zap.log` to see what they were (add-on and script-registration messages and passive-rule noise are common and harmless; a failed authentication or a request that never completed is not). The `insight.code.2xx` figure (`68` in the reference run) means roughly a third of responses were non-2xx; for an authenticated scan some of that is expected redirects, but a low figure can also mean requests failed to reach the app.
+
+So do these issues invalidate the scan? For *this* demo, no: Step 1 showed the scan reached `progress=100% · state=FINISHED`, the custom rule `50000` fired on the authenticated page, and Step 3 reconciled 3 of 3 fields, so the finding you are proving is sound. The logged errors and warnings are operational noise you must still read, not evidence the scan failed. The decision this authorizes is the one that protects you from false confidence: *a clean result is only trustworthy next to evidence the scan actually did its job.* If Insights is empty, investigate the run; if it reports logged errors or warnings, read those too, never invent a number so the step looks complete.
 
 **On FAIL:** empty or missing Insights is a HOLD by design. Investigate why the report has none rather than papering over it.
 
-**Next:** you now have all four pieces, finished, found, reconciled, healthy, the complete programmatic evidence a pipeline needs.
+**Next:** you now have all four pieces, finished, found, reconciled, and scan health *assessed* (not assumed), the complete programmatic evidence a pipeline needs. A matching report from a scan with logged errors still needs those errors read before you trust it.
 
 </details>
 
@@ -283,7 +285,7 @@ You can now defend a scan's evidence the way a release pipeline has to, with the
 1. **(EO3b) You confirmed the scan was real before trusting it.** You asked the engine its version (`2.17.0`), confirmed the authenticated plan `finished` with no errors as `alice`, and read `progress=100% · state=FINISHED`, so you know the findings came from a complete scan, not a half-run one.
 2. **(EO3b) You identified the finding by rule, not by count.** You pulled `pluginId 50000`, your own Jython rule from Module 1, on parameter `note`, and read `risk` and `confidence` as the two separate `Medium` axes a pipeline reasons about.
 3. **(EO3b) You proved the report is release-grade.** You generated the official `traditional-json` report and reconciled its `pluginid` and `riskdesc` ("Medium (Medium)") field-by-field with the live API, so you can reject a stale or mismatched report instead of trusting it blindly.
-4. **(EO3b) You checked the scan's health, not just its result.** You read a real `insights[]` entry and know that an empty Insights section is a reason to investigate, never a clean bill of health.
+4. **(EO3b) You checked the scan's health, not just its result.** You read the report's real `insights[]` entries, including the `insight.log.error` and `insight.log.warn` counts, and you know that neither an empty Insights section nor a non-empty one carrying logged errors and warnings is a clean bill of health, each is a reason to open the saved report and `zap.log` and investigate before you trust the result.
 
 **How to apply it:** this is exactly the sequence you wire into CI, confirm completion, pull findings by identity, reconcile the stored report, and check coverage, so a build can make a defensible security decision with no human watching.
 
@@ -292,7 +294,7 @@ You can now defend a scan's evidence the way a release pipeline has to, with the
 
 ## Finish your lab
 
-A report is trustworthy only when its custom finding, its rating, and its scan-quality context all match the current API evidence, which is exactly what you just proved, in order.
+A report is trustworthy only when its custom finding and its rating reconcile with the current API evidence *and* you have read its scan-quality Insights rather than assuming they are clean, which is exactly what you just did, in order.
 
 From the same demo directory, stop the local services:
 
