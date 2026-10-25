@@ -157,7 +157,7 @@ git switch m1-demo1-before</pre>Each <code>*-before</code> branch is an independ
 <tr><td>⑤</td><td><b>Observe the result and clean up</b><pre>./scripts/lab-down.sh</pre>Record the actual displayed evidence.</td></tr>
 </table>
 
-> 🧪 **Self-test first (off camera).** Before you follow the steps by hand, run the self-test to confirm every step works and prints the expected output. It is NOT a lab step — it just runs the real steps for you and writes `course-evidence.txt` (and a `FAIL-<module>-<demo>.log` naming any broken step):
+> 🧪 **Self-test first.** Before you follow the steps by hand, run the self-test to confirm every step works and prints the expected output. It just runs the real steps for you so you can fix any setup issue before you begin:
 >
 > ```bash
 > ./preflight-check            # the whole course, every demo, in order
