@@ -5,7 +5,7 @@
 > ```bash
 > cd "$HOME/pluralsight-script-development-with-zap"   # the repo root (where ./lab lives)
 > ./lab up      # start the lab (first time; waits until ready)
-> ./lab run run-targeted-injection-scan   # run the first step (each step’s name is in the walk-through below)
+> ./lab run run-targeted-injection-scan   # run the first check (use the matching script name below)
 > ./lab down    # stop the lab when you are done
 > ```
 >
@@ -79,20 +79,54 @@ The Mac prerequisite installer, `setup/setup-macos.sh`, is a **one-time** prepar
 cd "$HOME/pluralsight-script-development-with-zap"
 git fetch origin
 git switch m1-demo1-before
-cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
-./scripts/lab-reset.sh
+(cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf && ./scripts/lab-reset.sh)
 ```
 
-**Expected start:** the reset script prints a clean-slate message and brings up the vulnerable Globomantics build. Continue only after it reports readiness, a failed startup is not one of the four teaching steps.
+**Expected start:** the reset script prints a clean-slate message and brings up the vulnerable Globomantics build. Continue only after it reports readiness, a failed startup must be fixed before starting the numbered steps.
 
 **Interfaces:** <a href="http://localhost:8000/" target="_blank" rel="noopener">Globomantics app, localhost:8000</a> · <a href="http://localhost:8080/zap/" target="_blank" rel="noopener">ZAP GUI, localhost:8080/zap/</a> · <a href="http://localhost:8090/" target="_blank" rel="noopener">ZAP API/proxy, localhost:8090</a>. Open only the interface a step calls for. Use VS Code with `runtime/app/main.py` open and the integrated Terminal; the script prints the real ZAP findings in that terminal.
 
 </details>
 
-## Your four steps
+## Your steps
 
-<details open>
-<summary><b>Step 1, Run one targeted injection scan</b> · SQL · NoSQL · command</summary>
+<!-- learner-command-steps:start -->
+
+Follow one numbered action set at a time. Opening the terminal, pasting a command and pressing Enter belong to the same step. Reading its source and interpreting its result stay with that step. Script filenames retain their stable 01–04 identifiers. Check numbers printed by the scripts identify those underlying lab checks, not the parent step numbers below. The numbered walkthrough steps also include entering the folder, reference copies and reruns where needed.
+
+| Step | Action |
+|---|---|
+| [Step 1](#step-1) | directory change command |
+| [Step 2](#step-2) | targeted injection scan script |
+| [Step 3](#step-3) | reflected xss contexts script |
+| [Step 4](#step-4) | cross session csrf token script |
+| [Step 5](#step-5) | reconcile security alerts script |
+
+<a id="step-1"></a>
+
+## Step 1: directory change command
+
+[All steps](#your-steps) · [Next step 2 →](#step-2)
+
+1. Open the VS Code integrated Terminal at the repository root after the lab setup above.
+2. Paste this command and press Enter.
+
+```bash
+cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
+```
+
+Confirm the returned prompt is inside `demos/module1-demos/m1-demo1-targeted-injection-xss-csrf` before running the first check. Stop if the directory change fails. This folder entry is Step 1; pasting and executing each later command is one new step, with its teaching and results kept together.
+
+[All steps](#your-steps) · [Next step 2 →](#step-2)
+
+<a id="step-2"></a>
+
+## Step 2: targeted injection scan script
+
+[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
+
+<details>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -151,8 +185,16 @@ Read the output from the top, because each line is there for a reason.
 
 </details>
 
+[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
+
+<a id="step-3"></a>
+
+## Step 3: reflected xss contexts script
+
+[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
+
 <details>
-<summary><b>Step 2, Validate reflected XSS in the correct context</b> · body · attribute · JS string</summary>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -205,7 +247,7 @@ In the last step a scan *reported* a lead; here your output has to show the lead
 - The **ZAP alert** row (`40012` on `name`) is the engine agreeing with you independently. Notice it cites the *same* parameter you just traced, your manual reading and ZAP's automated rule are pointing at one defect, from two directions.
 - The **payload** row is run-specific on purpose: read it from *your* output, not from this page, so the evidence is yours.
 
-**What this establishes:** this is a confirmed reflected XSS on `name`, reproducible with a named rule and a captured payload, and, unlike step 1's lead, you have now *watched* it reflect. The method also carries forward: the context dictates the payload, every time.
+**What this establishes:** this is a confirmed reflected XSS on `name`, reproducible with a named rule and a captured payload, and, unlike step 2's lead, you have now *watched* it reflect. The method also carries forward: the context dictates the payload, every time.
 
 **On FAIL:** read the diagnostic, a context that came back encoded or a missing `40012`, and verify branch and app state instead of asserting the finding.
 
@@ -213,8 +255,16 @@ In the last step a scan *reported* a lead; here your output has to show the lead
 
 </details>
 
+[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
+
+<a id="step-4"></a>
+
+## Step 4: cross session csrf token script
+
+[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
+
 <details>
-<summary><b>Step 3, Replay a CSRF token across sessions</b> · reuse · cross-session</summary>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -257,13 +307,13 @@ Every value is deterministic: the three status codes, and session B's email movi
 
 ### Read your output, then decide
 
-Steps 1 and 2 read values off the screen; this step changes a record, so read the output as a before/after story.
+Steps 2 and 3 read values off the screen; this step changes a record, so read the output as a before/after story.
 
 - Start with the two **controls**. `Valid token → 200` and `Missing token → 403` are there to prove the endpoint genuinely checks for a token at all, without them, an attacker's `200` could just mean "this app never checked." Those two lines are what make the next two damning instead of ambiguous.
 - Now the two **abuse** lines: the replayed used token and the cross-session token both come back `200 (should be rejected)`. Read them against the missing validation you saw in `change_email`, no single-use check, no session binding. The status code alone isn't the proof, though.
 - The proof is the **email before → after** rows beneath each abuse. Watch the stored address actually move, once on the replay, again on the cross-session request. A changed record is something you can show a reviewer; a bare `200` is not.
 
-**What this establishes:** this is a true CSRF defect, the token is present but enforced as neither single-use nor session-bound, and you have the overwritten email to prove it. Notice the pattern completing across the three steps: a lead (step 1), a reflection you watched (step 2), and now a state change you caused (step 3), each a stronger grade of evidence than the last.
+**What this establishes:** this is a true CSRF defect, the token is present but enforced as neither single-use nor session-bound, and you have the overwritten email to prove it. Notice the pattern completing across the three steps: a lead (step 2), a reflection you watched (step 3), and now a state change you caused (step 4), each a stronger grade of evidence than the last.
 
 **On FAIL:** a control that did not behave (valid ≠ `200`, missing ≠ `403`) means the app state is wrong, not the finding. Reset and re-run rather than reporting a bypass you did not see.
 
@@ -271,8 +321,16 @@ Steps 1 and 2 read values off the screen; this step changes a record, so read th
 
 </details>
 
+[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
+
+<a id="step-5"></a>
+
+## Step 5: reconcile security alerts script
+
+[← Previous step 4](#step-4) · [All steps](#your-steps)
+
 <details>
-<summary><b>Step 4, Reconcile the findings with application behavior</b> · alert → real effect</summary>
+<summary><b>Teaching, command and result</b></summary>
 
 ### What you are learning
 
@@ -315,7 +373,7 @@ Every value is deterministic for these fixed inputs: the Postgres parse error, t
 
 This is where the three steps converge, so read the table as the receipt for the whole investigation.
 
-- Each row pairs a finding with the **real effect** that makes it a True Positive, and every one of those effects is something you produced in an earlier step: the SQL alert → the database's own parse error; the NoSQL alert → the change in how many account records matched; the command alert → the `ZAP_CMD_PROOF` marker the injected shell printed; the XSS alert → the unescaped reflection from step 2; the CSRF case → the token accepted twice from step 3. Notice there is no row that says "High severity" and stops, severity never appears, because it was never the point.
+- Each row pairs a finding with the **real effect** that makes it a True Positive, and every one of those effects is something you produced in an earlier step: the SQL alert → the database's own parse error; the NoSQL alert → the change in how many account records matched; the command alert → the `ZAP_CMD_PROOF` marker the injected shell printed; the XSS alert → the unescaped reflection from step 3; the CSRF case → the token accepted twice from step 4. Notice there is no row that says "High severity" and stops, severity never appears, because it was never the point.
 - The **Disposition record written** line (`logs/alert-disposition.md`) is the deliverable. Open it: it turns everything you watched on screen into a reviewable artifact, so the decision outlives this terminal session.
 - The `✔ PASS` line means every finding reconciled against an effect. A finding with no effect would not be here, which is exactly the discipline the step is teaching.
 
@@ -326,6 +384,10 @@ This is where the three steps converge, so read the table as the receipt for the
 **Next:** you have a complete, evidence-backed result for all three injection classes plus XSS and CSRF.
 
 </details>
+
+[← Previous step 4](#step-4) · [All steps](#your-steps)
+
+<!-- learner-command-steps:end -->
 
 <!-- student-achievement:start -->
 ## What you achieved
@@ -344,7 +406,7 @@ You can now explain each learning objective with the evidence you captured, not 
 
 ## Finish your lab
 
-After Step 4 you should be able to say *why* each finding deserves a confirmed disposition from real evidence, not just recall the command that produced it.
+After Step 5 you should be able to say *why* each finding deserves a confirmed disposition from real evidence, not just recall the command that produced it.
 
 Stop the demo's containers from the same demo directory:
 
