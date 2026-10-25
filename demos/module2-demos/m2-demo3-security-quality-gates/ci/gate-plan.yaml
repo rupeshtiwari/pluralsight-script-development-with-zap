@@ -31,14 +31,23 @@ jobs:
     parameters:
       scanOnlyInScope: true
 
-  # 2) FILTER BEFORE SCANNING: mark a known benign Globomantics finding as a
-  #    False Positive, so every later alert inherits this disposition.
+  # 2) FILTER BEFORE SCANNING: record a reviewed disposition for ONE benign
+  #    finding — the missing X-Content-Type-Options header (rule 10021).
+  #    newRisk: "False Positive" RE-LABELS the alert (it is still written to the
+  #    report); it does NOT delete the finding or disable the rule, and it never
+  #    touches the genuine High findings the gate must still block on.
+  #
+  #    The disposition is RULE-LEVEL on purpose. A missing security header is an
+  #    app-wide configuration fact — benign on every page the team reviewed — so
+  #    the exception belongs to the rule, not to one URL. If a finding were benign
+  #    on only ONE path you would add a `url` pattern with `urlRegex` true to scope
+  #    it there — but a ZAP alert-filter URL regex must be escaped and full-matched,
+  #    and you must always confirm in the report WHERE the filter actually applied.
+  #    The filtered-report step is that confirmation.
   - type: alertFilter
     alertFilters:
-      - ruleId: 10021                       # X-Content-Type-Options Header Missing
+      - ruleId: 10021                       # X-Content-Type-Options Header Missing (benign, app-wide)
         newRisk: "False Positive"
-        url: "http://app:8000/greet.*"
-        urlRegex: true
 
   # 3) The Module 1 JavaScript marker script stamps every request the scan sends.
   - type: script
@@ -73,7 +82,8 @@ jobs:
       defaultStrength: "medium"
       defaultThreshold: "medium"
 
-  # 7) Scan it. The reflected-XSS High finding is what the gate will catch.
+  # 7) Scan it. The genuine High findings (reflected XSS, DOM-based XSS, SQL
+  #    injection) are what the gate catches and blocks the build on.
   - type: activeScan
     parameters:
       context: "GlobomanticsGate"
