@@ -102,7 +102,11 @@ scan_url_quiet() { # <url>  -- active-scan one endpoint, wait, no output
     local try
     for try in 1 2 3 4 5; do
         zap core/action/accessUrl "url=${eu}&followRedirects=false" >/dev/null 2>&1 || true
-        sid="$(zap ascan/action/scan "url=${eu}&recurse=false&scanPolicyName=${POLICY}" | jget scan 2>/dev/null)"
+        # Suppress the transient non-200 stderr from this retry: on a fresh ZAP the sites
+        # tree may not hold the URL yet, so the first try can return non-200. The loop retries
+        # and the sid check below is the real success test; a genuine failure still surfaces
+        # (empty sid -> return 1 -> the step fails). This keeps the recorded output clean.
+        sid="$(zap ascan/action/scan "url=${eu}&recurse=false&scanPolicyName=${POLICY}" 2>/dev/null | jget scan 2>/dev/null)"
         [[ "${sid}" =~ ^[0-9]+$ ]] && break
         sleep 3   # the sites tree may not hold the URL yet on a fresh ZAP
     done
