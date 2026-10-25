@@ -29,10 +29,21 @@ run_plan_and_wait() {
     return 0
 }
 
-# Steps 3 and 4 read the authenticated scan's result. If this ZAP session has no
-# scan data yet (you're recording a step on its own), run the plan once first.
+# Steps 2-4 read the authenticated scan's result. When Step 1 (or an earlier
+# step) already ran the plan in THIS long-lived local ZAP session, reuse that
+# result instead of re-running the scan; only run the plan when there is
+# genuinely nothing to reuse (you're recording a later step on its own).
+#
+# The reuse probe must look for the evidence THIS plan actually produces. The
+# plan's activeScan-policy runs the custom rule ONLY (plugin 50000, every
+# built-in rule threshold "off" in ci/af-plan.yaml), so it never raises a
+# built-in "Cross Site Scripting (Reflected)" alert. Probing for that built-in
+# finding never matched, so every sequential step re-primed and re-ran the whole
+# plan. Probe for the named custom alert the plan does raise on the login-only
+# page: sequential runs then reuse Step 1's evidence, while an independent
+# single-step run (fresh session, no alert yet) still primes once.
 prime_if_needed() {
-    [ -n "$(reflection_reached)" ] && return 0
+    [ -n "$(custom_alert)" ] && return 0
     fm note "Priming: no scan result in this ZAP session yet, running the plan once so this step has data."
     run_plan_and_wait
 }

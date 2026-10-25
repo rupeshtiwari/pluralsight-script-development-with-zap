@@ -95,17 +95,6 @@ wait_nonempty() { # <seconds> <fn> -> prints fn's first non-empty output
     return 1
 }
 
-reflection_reached() {
-    zap core/view/alerts "baseurl=$(enc "${APP_INTERNAL}/account/profile")" | python3 -c '
-import json,sys
-try: data=json.load(sys.stdin)
-except Exception: print(""); raise SystemExit
-for a in data.get("alerts", []):
-    nm=(a.get("alert") or a.get("name") or "")
-    if "Cross Site Scripting (Reflected)" in nm:
-        print("%s | param=%s" % (nm, a.get("param"))); raise SystemExit
-print("")'
-}
 custom_alert() {
     zap core/view/alerts "baseurl=$(enc "${APP_INTERNAL}/account/profile")" | python3 -c '
 import json,sys
