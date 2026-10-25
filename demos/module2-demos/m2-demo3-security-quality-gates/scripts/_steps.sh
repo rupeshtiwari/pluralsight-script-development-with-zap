@@ -96,16 +96,16 @@ hosted() { python3 "${REPO_ROOT}/runtime/scripts/hosted_run.py" "${REPO_ROOT}" z
 step1_fp_filter() {
     fm header "A known benign finding is marked False Positive, by config" \
               "A quality gate must ignore noise it has already judged benign. The alertFilter job records that decision once, in the plan, so every run applies it (EO3c)."
-    local rid risk url
-    rid="$(plan_value ruleId)"; risk="$(plan_value newRisk)"; url="$(plan_value url)"
+    local rid risk
+    rid="$(plan_value ruleId)"; risk="$(plan_value newRisk)"
     fm star "Filtered rule  (ruleId)" "${rid:-<none>}  (X-Content-Type-Options Header Missing)" focus
     fm star "New disposition  (newRisk)" "${risk:-<none>}" focus
-    fm star "Scope  (url)" "${url:-<none>}"
-    if [ "${rid}" = "${FP_RULE}" ] && [ "${risk}" = "False Positive" ] && [ -n "${url}" ]; then
-        pass "the plan marks rule ${FP_RULE} as a False Positive, scoped to ${url}"
+    fm star "Applies to" "all in-scope pages (rule-level: the header is missing app-wide, benign everywhere the team reviewed)"
+    if [ "${rid}" = "${FP_RULE}" ] && [ "${risk}" = "False Positive" ]; then
+        pass "the plan marks rule ${FP_RULE} as a reviewed False Positive"
     else
         fail "the alertFilter config is missing or wrong (ruleId=${rid:-none}, newRisk=${risk:-none})" \
-             "expected ruleId ${FP_RULE} with newRisk \"False Positive\" and a url scope in ci/gate-plan.yaml" \
+             "expected ruleId ${FP_RULE} with newRisk \"False Positive\" in ci/gate-plan.yaml" \
              "restore the alertFilter job for rule ${FP_RULE}"
     fi
     return "${STEP_RC}"
@@ -174,11 +174,22 @@ step4_filtered_report() {
     ensure_gate || { return "${STEP_RC}"; }
     local row; row="$(jq_py 'import json
 d=json.load(open("'"${GATE_REPORT}"'"))
-fp=xs=("","")
+fp=("","")
+xs=("","")
+fp_rows=[]
 for s in d.get("site",[]):
     for a in s.get("alerts",[]):
-        if str(a.get("pluginid"))=="'"${FP_RULE}"'": fp=(a.get("name") or a.get("alert",""), a.get("riskdesc",""))
-        if str(a.get("pluginid"))=="'"${XSS_RULE}"'": xs=(a.get("name") or a.get("alert",""), a.get("riskdesc",""))
+        pid=str(a.get("pluginid"))
+        if pid=="'"${FP_RULE}"'": fp_rows.append((a.get("name") or a.get("alert",""), a.get("riskdesc","")))
+        if pid=="'"${XSS_RULE}"'": xs=(a.get("name") or a.get("alert",""), a.get("riskdesc",""))
+# Pick the 10021 row deterministically, independent of alert order: prefer the
+# re-labelled False Positive row; if none applied, surface the first row so a
+# filter that did NOT take effect is reported honestly, never hidden.
+for r in fp_rows:
+    if "False Positive" in r[1]:
+        fp=r; break
+else:
+    if fp_rows: fp=fp_rows[0]
 print("|".join(fp+xs))')"
     IFS='|' read -r fpn fpr xn xr <<<"${row}"
     local code; code="$(cat "${GATE_EXIT_FILE}" 2>/dev/null)"
@@ -190,7 +201,7 @@ print("|".join(fp+xs))')"
     else
         fail "the report did not prove both the False Positive and the remaining High-risk alert" \
              "expected rule ${FP_RULE} False Positive and rule ${XSS_RULE} High from the same run that exited 1" \
-             "run Step 3 first; confirm the scan reached /greet"
+             "run Step 3 first; then read logs/.gate/run.log and the gate report"
     fi
     return "${STEP_RC}"
 }
