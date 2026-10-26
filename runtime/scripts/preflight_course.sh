@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Whole-course preflight: run EVERY module's EVERY demo, step by step, in the exact order and the
-# exact output format a recorder would see, so you confirm the entire course in one command instead
+# exact output format you would see, so you confirm the entire course in one command instead
 # of testing each demo by hand.
 #
 #   ./preflight-check                (from the repo root; the whole course — same as calling this script)
@@ -10,13 +10,13 @@
 # What it writes (at the repo root, so you can hand them straight back):
 #   course-evidence.txt      one text file with every demo's four steps and their real output,
 #                            grouped module by module, demo by demo. This is the evidence a student
-#                            or recorder reads before starting: if it is all PASS, the course runs.
+#                            reads before starting: if it is all PASS, the course runs.
 #   FAIL-<module>-<demo>.log a separate log written ONLY for a demo that failed, named so you can see
 #                            at a glance which module and demo broke. It holds that demo's full output
 #                            and the failing step, and it is exactly what to hand back to fix the step.
 #
 # Exit code is non-zero if any demo failed, so CI (and a student) can treat "course did not pass" as a
-# hard stop: if this fails, do not start recording. A demo whose taught file is not authored on the
+# hard stop: if this fails, do not start. A demo whose taught file is not authored on the
 # current branch is reported as SKIPPED (author it, or run on the integration branch), never a failure.
 set -uo pipefail
 
@@ -25,7 +25,7 @@ ROOT="${1:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 # whole course); $3 is a human label for the header. The ./preflight-check front door translates
 # --m1 / --m1d1 into these, so this engine stays one simple, filterable loop.
 FILTER="${2:-}"
-SCOPE_LABEL="${3:-every module, every demo, every step, in recorder order}"
+SCOPE_LABEL="${3:-every module, every demo, every step, in order}"
 cd "$ROOT" || exit 2
 
 EVIDENCE="$ROOT/course-evidence.txt"
