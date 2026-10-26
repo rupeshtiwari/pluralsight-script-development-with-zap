@@ -107,8 +107,6 @@ Follow one numbered action set at a time. Opening the terminal, pasting a comman
 
 ## Step 1: directory change command
 
-[All steps](#your-steps) · [Next step 2 →](#step-2)
-
 1. Open the VS Code integrated Terminal at the repository root after the lab setup above.
 2. Paste this command and press Enter.
 
@@ -118,13 +116,9 @@ cd demos/module2-demos/m2-demo2-zap-api-scan-evidence
 
 Confirm the returned prompt is inside `demos/module2-demos/m2-demo2-zap-api-scan-evidence` before running the first check. Stop if the directory change fails. This folder entry is Step 1; pasting and executing each later command is one new step, with its teaching and results kept together.
 
-[All steps](#your-steps) · [Next step 2 →](#step-2)
-
 <a id="step-2"></a>
 
 ## Step 2: zap scan status script
-
-[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -174,13 +168,9 @@ Read your own output against the prediction. If `state` is not `FINISHED` or `pr
 
 </details>
 
-[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
-
 <a id="step-3"></a>
 
 ## Step 3: query custom rule alert script
-
-[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -228,13 +218,9 @@ Confirm the identity is `50000`, not a built-in reflected-XSS rule that happens 
 
 </details>
 
-[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
-
 <a id="step-4"></a>
 
 ## Step 4: reconcile json report script
-
-[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -279,13 +265,9 @@ Look at the three fields side by side with your Step 3 values. If any of identit
 
 </details>
 
-[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
-
 <a id="step-5"></a>
 
 ## Step 5: zap insights script
-
-[← Previous step 4](#step-4) · [All steps](#your-steps)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -334,8 +316,6 @@ So do these issues invalidate the scan? For *this* demo, no: Step 2 showed the s
 **Next:** you now have all four pieces, finished, found, reconciled, and scan health *assessed* (not assumed), the complete programmatic evidence a pipeline needs. A matching report from a scan with logged errors still needs those errors read before you trust it.
 
 </details>
-
-[← Previous step 4](#step-4) · [All steps](#your-steps)
 
 <!-- learner-command-steps:end -->
 
