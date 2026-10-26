@@ -107,8 +107,6 @@ Follow one numbered action set at a time. Opening the terminal, pasting a comman
 
 ## Step 1: directory change command
 
-[All steps](#your-steps) · [Next step 2 →](#step-2)
-
 1. Open the VS Code integrated Terminal at the repository root after the lab setup above.
 2. Paste this command and press Enter.
 
@@ -118,13 +116,9 @@ cd demos/module1-demos/m1-demo2-javascript-http-sender
 
 Confirm the returned prompt is inside `demos/module1-demos/m1-demo2-javascript-http-sender` before running the first check. Stop if the directory change fails. This folder entry is Step 1; pasting and executing each later command is one new step, with its teaching and results kept together.
 
-[All steps](#your-steps) · [Next step 2 →](#step-2)
-
 <a id="step-2"></a>
 
 ## Step 2: load javascript http sender script
-
-[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -147,13 +141,9 @@ It stops with a **yellow `✍️ AUTHOR THIS FIRST`** message (not red, not an e
 
 </details>
 
-[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
-
 <a id="step-3"></a>
 
 ## Step 3: reference copy command
-
-[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -228,13 +218,9 @@ Loading this file registers it with ZAP's **Graal.js** engine as an `httpsender`
 
 </details>
 
-[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
-
 <a id="step-4"></a>
 
 ## Step 4: load javascript http sender script
-
-[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -278,13 +264,9 @@ Match the registered `httpsender` type to the `sendingRequest` hook you read in 
 
 </details>
 
-[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
-
 <a id="step-5"></a>
 
 ## Step 5: prove outbound marker header script
-
-[← Previous step 4](#step-4) · [All steps](#your-steps) · [Next step 6 →](#step-6)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -334,13 +316,9 @@ Confirm the `marker-<id>` in ZAP's History matches the one the terminal reported
 
 </details>
 
-[← Previous step 4](#step-4) · [All steps](#your-steps) · [Next step 6 →](#step-6)
-
 <a id="step-6"></a>
 
 ## Step 6: live script console
-
-[← Previous step 5](#step-5) · [All steps](#your-steps) · [Next step 7 →](#step-7)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -390,13 +368,9 @@ Line the console URL up with the `marker-<id>` from Step 5, same request, report
 
 </details>
 
-[← Previous step 5](#step-5) · [All steps](#your-steps) · [Next step 7 →](#step-7)
-
 <a id="step-7"></a>
 
 ## Step 7: enabled script registration
-
-[← Previous step 6](#step-6) · [All steps](#your-steps)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -445,8 +419,6 @@ Confirm the name and type match what the Module-2 reuse line expects. The decisi
 **Next:** you have source, a modified request, a live console line, and a reusable registration, four independent proofs that your code runs.
 
 </details>
-
-[← Previous step 6](#step-6) · [All steps](#your-steps)
 
 <!-- learner-command-steps:end -->
 

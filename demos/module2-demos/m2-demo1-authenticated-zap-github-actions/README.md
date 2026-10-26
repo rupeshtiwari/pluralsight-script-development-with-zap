@@ -107,8 +107,6 @@ Follow one numbered action set at a time. Opening the terminal, pasting a comman
 
 ## Step 1: directory change command
 
-[All steps](#your-steps) · [Next step 2 →](#step-2)
-
 1. Open the VS Code integrated Terminal at the repository root after the lab setup above.
 2. Paste this command and press Enter.
 
@@ -118,13 +116,9 @@ cd demos/module2-demos/m2-demo1-authenticated-zap-github-actions
 
 Confirm the returned prompt is inside `demos/module2-demos/m2-demo1-authenticated-zap-github-actions` before running the first check. Stop if the directory change fails. This folder entry is Step 1; pasting and executing each later command is one new step, with its teaching and results kept together.
 
-[All steps](#your-steps) · [Next step 2 →](#step-2)
-
 <a id="step-2"></a>
 
 ## Step 2: headless automation plan script
-
-[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -145,13 +139,9 @@ The first run stops on purpose, with a **yellow `✍️ AUTHOR THIS FIRST`** mes
 
 </details>
 
-[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
-
 <a id="step-3"></a>
 
 ## Step 3: reference copy command
-
-[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -172,13 +162,9 @@ Open `ci/af-plan.yaml` and `.github/workflows/zap-authenticated-scan.yml` in VS 
 
 </details>
 
-[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
-
 <a id="step-4"></a>
 
 ## Step 4: headless automation plan script
-
-[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -221,13 +207,9 @@ Read the local `0 errors` next to the hosted `success · covers this code`. The 
 
 </details>
 
-[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
-
 <a id="step-5"></a>
 
 ## Step 5: authenticated scan context script
-
-[← Previous step 4](#step-4) · [All steps](#your-steps) · [Next step 6 →](#step-6)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -275,13 +257,9 @@ Tie the config (`alice`, scripted auth, profile scope) to the login-only finding
 
 </details>
 
-[← Previous step 4](#step-4) · [All steps](#your-steps) · [Next step 6 →](#step-6)
-
 <a id="step-6"></a>
 
 ## Step 6: reused security scripts
-
-[← Previous step 5](#step-5) · [All steps](#your-steps) · [Next step 7 →](#step-7)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -327,13 +305,9 @@ Confirm the `50000` identity matches the rule you wrote in Module 1 Demo 3, same
 
 </details>
 
-[← Previous step 5](#step-5) · [All steps](#your-steps) · [Next step 7 →](#step-7)
-
 <a id="step-7"></a>
 
 ## Step 7: authenticated custom alert script
-
-[← Previous step 6](#step-6) · [All steps](#your-steps)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -379,8 +353,6 @@ Confirm the report's finding is your named rule on `note`, and that the hosted c
 **Next:** a repeatable authenticated CI report is now a trusted source for the API-driven decisions you make in Demo 2.
 
 </details>
-
-[← Previous step 6](#step-6) · [All steps](#your-steps)
 
 <!-- learner-command-steps:end -->
 

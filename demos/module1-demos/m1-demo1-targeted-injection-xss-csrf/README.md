@@ -106,8 +106,6 @@ Follow one numbered action set at a time. Opening the terminal, pasting a comman
 
 ## Step 1: directory change command
 
-[All steps](#your-steps) · [Next step 2 →](#step-2)
-
 1. Open the VS Code integrated Terminal at the repository root after the lab setup above.
 2. Paste this command and press Enter.
 
@@ -117,13 +115,9 @@ cd demos/module1-demos/m1-demo1-targeted-injection-xss-csrf
 
 Confirm the returned prompt is inside `demos/module1-demos/m1-demo1-targeted-injection-xss-csrf` before running the first check. Stop if the directory change fails. This folder entry is Step 1; pasting and executing each later command is one new step, with its teaching and results kept together.
 
-[All steps](#your-steps) · [Next step 2 →](#step-2)
-
 <a id="step-2"></a>
 
 ## Step 2: targeted injection scan script
-
-[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -185,13 +179,9 @@ Read the output from the top, because each line is there for a reason.
 
 </details>
 
-[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
-
 <a id="step-3"></a>
 
 ## Step 3: reflected xss contexts script
-
-[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -255,13 +245,9 @@ In the last step a scan *reported* a lead; here your output has to show the lead
 
 </details>
 
-[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
-
 <a id="step-4"></a>
 
 ## Step 4: cross session csrf token script
-
-[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -321,13 +307,9 @@ Steps 2 and 3 read values off the screen; this step changes a record, so read th
 
 </details>
 
-[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
-
 <a id="step-5"></a>
 
 ## Step 5: reconcile security alerts script
-
-[← Previous step 4](#step-4) · [All steps](#your-steps)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -384,8 +366,6 @@ This is where the three steps converge, so read the table as the receipt for the
 **Next:** you have a complete, evidence-backed result for all three injection classes plus XSS and CSRF.
 
 </details>
-
-[← Previous step 4](#step-4) · [All steps](#your-steps)
 
 <!-- learner-command-steps:end -->
 
