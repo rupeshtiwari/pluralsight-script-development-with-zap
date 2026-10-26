@@ -12,7 +12,7 @@
 
 The Globomantics release team needs repeatable security checks in CI. Its pipeline must authenticate, retrieve the right custom finding, and enforce a risk policy that ignores only reviewed benign noise.
 
-> 🧪 **Self-test first:** `./preflight-check --m2` runs every Module 2 demo's steps and confirms each step works and prints the expected output. Use `./preflight-check` for the whole course, or `--m2d1 … --m2d3` for one demo.
+> 🧪 **Self-test first:** `(cd "$(git rev-parse --show-toplevel)" && ./preflight-check --m2)` (runs from anywhere) every Module 2 demo's steps and confirms each step works and prints the expected output. Use `./preflight-check` for the whole course, or `--m2d1 … --m2d3` for one demo.
 
 ## What you will learn
 
