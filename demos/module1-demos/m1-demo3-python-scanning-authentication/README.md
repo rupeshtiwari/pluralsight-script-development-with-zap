@@ -107,8 +107,6 @@ Follow one numbered action set at a time. Opening the terminal, pasting a comman
 
 ## Step 1: directory change command
 
-[All steps](#your-steps) · [Next step 2 →](#step-2)
-
 1. Open the VS Code integrated Terminal at the repository root after the lab setup above.
 2. Paste this command and press Enter.
 
@@ -118,13 +116,9 @@ cd demos/module1-demos/m1-demo3-python-scanning-authentication
 
 Confirm the returned prompt is inside `demos/module1-demos/m1-demo3-python-scanning-authentication` before running the first check. Stop if the directory change fails. This folder entry is Step 1; pasting and executing each later command is one new step, with its teaching and results kept together.
 
-[All steps](#your-steps) · [Next step 2 →](#step-2)
-
 <a id="step-2"></a>
 
 ## Step 2: load python active scan rule script
-
-[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -147,13 +141,9 @@ It stops with a **yellow `✍️ AUTHOR THIS FIRST`** message (not red, not an e
 
 </details>
 
-[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
-
 <a id="step-3"></a>
 
 ## Step 3: reference copy command
-
-[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -269,13 +259,9 @@ This runs on ZAP's **Python Scripting (jython)** add-on, so the file is Python 2
 
 </details>
 
-[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
-
 <a id="step-4"></a>
 
 ## Step 4: load python active scan rule script
-
-[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -325,13 +311,9 @@ Confirm the error flag is `false` and the registered type is `active`, a rule th
 
 </details>
 
-[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
-
 <a id="step-5"></a>
 
 ## Step 5: register scripted authentication script
-
-[← Previous step 4](#step-4) · [All steps](#your-steps) · [Next step 6 →](#step-6)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -448,13 +430,9 @@ Confirm the logged-in regex matched `1` on the signed-in page and `0` on the sig
 
 </details>
 
-[← Previous step 4](#step-4) · [All steps](#your-steps) · [Next step 6 →](#step-6)
-
 <a id="step-6"></a>
 
 ## Step 6: authenticated profile access script
-
-[← Previous step 5](#step-5) · [All steps](#your-steps) · [Next step 7 →](#step-7)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -507,13 +485,9 @@ Read the `401`/`200` pair together, the jump is the whole proof, and the auth tr
 
 </details>
 
-[← Previous step 5](#step-5) · [All steps](#your-steps) · [Next step 7 →](#step-7)
-
 <a id="step-7"></a>
 
 ## Step 7: custom scan alert script
-
-[← Previous step 6](#step-6) · [All steps](#your-steps)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -568,8 +542,6 @@ Confirm the finding was absent a moment ago and is now present as `pluginId 5000
 **Next:** you have a reusable custom rule and a scripted login, and the alert record that Module 2 Demo 2 reads back over the API.
 
 </details>
-
-[← Previous step 6](#step-6) · [All steps](#your-steps)
 
 <!-- learner-command-steps:end -->
 
