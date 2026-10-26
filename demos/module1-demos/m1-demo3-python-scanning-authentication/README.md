@@ -89,6 +89,21 @@ git switch m1-demo3-before
 
 ## Your steps
 
+<!-- source-focus:start -->
+## Read the code that supports this exercise
+
+Paths below are relative to this demo folder. Open the named file in VS Code and find the function or YAML block; inspect only the part that explains the current check.
+
+| File | Function or block | What to understand |
+|---|---|---|
+| `zap-scripts/globomantics-active-rule.py` | `scan(), scanNode(), _probe_request(), _check(), _raise()` | After the reference copy, trace callbacks through the probe and response check to the named alert. The alphanumeric marker proves reflection, not encoding-aware XSS detection. |
+| `zap-scripts/globomantics-auth.py` | `authenticate() and parameter declarations` | Inspect the login inputs, form submission and returned message in this separate copied file. |
+| `scripts/_steps.sh` | `setup_script_auth()` | Find setLoggedInIndicator here. Context configuration is separate from the login script; verify access with the signed-out and authenticated requests. |
+
+The `steps/` folder contains the commands you run; `scripts/` contains their implementation. Files identified as copied references become available after the existing reference-copy step.
+
+<!-- source-focus:end -->
+
 <!-- learner-command-steps:start -->
 
 Follow one numbered action set at a time. Opening the terminal, pasting a command and pressing Enter belong to the same step. Reading its source and interpreting its result stay with that step. Script filenames retain their stable 01–04 identifiers. Check numbers printed by the scripts identify those underlying lab checks, not the parent step numbers below. The numbered walkthrough steps also include entering the folder, reference copies and reruns where needed.
