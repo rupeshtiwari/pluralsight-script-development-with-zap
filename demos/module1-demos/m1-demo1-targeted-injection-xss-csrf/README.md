@@ -41,7 +41,7 @@
 
 A scan of the Globomantics Store just came back with a wall of alerts, and someone has to decide what is actually broken before the team can act. That someone is you. A severity label on its own is not a decision, a "High" that you cannot reproduce wastes a developer's afternoon, and a real defect buried in the list ships to production. What turns an alert into a decision is a request you sent, a response you read, and a change you can see in the application.
 
-So in this demo you and I are not going to collect alerts, we are going to *prove* three specific defects and write down why each one is real. We will narrow ZAP to the injection rules that matter for three different endpoints, watch a reflected-XSS payload come back unescaped in the exact context it was injected into, replay a CSRF token where it should have been rejected, and finish by reconciling every finding against what the app actually did. Keep the vulnerable source handy in VS Code as you go, because you cannot explain a finding you have not traced back to the line that caused it.
+So in this demo you and I are not going to collect alerts, we are going to *prove* three specific defects and write down why each one is real. We will narrow ZAP to the injection rules that matter for three different endpoints, watch a reflected-XSS payload come back unescaped in the exact context it was injected into, send another session’s CSRF token where it should have been rejected, and finish by reconciling every finding against what the app actually did. Use the vulnerable application source as optional reference when you need to trace an input. The recorded code view focuses on the scan-policy function.
 
 ## Your learning goals
 
@@ -246,7 +246,7 @@ The alert name, the rule, the `name` parameter and the `High/Medium` rating are 
 
 In the last step a scan *reported* a lead; here your output has to show the lead is real, line by line.
 
-- The three request / response-body pairs are the heart of it. For each one, find your injected `name` value sitting **unescaped** in the response, a `<script>` in the body row, a broken-out attribute in the attribute row, a closed JS string in the script row. Why three rows and not one? Because the same input lands in three different places, and each needed a different payload to escape it. Seeing the payload survive in its own context is the proof that "reflected" has become "executable here."
+- The three request / response-body pairs are the heart of it. For each one, find your injected `name` value sitting **unescaped** in the response, a `<script>` in the body row, a broken-out attribute in the attribute row, a closed JS string in the script row. Why three rows and not one? Because the same input lands in three different places, and each needed a different payload to escape it. Seeing the payload return unescaped connects that input to its output context. It does not show JavaScript executing in a browser.
 - The **ZAP alert** row (`40012` on `name`) is the engine agreeing with you independently. Notice it cites the *same* parameter you just traced, your manual reading and ZAP's automated rule are pointing at one defect, from two directions.
 - The **payload** row is run-specific on purpose: read it from *your* output, not from this page, so the evidence is yours.
 
@@ -267,15 +267,15 @@ In the last step a scan *reported* a lead; here your output has to show the lead
 
 ### What you are learning
 
-Show that a CSRF token which *looks* enforced can still fail if it is neither single-use nor bound to its session. *(EO1c)*
+Use valid, missing, reused and cross-session tokens to test what the protection enforces. The decisive defect here is accepting a token that belongs to another session. *(EO1c)*
 
 ### What we examine, and why
 
-Open `change_email` and the token-issuing helper (`./scripts/show_code.sh csrf`). The endpoint does check for a token, so a naive look says "protected." But read how the token is validated: it is accepted as long as it is a token the app issued, with no check that it has been used before or that it belongs to *this* cookie's session. Those two missing checks are the whole defect, and controls are how you expose them: a legitimate request should pass, a missing token should be rejected, and then the two abuse cases, the **same token used twice**, and a token from **session A submitted with session B's cookie**, should both be rejected but will not be.
+If you inspect `change_email` and the token-issuing helper (`./scripts/show_code.sh csrf`) as optional reference, notice that the endpoint accepts any token the application issued. A legitimate request should pass and a missing token should fail. Reusing the same token tells you whether it is single-use; session-based CSRF tokens may legitimately be reusable. Sending session A's token with session B's cookie tests a different requirement: whether the token is bound to the correct session.
 
 The step runs all four and shows session B's stored email before and after, so the proof is a status code *and* a changed record, never a status code alone.
 
-**Predict before you run:** valid token → `200`; missing token → `403`; then the two that *should* be `403` but come back `200`, the replayed used token (changing the email once) and the cross-session token (changing it again). Watch the email field move with each accepted abuse.
+**Predict before you run:** a valid token should return `200`, and a missing token should return `403`. What should happen when the token belongs to another session? That request should be rejected. Inspect its response and the stored email together; the same-session replay is a separate reuse check.
 
 ### Run command
 
@@ -289,7 +289,7 @@ Keep the valid-token control, missing-token control, replay, cross-session reque
 
 ### Expected result (the exact terminal output, verified in the lab)
 
-Every value is deterministic: the three status codes, and session B's email moving from `alice@globomantics.example` to `replayed@evil.example` and then to `attacker@evil.example`. Your terminal prints exactly this:
+The captured run shows session B's email moving from `alice@globomantics.example` to `replayed@evil.example` and then to `attacker@evil.example`. Compare the status codes and stored addresses with your run. The helper's captured PASS line is:
 
 ```text
 ✔ PASS  the used token was accepted again (200) and changed the email; a token from another session was also accepted, tokens are neither single-use nor session-bound
@@ -304,15 +304,17 @@ Every value is deterministic: the three status codes, and session B's email movi
 | token from session A, submitted with session B's cookie | `200  (should be rejected)` |
 | session B's email after the cross-session request | `attacker@evil.example` |
 
+> **Interpret the helper labels carefully.** The preserved output labels the replay as “should be rejected.” That reflects the lab's stricter single-use expectation, not a universal CSRF requirement. [OWASP permits per-session tokens](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#synchronizer-token-pattern). The cross-session token and resulting email change are the security evidence here.
+
 ### Read your output, then decide
 
 Steps 2 and 3 read values off the screen; this step changes a record, so read the output as a before/after story.
 
-- Start with the two **controls**. `Valid token → 200` and `Missing token → 403` are there to prove the endpoint genuinely checks for a token at all, without them, an attacker's `200` could just mean "this app never checked." Those two lines are what make the next two damning instead of ambiguous.
-- Now the two **abuse** lines: the replayed used token and the cross-session token both come back `200 (should be rejected)`. Read them against the missing validation you saw in `change_email`, no single-use check, no session binding. The status code alone isn't the proof, though.
-- The proof is the **email before → after** rows beneath each abuse. Watch the stored address actually move, once on the replay, again on the cross-session request. A changed record is something you can show a reviewer; a bare `200` is not.
+- Start with the two **controls**. `Valid token → 200` and `Missing token → 403` show that the endpoint checks for a token. You can then investigate which token properties it actually validates.
+- Compare the **reuse** and **cross-session** rows. Both return `200` in this training app, but they establish different facts. Reuse shows that the token is not single-use. Accepting another session's token exposes the missing session binding.
+- Read the **email before → after** rows. The change after the cross-session request confirms that the wrongly accepted token caused a state change. A bare `200` would not establish that effect.
 
-**What this establishes:** this is a true CSRF defect, the token is present but enforced as neither single-use nor session-bound, and you have the overwritten email to prove it. Notice the pattern completing across the three steps: a lead (step 2), a reflection you watched (step 3), and now a state change you caused (step 4), each a stronger grade of evidence than the last.
+**What this establishes:** the missing-token control shows that a token check exists, while the cross-session email change shows that it fails to bind the token to the correct session. You now have a concrete failure to carry into the final disposition, alongside the injection and reflected-output evidence.
 
 **On FAIL:** a control that did not behave (valid ≠ `200`, missing ≠ `403`) means the app state is wrong, not the finding. Reset and re-run rather than reporting a bypass you did not see.
 
@@ -333,7 +335,7 @@ Turn each ZAP alert and the CSRF case into a recorded, evidence-backed dispositi
 
 ### What we examine, and why
 
-A rule ID is a lead; a disposition is a decision with the evidence attached. Keep `runtime/app/main.py` open and read the disposition template at `docs/alert-disposition-template.md`. The step walks each finding back to the concrete effect that makes it a **True Positive**: the SQL alert to the database's own parse error, the NoSQL alert to a change in how many account records matched, the command alert to a harmless marker the injected shell command printed, the XSS alert to the unescaped reflection, and the CSRF case to the token accepted twice. A "normal ping" or a bare alert is explicitly *not* enough, the effect is the proof.
+A rule ID is a lead; a disposition is a decision with the evidence attached. Use `runtime/app/main.py` and `docs/alert-disposition-template.md` as optional references when you inspect the disposition. The step walks each finding back to the concrete effect that makes it a **True Positive**: the SQL alert to the database's own parse error, the NoSQL alert to a change in how many account records matched, the command alert to a harmless marker the injected shell command printed, the XSS alert to the unescaped reflection, and the CSRF summary to same-session token reuse. For CSRF, combine that summary with the cross-session email change you captured in step 4; reuse alone does not establish the defect. A bare alert is not enough to support the disposition.
 
 **Predict before you run:** you expect every finding to reconcile as a True Positive against a real effect, and the step to write a disposition record to `logs/alert-disposition.md`. If any finding cannot be tied to an effect, it is not ready to ship as confirmed.
 
@@ -364,11 +366,13 @@ Every value is deterministic for these fixed inputs: the Postgres parse error, t
 | CSRF · /account/email (csrf_token) | `True Positive, used token accepted twice (200, 200)` |
 | Disposition record written | `logs/alert-disposition.md` |
 
+> **CSRF evidence boundary:** this final command repeats the same-session replay and labels it True Positive. That row alone is not sufficient to establish a CSRF defect. Retain step 4's cross-session result and stored-email change with the disposition record.
+
 ### Read your output, then decide
 
 This is where the three steps converge, so read the table as the receipt for the whole investigation.
 
-- Each row pairs a finding with the **real effect** that makes it a True Positive, and every one of those effects is something you produced in an earlier step: the SQL alert → the database's own parse error; the NoSQL alert → the change in how many account records matched; the command alert → the `ZAP_CMD_PROOF` marker the injected shell printed; the XSS alert → the unescaped reflection from step 3; the CSRF case → the token accepted twice from step 4. Notice there is no row that says "High severity" and stops, severity never appears, because it was never the point.
+- Each row pairs a finding with the **real effect** that makes it a True Positive, and every one of those effects is something you produced in an earlier step: the SQL alert → the database's own parse error; the NoSQL alert → the change in how many account records matched; the command alert → the `ZAP_CMD_PROOF` marker the injected shell printed; the XSS alert → the unescaped reflection from step 3; the CSRF summary → same-session token reuse. For the CSRF defect, keep the separate cross-session email-change evidence from step 4 beside this summary. A severity label or reuse count alone does not establish session binding.
 - The **Disposition record written** line (`logs/alert-disposition.md`) is the deliverable. Open it: it turns everything you watched on screen into a reviewable artifact, so the decision outlives this terminal session.
 - The `✔ PASS` line means every finding reconciled against an effect. A finding with no effect would not be here, which is exactly the discipline the step is teaching.
 
@@ -389,8 +393,8 @@ You can now explain each learning objective with the evidence you captured, not 
 
 1. **(EO1a) You located three different injection boundaries in one focused scan.** ZAP raised SQL `40018` on `/search (q)`, MongoDB NoSQL `40033` on `/api/account (username)`, and OS command `90020` on `/admin/ping (host)`, each one mapped back to the exact sink you read in `main.py`.
 2. **(EO1b) You confirmed reflected XSS by output context, not by guesswork.** ZAP rule `40012` fired on `name` at `/greet` with a context-matched payload reflected unescaped, proof the input reaches the page unsafely, not that a browser popped an alert.
-3. **(EO1c) You showed the CSRF token is neither single-use nor session-bound.** Valid token `200`, missing token `403`, yet a replayed token and a cross-session token both returned `200` and overwrote the victim's stored email from `alice@globomantics.example`.
-4. **(EO1a · EO1b · EO1c) You turned alerts into an evidence-backed disposition.** Each finding reconciled to a real effect, the database parse error, the account-count change, the injected marker `ZAP_CMD_PROOF`, the reflected payload, and the twice-accepted token, and the decision was written to `logs/alert-disposition.md`.
+3. **(EO1c) You distinguished token reuse from a session-binding failure.** The valid-token and missing-token controls returned `200` and `403`. A token from another session was accepted and changed the stored email. Same-session reuse alone would not prove that defect.
+4. **(EO1a · EO1b · EO1c) You turned alerts into an evidence-backed disposition.** Each finding reconciled to a real effect, the database parse error, the account-count change, the injected marker `ZAP_CMD_PROOF`, the reflected payload, and the cross-session email change captured in step 4. The reconciliation summary was written to `logs/alert-disposition.md`.
 
 **How to apply it:** this is how you triage any scan, map each alert to its sink in the source, reproduce the effect, and record a disposition with evidence, so your team acts on confirmed defects instead of a severity list.
 
