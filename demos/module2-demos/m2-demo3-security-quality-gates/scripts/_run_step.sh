@@ -22,7 +22,15 @@ N="${1:-}"; case "${N}" in 1|2|3|4) ;; *) usage ;; esac
 
 # Steps 1 and 2 only read the plan file; steps 3 and 4 need the stack + a gate run.
 case "${N}" in
-    1|2) [ -f "${GATE_PLAN_HOST}" ] || { fail "gate plan not found"; exit 1; } ;;
+    1|2) [ -f "${GATE_PLAN_HOST}" ] || {
+            # Starter branch ships without the plan on purpose: show the friendly yellow
+            # author-gate (not a red FAIL), the same beat steps 3|4 show via ensure_ready,
+            # so preflight classifies this SKIPPED/author-this-first, never a broken repo.
+            need_author "you have not written the quality-gate plan yet" \
+                "the m2-demo3-before branch ships without ci/gate-plan.yaml on purpose; writing it IS this demo" \
+                "author ci/gate-plan.yaml (this demo's README, Step 1)" \
+                "${GATE_PLAN_HOST}"
+            exit 1; } ;;
     3|4) ensure_ready || exit 1 ;;
 esac
 echo
