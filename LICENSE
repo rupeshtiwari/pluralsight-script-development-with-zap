@@ -1,0 +1,27 @@
+Educational and Training Use Only
+Copyright (c) 2026 Rupesh Tiwari
+
+This repository is an intentionally vulnerable, controlled training environment
+created to teach OWASP ZAP scripting, security testing, scan automation,
+reporting, and evidence-based security decisions.
+
+- The Globomantics application, security configurations, credentials, scripts,
+  and CI examples exist for demonstration and learning only.
+- This project is not production-ready and must not be deployed, exposed, or
+  reused as a production application or security-testing platform.
+- The examples are intentionally simplified to make specific security concepts
+  observable and reproducible; they have not been validated against production
+  datasets, enterprise traffic, or real-world deployment requirements.
+- Security weaknesses are included deliberately. An insecure implementation here
+  is part of the exercise, not an endorsement of that implementation.
+- Use this project only in an isolated, authorized lab. Never point its active
+  scanning scripts at systems you do not have explicit permission to test.
+
+Permission is granted to use, copy, and modify this material for personal,
+educational, and training purposes, provided this notice is retained.
+
+THE MATERIAL IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED. THE AUTHOR IS NOT LIABLE FOR ANY CLAIM OR DAMAGES ARISING FROM ITS USE.
+Use only in an isolated, authorized lab.
+
+Maintained by Rupesh Tiwari — Authorized Globomantics practice only.

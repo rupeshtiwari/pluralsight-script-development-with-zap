@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# preflight-check — the OFF-CAMERA self-test for this course.
+# preflight-check — the self-test for this course.
 #
-# Run it before you record (or before you follow the steps by hand) to confirm every step actually
+# Run it before you follow the steps by hand to confirm every step actually
 # works and prints the expected output. By DEFAULT it runs the WHOLE course, every module and every
 # demo, in order. Pass a scope to check just one module or one demo:
 #
@@ -12,10 +12,9 @@
 #
 # It writes one text file, course-evidence.txt, with every step's real output, and for any demo that
 # fails it also writes FAIL-<module>-<demo>.log naming the module, demo and failing step. It exits
-# non-zero if anything failed, so a red preflight is a hard stop: fix the step before recording.
+# non-zero if anything failed, so a red preflight is a hard stop: fix the step before you start.
 #
-# This is NOT an on-camera command — it is the check you run first, off camera. The on-camera commands
-# are ./lab up and ./lab step N.
+# This is a self-test you run first, not a lab step. The lab commands are ./lab up and ./lab step N.
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 engine="$ROOT/runtime/scripts/preflight_course.sh"
