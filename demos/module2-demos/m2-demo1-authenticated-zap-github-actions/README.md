@@ -89,6 +89,19 @@ git switch m2-demo1-before
 
 ## Your steps
 
+<!-- source-focus:start -->
+## Read the code that supports this exercise
+
+Paths below are relative to this demo folder. Open the named file in VS Code and find the function or YAML block; inspect only the part that explains the current check.
+
+| File | Function or block | What to understand |
+|---|---|---|
+| `ci/af-plan.yaml` | `env.contexts.authentication, users, activeScan and script jobs` | After the reference copy, connect the login script, configured user and active scan. Inspect script identities and enable jobs; the script implementations do not need another walkthrough. |
+
+The `steps/` folder contains the commands you run; `scripts/` contains their implementation. Files identified as copied references become available after the existing reference-copy step.
+
+<!-- source-focus:end -->
+
 <!-- learner-command-steps:start -->
 
 Follow one numbered action set at a time. Opening the terminal, pasting a command and pressing Enter belong to the same step. Reading its source and interpreting its result stay with that step. Script filenames retain their stable 01–04 identifiers. Check numbers printed by the scripts identify those underlying lab checks, not the parent step numbers below. The numbered walkthrough steps also include entering the folder, reference copies and reruns where needed.
