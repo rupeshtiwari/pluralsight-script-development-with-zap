@@ -12,7 +12,7 @@
 
 The Globomantics Store has several distinct input boundaries. Maya must test them precisely, extend ZAP with custom scripts, and prove the scanner reached the authenticated code she intended to assess.
 
-> 🧪 **Self-test first:** `./preflight-check --m1` runs every Module 1 demo's steps and confirms each step works and prints the expected output. Use `./preflight-check` for the whole course, or `--m1d1 … --m1d3` for one demo.
+> 🧪 **Self-test first:** `(cd "$(git rev-parse --show-toplevel)" && ./preflight-check --m1)` (runs from anywhere) every Module 1 demo's steps and confirms each step works and prints the expected output. Use `./preflight-check` for the whole course, or `--m1d1 … --m1d3` for one demo.
 
 ## What you will learn
 
