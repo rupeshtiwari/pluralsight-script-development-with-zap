@@ -107,8 +107,6 @@ Follow one numbered action set at a time. Opening the terminal, pasting a comman
 
 ## Step 1: directory change command
 
-[All steps](#your-steps) · [Next step 2 →](#step-2)
-
 1. Open the VS Code integrated Terminal at the repository root after the lab setup above.
 2. Paste this command and press Enter.
 
@@ -118,13 +116,9 @@ cd demos/module2-demos/m2-demo3-security-quality-gates
 
 Confirm the returned prompt is inside `demos/module2-demos/m2-demo3-security-quality-gates` before running the first check. Stop if the directory change fails. This folder entry is Step 1; pasting and executing each later command is one new step, with its teaching and results kept together.
 
-[All steps](#your-steps) · [Next step 2 →](#step-2)
-
 <a id="step-2"></a>
 
 ## Step 2: false positive filter script
-
-[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -147,13 +141,9 @@ It stops with a **yellow `✍️ AUTHOR THIS FIRST`** message (not red, not an e
 
 </details>
 
-[← Previous step 1](#step-1) · [All steps](#your-steps) · [Next step 3 →](#step-3)
-
 <a id="step-3"></a>
 
 ## Step 3: reference copy command
-
-[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -191,13 +181,9 @@ This is a disposition-as-code: the judgment is written once, in the plan, review
 
 </details>
 
-[← Previous step 2](#step-2) · [All steps](#your-steps) · [Next step 4 →](#step-4)
-
 <a id="step-4"></a>
 
 ## Step 4: false positive filter script
-
-[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -238,13 +224,9 @@ Confirm the rule ID and disposition are exactly what you reviewed. The decision:
 
 </details>
 
-[← Previous step 3](#step-3) · [All steps](#your-steps) · [Next step 5 →](#step-5)
-
 <a id="step-5"></a>
 
 ## Step 5: automation job order script
-
-[← Previous step 4](#step-4) · [All steps](#your-steps) · [Next step 6 →](#step-6)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -294,13 +276,9 @@ Confirm both invariants, filter early, gate last. The decision: *the plan is seq
 
 </details>
 
-[← Previous step 4](#step-4) · [All steps](#your-steps) · [Next step 6 →](#step-6)
-
 <a id="step-6"></a>
 
 ## Step 6: security quality gate script
-
-[← Previous step 5](#step-5) · [All steps](#your-steps) · [Next step 7 →](#step-7)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -350,13 +328,9 @@ Read the exit `1` next to a positive High count and the hosted gate failure, the
 
 </details>
 
-[← Previous step 5](#step-5) · [All steps](#your-steps) · [Next step 7 →](#step-7)
-
 <a id="step-7"></a>
 
 ## Step 7: filtered alert report script
-
-[← Previous step 6](#step-6) · [All steps](#your-steps)
 
 <details>
 <summary><b>Teaching, command and result</b></summary>
@@ -405,8 +379,6 @@ Read the two findings side by side and tie them to the exit code: benign re-labe
 **Next:** you have a complete, defensible quality gate, reviewed exception, correct order, real block, report that explains it.
 
 </details>
-
-[← Previous step 6](#step-6) · [All steps](#your-steps)
 
 <!-- learner-command-steps:end -->
 
