@@ -160,8 +160,8 @@ git switch m1-demo1-before</pre>Each <code>*-before</code> branch is an independ
 > 🧪 **Self-test first.** Before you follow the steps by hand, run the self-test to confirm every step works and prints the expected output. It just runs the real steps for you so you can fix any setup issue before you begin:
 >
 > ```bash
-> ./preflight-check            # the whole course, every demo, in order
-> ./preflight-check --m1       # a whole module (--m1 / --m2), or one demo (--m1d1 … --m2d3)
+> (cd "$(git rev-parse --show-toplevel)" && ./preflight-check)            # the whole course, every demo, in order (runs from anywhere)
+> (cd "$(git rev-parse --show-toplevel)" && ./preflight-check --m1)       # a whole module (--m1 / --m2), or one demo (--m1d1 … --m2d3)
 > ```
 
 **Different demo?** Return to the repository root, save any personal changes, switch to its `*-before` branch, then follow its own README. Don't reuse scan history from another demo.
