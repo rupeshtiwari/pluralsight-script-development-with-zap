@@ -13,8 +13,8 @@
 >
 > 🧪 **Self-test before you start.** `preflight-check` runs every step and confirms each one works and prints the expected output, so you can fix any setup issue before you begin.
 > ```bash
-> ./preflight-check --m2d3      # just this demo
-> ./preflight-check             # or the whole course, every demo in order
+> (cd "$(git rev-parse --show-toplevel)" && ./preflight-check --m2d3)   # just this demo — runs from anywhere
+> (cd "$(git rev-parse --show-toplevel)" && ./preflight-check)          # or the whole course, every demo in order
 > ```
 
 
