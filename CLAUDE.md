@@ -102,3 +102,7 @@ Key constraints from the outline:
 - After changing this repository, update the private repository in the same task: run its
   `tools/source_lock.py check`, update every asset it flags, then relock. Information flows
   public → private only.
+
+## Terminal file paths (owner, October 28, 2026)
+
+Use the module folder as the display root in terminal output: `module2-demos/m2-demo2-zap-api-scan-evidence/logs/report.json`. Omit personal home, repository and `demos/` prefixes. Apply the shared path display helper before wrapping all terminal field values, including JSON-driven rows. Preserve actual file locations, raw reports, URLs, container paths and authentication evidence. Use a plain `$ ` prompt with no username or hostname. Keep this formatter policy and its regression test in CI for all modules and future demos.
