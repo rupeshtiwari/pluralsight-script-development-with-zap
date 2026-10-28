@@ -46,7 +46,7 @@ class PreflightFlowTests(unittest.TestCase):
         scripts = self.root / 'runtime/scripts'
         scripts.mkdir(parents=True)
         for name in ('preflight_course.sh', 'preflight_all_steps.sh', 'recording_step.py',
-                     'preflight_runtime.sh', 'preflight_start.py', 'lib.sh'):
+                     'preflight_runtime.sh', 'preflight_start.py', 'lib.sh', 'capture_ci_source.py'):
             shutil.copy2(SOURCE / name, scripts / name)
         shutil.copy2(SOURCE.parents[1] / 'preflight-check', self.root / 'preflight-check')
         self.write_exec(self.bin / 'docker', '''#!/usr/bin/env python3
@@ -157,6 +157,13 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
                 result=self.run_scope(option,cwd=self.root/FOLDERS['m2-demo2'])
                 self.assertEqual(result.returncode,0,result.stdout+result.stderr)
                 self.assertIn('1 passed, 0 failed',result.stdout)
+                for n in range(1, 5):
+                    logs = self.root / folder / 'logs'
+                    self.assertEqual((logs / f'preflight-step-{n:02d}.exit').read_text(), '0\n')
+                    expected = (f'STEP LIVE: {demo} {n}\n'
+                                '✔ PASS: cwd and prerequisites verified\n').encode()
+                    self.assertEqual((logs / f'preflight-step-{n:02d}.log').read_bytes(), expected)
+                    self.assertEqual((logs / '.producer' / f'preflight-step-{n:02d}.raw.log').read_bytes(), expected)
                 self.assert_restored()
         rows=(self.root/'executions').read_text().splitlines()
         self.assertEqual(len(rows),24)
@@ -211,6 +218,80 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
         self.assertIn('Step 2 failed',result.stdout)
         self.assertIn('0 passed, 1 failed',result.stdout)
         self.assertNotIn('Broken pipe',result.stderr)
+        logs = self.root / FOLDERS['m2-demo1'] / 'logs'
+        self.assertEqual((logs / 'preflight-step-01.exit').read_text(), '0\n')
+        self.assertEqual((logs / 'preflight-step-02.exit').read_text(), '7\n')
+        self.assertIn('✘ FAIL', (logs / 'preflight-step-02.log').read_text())
+        self.assertFalse((logs / 'preflight-step-03.exit').exists())
+        self.assertFalse((logs / 'preflight-step-04.log').exists())
+        self.assert_restored()
+
+    def test_ci_source_describes_actual_temporary_prerequisites_and_preserves_index(self):
+        import hashlib
+        after = self.git('rev-parse', 'refs/remotes/origin/m2-demo1-after')
+        workflow_sha = self.head
+        # Mirror CI's distinct local authored commit before the runner supplies reused files.
+        authored = self.root / FOLDERS['m2-demo1'] / 'ci/af-plan.yaml'
+        authored.write_text('reference fixture\n')
+        self.git('add', str(authored))
+        self.git('commit', '-qm', 'local authored plan')
+        self.head = self.git('rev-parse', 'HEAD')
+        self.index = (self.root / '.git/index').read_bytes()
+        (self.root / 'SOURCE.txt').write_text(workflow_sha + '\n')
+        (self.root / 'AFTER_SHA.txt').write_text(after + '\n')
+        self.env.update(PREFLIGHT_CI_SOURCE='1', GITHUB_SHA=workflow_sha)
+        result = self.run_scope('--m2d1')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        manifest = json.loads((self.root / 'EXECUTION.json').read_text())
+        self.assertEqual(manifest['workflow_sha'], workflow_sha)
+        self.assertNotEqual(manifest['workflow_sha'], manifest['executed_head'])
+        self.assertEqual(manifest['executed_head'], self.head)
+        self.assertEqual(manifest['after_sha'], after)
+        self.assertEqual((self.root / 'EXECUTED_TREE.txt').read_text().strip(), manifest['executed_tree'])
+        self.assertEqual((self.root / 'EXECUTED_HEAD.txt').read_text().strip(), manifest['executed_head'])
+        self.assertEqual(manifest['authored_patch_sha256'],
+                         hashlib.sha256((self.root / 'AUTHORED.patch').read_bytes()).hexdigest())
+        self.assertNotEqual(manifest['executed_tree'], self.git('rev-parse', 'HEAD^{tree}'))
+        for key in NEEDS['m2-demo1']:
+            owner, name = ARTIFACTS[key]
+            relative = FOLDERS[owner] + '/' + name
+            captured = subprocess.check_output(['git', '-C', str(self.root), 'show',
+                                                manifest['executed_tree'] + ':' + relative])
+            self.assertEqual(manifest['source_hashes'][relative], hashlib.sha256(captured).hexdigest())
+        self.assertFalse(any('/logs/' in path for path in manifest['source_hashes']))
+        # Reconstruct the executed tree from the immutable workflow base and captured patch.
+        with tempfile.TemporaryDirectory() as temporary:
+            env = dict(os.environ, GIT_INDEX_FILE=str(Path(temporary) / 'index'))
+            for args in (['read-tree', workflow_sha],
+                         ['apply', '--cached', '--binary', str(self.root / 'AUTHORED.patch')]):
+                subprocess.run(['git', '-C', str(self.root), *args], env=env, check=True,
+                               capture_output=True)
+            rebuilt = subprocess.check_output(['git', '-C', str(self.root), 'write-tree'],
+                                              env=env, text=True).strip()
+        self.assertEqual(rebuilt, manifest['executed_tree'])
+        self.assert_restored([authored])
+
+    def test_second_failure_clears_stale_unexecuted_step_evidence(self):
+        self.assertEqual(self.run_scope('--m2d1').returncode, 0)
+        (self.root / 'step-fail').touch()
+        result = self.run_scope('--m2d1')
+        self.assertEqual(result.returncode, 1)
+        logs = self.root / FOLDERS['m2-demo1'] / 'logs'
+        self.assertEqual((logs / 'preflight-step-02.exit').read_text(), '7\n')
+        for n in (3, 4):
+            self.assertFalse((logs / f'preflight-step-{n:02d}.exit').exists())
+            self.assertFalse((logs / f'preflight-step-{n:02d}.log').exists())
+        self.assert_restored()
+
+    def test_timed_out_step_records_actual_killed_exit_and_no_unexecuted_exits(self):
+        (self.root / 'pause').touch()
+        self.env['PREFLIGHT_STEP_TIMEOUT'] = '0.2'
+        result = self.run_scope('--m2d1')
+        self.assertEqual(result.returncode, 1)
+        logs = self.root / FOLDERS['m2-demo1'] / 'logs'
+        self.assertEqual((logs / 'preflight-step-01.exit').read_text(), '-15\n')
+        self.assertIn('STEP LIVE', (logs / 'preflight-step-01.log').read_text())
+        self.assertFalse((logs / 'preflight-step-02.exit').exists())
         self.assert_restored()
 
     def test_existing_modified_reference_is_preserved(self):
