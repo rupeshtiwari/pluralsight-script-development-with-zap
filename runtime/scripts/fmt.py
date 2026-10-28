@@ -20,7 +20,7 @@ import json
 import os
 import sys
 
-from terminal_paths import display_text
+from terminal_paths import display_text, display_command
 
 # --- Official Pluralsight brand palette (R, G, B), verified against the ------
 #     Keynote Template 2026.07.b style guide.
@@ -209,8 +209,10 @@ def _main(argv) -> int:
     elif cmd == "fail":
         bad(args[0], args[1] if len(args) > 1 else "", args[2] if len(args) > 2 else "")
     elif cmd == "todo":
-        todo(args[0], args[1] if len(args) > 1 else "", args[2] if len(args) > 2 else "",
-             args[3] if len(args) > 3 else "")
+        # The 4th arg is a RUNNABLE copy command; keep its full repo-relative path (demos/...) so it
+        # works when pasted. Only hide a home prefix (owner rule F); never shorten the path itself.
+        try_cmd = display_command(argv[4]) if len(argv) > 4 else ""
+        todo(args[0], args[1] if len(args) > 1 else "", args[2] if len(args) > 2 else "", try_cmd)
     elif cmd == "note":
         note(args[0])
     elif cmd == "json":
