@@ -68,5 +68,23 @@ class TerminalPathTests(unittest.TestCase):
         self.assertIn('~/report.json', result.stdout)
         self.assertNotIn('recorder', result.stdout)
 
+    def test_author_this_first_copy_command_keeps_full_demos_path(self):
+        # The 4th 'todo' arg is a RUNNABLE copy command the learner pastes. Its repo-relative path must
+        # stay complete (demos/module.../...), or it fails with 'no such file or directory'. Only a home
+        # prefix may be hidden (owner rule F). The message/reason/fix are still shortened as usual.
+        path = 'demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci/af-plan.yaml'
+        command = (f'(cd "$(git rev-parse --show-toplevel)" && git show origin/m2-demo1-after:{path} '
+                   f'> {path})')
+        result = subprocess.run(['python3', str(FMT), 'todo', 'you have not written the plan yet',
+                                 'the -before branch ships without it', 'author ci/af-plan.yaml', command],
+                                capture_output=True, text=True, check=True)
+        self.assertIn(command, result.stdout)                 # command intact and runnable
+        self.assertNotIn('origin/m2-demo1-after:module2-demos/', result.stdout)  # demos/ not stripped
+        # a home prefix inside such a command is still hidden, but the demos/ path is preserved
+        homed = subprocess.run(['python3', str(FMT), 'todo', 'x', '', '',
+                                f'cat /Users/nandini/{path}'], capture_output=True, text=True, check=True)
+        self.assertIn(f'cat ~/{path}', homed.stdout)
+        self.assertNotIn('nandini', homed.stdout)
+
 if __name__ == '__main__':
     unittest.main()
