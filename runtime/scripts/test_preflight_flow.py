@@ -13,6 +13,7 @@ import subprocess
 import tempfile
 import time
 import unittest
+from unittest.mock import patch
 
 SOURCE = Path(__file__).resolve().parent
 FOLDERS = {
@@ -38,10 +39,13 @@ class PreflightFlowTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
+        # macOS may spell its temp parent /var while child cwd reports /private/var.
+        # Canonicalize the fixture identity; retain strict working-directory assertions.
+        temp_root = Path(self.temp.name).resolve()
         # Include spaces in the checkout path as on many real recording Macs.
-        self.root = Path(self.temp.name) / 'course checkout'
+        self.root = temp_root / 'course checkout'
         self.root.mkdir()
-        self.bin = Path(self.temp.name) / 'bin'
+        self.bin = temp_root / 'bin'
         self.bin.mkdir()
         scripts = self.root / 'runtime/scripts'
         scripts.mkdir(parents=True)
@@ -149,6 +153,29 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
         self.assertEqual((self.root/'.git/index').read_bytes(),self.index)
         self.assertFalse((self.root/'.preflight-reference.lock').exists())
         self.assertFalse(list(self.root.glob('.preflight-output.*')))
+
+    def test_symlinked_temp_parent_keeps_strict_working_directory_checks(self):
+        # Reproduce macOS /var -> /private/var using a real alias on Linux too.
+        with tempfile.TemporaryDirectory() as parent:
+            physical = Path(parent) / 'physical'
+            physical.mkdir()
+            alias = Path(parent) / 'alias'
+            alias.symlink_to(physical, target_is_directory=True)
+            fixture = PreflightFlowTests('test_healthy_lab_is_reused_without_starting')
+            try:
+                with patch.object(tempfile, 'tempdir', str(alias)):
+                    fixture.setUp()
+                aliased_checkout = Path(fixture.temp.name) / 'course checkout'
+                self.assertNotEqual(aliased_checkout, aliased_checkout.resolve())
+                result = fixture.run_scope('--m2d1', cwd=aliased_checkout)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertEqual(fixture.root, aliased_checkout.resolve())
+                rows = (fixture.root / 'executions').read_text().splitlines()
+                expected = fixture.root / FOLDERS['m2-demo1']
+                self.assertEqual(rows, [f'm2-demo1:{n}:{expected}' for n in range(1, 5)])
+                fixture.assert_restored()
+            finally:
+                fixture.doCleanups()
 
     def test_each_demo_runs_four_steps_in_its_own_directory_from_anywhere(self):
         for demo,folder in FOLDERS.items():
