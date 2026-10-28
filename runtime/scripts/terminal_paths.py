@@ -22,3 +22,14 @@ def display_text(text: str) -> str:
     # container paths such as /tmp/report.json are not local checkout paths.
     text = re.sub(r'(?<![\w/])/(?:Users|home)/[^/\s]+(?=/|$)', '~', text)
     return text
+
+
+def display_command(text: str) -> str:
+    """Shorten a RUNNABLE command for display without breaking it.
+
+    Hide only the personal home prefix (owner rule F keeps the username off screen); KEEP the full
+    repository-relative path (demos/module.../...) intact, because the learner pastes this command and
+    runs it. display_text would drop the leading `demos/`, turning the 'author this first' copy command
+    into `module2-demos/...`, which then fails with 'no such file or directory'.
+    """
+    return re.sub(r'(?<![\w/])/(?:Users|home)/[^/\s]+(?=/|$)', '~', str(text))
