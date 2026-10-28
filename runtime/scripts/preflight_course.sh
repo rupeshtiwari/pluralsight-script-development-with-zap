@@ -43,13 +43,18 @@ rm -f "$ROOT"/FAIL-*.log
 } >> "$EVIDENCE"
 
 # Keep the runner PID so cancelling this front door also waits for source cleanup.
-runner_pid=""; capture=""
+runner_pid=""; tee_pid=""; capture=""; fifo=""
 cleanup_capture() {
   if [ -n "$runner_pid" ]; then
     kill -TERM "$runner_pid" 2>/dev/null || true
     wait "$runner_pid" 2>/dev/null || true
   fi
+  if [ -n "$tee_pid" ]; then
+    kill -TERM "$tee_pid" 2>/dev/null || true
+    wait "$tee_pid" 2>/dev/null || true
+  fi
   [ -z "$capture" ] || rm -f "$capture"
+  [ -z "$fifo" ] || rm -f "$fifo"
 }
 cancel_preflight() {
   local code="$1"
@@ -59,8 +64,9 @@ cancel_preflight() {
     wait "$runner_pid" 2>/dev/null || true
     runner_pid=""
   fi
-  if [ -n "$capture" ] && [ -f "$capture" ]; then
-    cat "$capture" >> "$EVIDENCE"
+  if [ -n "$tee_pid" ]; then
+    wait "$tee_pid" 2>/dev/null || true
+    tee_pid=""
   fi
   echo "Course preflight INTERRUPTED; no further demos were run. Evidence: ${EVIDENCE#"$ROOT"/}" | tee -a "$EVIDENCE"
   exit "$code"
@@ -70,10 +76,51 @@ trap 'cancel_preflight 130' INT
 trap 'cancel_preflight 143' TERM
 trap 'cancel_preflight 129' HUP
 
-total=0; passed=0; failed=0; course_rc=0
+# FIFO + separate tee PID preserves the runner exit status, streams progress on
+# macOS Bash 3.2 and Linux, and lets cancellation wait for source restoration.
+run_logged() {
+  local status tee_status
+  capture="$(mktemp "$ROOT/.preflight-output.XXXXXX")" || return 1
+  fifo="${capture}.pipe"
+  mkfifo "$fifo" || return 1
+  tee -a "$capture" "$EVIDENCE" < "$fifo" & tee_pid=$!
+  "$@" > "$fifo" 2>&1 & runner_pid=$!
+  wait "$runner_pid"; status=$?
+  runner_pid=""
+  wait "$tee_pid"; tee_status=$?
+  tee_pid=""
+  out="$(cat "$capture")"
+  printf '\n' >> "$EVIDENCE"
+  rm -f "$capture" "$fifo"; capture=""; fifo=""
+  [ "$status" -ne 0 ] || status="$tee_status"
+  return "$status"
+}
+
+# Validate the selector before potentially starting a large local stack.
+selected=()
+while IFS= read -r stepsdir; do
+  selected+=("$stepsdir")
+done < <(find "$ROOT"/demos -type d -name steps | sort | { if [ -n "$FILTER" ]; then grep -E "$FILTER"; else cat; fi; })
+if [ "${#selected[@]}" -eq 0 ]; then
+  echo "No demo matched the requested scope${FILTER:+ (filter: $FILTER)}." | tee -a "$EVIDENCE"
+  exit 2
+fi
+
+out=""
+if run_logged "$ROOT/runtime/scripts/preflight_runtime.sh"; then
+  :
+else
+  status=$?
+  printf '%s\n' "$out" > "$ROOT/FAIL-setup.log"
+  echo "PREFLIGHT SETUP FAILED · no demo steps executed. See FAIL-setup.log and the error above." | tee -a "$EVIDENCE"
+  run_logged "$ROOT/runtime/scripts/preflight_diagnose.sh" || true
+  exit "$status"
+fi
+
+total=0; passed=0; failed=0; course_rc=0; diagnosed=0
 
 # demos/module1-demos/m1-demo1-... before module2, m1-demo1 before m1-demo2: plain sort is the right order.
-while IFS= read -r stepsdir; do
+for stepsdir in "${selected[@]}"; do
   demo_dir="$(dirname "$stepsdir")"
   rel="${demo_dir#"$ROOT"/}"                       # e.g. demos/module1-demos/m1-demo1-...
   module="$(printf '%s' "$rel" | sed -E 's#demos/(module[0-9]+)-demos/.*#\1#')"
@@ -86,14 +133,7 @@ while IFS= read -r stepsdir; do
   echo "$banner"
   { echo "$banner"; } >> "$EVIDENCE"
 
-  # Capture the demo's full preflight output once; tee into the evidence file and keep it for a FAIL log.
-  capture="$(mktemp "$ROOT/.preflight-output.XXXXXX")" || exit 1
-  "$runner" "$demo_dir" > "$capture" 2>&1 & runner_pid=$!
-  wait "$runner_pid"; rc=$?
-  runner_pid=""
-  out="$(cat "$capture")"
-  rm -f "$capture"; capture=""
-  printf '%s\n\n' "$out" >> "$EVIDENCE"
+  run_logged "$runner" "$demo_dir"; rc=$?
 
   # A missing-source gate is incomplete validation, never a skipped success.
   if [ "$rc" -eq 0 ] && [[ "$out" != *"AUTHOR THIS FIRST"* ]]; then
@@ -107,19 +147,23 @@ while IFS= read -r stepsdir; do
       echo "FAILED DEMO: ${module} / ${demo}"
       echo "Demo folder: ${rel}"
       echo "Hand this file back to fix the step. The failing step is the one whose block ends in ✘ FAIL below."
-      echo "Failing step(s): $(printf '%s' "$out" | grep -oE 'STEP [0-9]+ · command: [^ ]+' | tail -0; printf '%s' "$out" | awk '/^STEP [0-9]/{s=$0} /✘ FAIL/{print s}')"
+      echo "Failing step(s): $(printf '%s' "$out" | awk '/^STEP [0-9]/{s=$0} /✘ FAIL|FAIL:/{if(s) print s; else print "Preparation or setup"}')"
       echo "────────────────────────────────────────────────────────────────"
       printf '%s\n' "$out"
     } > "$faillog"
     echo "  ✘ FAIL (${demo})  →  wrote ${faillog#"$ROOT"/}"
     { echo "RESULT for ${demo}: FAIL (see FAIL-${module}-${demo}.log)"; echo; } >> "$EVIDENCE"
+    if [ "$diagnosed" -eq 0 ]; then
+      run_logged "$ROOT/runtime/scripts/preflight_diagnose.sh" || true
+      diagnosed=1
+    fi
   fi
   if [ "$rc" -ge 128 ]; then
     echo "Course preflight interrupted; remaining demos were not run."
     exit "$rc"
   fi
   echo
-done < <(find "$ROOT"/demos -type d -name steps | sort | { if [ -n "$FILTER" ]; then grep -E "$FILTER"; else cat; fi; })
+done
 
 if [ "$total" -eq 0 ]; then
   echo "No demo matched the requested scope${FILTER:+ (filter: $FILTER)}."
