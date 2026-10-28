@@ -24,6 +24,8 @@ jobs:
         run: python3 -m unittest discover -s runtime/scripts -p 'test_course_maintenance.py' -v
       - name: Verify module-based terminal paths and preserved reports
         run: python3 -m unittest discover -s runtime/scripts -p 'test_terminal_paths.py' -v
+      - name: Verify preflight startup, every demo working directory and cleanup
+        run: python3 -m unittest discover -s runtime/scripts -p 'test_preflight_*.py' -v
       - name: Validate Docker Compose wiring
         run: docker compose config --quiet
       - name: Validate branch-aware student project structure
@@ -45,3 +47,18 @@ jobs:
         run: git fetch origin '+refs/heads/*:refs/remotes/origin/*'
       - name: Validate that no -before branch can break for a student
         run: python3 runtime/scripts/check_before_never_breaks.py
+
+  preflight-portability:
+    name: Preflight working directories and cleanup (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check every demo cwd, startup, live logs, cleanup and safe diagnostics
+        run: python3 -m unittest discover -s runtime/scripts -p 'test_preflight_*.py' -v
