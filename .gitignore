@@ -24,3 +24,6 @@ __pycache__/
 # Whole-course preflight artifacts (generated locally; hand FAIL logs back to fix steps)
 course-evidence.txt
 FAIL-*.log
+
+# Shareable local preflight runtime diagnostics
+/preflight-diagnostics.txt
