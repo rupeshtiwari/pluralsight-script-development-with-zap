@@ -20,6 +20,8 @@ import json
 import os
 import sys
 
+from terminal_paths import display_text
+
 # --- Official Pluralsight brand palette (R, G, B), verified against the ------
 #     Keynote Template 2026.07.b style guide.
 BRAND = {
@@ -115,7 +117,7 @@ def star(label: str, value: str, focus: bool = False) -> None:
     geometry is fixed (LABEL_WIDTH / VALUE_WIDTH) so the terminal and the README match. Continuation
     lines keep both gutters, so the evidence parser can rejoin label and value.
     """
-    label, value = str(label).strip(), str(value)
+    label, value = display_text(label).strip(), display_text(value)
     color = "focus" if focus else "value"
     sep = _w("header", " │ ")
     lab_chunks = _wrap_value(label, LABEL_WIDTH)
@@ -193,7 +195,7 @@ def _main(argv) -> int:
     if not argv:
         print("usage: fmt.py {header|star|section|item|ok|fail|todo|note|json} ...", file=sys.stderr)
         return 2
-    cmd, args = argv[0], argv[1:]
+    cmd, args = argv[0], [display_text(arg) for arg in argv[1:]]
     if cmd == "header":
         header(args[0], args[1] if len(args) > 1 else "")
     elif cmd == "star":
