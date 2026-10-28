@@ -306,7 +306,7 @@ for it in (d.get("insights") or [])[:3]:
     done <<<"${ins}"
     fm star "Report file  (in ZAP container)" "${REPORT_CONTAINER_PATH}"
     fm star "Saved for inspection (on your Mac)" "${REPORT_HOST_PATH}" focus
-    fm note "Insights describe the SCAN's health, not the app's. An error/warn insight is a COUNT of lines ZAP wrote to zap.log this run, so a non-empty Insights section is NOT a clean bill of health. Open the saved report and judge each entry: add-on/script-registration noise and benign warnings are expected, but logged errors or a low 2xx percentage can mean the scan under-tested the target. Here the scan still reached 100% and raised the custom rule on the authenticated page, so this finding is sound, but the logged issues are yours to read, not to gloss green."
-    pass "the report's own Insights section reports scan effectiveness (interpret each entry; it is not a clean bill of health)"
+    fm note "Insights describe scan health, not application safety. Review the actual values alongside zap.log and request evidence. Logged errors and warnings may include setup activity; check their timing and cause before deciding their impact. A completed scan and a matching custom alert do not prove complete coverage or validate every finding. Investigate affected requests before treating network failures as harmless. This step retrieves and interprets evidence; it does not require repairing network failures to zero."
+    pass "Insights retrieved successfully; scan health requires interpretation"
     return "${STEP_RC}"
 }
