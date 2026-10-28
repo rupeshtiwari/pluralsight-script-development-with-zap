@@ -148,7 +148,12 @@ def main():
         full_path = logs / ("preflight-" + stamp + ".log")
         raw = raw_path.open("xb")
         # A failed preparation must not leave old baselines looking current.
-        for old in logs.glob("preflight-step-0[1-4].log"):
+        for pattern in ("preflight-step-0[1-4].log", "preflight-step-0[1-4].exit"):
+            for old in logs.glob(pattern):
+                old.unlink()
+        producer = logs / ".producer"
+        producer.mkdir(exist_ok=True)
+        for old in producer.glob("preflight-step-0[1-4].raw.log"):
             old.unlink()
         emit("PREFLIGHT · four actual demo steps, the same commands a learner runs")
         emit("Evidence is restricted to the authorized local Globomantics application.")
@@ -188,6 +193,9 @@ def main():
                 os.link(snapshot, target)  # Atomic creation; never overwrite an existing file.
                 copies.append((target, snapshot, identity.st_dev, identity.st_ino, data))
             emit("PREFLIGHT SOURCE · temporary %s from %s@%s" % (relative, ref, refs[ref]))
+        if os.environ.get("PREFLIGHT_CI_SOURCE") == "1":
+            subprocess.run([sys.executable, str(root / "runtime/scripts/capture_ci_source.py"),
+                            str(root), *[str(item[0]) for item in copies]], check=True, timeout=120)
         emit("")
         passed = 0
         env = dict(os.environ, DEMO_SYNC_MODE="1", DEMO_SYNC_PHASE="reference")
@@ -196,6 +204,11 @@ def main():
             emit("STEP %d · command: ./steps/%s" % (number, step.name))
             emit("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
             child = None
+            stem = "preflight-step-%02d" % number
+            # Capture the actual named command's combined output and process exit. These
+            # sidecars are proof from this execution, never inferred from a PASS marker.
+            step_raw_path = producer / (stem + ".raw.log")
+            step_raw = step_raw_path.open("wb")
             try:
                 with atomic_change():
                     child = subprocess.Popen(
@@ -215,6 +228,8 @@ def main():
                         for event, _ in selector.select(timeout=min(1, timeout - (now - started))):
                             data = os.read(event.fd, 65536)
                             if data:
+                                step_raw.write(data)
+                                step_raw.flush()
                                 emit(data)
                             else:
                                 selector.unregister(event.fileobj)
@@ -224,8 +239,12 @@ def main():
                     stop_process(child)
                 raise
             finally:
+                step_raw.close()
                 if child is not None and child.stdout is not None:
                     child.stdout.close()
+                if child is not None and child.returncode is not None:
+                    shutil.copyfile(step_raw_path, logs / (stem + ".log"))
+                    (logs / (stem + ".exit")).write_text(str(child.returncode) + "\n")
             if status:
                 emit("FAIL: Step %d failed; baseline is not recording-ready." % number)
                 emit("RESULT: %d steps passed before failure" % passed)
