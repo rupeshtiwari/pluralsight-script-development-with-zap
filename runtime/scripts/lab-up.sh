@@ -2,12 +2,14 @@
 # Bring the demo stack up and wait for all four services to be healthy.
 #   APP_BUILD=vulnerable|remediated ./scripts/lab-up.sh
 set -euo pipefail
+# Preserve the documented caller override before .env is loaded by lib.sh.
+LAB_REQUESTED_APP_BUILD="${APP_BUILD:-}"
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 cd "${REPO_ROOT}"
 
 ensure_docker
 
-BUILD="${APP_BUILD:-vulnerable}"
+BUILD="${LAB_REQUESTED_APP_BUILD:-${APP_BUILD:-vulnerable}}"
 log "Starting demo stack (APP_BUILD=${BUILD})..."
 # --force-recreate so a stale, UNHEALTHY container from an earlier run (e.g. a ZAP that never finished
 # booting and sat "Up (unhealthy)") is replaced with a fresh one instead of silently reused. Data lives
