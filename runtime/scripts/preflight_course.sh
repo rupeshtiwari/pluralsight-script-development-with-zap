@@ -16,8 +16,8 @@
 #                            and the failing step, and it is exactly what to hand back to fix the step.
 #
 # Exit code is non-zero if any demo failed, so CI (and a student) can treat "course did not pass" as a
-# hard stop: if this fails, do not start. A demo whose taught file is not authored on the
-# current branch is reported as SKIPPED (author it, or run on the integration branch), never a failure.
+# hard stop: if this fails, do not start. The per-demo runner temporarily supplies missing
+# reference sources and removes only its own unchanged copies afterward.
 set -uo pipefail
 
 ROOT="${1:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
@@ -42,7 +42,35 @@ rm -f "$ROOT"/FAIL-*.log
   echo
 } >> "$EVIDENCE"
 
-total=0; passed=0; failed=0; skipped=0; course_rc=0
+# Keep the runner PID so cancelling this front door also waits for source cleanup.
+runner_pid=""; capture=""
+cleanup_capture() {
+  if [ -n "$runner_pid" ]; then
+    kill -TERM "$runner_pid" 2>/dev/null || true
+    wait "$runner_pid" 2>/dev/null || true
+  fi
+  [ -z "$capture" ] || rm -f "$capture"
+}
+cancel_preflight() {
+  local code="$1"
+  trap '' INT TERM HUP
+  if [ -n "$runner_pid" ]; then
+    kill -TERM "$runner_pid" 2>/dev/null || true
+    wait "$runner_pid" 2>/dev/null || true
+    runner_pid=""
+  fi
+  if [ -n "$capture" ] && [ -f "$capture" ]; then
+    cat "$capture" >> "$EVIDENCE"
+  fi
+  echo "Course preflight INTERRUPTED; no further demos were run. Evidence: ${EVIDENCE#"$ROOT"/}" | tee -a "$EVIDENCE"
+  exit "$code"
+}
+trap cleanup_capture EXIT
+trap 'cancel_preflight 130' INT
+trap 'cancel_preflight 143' TERM
+trap 'cancel_preflight 129' HUP
+
+total=0; passed=0; failed=0; course_rc=0
 
 # demos/module1-demos/m1-demo1-... before module2, m1-demo1 before m1-demo2: plain sort is the right order.
 while IFS= read -r stepsdir; do
@@ -59,14 +87,16 @@ while IFS= read -r stepsdir; do
   { echo "$banner"; } >> "$EVIDENCE"
 
   # Capture the demo's full preflight output once; tee into the evidence file and keep it for a FAIL log.
-  out="$("$runner" "$demo_dir" 2>&1)"; rc=$?
+  capture="$(mktemp "$ROOT/.preflight-output.XXXXXX")" || exit 1
+  "$runner" "$demo_dir" > "$capture" 2>&1 & runner_pid=$!
+  wait "$runner_pid"; rc=$?
+  runner_pid=""
+  out="$(cat "$capture")"
+  rm -f "$capture"; capture=""
   printf '%s\n\n' "$out" >> "$EVIDENCE"
 
-  if printf '%s' "$out" | grep -q "AUTHOR THIS FIRST"; then
-    skipped=$((skipped+1))
-    echo "  ⏭️  SKIPPED (${demo}: a taught file is not authored on this branch; run on the integration branch)"
-    { echo "RESULT for ${demo}: SKIPPED (taught file not authored on this branch)"; echo; } >> "$EVIDENCE"
-  elif [ "$rc" -eq 0 ]; then
+  # A missing-source gate is incomplete validation, never a skipped success.
+  if [ "$rc" -eq 0 ] && [[ "$out" != *"AUTHOR THIS FIRST"* ]]; then
     passed=$((passed+1))
     echo "  ✅ PASS (${demo})"
     { echo "RESULT for ${demo}: PASS"; echo; } >> "$EVIDENCE"
@@ -84,6 +114,10 @@ while IFS= read -r stepsdir; do
     echo "  ✘ FAIL (${demo})  →  wrote ${faillog#"$ROOT"/}"
     { echo "RESULT for ${demo}: FAIL (see FAIL-${module}-${demo}.log)"; echo; } >> "$EVIDENCE"
   fi
+  if [ "$rc" -ge 128 ]; then
+    echo "Course preflight interrupted; remaining demos were not run."
+    exit "$rc"
+  fi
   echo
 done < <(find "$ROOT"/demos -type d -name steps | sort | { if [ -n "$FILTER" ]; then grep -E "$FILTER"; else cat; fi; })
 
@@ -93,7 +127,7 @@ if [ "$total" -eq 0 ]; then
   exit 2
 fi
 
-summary="COURSE PREFLIGHT SUMMARY · ${total} demo(s): ${passed} passed, ${failed} failed, ${skipped} skipped"
+summary="COURSE PREFLIGHT SUMMARY · ${total} demo(s): ${passed} passed, ${failed} failed"
 echo "$summary"
 { echo "────────────────────────────────────────────────────────────────"; echo "$summary"; } >> "$EVIDENCE"
 echo "Evidence written to: ${EVIDENCE#"$ROOT"/}"
@@ -101,6 +135,6 @@ if [ "$failed" -gt 0 ]; then
   echo "Course preflight did NOT pass. A student must not start: fix the demos named in the FAIL-*.log files, then re-run."
   echo "Per-failure logs:"; for f in "$ROOT"/FAIL-*.log; do [ -f "$f" ] && echo "    ${f#"$ROOT"/}"; done
 else
-  echo "Course preflight PASSED. Every authored demo runs end to end; the course is safe to start."
+  echo "Course preflight PASSED. Every selected demo completed all four checks; temporary source copies were restored."
 fi
 exit "$course_rc"
