@@ -28,33 +28,39 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Capture the immutable workflow checkout source
+        run: |
+          set -euo pipefail
+          source_sha="$(git rev-parse --verify HEAD)"
+          [[ "${source_sha}" =~ ^[0-9a-f]{40}$ ]] && [ "${source_sha}" = "${GITHUB_SHA}" ] || { echo "Workflow checkout source mismatch" >&2; exit 1; }
+          printf '%s\n' "${source_sha}" > SOURCE.txt
+
       - name: Author the taught file(s) from the matching -after branch (what the recorder types on camera)
         run: |
           set -euo pipefail
           stem="${GITHUB_REF_NAME%-before}"
           after="${stem}-after"
           git fetch origin "${after}" --quiet
+          after_sha="$(git rev-parse --verify "FETCH_HEAD^{commit}")"
+          printf '%s\n' "${after_sha}" > AFTER_SHA.txt
           authored=0
           # Any file the -after branch has under demos/ that -before lacks is the on-camera taught artifact.
-          for f in $(git diff --name-only "HEAD" "origin/${after}" -- demos/); do
-            if [ ! -e "$f" ] && git cat-file -e "origin/${after}:$f" 2>/dev/null; then
+          for f in $(git diff --name-only "HEAD" "${after_sha}" -- demos/); do
+            if [ ! -e "$f" ] && git cat-file -e "${after_sha}:$f" 2>/dev/null; then
               mkdir -p "$(dirname "$f")"
-              git show "origin/${after}:$f" > "$f"
+              git show "${after_sha}:$f" > "$f"
               echo "authored (from ${after}): $f"
               authored=$((authored + 1))
             fi
           done
           echo "taught files authored in: ${authored}"
-          # Commit the authored file locally (NOT pushed) so this checkout's HEAD now carries exactly the
-          # code the recorder has on camera after the AUTHOR THIS FIRST beat. The hosted-run proof in
-          # the self-test (m2-demo1, m2-demo3) compares the committed HEAD's watched paths against the
-          # covering -after run: with the taught file absent from the commit, that diff is dirty and the
-          # proof reads "covers this code: no". Committing it here makes HEAD match -after for the taught
-          # path, so the only thing that can still break the proof is a genuine workflow drift.
+          # Keep the authored state as a separate local commit; it is never pushed.
+          # SOURCE.txt identifies the immutable workflow run's base commit, while
+          # EXECUTED_HEAD.txt preserves this authored commit as a distinct source identity.
           if [ "${authored}" -gt 0 ]; then
             git config user.name "globo-smoke"
             git config user.email "smoke@globomantics.test"
-            git add -A
+            git add -A -- demos/
             git commit -q -m "smoke: author the taught file (local only, mirrors the on-camera AUTHOR THIS FIRST beat)"
             echo "committed ${authored} authored file(s) onto the smoke HEAD"
           fi
@@ -68,6 +74,8 @@ jobs:
         # throttled at random and the proof flips red; github.token gives this job the 5000/hour budget.
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          # The runner captures the actual tree after supplying reused prerequisites.
+          PREFLIGHT_CI_SOURCE: '1'
         run: |
           set -euo pipefail
           # The course self-test is one off-camera command: ./preflight-check. Scope it to THIS -before
@@ -84,9 +92,17 @@ jobs:
           # the course self-test's evidence + any FAIL log, the per-step logs, plus the gate/producer
           # sub-logs (hidden dirs) so a failure is diagnosable
           path: |
+            SOURCE.txt
+            EXECUTED_HEAD.txt
+            EXECUTED_TREE.txt
+            EXECUTION.json
+            AFTER_SHA.txt
+            AUTHORED.patch
+            SOURCE_SHA256SUMS.txt
             course-evidence.txt
             FAIL-*.log
             demos/**/logs/preflight-*.log
+            demos/**/logs/preflight-step-*.exit
             demos/**/logs/.gate/*.log
             demos/**/logs/.producer/*.log
           include-hidden-files: true
@@ -122,15 +138,21 @@ jobs:
       - name: Dispatch the author repo's evidence sync
         env:
           TOKEN: ${{ secrets.COURSE_SYNC_TOKEN }}
+          SYNC_BRANCH: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           if [ -z "${TOKEN}" ]; then
             echo "COURSE_SYNC_TOKEN not set; skipping author-repo sync dispatch"
             exit 0
           fi
-          curl -sS -X POST \
+          payload="$(python3 -c 'import json, os; print(json.dumps({"event_type": "code-synced", "client_payload": {"branch": os.environ["SYNC_BRANCH"]}}))')"
+          if ! curl --fail --silent --show-error --max-time 30 --output /dev/null -X POST \
             -H "Authorization: Bearer ${TOKEN}" \
             -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/rupeshtiwari/pluralsight-script-development-with-zap-production/dispatches \
-            -d '{"event_type":"code-synced","client_payload":{"branch":"${{ github.ref_name }}"}}'
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/rupeshtiwari/pluralsight-author-13-script-development-with-zap/dispatches \
+            --data "${payload}"; then
+            echo "::error::Author repository evidence-sync dispatch failed"
+            exit 1
+          fi
           echo "dispatched code-synced to the author repo"
