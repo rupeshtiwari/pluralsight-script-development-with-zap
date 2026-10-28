@@ -123,17 +123,34 @@ ensure_ready() {
     return 0
 }
 
-# Cache the generated report path so steps 3 and 4 read the same file.
+# The report path that steps 3 and 4 display and save for inspection.
+# new_report_path() MUST be called by the step DIRECTLY (never inside a
+# rep="$(...)" capture). The report JSON is read through command substitution,
+# which runs in a SUBSHELL, so any variable generate_report sets in there is
+# discarded the moment the subshell exits. That lost subshell assignment is
+# exactly why the "Report file" line used to print blank. Setting the paths in
+# the step's own shell keeps them visible to the fm star line and the host save.
 REPORT_CONTAINER_PATH=""
-generate_report() { # -> a NEW report file each call (never a stale one); echoes its JSON
-    local cid name; cid="$(zap_container)"
-    [ -n "${cid}" ] || return 1
-    name="globo-api-report-$(date +%s)-${RANDOM}.json"
+REPORT_HOST_PATH=""
+new_report_path() { # set a fresh container + host report path in THIS shell
+    local name; name="globo-api-report-$(date +%s)-${RANDOM}.json"
     REPORT_CONTAINER_PATH="/tmp/${name}"
+    REPORT_HOST_PATH="${DEMO_DIR}/logs/${name}"
+}
+generate_report() { # generate the report at REPORT_CONTAINER_PATH; echoes its JSON
+    local cid; cid="$(zap_container)"
+    [ -n "${cid}" ] || return 1
+    [ -n "${REPORT_CONTAINER_PATH}" ] || return 1
     zap reports/action/generate \
-        "title=$(enc 'Globomantics API evidence')&template=traditional-json&reportDir=/tmp&reportFileName=${name}&display=false" \
+        "title=$(enc 'Globomantics API evidence')&template=traditional-json&reportDir=/tmp&reportFileName=$(basename "${REPORT_CONTAINER_PATH}")&display=false" \
         >/dev/null || return 1
     docker exec "${cid}" cat "${REPORT_CONTAINER_PATH}" 2>/dev/null
+}
+# Save the captured report JSON to the host so the learner can open the real
+# file (logs/*.json is gitignored, so this is a local runtime artifact only).
+save_report_host_copy() { # <json-body> -> writes REPORT_HOST_PATH (best effort)
+    [ -n "${REPORT_HOST_PATH}" ] || return 0
+    printf '%s' "$1" > "${REPORT_HOST_PATH}" 2>/dev/null || true
 }
 
 # ===========================================================================
@@ -212,11 +229,13 @@ step3_json_report() {
     fm header "The official JSON report reconciles with the API" \
               "Generate ZAP's own JSON report through the API and compare its alert field by field with the Step 2 API response (EO3b)."
     ensure_scan || return "${STEP_RC}"
+    new_report_path                 # set the paths in THIS shell, before the subshell capture below
     local rep; rep="$(generate_report)"
     if [ -z "${rep}" ]; then
         fail "could not generate or read the JSON report" "reports/action/generate failed" "check the reports add-on and docker access to the ZAP container"
         return "${STEP_RC}"
     fi
+    save_report_host_copy "${rep}"  # write the real report to logs/ so it can be opened
     local line; line="$(printf '%s' "${rep}" | python3 -c 'import json,sys
 name=sys.argv[1]
 d=json.load(sys.stdin)
@@ -234,7 +253,8 @@ for a in json.load(sys.stdin).get("alerts",[]):
     if (a.get("alert") or a.get("name"))==name:
         print("|".join(str(a.get(k,"")) for k in ("pluginId","risk","confidence","param"))); break' "${CUSTOM_NAME}")"
     IFS='|' read -r apid arisk aconf aparam <<<"${arec}"
-    fm star "Report file  (traditional-json)" "${REPORT_CONTAINER_PATH}"
+    fm star "Report file  (in ZAP container)" "${REPORT_CONTAINER_PATH}"
+    fm star "Saved for inspection (on your Mac)" "${REPORT_HOST_PATH}" focus
     fm star "Report  pluginid · riskdesc · param" "${rpid:-?} · ${riskdesc:-?} · ${rparam:-?}" focus
     fm star "API (Step 2)  pluginId · risk (confidence) · param" "${apid:-?} · ${arisk:-?} (${aconf:-?}) · ${aparam:-?}" focus
     local m=0
@@ -259,11 +279,13 @@ step4_insights() {
     fm header "ZAP 2.17.0 Insights assess scan effectiveness, not just findings" \
               "Read the report's Insights, signals about how well the scan ran and any operational issues, so you trust the result, not just the alert list (EO3b)."
     ensure_scan || return "${STEP_RC}"
+    new_report_path                 # set the paths in THIS shell, before the subshell capture below
     local rep; rep="$(generate_report)"
     if [ -z "${rep}" ]; then
         fail "could not generate or read the JSON report for Insights" "reports/action/generate failed" "check the reports add-on"
         return "${STEP_RC}"
     fi
+    save_report_host_copy "${rep}"  # write the real report to logs/ so it can be opened
     local ins; ins="$(printf '%s' "${rep}" | jq_py 'import json,sys
 d=json.load(sys.stdin)
 for it in (d.get("insights") or [])[:3]:
@@ -282,6 +304,9 @@ for it in (d.get("insights") or [])[:3]:
         else fm star "Insight  (level · key)" "${lvl} · ${key}"; fi
         fm star "Statistic · meaning" "${stat} · ${desc}"
     done <<<"${ins}"
-    pass "the report's own Insights section reports scan effectiveness"
+    fm star "Report file  (in ZAP container)" "${REPORT_CONTAINER_PATH}"
+    fm star "Saved for inspection (on your Mac)" "${REPORT_HOST_PATH}" focus
+    fm note "Insights describe scan health, not application safety. Review the actual values alongside zap.log and request evidence. Logged errors and warnings may include setup activity; check their timing and cause before deciding their impact. A completed scan and a matching custom alert do not prove complete coverage or validate every finding. Investigate affected requests before treating network failures as harmless. This step retrieves and interprets evidence; it does not require repairing network failures to zero."
+    pass "Insights retrieved successfully; scan health requires interpretation"
     return "${STEP_RC}"
 }
