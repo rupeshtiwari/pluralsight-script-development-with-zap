@@ -172,7 +172,16 @@ If setup or even one step fails, times out, or is interrupted, files stay availa
 (cd "$(git rev-parse --show-toplevel)" && ./preflight-check --cleanup)
 ```
 
-A failed run must be cleaned explicitly before another preflight. Cleanup refuses files you edited or replaced after preflight and leaves them for your review. Move any work you want to keep out of the temporary path, then run cleanup again. Files from older runs without an ownership manifest are never swept away. Lab services and ZAP session state remain running; follow the demo's normal reset before filming. When upgrading an older checkout after a failed run, run `./preflight-check --cleanup` before `git pull --ff-only`. Save any unsaved ZAP Script Console work, then run `./lab reset` once to load the updated saved scripts into a fresh training session; an existing named in-memory script is preserved automatically. CI exports the run's evidence outside the checkout before cleanup so uploaded proof is retained.
+A failed run must be cleaned explicitly before another preflight. Normal cleanup protects files you edited or replaced after the run. To save those changed files and finish cleanup, update your branch first and use:
+
+```bash
+(cd "$(git rev-parse --show-toplevel)" && git pull --ff-only && ./preflight-check --cleanup --save-changes && ./preflight-check --m2d2)
+```
+
+`--save-changes` copies changed preflight-owned files to a unique private sibling folder named `<checkout>-preflight-saved-*`, verifies the saved copies, and prints its relative location before cleanup. Source files that existed before preflight stay in place; edits to temporary copies are saved in that backup. Edits made during backup stop cleanup; active runs, symlinks and unknown locks still require inspection. Files already moved aside or restored are accepted without another backup. Files from older runs without an ownership manifest are never swept away.
+
+Preflight prepares or reuses the lab as needed. File cleanup preserves running services/session state; use the demo's normal reset before continuing after saving unsaved ZAP Console work. Chain recovery commands with `&&` so a failure stops the sequence. CI exports run evidence outside the checkout before successful cleanup.
+
 
 **Different demo?** Return to the repository root, save any personal changes, switch to its `*-before` branch, then follow its own README. Don't reuse scan history from another demo.
 

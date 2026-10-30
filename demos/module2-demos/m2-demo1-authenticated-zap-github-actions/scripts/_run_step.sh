@@ -26,6 +26,10 @@ N="${1:-}"; case "${N}" in 1|2|3|4) ;; *) usage ;; esac
 run_plan_and_wait() {
     run_plan || return 1
     local i; for i in $(seq 1 120); do plan_finished && break; sleep 3; done
+    if ! plan_finished || [ "$(plan_field error)" != "0" ]; then
+        fail "the priming plan did not finish successfully" "automation/view/planProgress is unfinished or reports errors" "check the plan and ZAP log before retrying this step"
+        return 1
+    fi
     return 0
 }
 
@@ -53,8 +57,8 @@ echo
 
 case "${N}" in
     1) step1_headless_run ;;
-    2) prime_if_needed; step2_context_config ;;
-    3) prime_if_needed; step3_script_job ;;
-    4) prime_if_needed; step4_custom_alert ;;
+    2) prime_if_needed || exit 1; step2_context_config ;;
+    3) prime_if_needed || exit 1; step3_script_job ;;
+    4) prime_if_needed || exit 1; step4_custom_alert ;;
 esac
 exit "${STEP_RC:-0}"
