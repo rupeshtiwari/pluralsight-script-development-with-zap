@@ -65,11 +65,15 @@ run_plan() { reset_plan_state; PLAN_ID="$(zap automation/action/runPlan "filePat
 try: print(json.load(sys.stdin).get("planId",""))
 except Exception: print("")')"; [ -n "${PLAN_ID:-}" ]; }
 plan_finished() { zap automation/view/planProgress "planId=${PLAN_ID}" | grep -q '"finished"[^,]*[0-9T:-]'; }
-scan_finished() { # "yes" when the most recent active scan has reached 100%
-    zap ascan/view/scans | python3 -c 'import json,sys
-try: s=json.load(sys.stdin).get("scans",[])
-except Exception: raise SystemExit
-if s and str(s[-1].get("progress",""))=="100": print("yes")'
+SCAN_ID=""
+scan_finished() { # Read THIS plan's scan; old completed scans cannot satisfy the wait.
+    [ -n "${SCAN_ID}" ] || return 1
+    local record
+    record="$(zap ascan/view/scans | python3 "${REPO_ROOT}/runtime/scripts/zap_scan.py" record "${SCAN_ID}")" || return 1
+    local id progress state requests
+    IFS='|' read -r id progress state requests <<<"${record}"
+    [ "${progress}" = "100" ] && [ "${state}" = "FINISHED" ] || return 1
+    printf yes
 }
 
 custom_present() {
@@ -86,16 +90,28 @@ STATE="${DEMO_DIR}/logs/.m2demo2-state"   # Step 1 plan + Step 2 API values, rea
 mkdir -p "${DEMO_DIR}/logs"
 
 ensure_scan() { # Steps 2-4: the authenticated run from Step 1 must exist in this ZAP session
+    SCAN_ID="$(sed -n 's/^scan=//p' "${STATE}" 2>/dev/null)"
     { [ -n "$(custom_present)" ] && [ -n "$(scan_finished)" ]; } && return 0
     fail "no finished authenticated scan in this ZAP session" "Step 1 runs the authenticated plan" "run Step 1 first"
     return 1
 }
 
 run_authenticated_plan() { # Step 1: fresh alerts, run the authenticated plan, wait for the scan
-    zap core/action/deleteAllAlerts >/dev/null || return 1
+    # A failed new run must not leave an earlier scan identity usable.
+    rm -f "${STATE}" || { fail "could not invalidate the previous scan state" "the state file is not writable" "check logs/.m2demo2-state permissions"; return 1; }
+    local previous
+    previous="$(zap ascan/view/scans | python3 "${REPO_ROOT}/runtime/scripts/zap_scan.py" ids)" || {
+        fail "could not read active scans before starting the plan" "scan identity could not be established" "check the ZAP API"; return 1;
+    }
+    zap core/action/deleteAllAlerts >/dev/null || {
+        fail "could not clear old alert evidence" "the ZAP API rejected deleteAllAlerts" "check the ZAP API"; return 1;
+    }
     run_plan || { fail "could not start the plan to generate evidence" "automation/action/runPlan returned no plan id" "ask: 'the AF plan did not run; check the automation add-on and /af/af-plan.yaml'"; return 1; }
     local i; for i in $(seq 1 160); do plan_finished && break; sleep 3; done
     plan_finished || { fail "the authenticated plan did not finish in time" "planProgress never reported finished" "check the ZAP container log"; return 1; }
+    SCAN_ID="$(zap ascan/view/scans | python3 "${REPO_ROOT}/runtime/scripts/zap_scan.py" new "${previous}")" || {
+        fail "could not identify the active scan created by this plan" "expected exactly one new scan ID" "check planProgress and ascan/view/scans; do not reuse an earlier scan"; return 1;
+    }
     # Bounded wait for the active scan to fully complete so Step 1 observes
     # progress=100 and the JSON report in Steps 3-4 is generated from a finished
     # scan. If it never reaches 100% within the timeout, fail with a nonzero exit.
@@ -160,7 +176,7 @@ step1_api_status() {
     fm header "The ZAP API answers: what engine, and is the authenticated scan done?" \
               "You drive ZAP over HTTP, not the GUI, start the authenticated plan, then ask the engine its version and whether the scan has finished (EO3b)."
     fm note "running the authenticated Automation Framework plan through the API (fresh alert store)..."
-    run_authenticated_plan || return "${STEP_RC}"
+    run_authenticated_plan || return 1
     local ver prog user errs
     ver="$(zap core/view/version | jq_py 'import json,sys
 try: print(json.load(sys.stdin).get("version",""))
@@ -172,19 +188,16 @@ except Exception: print("?")')"
     user="$(zap users/view/usersList "contextId=$(zap context/view/context "contextName=Globomantics" | python3 -c 'import json,sys;print(json.load(sys.stdin)["context"]["id"])' 2>/dev/null)" 2>/dev/null | python3 -c 'import json,sys
 try: print(" ".join(u["name"] for u in json.load(sys.stdin)["usersList"]))
 except Exception: print("")')"
-    local scan; scan="$(zap ascan/view/scans | jq_py 'import json,sys
-try: s=json.load(sys.stdin).get("scans",[])
-except Exception: s=[]
-if not s: print("||"); raise SystemExit
-a=s[-1]
-print("%s|%s|%s|%s" % (a.get("id",""), a.get("progress",""), a.get("state",""), a.get("reqCount","")))')"
+    local scan; scan="$(zap ascan/view/scans | python3 "${REPO_ROOT}/runtime/scripts/zap_scan.py" record "${SCAN_ID}")" || return 1
     IFS='|' read -r sid sprog sstate sreq <<<"${scan}"
-    printf 'plan=%s\nscan=%s\n' "${PLAN_ID}" "${sid}" > "${STATE}"
     fm star "ZAP runtime  (GET core/view/version)" "${ver:-unknown}" focus
     fm star "Authenticated plan  (automation/view/planProgress)" "plan ${PLAN_ID} · finished · ${errs} errors · scanning as ${user:-?}"
     fm star "Active scan  (GET ascan/view/scans)" "id=${sid:-?} · progress=${sprog:-?}% · state=${sstate:-?}" focus
     fm star "Requests the scan sent" "${sreq:-?}"
-    if [ -n "${ver}" ] && [ "${sprog}" = "100" ] && [ "${errs}" = "0" ] && [[ " ${user} " == *" alice "* ]]; then
+    if [ -n "${ver}" ] && [ "${sprog}" = "100" ] && [ "${sstate}" = "FINISHED" ] && [ "${errs}" = "0" ] && [[ " ${user} " == *" alice "* ]]; then
+        printf 'plan=%s\nscan=%s\n' "${PLAN_ID}" "${sid}" > "${STATE}" || {
+            fail "could not save the validated scan identity" "the state file is not writable" "check logs/.m2demo2-state permissions"; return 1;
+        }
         pass "the API reports the ZAP runtime and a finished authenticated scan"
     else
         fail "the API did not report a finished authenticated scan (version='${ver}', progress='${sprog}', plan errors=${errs}, user='${user}')" \
