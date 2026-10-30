@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Temporarily supply missing reference sources, run the unchanged named steps,
-# then restore the original source-file state. Existing learner work is never replaced.
+# then let the scope transaction clean only after total success. Existing work is never replaced.
 set -uo pipefail
 if [ "$#" -ne 1 ]; then
     echo "usage: preflight_all_steps.sh DEMO_DIRECTORY" >&2
@@ -87,6 +87,13 @@ def main():
     key = next((k for k, folder in DEMO_FOLDERS.items() if root / folder == demo), None)
     if key is None:
         raise RuntimeError("unrecognized demo directory; no reference files were copied")
+    managed = os.environ.get("PREFLIGHT_WORKSPACE_ACTIVE") == str(root / ".preflight-workspace")
+    if not managed:
+        return subprocess.call([sys.executable, str(root / "runtime/scripts/preflight_workspace.py"),
+                                "demo", str(root), str(demo)])
+    sys.dont_write_bytecode = True
+    sys.path.insert(0, str(root / "runtime/scripts"))
+    from preflight_workspace import load, register_source
     steps = sorted((demo / "steps").glob("0[1-4]-*.sh"))
     if len(steps) != 4 or any(not p.name.startswith("0%d-" % (i + 1)) for i, p in enumerate(steps)):
         raise RuntimeError("expected four concept-named step scripts in order")
@@ -98,7 +105,6 @@ def main():
     copies, directories = [], []
     raw = None
     raw_path = full_path = None
-    cleanup_failed = False
     result = 1
     stdout_open = True
     logging_failed = False
@@ -140,7 +146,8 @@ def main():
                 raise RuntimeError("another preflight owns .preflight-reference.lock; wait for it to finish. "
                                    "If interrupted by a forced kill, inspect its sources before removing the stale lock")
             owns_lock = True
-        (lock / "owner").write_text("pid=%d\ndemo=%s\n" % (os.getpid(), key))
+        (lock / "owner").write_text("pid=%d\ndemo=%s\nworkspace_run=%s\n" %
+                                    (os.getpid(), key, load(root)["run_id"]))
         logs = demo / "logs"
         logs.mkdir(exist_ok=True)
         stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")
@@ -190,12 +197,13 @@ def main():
             snapshot.write_bytes(data)
             identity = snapshot.stat()
             with atomic_change():
+                register_source(root, relative, data, identity)
                 os.link(snapshot, target)  # Atomic creation; never overwrite an existing file.
                 copies.append((target, snapshot, identity.st_dev, identity.st_ino, data))
             emit("PREFLIGHT SOURCE · temporary %s from %s@%s" % (relative, ref, refs[ref]))
         if os.environ.get("PREFLIGHT_CI_SOURCE") == "1":
             subprocess.run([sys.executable, str(root / "runtime/scripts/capture_ci_source.py"),
-                            str(root), *[str(item[0]) for item in copies]], check=True, timeout=120)
+                            str(root), *[str(root / relative) for relative in load(root)["sources"]]], check=True, timeout=120)
         emit("")
         passed = 0
         env = dict(os.environ, DEMO_SYNC_MODE="1", DEMO_SYNC_PHASE="reference")
@@ -259,7 +267,7 @@ def main():
             result = 0
     except PreflightInterrupted as error:
         result = 128 + int(error.args[0])
-        emit("FAIL: preflight interrupted; restoring only its temporary source copies.")
+        emit("FAIL: preflight interrupted; all preflight files are retained for inspection.")
     except (OSError, RuntimeError, subprocess.SubprocessError, ValueError) as error:
         emit("FAIL: preflight could not complete: " + str(error))
         result = 1
@@ -267,27 +275,8 @@ def main():
         # A second interrupt must not interrupt cleanup halfway through.
         for sig in SIGNALS:
             signal.signal(sig, signal.SIG_IGN)
-        for target, snapshot, device, inode, original in reversed(copies):
-            try:
-                safe_path(str(target.relative_to(root)))
-                if not os.path.lexists(target):
-                    continue
-                current = target.lstat()
-                if (not stat.S_ISREG(current.st_mode) or (current.st_dev, current.st_ino) != (device, inode)
-                        or target.read_bytes() != original):
-                    cleanup_failed = True
-                    emit("FAIL: temporary source changed; preserved for review: " + str(target.relative_to(root)))
-                else:
-                    target.unlink()
-                    emit("PREFLIGHT RESTORED · removed temporary " + str(target.relative_to(root)))
-            except (OSError, RuntimeError) as error:
-                cleanup_failed = True
-                emit("FAIL: could not restore temporary source %s: %s" % (target, error))
-        for folder in reversed(directories):
-            try:
-                folder.rmdir()  # Never remove a nonempty directory or somebody else's files.
-            except OSError:
-                pass
+        # The parent transaction owns source cleanup across the ENTIRE selected scope.
+        # Release only this process lock; keep sources and evidence until total success.
         if owns_lock:
             shutil.rmtree(lock)
         if raw is not None:
@@ -295,7 +284,7 @@ def main():
             raw = None
             shutil.copyfile(raw_path, full_path)
             emit("Full preflight log: " + str(full_path.relative_to(demo)))
-    return 1 if cleanup_failed or logging_failed else result
+    return 1 if logging_failed else result
 
 try:
     sys.exit(main())

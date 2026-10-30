@@ -76,6 +76,8 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           # The runner captures the actual tree after supplying reused prerequisites.
           PREFLIGHT_CI_SOURCE: '1'
+          # Export proof before success cleanup restores the recording checkout.
+          PREFLIGHT_EVIDENCE_DIR: ${{ runner.temp }}/zap-preflight-evidence
         run: |
           set -euo pipefail
           # The course self-test is one off-camera command: ./preflight-check. Scope it to THIS -before
@@ -91,20 +93,7 @@ jobs:
           name: preflight-evidence-${{ github.ref_name }}
           # the course self-test's evidence + any FAIL log, the per-step logs, plus the gate/producer
           # sub-logs (hidden dirs) so a failure is diagnosable
-          path: |
-            SOURCE.txt
-            EXECUTED_HEAD.txt
-            EXECUTED_TREE.txt
-            EXECUTION.json
-            AFTER_SHA.txt
-            AUTHORED.patch
-            SOURCE_SHA256SUMS.txt
-            course-evidence.txt
-            FAIL-*.log
-            demos/**/logs/preflight-*.log
-            demos/**/logs/preflight-step-*.exit
-            demos/**/logs/.gate/*.log
-            demos/**/logs/.producer/*.log
+          path: ${{ runner.temp }}/zap-preflight-evidence/
           include-hidden-files: true
           if-no-files-found: warn
 
