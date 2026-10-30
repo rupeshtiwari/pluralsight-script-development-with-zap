@@ -144,7 +144,13 @@ step1_headless_run() {
     fi
     local i; for i in $(seq 1 120); do plan_finished && break; sleep 3; done
     local errs warns jobs; errs="$(plan_field error)"; warns="$(plan_field warn)"; jobs="$(plan_field info)"
-    fm star "Local plan run" "plan ${PLAN_ID} · $(plan_finished && echo finished || echo NOT finished) · ${errs} errors · ${warns} warnings" focus
+    # The displayed value deliberately OMITS ZAP's Automation Framework plan id. ZAP mints and increments
+    # that id on every runPlan (plan 0 on a fresh engine, a higher number as the engine is reused), so
+    # printing it makes this line change run-to-run and unusable for a clean recording. The real
+    # ${PLAN_ID} is still captured in run_plan() and drives every planProgress / plan_field / plan_finished
+    # call for THIS run; only this human-facing line drops it. The stable, repeatable facts the learner
+    # reads are: the plan finished, with zero errors and zero warnings (all still measured from the live run).
+    fm star "Local plan run" "$(plan_finished && echo finished || echo NOT finished) · ${errs} errors · ${warns} warnings" focus
     local h id concl sha labels covers url steps
     h="$(hosted)"; IFS='|' read -r id concl sha labels covers url steps <<<"${h}"
     fm section "Hosted proof, GitHub Actions (read from the Actions API)"
