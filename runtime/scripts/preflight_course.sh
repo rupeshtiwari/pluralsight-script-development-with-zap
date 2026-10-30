@@ -17,7 +17,7 @@
 #
 # Exit code is non-zero if any demo failed, so CI (and a student) can treat "course did not pass" as a
 # hard stop: if this fails, do not start. The per-demo runner temporarily supplies missing
-# reference sources and removes only its own unchanged copies afterward.
+# reference sources. The scope transaction restores owned files only after total success.
 set -uo pipefail
 
 ROOT="${1:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
@@ -27,6 +27,21 @@ ROOT="${1:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 FILTER="${2:-}"
 SCOPE_LABEL="${3:-every module, every demo, every step, in order}"
 cd "$ROOT" || exit 2
+
+# Validate the selector before potentially starting a large local stack.
+selected=()
+while IFS= read -r stepsdir; do
+  selected+=("$stepsdir")
+done < <(find "$ROOT"/demos -type d -name steps | sort | { if [ -n "$FILTER" ]; then grep -E "$FILTER"; else cat; fi; })
+if [ "${#selected[@]}" -eq 0 ]; then
+  echo "No demo matched the requested scope${FILTER:+ (filter: $FILTER)}."
+  exit 2
+fi
+
+# One transaction spans every selected demo; no cleanup after an early success.
+if [ "${PREFLIGHT_WORKSPACE_ACTIVE:-}" != "$ROOT/.preflight-workspace" ]; then
+  exec python3 "$ROOT/runtime/scripts/preflight_workspace.py" run "$ROOT" "$FILTER" "$SCOPE_LABEL"
+fi
 
 EVIDENCE="$ROOT/course-evidence.txt"
 runner="$ROOT/runtime/scripts/preflight_all_steps.sh"
@@ -96,15 +111,6 @@ run_logged() {
   return "$status"
 }
 
-# Validate the selector before potentially starting a large local stack.
-selected=()
-while IFS= read -r stepsdir; do
-  selected+=("$stepsdir")
-done < <(find "$ROOT"/demos -type d -name steps | sort | { if [ -n "$FILTER" ]; then grep -E "$FILTER"; else cat; fi; })
-if [ "${#selected[@]}" -eq 0 ]; then
-  echo "No demo matched the requested scope${FILTER:+ (filter: $FILTER)}." | tee -a "$EVIDENCE"
-  exit 2
-fi
 
 out=""
 if run_logged "$ROOT/runtime/scripts/preflight_runtime.sh"; then
@@ -174,11 +180,11 @@ fi
 summary="COURSE PREFLIGHT SUMMARY · ${total} demo(s): ${passed} passed, ${failed} failed"
 echo "$summary"
 { echo "────────────────────────────────────────────────────────────────"; echo "$summary"; } >> "$EVIDENCE"
-echo "Evidence written to: ${EVIDENCE#"$ROOT"/}"
+echo "Run evidence: ${EVIDENCE#"$ROOT"/} (retained on failure; removed/restored after total success)"
 if [ "$failed" -gt 0 ]; then
   echo "Course preflight did NOT pass. A student must not start: fix the demos named in the FAIL-*.log files, then re-run."
   echo "Per-failure logs:"; for f in "$ROOT"/FAIL-*.log; do [ -f "$f" ] && echo "    ${f#"$ROOT"/}"; done
 else
-  echo "Course preflight PASSED. Every selected demo completed all four checks; temporary source copies were restored."
+  echo "Course preflight PASSED. Every selected demo completed all four checks; recording cleanup follows only after this complete scope succeeds."
 fi
 exit "$course_rc"
