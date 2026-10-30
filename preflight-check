@@ -18,6 +18,7 @@
 # directly to the terminal and course-evidence.txt; setup failures stop before any demos run.
 # After total success, generated files are removed and prior files restored. Any failure retains
 # files until you explicitly run ./preflight-check --cleanup.
+# Add --save-changes to manual cleanup to back up edited files outside the checkout first.
 # Run ./preflight-check --diagnose to collect shareable, credential-free runtime diagnostics.
 # This is a self-test you run first, not a lab step. The lab commands are ./lab up and ./lab step N.
 set -uo pipefail
@@ -36,11 +37,12 @@ case "$arg" in
     mod="${arg:3:1}"; dem="${arg:5:1}"
     exec "$engine" "$ROOT" "/m${mod}-demo${dem}-" "Module ${mod}, Demo ${dem}" ;;
   --cleanup)
-    exec python3 "$ROOT/runtime/scripts/preflight_workspace.py" cleanup "$ROOT" ;;
+    shift
+    exec python3 "$ROOT/runtime/scripts/preflight_workspace.py" cleanup "$ROOT" "$@" ;;
   --diagnose)
     exec "$ROOT/runtime/scripts/preflight_diagnose.sh" ;;
   -h|--help)
-    sed -n '2,24p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    awk 'NR==1 {next} /^#/ {sub(/^# ?/,""); print; next} {exit}' "${BASH_SOURCE[0]}"; exit 0 ;;
   *)
     echo "preflight-check: unknown option '$arg'"
     echo "usage: ./preflight-check [--m1|--m2|--m1d1|--m1d2|--m1d3|--m2d1|--m2d2|--m2d3|--diagnose|--cleanup]   (no option = whole course)"

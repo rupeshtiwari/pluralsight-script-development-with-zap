@@ -64,7 +64,7 @@ reset_plan_state() {
 run_plan() { reset_plan_state; PLAN_ID="$(zap automation/action/runPlan "filePath=$(enc "${AF_PLAN_ZAP}")" | jq_py 'import json,sys
 try: print(json.load(sys.stdin).get("planId",""))
 except Exception: print("")')"; [ -n "${PLAN_ID:-}" ]; }
-plan_finished() { zap automation/view/planProgress "planId=${PLAN_ID}" | grep -q '"finished"[^,]*[0-9T:-]'; }
+plan_finished() { zap automation/view/planProgress "planId=${PLAN_ID}" | python3 "${REPO_ROOT}/runtime/scripts/zap_scan.py" plan-finished; }
 SCAN_ID=""
 scan_finished() { # Read THIS plan's scan; old completed scans cannot satisfy the wait.
     [ -n "${SCAN_ID}" ] || return 1
@@ -109,6 +109,13 @@ run_authenticated_plan() { # Step 1: fresh alerts, run the authenticated plan, w
     run_plan || { fail "could not start the plan to generate evidence" "automation/action/runPlan returned no plan id" "ask: 'the AF plan did not run; check the automation add-on and /af/af-plan.yaml'"; return 1; }
     local i; for i in $(seq 1 160); do plan_finished && break; sleep 3; done
     plan_finished || { fail "the authenticated plan did not finish in time" "planProgress never reported finished" "check the ZAP container log"; return 1; }
+    local plan_errors
+    plan_errors="$(zap automation/view/planProgress "planId=${PLAN_ID}" | python3 "${REPO_ROOT}/runtime/scripts/zap_scan.py" plan-errors)" || {
+        fail "could not read the plan error status" "the completion response is missing or invalid" "check automation/view/planProgress"; return 1;
+    }
+    if [ "${plan_errors}" != "0" ]; then
+        fail "the authenticated plan finished with ${plan_errors} errors" "the plan did not complete its scan jobs successfully" "check automation/view/planProgress and the ZAP container log"; return 1;
+    fi
     SCAN_ID="$(zap ascan/view/scans | python3 "${REPO_ROOT}/runtime/scripts/zap_scan.py" new "${previous}")" || {
         fail "could not identify the active scan created by this plan" "expected exactly one new scan ID" "check planProgress and ascan/view/scans; do not reuse an earlier scan"; return 1;
     }
