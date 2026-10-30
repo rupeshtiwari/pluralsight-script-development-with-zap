@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import shutil
 import tempfile
 import unittest
 
@@ -64,6 +65,32 @@ class RecordingParityTests(unittest.TestCase):
         x = self.run_step("reference")
         self.assertNotEqual(x.returncode, 0)
         self.assertFalse((self.demo / "logs/preflight-step-01.log").exists())
+
+    def test_author_copy_command_survives_actual_formatter_and_recording_wrapper(self):
+        fmt=ENGINE.with_name('fmt.py')
+        command='git show origin/m2-demo1-after:demos/module2-demos/demo/ci/af-plan.yaml > demos/module2-demos/demo/ci/af-plan.yaml'
+        self.dummy.write_text('import subprocess,sys\n'+
+                             f'subprocess.run([sys.executable,{str(fmt)!r},"todo","author first","missing","write it",{command!r}],check=True)\n')
+        result=self.run_step('reference')
+        self.assertNotEqual(result.returncode,0)  # A TODO is never fabricated proof.
+        self.assertIn('origin/m2-demo1-after:demos/',result.stdout)
+        self.assertIn('> demos/module2-demos/',result.stdout)
+        self.assertNotIn('origin/m2-demo1-after:module2-demos/',result.stdout)
+        self.assertIn(command,(self.demo/'logs/.producer/reference-step-01.raw.log').read_text())
+
+    def test_failure_path_starts_at_module_without_personal_checkout_prefix(self):
+        repo=Path(self.tmp.name)/'personal checkout'
+        scripts=repo/'runtime/scripts';scripts.mkdir(parents=True)
+        for name in ('recording_step.py','terminal_paths.py'):shutil.copy2(ENGINE.parent/name,scripts/name)
+        demo=repo/'demos/module99-demos/future-demo';(demo/'scripts').mkdir(parents=True)
+        result=subprocess.run([sys.executable,str(scripts/'recording_step.py'),str(demo),'1',
+                               sys.executable,'-c',"import sys; print('✘ FAIL: '+sys.argv[1])",str(demo/'logs/report.json')],
+                              env=dict(os.environ,DEMO_SYNC_PHASE='reference'),capture_output=True,text=True)
+        self.assertNotEqual(result.returncode,0)
+        self.assertIn('module99-demos/future-demo/logs/.producer/reference-step-01.raw.log',result.stderr)
+        self.assertNotIn(str(repo),result.stderr)
+        self.assertIn(str(repo),(demo/'logs/.producer/reference-step-01.raw.log').read_text())
+        self.assertNotIn('demos/module99',result.stderr)
 
 
 if __name__ == "__main__":

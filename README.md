@@ -172,7 +172,7 @@ If setup or even one step fails, times out, or is interrupted, files stay availa
 (cd "$(git rev-parse --show-toplevel)" && ./preflight-check --cleanup)
 ```
 
-A failed run must be cleaned explicitly before another preflight. Cleanup refuses files you edited or replaced after preflight and leaves them for your review. Move any work you want to keep out of the temporary path, then run cleanup again. Files from older runs without an ownership manifest are never swept away. Lab services and ZAP session state remain running; follow the demo's normal reset before filming. CI exports the run's evidence outside the checkout before cleanup so uploaded proof is retained.
+A failed run must be cleaned explicitly before another preflight. Cleanup refuses files you edited or replaced after preflight and leaves them for your review. Move any work you want to keep out of the temporary path, then run cleanup again. Files from older runs without an ownership manifest are never swept away. Lab services and ZAP session state remain running; follow the demo's normal reset before filming. When upgrading an older checkout after a failed run, run `./preflight-check --cleanup` before `git pull --ff-only`. Save any unsaved ZAP Script Console work, then run `./lab reset` once to load the updated saved scripts into a fresh training session; an existing named in-memory script is preserved automatically. CI exports the run's evidence outside the checkout before cleanup so uploaded proof is retained.
 
 **Different demo?** Return to the repository root, save any personal changes, switch to its `*-before` branch, then follow its own README. Don't reuse scan history from another demo.
 
