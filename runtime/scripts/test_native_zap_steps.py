@@ -24,7 +24,7 @@ class NativeZapTests(unittest.TestCase):
         (demo/'scripts').mkdir(parents=True,exist_ok=True)
         library=demo/'scripts/_steps.sh'
         shutil.copy2(ROOT/folder/'scripts/_steps.sh',library)
-        return subprocess.run(['bash','-c','source "$1"\nfm() { printf "%s\\n" "$*"; }\n'+code,
+        return subprocess.run(['bash','-c','set -o pipefail\nsource "$1"\nfm() { printf "%s\\n" "$*"; }\n'+code,
                                'native-test',str(library)],cwd=demo,env=self.env,
                               capture_output=True,text=True,timeout=10)
 
@@ -102,7 +102,7 @@ zap() {
  automation/view/planProgress) echo '{"error":[]}' ;;
  context/view/context) echo '{"context":{"id":"1"}}' ;;
  users/view/usersList) echo '{"usersList":[{"name":"alice"}]}' ;;
- *) echo '{}' ;;
+ *) echo '{"error":[]}' ;;
  esac
 }
 run_plan() { touch "$TEST_ROOT/plan-started";PLAN_ID=7; }
@@ -153,7 +153,7 @@ zap() {
  context/view/context) echo '{"context":{"id":"1"}}' ;;
  users/view/usersList)
   if [ "$TEST_DEFECT" = user ];then echo '{"usersList":[]}';else echo '{"usersList":[{"name":"alice"}]}';fi ;;
- *) echo '{}' ;;
+ *) echo '{"error":[]}' ;;
  esac
 }
 run_plan() { touch "$TEST_ROOT/plan-started";PLAN_ID=1; }
@@ -167,10 +167,90 @@ printf 'FIRST=%s LATER=%s\n' "$first" "$later"
                 self.assertEqual(result.returncode,0,result.stdout+result.stderr)
                 self.assertIn('FIRST=1 LATER=1',result.stdout)
 
+    def test_real_plan_completion_predicate_rejects_empty_null_and_unrelated_timestamps(self):
+        for folder in ('m2-demo1-authenticated-zap-github-actions','m2-demo2-zap-api-scan-evidence'):
+            for finished in ('',None,False,[],{},'bad-time','2026-10-30T12:00:00Z'):
+                with self.subTest(folder=folder,finished=finished):
+                    self.env['TEST_PROGRESS']=json.dumps({'finished':finished,'started':'2026-10-30T11:00:00Z','info':['finished job2026-10-30T11:00:00Z']})
+                    result=self.run_library('demos/module2-demos/'+folder,r'''
+PLAN_ID=0
+zap() { printf '%s' "$TEST_PROGRESS"; }
+plan_finished
+''')
+                    self.assertEqual(result.returncode==0,finished=='2026-10-30T12:00:00Z',result.stdout+result.stderr)
+
+    def test_fresh_engine_waits_for_actual_plan_completion_before_looking_for_scan(self):
+        result=self.scan(r'''
+zap() {
+ case "$1" in
+ automation/view/planProgress)
+  n="$(cat "$TEST_ROOT/plan-polls" 2>/dev/null || echo 0)";n=$((n+1));echo "$n" > "$TEST_ROOT/plan-polls"
+  if [ "$n" -lt 3 ];then
+   echo '{"finished":"","error":[],"started":"2026-10-30T11:00:00Z"}'
+  else
+   touch "$TEST_ROOT/plan-complete"
+   echo '{"finished":"2026-10-30T12:00:00Z","error":[]}'
+  fi ;;
+ ascan/view/scans)
+  if [ -e "$TEST_ROOT/plan-complete" ];then echo '{"scans":[{"id":"6","progress":"100","state":"FINISHED","reqCount":"3"}]}';else echo '{"scans":[]}';fi ;;
+ core/view/version) echo '{"version":"2.17.0"}' ;;
+ context/view/context) echo '{"context":{"id":"1"}}' ;;
+ users/view/usersList) echo '{"usersList":[{"name":"alice"}]}' ;;
+ *) echo '{"error":[]}' ;;
+ esac
+}
+run_plan() { PLAN_ID=1; }
+custom_present() { printf yes; }
+sleep() { echo waited >> "$TEST_ROOT/waits"; }
+step1_api_status
+''')
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertEqual((self.root/'waits').read_text().splitlines(),['waited','waited'])
+        self.assertIn('id=6 · progress=100% · state=FINISHED',result.stdout)
+
+    def test_later_m2_demo1_commands_stop_when_real_priming_wait_fails(self):
+        folder='demos/module2-demos/m2-demo1-authenticated-zap-github-actions'
+        self.assertEqual(self.run_library(folder,'true').returncode,0)
+        scripts=self.root/folder/'scripts'
+        (scripts/'_steps.sh').rename(scripts/'_actual_steps.sh')
+        (scripts/'_steps.sh').write_text(r'''
+source "$(dirname "${BASH_SOURCE[0]}")/_actual_steps.sh"
+fm() { printf '%s\n' "$*"; }
+ensure_ready() { return 0; }
+reflection_reached() { printf ''; }
+run_plan() { PLAN_ID=0; }
+zap() { echo '{"finished":"","error":[]}'; }
+seq() { echo 1; }
+sleep() { :; }
+step2_context_config() { touch "$TEST_ROOT/WRONG_STEP"; }
+step3_script_job() { touch "$TEST_ROOT/WRONG_STEP"; }
+step4_custom_alert() { touch "$TEST_ROOT/WRONG_STEP"; }
+''')
+        entry=scripts/'_run_step.sh'
+        shutil.copy2(ROOT/folder/'scripts/_run_step.sh',entry)
+        for number in ('2','3','4'):
+            with self.subTest(step=number):
+                result=subprocess.run(['bash',str(entry),number],cwd=scripts.parent,
+                                      env=self.env,capture_output=True,text=True,timeout=10)
+                self.assertNotEqual(result.returncode,0,result.stdout+result.stderr)
+                self.assertIn('priming plan did not finish successfully',result.stdout)
+                self.assertFalse((self.root/'WRONG_STEP').exists())
+
+    def test_headless_error_gate_rejects_missing_and_wrong_type_error_lists(self):
+        for document,expected in (({},'?'),({'error':''},'?'),({'error':{}},'?'),({'error':[]},'0')):
+            with self.subTest(document=document):
+                self.env['TEST_PROGRESS']=json.dumps(document)
+                result=self.run_library('demos/module2-demos/m2-demo1-authenticated-zap-github-actions',r'''
+PLAN_ID=0
+zap() { printf '%s' "$TEST_PROGRESS"; }
+plan_field error
+''')
+                self.assertEqual(result.stdout.strip(),expected)
+
     def test_ambiguous_new_scan_ids_are_rejected(self):
         result=self.scan(r'''
 zap() {
- if [ -e "$TEST_ROOT/plan-started" ];then echo '{"scans":[{"id":"6"},{"id":"7"}]}';else echo '{"scans":[]}';fi
+ if [ -e "$TEST_ROOT/plan-started" ];then echo '{"scans":[{"id":"6"},{"id":"7"}],"error":[]}';else echo '{"scans":[],"error":[]}';fi
 }
 run_plan() { touch "$TEST_ROOT/plan-started";PLAN_ID=1; }
 plan_finished() { return 0; }
