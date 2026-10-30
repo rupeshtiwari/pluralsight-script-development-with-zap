@@ -49,7 +49,7 @@ class PreflightFlowTests(unittest.TestCase):
         self.bin.mkdir()
         scripts = self.root / 'runtime/scripts'
         scripts.mkdir(parents=True)
-        for name in ('preflight_course.sh', 'preflight_all_steps.sh', 'recording_step.py',
+        for name in ('preflight_course.sh', 'preflight_all_steps.sh', 'recording_step.py', 'terminal_paths.py',
                      'preflight_runtime.sh', 'preflight_start.py', 'lib.sh', 'capture_ci_source.py', 'preflight_workspace.py'):
             shutil.copy2(SOURCE / name, scripts / name)
         shutil.copy2(SOURCE.parents[1] / 'preflight-check', self.root / 'preflight-check')
