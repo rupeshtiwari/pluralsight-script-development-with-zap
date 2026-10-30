@@ -32,6 +32,38 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v4
 
+      - name: Verify the Automation Framework plan exists on this branch
+        # workflow_dispatch has no branch filter: GitHub lets this workflow be
+        # run manually from ANY branch that contains this file (it shows a branch
+        # picker). The learner-start branch m2-demo1-before deliberately ships
+        # WITHOUT ci/af-plan.yaml (authoring it IS Step 1), and main never carries
+        # the completed plan. A manual run on such a branch used to fail deep in
+        # the next step with a cryptic `cp: cannot stat ... af-plan.yaml`. Fail
+        # fast here, BEFORE Docker starts, with a message that names the missing
+        # file and points to the right branch. This only checks and guides; it
+        # never authors or copies the plan.
+        run: |
+          PLAN="demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci/af-plan.yaml"
+          if [ ! -f "${PLAN}" ]; then
+            echo "::error title=Automation Framework plan not found on this branch::${PLAN} is absent on '${GITHUB_REF_NAME}'. Re-run this workflow with branch 'm2-demo1-after' selected."
+            echo "────────────────────────────────────────────────────────────────────────"
+            echo "This hosted authenticated scan needs the completed Automation Framework plan:"
+            echo "    ${PLAN}"
+            echo ""
+            echo "It is NOT present on this branch: '${GITHUB_REF_NAME}'."
+            echo ""
+            echo "Run the workflow on the completed branch instead:"
+            echo "  * m2-demo1-after   the completed branch WITH the validated plan."
+            echo "                     Actions tab -> Run workflow -> Branch: m2-demo1-after."
+            echo "  * m2-demo1-before  the learner START branch. It intentionally ships"
+            echo "                     WITHOUT the plan; authoring ci/af-plan.yaml IS Step 1."
+            echo ""
+            echo "No file was created or copied. Re-run on 'm2-demo1-after'."
+            echo "────────────────────────────────────────────────────────────────────────"
+            exit 1
+          fi
+          echo "Found ${PLAN} on '${GITHUB_REF_NAME}'. Proceeding with the authenticated scan."
+
       - name: Start the Globomantics app (Postgres + Mongo + FastAPI)
         run: docker compose up -d --build --wait app
 
