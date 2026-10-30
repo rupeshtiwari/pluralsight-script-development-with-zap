@@ -115,11 +115,10 @@ send_probe() {
 
 
 marker_request_line() {
-    # Read the NEWEST messages: ZAP returns history oldest-first, so start near the end.
-    local total start
-    total="$(zap core/view/numberOfMessages "baseurl=$(enc "${APP_INTERNAL}")" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("numberOfMessages",0))' 2>/dev/null)"
-    start=$(( ${total:-0} > 50 ? ${total:-0} - 50 : 0 ))
-    zap core/view/messages "baseurl=$(enc "${APP_INTERNAL}")&start=${start}&count=50" | python3 -c '
+    # The probe URL is unique to this attempt. Query it directly: messages uses
+    # a 1-based inclusive start when start>0, so total-50/count50 omitted the
+    # newest request after earlier demos had filled a long-lived ZAP history.
+    zap core/view/messages "baseurl=$(enc "${PROBE_URL}")&start=0&count=10" | python3 -c '
 import json,sys
 want=sys.argv[1]
 try: ms=json.load(sys.stdin).get("messages",[])
@@ -232,8 +231,8 @@ step3_console_output() {
         pass "the script printed its named line for this request; the same line is in ZAP's Script Console"
     else
         fail "no console line from the script for this request" \
-             "the script is not enabled, or it does not print/store its line" \
-             "check the print() and ScriptVars lines in the script, then re-run Step 1"
+             "the registered script may be an older in-memory copy without ScriptVars, even when the saved source is current" \
+             "save unsaved Script Console work first; reload globomantics-marker from the saved source (or reset the training lab with ./lab reset), then re-run Step 1"
     fi
     return "${STEP_RC}"
 }
