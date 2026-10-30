@@ -198,11 +198,11 @@ For the hosted proof, open the <a href="https://github.com/rupeshtiwari/pluralsi
 
 ### Expected result (the script's output contract, not your run)
 
-The plan ID, hosted run ID and commit are specific to your run, read them from your output. ZAP numbers each Automation Framework plan per execution and increments it as the engine is reused, so the number in `plan <id>` changes between runs (a fresh engine starts at `plan 0`, a reused one shows a higher number); it is never the pass/fail signal. A healthy run is the plan reaching **`finished`** with **zero errors**, confirmed by the hosted `ubuntu-24.04` workflow evidence below. The named values are what that looks like.
+The hosted run ID and commit are specific to your run, read them from your output. The `Local plan run` line reports only the stable facts — the plan **`finished`** with **zero errors** and **zero warnings** — because ZAP assigns a fresh Automation Framework plan ID on every execution (and increments it as the engine is reused), which would otherwise make this line change run to run. That plan ID is still captured internally and drives ZAP's `planProgress` API; it just is not shown here, because it is never the pass/fail signal. A healthy run is the plan reaching `finished` with zero errors, confirmed by the hosted `ubuntu-24.04` workflow evidence below. The named values are what that looks like.
 
 | OBSERVED FIELD | ACTUAL VALUE |
 |---|---|
-| Local plan run | `plan <id> · finished · 0 errors · 0 warnings` |
+| Local plan run | `finished · 0 errors · 0 warnings` |
 | Workflow run | `<run id> · success · commit <sha>` |
 | Runner | `ubuntu-24.04` |
 | Headless ZAP step | `success` |
