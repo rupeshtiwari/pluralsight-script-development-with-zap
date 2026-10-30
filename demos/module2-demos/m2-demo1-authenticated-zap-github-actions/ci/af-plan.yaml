@@ -11,8 +11,9 @@
 #
 # Job sequence (M2 Clip 1 architecture, non-gate portion): this plan follows the
 # canonical Automation Framework order taught in the M2 Clip 1 presentation —
-#   passiveScan-config -> script -> spider -> passiveScan-wait -> activeScan
-#   -> passiveScan-wait -> report
+#   passiveScan-config -> script -> spider -> passiveScan-wait -> activeScan-policy
+#   -> activeScan -> passiveScan-wait -> report
+# (requestor seeds the login-only node as alice before the active scan.)
 # It deliberately omits the GATE jobs (alertFilter + exitStatus), which belong to
 # the M2 Clip 5 gate plan (ci/gate-plan.yaml, EO3c): adding exitStatus here would
 # fail this authenticated-scan run by design and contradict M2 Clip 3's
@@ -113,31 +114,35 @@ jobs:
       - url: "http://app:8000/account/profile?note=seed"
         method: "GET"
 
-  # 6) activeScan — run the active scan AS THE AUTHENTICATED USER against the
-  #    context scope. The inline policy enables the Script Active Scan Rules
-  #    plugin (50000) at LOW threshold, which routes the scan into our custom
-  #    Python rule; the JS marker stamps every request. (This is the
-  #    activeScan-policy + activeScan step of the canonical sequence, inline.)
-  - type: activeScan
+  # 6) activeScan-policy — define the policy: only the Script Active Scan Rules
+  #    plugin (50000) at LOW threshold, which routes the scan into our custom rule.
+  - type: activeScan-policy
     parameters:
-      context: "Globomantics"
-      user: "alice"
-      maxRuleDurationInMins: 2
-      maxScanDurationInMins: 5
+      name: "globomantics-custom-rule"
     policyDefinition:
       defaultStrength: "medium"
-      defaultThreshold: "medium"
+      defaultThreshold: "off"
       rules:
         - id: 50000          # Script Active Scan Rules — run our custom rule
           strength: "medium"
           threshold: "low"
 
-  # 7) passiveScan-wait — catch passive findings raised by active-scan traffic.
+  # 7) activeScan — run that policy AS THE AUTHENTICATED USER against the context
+  #    scope; the JS marker stamps every request.
+  - type: activeScan
+    parameters:
+      context: "Globomantics"
+      user: "alice"
+      policy: "globomantics-custom-rule"
+      maxRuleDurationInMins: 2
+      maxScanDurationInMins: 5
+
+  # 8) passiveScan-wait — catch passive findings raised by active-scan traffic.
   - type: passiveScan-wait
     parameters:
       maxDuration: 2
 
-  # 8) report — write the evidence the job and the author preflight read back.
+  # 9) report — write the evidence the job and the author preflight read back.
   - type: report
     parameters:
       template: "traditional-json"
