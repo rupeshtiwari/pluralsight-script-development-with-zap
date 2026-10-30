@@ -75,10 +75,13 @@ except Exception: print("")')"
 plan_progress() { zap automation/view/planProgress "planId=${PLAN_ID}"; }
 plan_field() { # <jsonkey> -> count of entries in that list
     plan_progress | python3 -c 'import json,sys
-try: print(len(json.load(sys.stdin).get(sys.argv[1],[])))
-except Exception: print("0")' "$1"
+try:
+    values=json.load(sys.stdin)[sys.argv[1]]
+    if not isinstance(values,list): raise ValueError("expected a plan progress list")
+    print(len(values))
+except Exception: print("?")' "$1"
 }
-plan_finished() { plan_progress | grep -q '"finished"[^,]*[0-9T:-]'; }
+plan_finished() { plan_progress | python3 "${REPO_ROOT}/runtime/scripts/zap_scan.py" plan-finished; }
 
 # Poll a no-arg producer function until it prints something, or a timeout
 # elapses. The AF plan can report "finished" a moment before the active scan's
