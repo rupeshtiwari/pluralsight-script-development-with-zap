@@ -50,7 +50,7 @@ class PreflightFlowTests(unittest.TestCase):
         scripts = self.root / 'runtime/scripts'
         scripts.mkdir(parents=True)
         for name in ('preflight_course.sh', 'preflight_all_steps.sh', 'recording_step.py',
-                     'preflight_runtime.sh', 'preflight_start.py', 'lib.sh', 'capture_ci_source.py'):
+                     'preflight_runtime.sh', 'preflight_start.py', 'lib.sh', 'capture_ci_source.py', 'preflight_workspace.py'):
             shutil.copy2(SOURCE / name, scripts / name)
         shutil.copy2(SOURCE.parents[1] / 'preflight-check', self.root / 'preflight-check')
         self.write_exec(self.bin / 'docker', '''#!/usr/bin/env python3
@@ -115,7 +115,7 @@ for relative in {required!r}:
 with (root/'executions').open('a') as f:f.write({demo!r}+':{n}:'+str(Path.cwd())+'\\n')
 print('STEP LIVE: {demo} {n}',flush=True)
 if (root/'pause').exists(): (root/'step-active').touch(); time.sleep(60)
-if (root/'step-fail').exists() and {n}==2:
+if (root/'step-fail').exists() and {n}==2 and os.environ.get('FAIL_DEMO', {demo!r})=={demo!r}:
  print('✘ FAIL: deliberate test failure',flush=True);sys.exit(7)
 print('✔ PASS: cwd and prerequisites verified',flush=True)
 ''')
@@ -142,6 +142,8 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
         return subprocess.check_output(['git','-C',str(self.root),*args],text=True).strip()
 
     def run_scope(self,option='',cwd=None):
+        self.export = Path(tempfile.mkdtemp(dir=self.temp.name)) / 'evidence'
+        self.env['PREFLIGHT_EVIDENCE_DIR'] = str(self.export)
         return subprocess.run([str(self.root/'preflight-check')]+([option] if option else []),
                               cwd=cwd or self.root,env=self.env,capture_output=True,text=True,timeout=20)
 
@@ -153,6 +155,14 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
         self.assertEqual((self.root/'.git/index').read_bytes(),self.index)
         self.assertFalse((self.root/'.preflight-reference.lock').exists())
         self.assertFalse(list(self.root.glob('.preflight-output.*')))
+        self.assertFalse((self.root/'.preflight-workspace').exists())
+        self.assertFalse(list(self.root.rglob('*.pyc')))
+
+    def cleanup_retained(self):
+        self.assertTrue((self.root/'.preflight-workspace/manifest.json').is_file())
+        result=self.run_scope('--cleanup', cwd=self.root/FOLDERS['m2-demo2'])
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assert_restored()
 
     def test_symlinked_temp_parent_keeps_strict_working_directory_checks(self):
         # Reproduce macOS /var -> /private/var using a real alias on Linux too.
@@ -185,7 +195,7 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
                 self.assertEqual(result.returncode,0,result.stdout+result.stderr)
                 self.assertIn('1 passed, 0 failed',result.stdout)
                 for n in range(1, 5):
-                    logs = self.root / folder / 'logs'
+                    logs = self.export / folder / 'logs'
                     self.assertEqual((logs / f'preflight-step-{n:02d}.exit').read_text(), '0\n')
                     expected = (f'STEP LIVE: {demo} {n}\n'
                                 '✔ PASS: cwd and prerequisites verified\n').encode()
@@ -235,9 +245,9 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
         self.assertIn('no demo steps executed',result.stdout)
         self.assertFalse((self.root/'executions').exists())
         self.assertEqual([p.name for p in self.root.glob('FAIL-*.log')],['FAIL-setup.log'])
-        self.assert_restored()
+        self.cleanup_retained()
 
-    def test_real_step_failure_is_visible_and_restores_temporary_files(self):
+    def test_real_step_failure_keeps_sources_and_logs_until_manual_cleanup(self):
         (self.root/'step-fail').touch()
         result=self.run_scope('--m2d1')
         self.assertEqual(result.returncode,1)
@@ -251,7 +261,11 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
         self.assertIn('✘ FAIL', (logs / 'preflight-step-02.log').read_text())
         self.assertFalse((logs / 'preflight-step-03.exit').exists())
         self.assertFalse((logs / 'preflight-step-04.log').exists())
-        self.assert_restored()
+        for label in NEEDS['m2-demo1']:
+            owner,name=ARTIFACTS[label]
+            self.assertTrue((self.root/FOLDERS[owner]/name).exists())
+        self.assertIn('--cleanup',result.stdout)
+        self.cleanup_retained()
 
     def test_ci_source_describes_actual_temporary_prerequisites_and_preserves_index(self):
         import hashlib
@@ -269,15 +283,15 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
         self.env.update(PREFLIGHT_CI_SOURCE='1', GITHUB_SHA=workflow_sha)
         result = self.run_scope('--m2d1')
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        manifest = json.loads((self.root / 'EXECUTION.json').read_text())
+        manifest = json.loads((self.export / 'EXECUTION.json').read_text())
         self.assertEqual(manifest['workflow_sha'], workflow_sha)
         self.assertNotEqual(manifest['workflow_sha'], manifest['executed_head'])
         self.assertEqual(manifest['executed_head'], self.head)
         self.assertEqual(manifest['after_sha'], after)
-        self.assertEqual((self.root / 'EXECUTED_TREE.txt').read_text().strip(), manifest['executed_tree'])
-        self.assertEqual((self.root / 'EXECUTED_HEAD.txt').read_text().strip(), manifest['executed_head'])
+        self.assertEqual((self.export / 'EXECUTED_TREE.txt').read_text().strip(), manifest['executed_tree'])
+        self.assertEqual((self.export / 'EXECUTED_HEAD.txt').read_text().strip(), manifest['executed_head'])
         self.assertEqual(manifest['authored_patch_sha256'],
-                         hashlib.sha256((self.root / 'AUTHORED.patch').read_bytes()).hexdigest())
+                         hashlib.sha256((self.export / 'AUTHORED.patch').read_bytes()).hexdigest())
         self.assertNotEqual(manifest['executed_tree'], self.git('rev-parse', 'HEAD^{tree}'))
         for key in NEEDS['m2-demo1']:
             owner, name = ARTIFACTS[key]
@@ -290,7 +304,7 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
         with tempfile.TemporaryDirectory() as temporary:
             env = dict(os.environ, GIT_INDEX_FILE=str(Path(temporary) / 'index'))
             for args in (['read-tree', workflow_sha],
-                         ['apply', '--cached', '--binary', str(self.root / 'AUTHORED.patch')]):
+                         ['apply', '--cached', '--binary', str(self.export / 'AUTHORED.patch')]):
                 subprocess.run(['git', '-C', str(self.root), *args], env=env, check=True,
                                capture_output=True)
             rebuilt = subprocess.check_output(['git', '-C', str(self.root), 'write-tree'],
@@ -308,7 +322,7 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
         for n in (3, 4):
             self.assertFalse((logs / f'preflight-step-{n:02d}.exit').exists())
             self.assertFalse((logs / f'preflight-step-{n:02d}.log').exists())
-        self.assert_restored()
+        self.cleanup_retained()
 
     def test_timed_out_step_records_actual_killed_exit_and_no_unexecuted_exits(self):
         (self.root / 'pause').touch()
@@ -319,7 +333,7 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
         self.assertEqual((logs / 'preflight-step-01.exit').read_text(), '-15\n')
         self.assertIn('STEP LIVE', (logs / 'preflight-step-01.log').read_text())
         self.assertFalse((logs / 'preflight-step-02.exit').exists())
-        self.assert_restored()
+        self.cleanup_retained()
 
     def test_existing_modified_reference_is_preserved(self):
         path=self.root/FOLDERS['m1-demo3']/'zap-scripts/globomantics-auth.py'
@@ -353,7 +367,7 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
                 self.assertEqual(child.wait(timeout=12),143)
             finally:
                 if child.poll() is None:child.kill();child.wait()
-        self.assert_restored()
+        self.cleanup_retained()
 
     def test_hung_readiness_is_bounded_before_and_after_startup(self):
         (self.root/'ready-pause').touch()
@@ -362,7 +376,7 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
         self.assertEqual(result.returncode,1)
         self.assertIn('readiness checks still fail',result.stdout)
         self.assertFalse((self.root/'executions').exists())
-        self.assert_restored()
+        self.cleanup_retained()
 
     def test_startup_timeout_is_bounded_and_leaves_no_ready_lab(self):
         (self.root/'startup-pause').touch()
@@ -371,7 +385,7 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
         self.assertEqual(result.returncode,1)
         self.assertIn('exceeded PREFLIGHT_START_TIMEOUT',result.stdout)
         self.assertFalse((self.root/'ready').exists())
-        self.assert_restored()
+        self.cleanup_retained()
 
     def test_cancel_startup_stops_owned_process(self):
         (self.root/'startup-pause').touch()
@@ -388,6 +402,147 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
                 self.assertFalse((self.root/'ready').exists())
             finally:
                 if child.poll() is None:child.kill();child.wait()
+        self.cleanup_retained()
+
+    def test_success_restores_prior_outputs_and_removes_all_new_native_artifacts(self):
+        from preflight_workspace import LOG_PATTERNS
+        logs=self.root/FOLDERS['m2-demo1']/'logs'
+        logs.mkdir()
+        gate=logs/'.gate';gate.mkdir();gate.chmod(0o750)
+        old=logs/'preflight-step-01.log'
+        old.write_text('my previous evidence\n');old.chmod(0o640)
+        (logs/'.gitkeep').touch()
+        (logs/'personal-notes.txt').write_text('keep me')
+        evidence=self.root/'course-evidence.txt';evidence.write_text('previous course evidence')
+        stale=self.root/'FAIL-old.log';stale.write_text('previous failure')
+        step=self.root/FOLDERS['m2-demo1']/'steps/04-test-step.sh'
+        with step.open('a') as script:
+            script.write("\nlogs=Path.cwd()/'logs'\n(logs/'.gate').chmod(0o777)\n")
+            for relative in ('alert-disposition.md','.m1demo3-state','custom-alert-record.json',
+                             '.m2demo2-state','globo-api-report-test.json','.gate/run.log',
+                             '.gate/gate-plan.yaml','.gate/globo-gate-report.json','.gate/exit',
+                             '.producer/reference-step-01-candidate.log'):
+                script.write(f"p=logs/{relative!r};p.parent.mkdir(parents=True,exist_ok=True);p.write_text('generated')\n")
+        result=self.run_scope('--m2d1')
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertEqual(old.read_text(),'my previous evidence\n')
+        self.assertEqual(old.stat().st_mode & 0o777,0o640)
+        self.assertEqual(gate.stat().st_mode & 0o777,0o750)
+        self.assertFalse(list(gate.iterdir()))
+        self.assertEqual(evidence.read_text(),'previous course evidence')
+        self.assertEqual(stale.read_text(),'previous failure')
+        self.assertEqual(sorted(p.name for p in logs.iterdir()),['.gate','.gitkeep','personal-notes.txt','preflight-step-01.log'])
         self.assert_restored()
+
+    def test_late_course_failure_retains_earlier_demo_files_and_blocks_rerun(self):
+        (self.root/'step-fail').touch();self.env['FAIL_DEMO']='m2-demo3'
+        result=self.run_scope()
+        self.assertEqual(result.returncode,1,result.stdout+result.stderr)
+        self.assertIn('5 passed, 1 failed',result.stdout)
+        for owner,name in ARTIFACTS.values():
+            self.assertTrue((self.root/FOLDERS[owner]/name).is_file())
+        earlier=self.root/FOLDERS['m1-demo1']/'logs/preflight-step-04.exit'
+        self.assertEqual(earlier.read_text(),'0\n')
+        evidence=(self.root/'course-evidence.txt').read_bytes()
+        second=self.run_scope('--m2d1')
+        self.assertNotEqual(second.returncode,0)
+        self.assertIn('--cleanup',second.stderr)
+        self.assertEqual((self.root/'course-evidence.txt').read_bytes(),evidence)
+        self.cleanup_retained()
+        self.assertFalse((self.root/'course-evidence.txt').exists())
+        self.assertFalse(earlier.exists())
+
+    def test_manual_cleanup_preserves_edits_without_partial_deletion(self):
+        (self.root/'step-fail').touch()
+        self.assertEqual(self.run_scope('--m2d1').returncode,1)
+        path=self.root/FOLDERS['m1-demo2']/'zap-scripts/globomantics-marker.js'
+        original=path.read_bytes();path.write_text('edited after failure')
+        result=self.run_scope('--cleanup')
+        self.assertNotEqual(result.returncode,0)
+        self.assertEqual(path.read_text(),'edited after failure')
+        self.assertTrue((self.root/'course-evidence.txt').exists())
+        path.write_bytes(original)
+        self.cleanup_retained()
+
+    def test_cleanup_preserves_same_content_replacement_and_accepts_manual_deletion(self):
+        (self.root/'step-fail').touch()
+        self.assertEqual(self.run_scope('--m2d1').returncode,1)
+        path=self.root/FOLDERS['m1-demo2']/'zap-scripts/globomantics-marker.js'
+        replacement=path.with_name('replacement')
+        replacement.write_bytes(path.read_bytes());replacement.replace(path)
+        result=self.run_scope('--cleanup')
+        self.assertNotEqual(result.returncode,0)
+        self.assertTrue(path.exists())
+        self.assertIn('replaced',result.stderr)
+        path.unlink()  # Explicit manual deletion is also supported.
+        self.cleanup_retained()
+
+    def test_manual_cleanup_keeps_edited_report_and_unrelated_files(self):
+        (self.root/'step-fail').touch()
+        self.assertEqual(self.run_scope('--m2d1').returncode,1)
+        output=self.root/FOLDERS['m2-demo1']/'logs/preflight-step-01.log'
+        original=output.read_bytes();output.write_text('my edited log')
+        note=output.parent/'personal-note.txt';note.write_text('unrelated')
+        result=self.run_scope('--cleanup')
+        self.assertNotEqual(result.returncode,0)
+        self.assertEqual(output.read_text(),'my edited log')
+        self.assertTrue((self.root/'course-evidence.txt').exists())
+        output.write_bytes(original)
+        self.cleanup_retained()
+        self.assertEqual(note.read_text(),'unrelated')
+
+    def test_cleanup_refuses_symlink_and_active_run(self):
+        (self.root/'pause').touch()
+        with tempfile.TemporaryFile() as log:
+            child=subprocess.Popen([str(self.root/'preflight-check'),'--m2d1'],cwd=self.root,
+                                   env=self.env,stdout=log,stderr=log)
+            try:
+                deadline=time.monotonic()+10
+                while not (self.root/'step-active').exists() and time.monotonic()<deadline:time.sleep(.02)
+                self.assertTrue((self.root/'step-active').exists())
+                manifest_path=self.root/'.preflight-workspace/manifest.json'
+                manifest=json.loads(manifest_path.read_text());manifest['phase']='retained'
+                manifest_path.write_text(json.dumps(manifest))
+                result=self.run_scope('--cleanup')
+                self.assertNotEqual(result.returncode,0)
+                self.assertIn('still running',result.stderr)
+                child.terminate();self.assertEqual(child.wait(timeout=12),143)
+            finally:
+                if child.poll() is None:child.kill();child.wait()
+        path=self.root/FOLDERS['m1-demo2']/'zap-scripts/globomantics-marker.js'
+        original=path.with_name('preserved-original');path.rename(original)
+        outside=Path(self.temp.name)/'personal-file';outside.write_text('personal')
+        path.symlink_to(outside)
+        result=self.run_scope('--cleanup')
+        self.assertNotEqual(result.returncode,0)
+        self.assertEqual(outside.read_text(),'personal')
+        path.unlink();original.rename(path)
+        self.cleanup_retained()
+
+    def test_cleanup_checks_native_owner_and_recovers_only_its_dead_lock(self):
+        (self.root/'step-fail').touch()
+        self.assertEqual(self.run_scope('--m2d1').returncode,1)
+        manifest=json.loads((self.root/'.preflight-workspace/manifest.json').read_text())
+        lock=self.root/'.preflight-reference.lock';lock.mkdir()
+        owner=lock/'owner'
+        owner.write_text(f"pid={os.getpid()}\nworkspace_run={manifest['run_id']}\n")
+        result=self.run_scope('--cleanup')
+        self.assertNotEqual(result.returncode,0)
+        self.assertIn('native preflight runner is still running',result.stderr)
+        owner.write_text(f"pid=999999999\nworkspace_run={manifest['run_id']}\n")
+        (lock/'source-0').write_text('owned snapshot')
+        self.cleanup_retained()
+        self.assertFalse(lock.exists())
+
+    def test_default_success_leaves_no_evidence_or_imported_sources(self):
+        env=dict(self.env);env.pop('PREFLIGHT_EVIDENCE_DIR',None)
+        result=subprocess.run([str(self.root/'preflight-check'),'--m2d1'],cwd=self.root,
+                              env=env,capture_output=True,text=True,timeout=20)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertFalse((self.root/'course-evidence.txt').exists())
+        self.assertFalse((self.root/FOLDERS['m2-demo1']/'logs').exists())
+        self.assertIn('CLEANUP COMPLETE',result.stdout)
+        self.assert_restored()
+
 
 if __name__=='__main__':unittest.main()
