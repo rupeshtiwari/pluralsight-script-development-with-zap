@@ -144,7 +144,8 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
     def run_scope(self,option='',cwd=None):
         self.export = Path(tempfile.mkdtemp(dir=self.temp.name)) / 'evidence'
         self.env['PREFLIGHT_EVIDENCE_DIR'] = str(self.export)
-        return subprocess.run([str(self.root/'preflight-check')]+([option] if option else []),
+        options=option if isinstance(option,list) else ([option] if option else [])
+        return subprocess.run([str(self.root/'preflight-check')]+options,
                               cwd=cwd or self.root,env=self.env,capture_output=True,text=True,timeout=20)
 
     def assert_restored(self,keep=()):
@@ -490,6 +491,152 @@ print('✔ PASS: cwd and prerequisites verified',flush=True)
         output.write_bytes(original)
         self.cleanup_retained()
         self.assertEqual(note.read_text(),'unrelated')
+
+    def test_moved_changed_report_allows_cleanup_and_restores_prior_report(self):
+        report=self.root/FOLDERS['m1-demo1']/'logs/alert-disposition.md'
+        report.parent.mkdir();report.write_text('before preflight')
+        step=self.root/FOLDERS['m1-demo1']/'steps/01-test-step.sh'
+        with step.open('a') as script:script.write("\n(Path.cwd()/'logs/alert-disposition.md').write_text('generated report')\n")
+        (self.root/'step-fail').touch();self.env['FAIL_DEMO']='m2-demo2'
+        self.assertEqual(self.run_scope().returncode,1)
+        report.write_text('edited report')
+        saved=Path(self.temp.name)/'saved-personal-report';report.rename(saved)
+        self.cleanup_retained()
+        self.assertEqual(saved.read_text(),'edited report')
+        self.assertEqual(report.read_text(),'before preflight')
+
+    def test_already_restored_output_allows_idempotent_cleanup(self):
+        report=self.root/FOLDERS['m2-demo1']/'logs/preflight-step-01.log'
+        report.parent.mkdir();report.write_text('original before preflight')
+        (self.root/'step-fail').touch()
+        self.assertEqual(self.run_scope('--m2d1').returncode,1)
+        report.write_text('original before preflight')
+        self.cleanup_retained()
+        self.assertEqual(report.read_text(),'original before preflight')
+        self.assertFalse(list(self.root.parent.glob(self.root.name+'-preflight-saved-*')))
+
+    def test_changed_file_backup_failure_preserves_all_checkout_files(self):
+        import contextlib,io
+        import preflight_workspace as workspace
+        (self.root/'step-fail').touch()
+        self.assertEqual(self.run_scope('--m2d1').returncode,1)
+        report=self.root/FOLDERS['m2-demo1']/'logs/preflight-step-01.log'
+        report.write_text('changed report')
+        before={p:p.read_bytes() for p in self.root.rglob('*') if p.is_file() and '.git' not in p.parts}
+        with patch.object(workspace.shutil,'copy2',side_effect=OSError(28,'No space left on device')):
+            with contextlib.redirect_stdout(io.StringIO()),self.assertRaisesRegex(RuntimeError,'backup failed'):
+                workspace.manual(self.root,save_changes=True)
+        self.assertTrue((self.root/'.preflight-workspace/manifest.json').exists())
+        for path,data in before.items():self.assertEqual(path.read_bytes(),data,path)
+        self.assertEqual(report.read_text(),'changed report')
+
+    def test_edit_during_archive_is_preserved_before_any_cleanup(self):
+        import contextlib,io
+        import preflight_workspace as workspace
+        (self.root/'step-fail').touch()
+        self.assertEqual(self.run_scope('--m2d1').returncode,1)
+        source=self.root/FOLDERS['m1-demo2']/'zap-scripts/globomantics-marker.js'
+        report=self.root/FOLDERS['m2-demo1']/'logs/preflight-step-01.log'
+        source.write_text('edited before archive');report.write_text('edited report')
+        copy=workspace.shutil.copy2
+        def copy_and_edit(src,dst,*args,**kwargs):
+            result=copy(src,dst,*args,**kwargs)
+            if Path(src)==report:source.write_text('latest edit during archive')
+            return result
+        with patch.object(workspace.shutil,'copy2',side_effect=copy_and_edit):
+            with contextlib.redirect_stdout(io.StringIO()),self.assertRaisesRegex(RuntimeError,'changed while preparing cleanup'):
+                workspace.manual(self.root,save_changes=True)
+        self.assertEqual(source.read_text(),'latest edit during archive')
+        self.assertEqual(report.read_text(),'edited report')
+        self.assertTrue((self.root/'course-evidence.txt').exists())
+        self.assertTrue((self.root/'.preflight-workspace/manifest.json').exists())
+
+    def test_backup_directory_error_does_not_expose_personal_parent_path(self):
+        import contextlib,io
+        import preflight_workspace as workspace
+        (self.root/'step-fail').touch()
+        self.assertEqual(self.run_scope('--m2d1').returncode,1)
+        report=self.root/FOLDERS['m2-demo1']/'logs/preflight-step-01.log'
+        report.write_text('changed')
+        with patch.object(workspace.tempfile,'mkdtemp',side_effect=OSError(13,'Permission denied','/Users/private-person/course')):
+            with contextlib.redirect_stdout(io.StringIO()),self.assertRaises(RuntimeError) as error:
+                workspace.manual(self.root,save_changes=True)
+        self.assertIn('Permission denied',str(error.exception))
+        self.assertNotIn('/Users/',str(error.exception))
+        self.assertEqual(report.read_text(),'changed')
+
+    def test_directory_change_during_archive_is_preserved_before_cleanup(self):
+        import contextlib,io
+        import preflight_workspace as workspace
+        logs=self.root/FOLDERS['m2-demo1']/'logs'
+        gate=logs/'.gate';gate.mkdir(parents=True);gate.chmod(0o750)
+        step=self.root/FOLDERS['m2-demo1']/'steps/01-test-step.sh'
+        with step.open('a') as script:script.write("\n(Path.cwd()/'logs/.gate').chmod(0o777)\n")
+        (self.root/'step-fail').touch()
+        self.assertEqual(self.run_scope('--m2d1').returncode,1)
+        report=logs/'preflight-step-01.log';report.write_text('changed report')
+        copy=workspace.shutil.copy2
+        def copy_and_change_mode(src,dst,*args,**kwargs):
+            result=copy(src,dst,*args,**kwargs)
+            gate.chmod(0o700)
+            return result
+        with patch.object(workspace.shutil,'copy2',side_effect=copy_and_change_mode):
+            with contextlib.redirect_stdout(io.StringIO()),self.assertRaisesRegex(RuntimeError,'directory changed while preparing cleanup'):
+                workspace.manual(self.root,save_changes=True)
+        self.assertEqual(gate.stat().st_mode & 0o777,0o700)
+        self.assertEqual(report.read_text(),'changed report')
+        self.assertTrue((self.root/'course-evidence.txt').exists())
+
+    def test_explicit_save_changes_archives_report_and_temporary_source_before_cleanup(self):
+        (self.root/'step-fail').touch()
+        self.assertEqual(self.run_scope('--m2d1').returncode,1)
+        report=self.root/FOLDERS['m2-demo1']/'logs/preflight-step-01.log'
+        source=self.root/FOLDERS['m1-demo2']/'zap-scripts/globomantics-marker.js'
+        report.write_text('edited report');report.chmod(0o640)
+        source.write_text('my modified temporary source')
+        result=self.run_scope(['--cleanup','--save-changes'])
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assert_restored()
+        archives=list(self.root.parent.glob(self.root.name+'-preflight-saved-*'))
+        self.assertEqual(len(archives),1)
+        saved_report=archives[0]/report.relative_to(self.root)
+        self.assertEqual(saved_report.read_text(),'edited report')
+        self.assertEqual(saved_report.stat().st_mode & 0o777,0o640)
+        self.assertEqual((archives[0]/source.relative_to(self.root)).read_text(),'my modified temporary source')
+        metadata=json.loads((archives[0]/'saved-files.json').read_text())
+        self.assertIn(str(report.relative_to(self.root)),metadata)
+        self.assertIn(str(source.relative_to(self.root)),metadata)
+        self.assertIn('Changed files saved and verified: ../',result.stdout)
+        self.assertNotIn(str(self.root.parent),result.stdout)
+        self.assertEqual(archives[0].stat().st_mode & 0o777,0o700)
+
+    def test_explicit_save_changes_still_preserves_existing_learner_source(self):
+        source=self.root/FOLDERS['m1-demo2']/'zap-scripts/globomantics-marker.js'
+        source.write_text('learner work before preflight')
+        (self.root/'step-fail').touch()
+        self.assertEqual(self.run_scope('--m2d1').returncode,1)
+        source.write_text('new learner work')
+        result=self.run_scope(['--cleanup','--save-changes'])
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertEqual(source.read_text(),'new learner work')
+        self.assert_restored([source])
+        self.assertFalse(list(self.root.parent.glob(self.root.name+'-preflight-saved-*')))
+
+    def test_explicit_save_changes_validates_everything_before_any_backup_or_deletion(self):
+        (self.root/'step-fail').touch()
+        self.assertEqual(self.run_scope('--m2d1').returncode,1)
+        report=self.root/FOLDERS['m2-demo1']/'logs/preflight-step-01.log'
+        report.write_text('changed report')
+        source=self.root/FOLDERS['m1-demo2']/'zap-scripts/globomantics-marker.js'
+        original=source.with_name('owned-original');source.rename(original)
+        outside=Path(self.temp.name)/'personal-source';outside.write_text('personal')
+        source.symlink_to(outside)
+        result=self.run_scope(['--cleanup','--save-changes'])
+        self.assertNotEqual(result.returncode,0)
+        self.assertEqual(report.read_text(),'changed report')
+        self.assertEqual(outside.read_text(),'personal')
+        self.assertFalse(list(self.root.parent.glob(self.root.name+'-preflight-saved-*')))
+        source.unlink();original.rename(source)
 
     def test_cleanup_refuses_symlink_and_active_run(self):
         (self.root/'pause').touch()
