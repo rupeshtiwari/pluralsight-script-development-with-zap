@@ -164,6 +164,16 @@ git switch m1-demo1-before</pre>Each <code>*-before</code> branch is an independ
 > (cd "$(git rev-parse --show-toplevel)" && ./preflight-check --m1)       # a whole module (--m1 / --m2), or one demo (--m1d1 … --m2d3)
 > ```
 
+**Ready to record after preflight:** when every selected step passes, preflight automatically removes its temporary script/plan copies, generated reports, state files and logs, and restores any pre-existing output files. Your existing source files and personal files are preserved. Cleanup waits for the entire selected demo/module/course scope; a later failure keeps earlier demos' files too.
+
+If setup or even one step fails, times out, or is interrupted, files stay available for inspection. Read `FAIL-*.log`, `course-evidence.txt` and `preflight-diagnostics.txt` before manually cleaning:
+
+```bash
+(cd "$(git rev-parse --show-toplevel)" && ./preflight-check --cleanup)
+```
+
+A failed run must be cleaned explicitly before another preflight. Cleanup refuses files you edited or replaced after preflight and leaves them for your review. Move any work you want to keep out of the temporary path, then run cleanup again. Files from older runs without an ownership manifest are never swept away. Lab services and ZAP session state remain running; follow the demo's normal reset before filming. CI exports the run's evidence outside the checkout before cleanup so uploaded proof is retained.
+
 **Different demo?** Return to the repository root, save any personal changes, switch to its `*-before` branch, then follow its own README. Don't reuse scan history from another demo.
 
 ## Your Six Hands-On Demos
