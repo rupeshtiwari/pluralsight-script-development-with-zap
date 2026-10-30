@@ -2,6 +2,7 @@
 """Select only the active scan created by this plan, never a previous scan."""
 import json
 import sys
+from datetime import datetime
 
 
 def scan_ids(document):
@@ -25,7 +26,20 @@ def record(document, scan_id):
 def main():
     action, *arguments = sys.argv[1:]
     document = json.load(sys.stdin)
-    if action == 'ids':
+    if not isinstance(document, dict):
+        raise ValueError('expected a JSON object')
+    if action == 'plan-finished':
+        value = document.get('finished')
+        if not isinstance(value, str) or 'T' not in value:
+            return 1
+        completed = datetime.fromisoformat(value.replace('Z', '+00:00'))
+        return 0 if completed.tzinfo is not None else 1
+    if action == 'plan-errors':
+        errors = document['error']
+        if not isinstance(errors, list):
+            raise ValueError('expected a plan error list')
+        print(len(errors))
+    elif action == 'ids':
         print(json.dumps(scan_ids(document)))
     elif action == 'new':
         print(new_scan(document, json.loads(arguments[0])))
@@ -38,7 +52,7 @@ def main():
 
 if __name__ == '__main__':
     try:
-        main()
+        sys.exit(main())
     except (ValueError, KeyError, TypeError, IndexError) as error:
         print('Scan identity check: ' + str(error), file=sys.stderr)
         sys.exit(1)
