@@ -20,6 +20,10 @@ jobs:
         run: python3 -m compileall -q runtime/app runtime/scripts
       - name: Verify evidence output replay and fail-closed parity
         run: python3 -m unittest discover -s runtime/scripts -p 'test_recording_step.py' -v
+      - name: Verify prerequisite branch contract checks
+        run: python3 -m unittest discover -s runtime/scripts -p 'test_prerequisite_versions.py' -v
+      - name: Verify native long-session request and scan checks
+        run: python3 -m unittest discover -s runtime/scripts -p 'test_native_zap_steps.py' -v
       - name: Verify all-branch isolation and review arithmetic
         run: python3 -m unittest discover -s runtime/scripts -p 'test_course_maintenance.py' -v
       - name: Verify module-based terminal paths and preserved reports
@@ -45,6 +49,8 @@ jobs:
           fetch-depth: 0
       - name: Fetch every branch ref
         run: git fetch origin '+refs/heads/*:refs/remotes/origin/*'
+      - name: Reject stale prerequisite copies on every branch
+        run: python3 runtime/scripts/check_prerequisite_versions.py
       - name: Validate that no -before branch can break for a student
         run: python3 runtime/scripts/check_before_never_breaks.py
 
@@ -62,3 +68,5 @@ jobs:
           python-version: '3.12'
       - name: Check every demo cwd, startup, live logs, cleanup and safe diagnostics
         run: python3 -m unittest discover -s runtime/scripts -p 'test_preflight_*.py' -v
+      - name: Check reused-session native request and scan identity
+        run: python3 -m unittest discover -s runtime/scripts -p 'test_native_zap_steps.py' -v
