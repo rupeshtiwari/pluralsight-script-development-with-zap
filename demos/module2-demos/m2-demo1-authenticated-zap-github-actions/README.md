@@ -194,7 +194,7 @@ Now the plan exists, run the SAME command again. It does two things, and the dis
 ./steps/01-run-headless-automation-plan.sh
 ```
 
-For the hosted proof, open the <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/actions/workflows/zap-authenticated-scan.yml" target="_blank" rel="noopener">authenticated-scan workflow</a>, select the run for your branch/SHA, and read the headless-execution step.
+For the hosted proof, open the <a href="https://github.com/rupeshtiwari/pluralsight-script-development-with-zap/actions/workflows/zap-authenticated-scan.yml" target="_blank" rel="noopener">authenticated-scan workflow</a>, select the run for your branch/SHA, and read the headless-execution step. If you trigger a run yourself (**Run workflow** on the Actions tab), select the **`m2-demo1-after`** branch, the completed branch that contains the finished `ci/af-plan.yaml`. Triggering it on `m2-demo1-before` (or any branch without the plan) stops immediately with a message telling you to switch branches, because there is no plan to execute there.
 
 ### Expected result (the script's output contract, not your run)
 
