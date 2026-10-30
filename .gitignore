@@ -27,3 +27,6 @@ FAIL-*.log
 
 # Shareable local preflight runtime diagnostics
 /preflight-diagnostics.txt
+
+# Owned snapshots retained after a failed preflight until explicit cleanup
+/.preflight-workspace/
