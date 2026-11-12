@@ -30,6 +30,8 @@ jobs:
         run: python3 -m unittest discover -s runtime/scripts -p 'test_terminal_paths.py' -v
       - name: Verify preflight startup, every demo working directory and cleanup
         run: python3 -m unittest discover -s runtime/scripts -p 'test_preflight_*.py' -v
+      - name: Verify lab workflow remains self-contained
+        run: python3 -m unittest discover -s runtime/scripts -p 'test_workflow_boundary.py' -v
       - name: Validate Docker Compose wiring
         run: docker compose config --quiet
       - name: Validate branch-aware student project structure
