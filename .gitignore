@@ -4,7 +4,7 @@
 # Local gate-run artifacts (headless report + plan copy) — regenerated each run
 **/logs/.gate/
 
-# Production material lives in the private production repository; never re-add it here
+# Exclude non-learner files from this distribution
 /docs/author-instructions/
 /docs/.author-instructions/
 /docs/maintainer/
