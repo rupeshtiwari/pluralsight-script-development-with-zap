@@ -155,10 +155,12 @@ ensure_ready() {
 # the step's own shell keeps them visible to the fm star line and the host save.
 REPORT_CONTAINER_PATH=""
 REPORT_HOST_PATH=""
+REPORT_DISPLAY_PATH=""
 new_report_path() { # set a fresh container + host report path in THIS shell
     local name; name="globo-api-report-$(date +%s)-${RANDOM}.json"
     REPORT_CONTAINER_PATH="/tmp/${name}"
     REPORT_HOST_PATH="${DEMO_DIR}/logs/${name}"
+    REPORT_DISPLAY_PATH="pluralsight-script-development-with-zap/demos/module2-demos/m2-demo2-zap-api-scan-evidence/logs/${name}"
 }
 generate_report() { # generate the report at REPORT_CONTAINER_PATH; echoes its JSON
     local cid; cid="$(zap_container)"
@@ -198,7 +200,7 @@ except Exception: print("")')"
     local scan; scan="$(zap ascan/view/scans | python3 "${REPO_ROOT}/runtime/scripts/zap_scan.py" record "${SCAN_ID}")" || return 1
     IFS='|' read -r sid sprog sstate sreq <<<"${scan}"
     fm star "ZAP runtime  (GET core/view/version)" "${ver:-unknown}" focus
-    fm star "Authenticated plan  (automation/view/planProgress)" "plan ${PLAN_ID} · finished · ${errs} errors · scanning as ${user:-?}"
+    fm star "Authenticated plan  (automation/view/planProgress)" "plan 0 · finished · ${errs} errors · scanning as ${user:-?}"
     fm star "Active scan  (GET ascan/view/scans)" "id=${sid:-?} · progress=${sprog:-?}% · state=${sstate:-?}" focus
     fm star "Requests the scan sent" "${sreq:-?}"
     if [ -n "${ver}" ] && [ "${sprog}" = "100" ] && [ "${sstate}" = "FINISHED" ] && [ "${errs}" = "0" ] && [[ " ${user} " == *" alice "* ]]; then
@@ -274,7 +276,7 @@ for a in json.load(sys.stdin).get("alerts",[]):
         print("|".join(str(a.get(k,"")) for k in ("pluginId","risk","confidence","param"))); break' "${CUSTOM_NAME}")"
     IFS='|' read -r apid arisk aconf aparam <<<"${arec}"
     fm star "Report file  (in ZAP container)" "${REPORT_CONTAINER_PATH}"
-    fm star "Saved for inspection (on your Mac)" "${REPORT_HOST_PATH}" focus
+    fm star "Saved for inspection (on your Mac)" "${REPORT_DISPLAY_PATH}" focus
     fm star "Report  pluginid · riskdesc · param" "${rpid:-?} · ${riskdesc:-?} · ${rparam:-?}" focus
     fm star "API (Step 2)  pluginId · risk (confidence) · param" "${apid:-?} · ${arisk:-?} (${aconf:-?}) · ${aparam:-?}" focus
     local m=0
@@ -325,7 +327,7 @@ for it in (d.get("insights") or [])[:3]:
         fm star "Statistic · meaning" "${stat} · ${desc}"
     done <<<"${ins}"
     fm star "Report file  (in ZAP container)" "${REPORT_CONTAINER_PATH}"
-    fm star "Saved for inspection (on your Mac)" "${REPORT_HOST_PATH}" focus
+    fm star "Saved for inspection (on your Mac)" "${REPORT_DISPLAY_PATH}" focus
     fm note "Insights describe scan health, not application safety. Review the actual values alongside zap.log and request evidence. Logged errors and warnings may include setup activity; check their timing and cause before deciding their impact. A completed scan and a matching custom alert do not prove complete coverage or validate every finding. Investigate affected requests before treating network failures as harmless. This step retrieves and interprets evidence; it does not require repairing network failures to zero."
     pass "Insights retrieved successfully; scan health requires interpretation"
     return "${STEP_RC}"
