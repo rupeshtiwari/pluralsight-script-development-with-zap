@@ -14,7 +14,6 @@ def load(name):
     obj=importlib.util.module_from_spec(spec);spec.loader.exec_module(obj)
     return obj
 
-# The author-guide generator and its tests moved to the private production repository.
 sync=load('sync_all_branches')
 
 class SyncTests(unittest.TestCase):

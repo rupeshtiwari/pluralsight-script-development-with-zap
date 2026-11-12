@@ -3,6 +3,7 @@ from pathlib import Path
 import re
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+UNRESOLVED_ROOT = Path(__file__).absolute().parents[2]
 
 
 def display_text(text: str) -> str:
@@ -14,9 +15,11 @@ def display_text(text: str) -> str:
     JSON field values can pass through the same shared formatter safely.
     """
     text = str(text)
-    root = re.escape(str(REPOSITORY_ROOT))
-    # The module folder is the display root for every current and future demo.
-    text = re.sub(r'(?<![\w/])' + root + r'/(?:demos/)?', '', text)
+    for r in dict.fromkeys((str(REPOSITORY_ROOT), str(UNRESOLVED_ROOT), str(REPOSITORY_ROOT).removeprefix("/private"))):
+        root = re.escape(r)
+        # The module folder is the display root for every current and future demo.
+        text = re.sub(r'(?<![\w/])' + root + r'/(?:demos/)?', '', text)
+    text = re.sub(r'(?<![\w/])(?:/private)?/tmp/work/(?=pluralsight-script-development-with-zap/)', '', text)
     text = re.sub(r'(?<![\w/])demos/(?=(?:module[^/\s]*|m\d+)[/\\])', '', text)
     # Outside this checkout, hide only the personal home prefix. URLs and
     # container paths such as /tmp/report.json are not local checkout paths.
@@ -32,4 +35,5 @@ def display_command(text: str) -> str:
     runs it. display_text would drop the leading `demos/`, turning the 'author this first' copy command
     into `module2-demos/...`, which then fails with 'no such file or directory'.
     """
-    return re.sub(r'(?<![\w/])/(?:Users|home)/[^/\s]+(?=/|$)', '~', str(text))
+    text = re.sub(r'(?<![\w/])(?:/private)?/tmp/work/(?=pluralsight-script-development-with-zap/)', '~/', str(text))
+    return re.sub(r'(?<![\w/])/(?:Users|home)/[^/\s]+(?=/|$)', '~', text)
