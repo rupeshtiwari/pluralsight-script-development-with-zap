@@ -22,8 +22,7 @@ SOLUTIONS = {
     "m2-demo1": ["demos/module2-demos/m2-demo1-authenticated-zap-github-actions/ci/af-plan.yaml"],
     "m2-demo3": ["demos/module2-demos/m2-demo3-security-quality-gates/ci/gate-plan.yaml"],
 }
-# Production material lives in the private production repository. Fail if any of it
-# reappears here (copied back, regenerated, or restored by a merge).
+# Fail if non-learner files reappear in the learner distribution.
 PRIVATE_ONLY = [
     "docs/.author-instructions", "docs/author-instructions", "docs/course-outline.md", "docs/maintainer",
     "setup/run-all-demo-preflights.sh", "setup/run_all_demo_preflights.py", "setup/preflight_process.py",
@@ -40,7 +39,7 @@ def must(cond, description):
 for folder in ("setup", "demos", "runtime", "docs"):
     must((ROOT / folder).is_dir(), f"missing directory: {folder}")
 for rel in PRIVATE_ONLY:
-    must(not (ROOT / rel).exists(), f"production-only path belongs in the private production repository: {rel}")
+    must(not (ROOT / rel).exists(), f"reserved non-learner path present: {rel}")
 for name in ("README.md", "CLAUDE.md", ".gitignore", ".env", "docker-compose.yaml"):
     must((ROOT / name).is_file(), f"missing root entry point: {name}")
 for old in ("before-running-demo-run-this", "app", "data", "zap", "scripts", "module1", "module2", "env-setup"):
@@ -67,8 +66,8 @@ for lab, rel in LABS.items():
         body = (path / "README.md").read_text(encoding="utf-8")
         for step in steps:
             must(step.name in body, f"{lab}: README missing named command {step.name}")
-        must("run-all-demo-preflights.sh" not in body, f"{lab}: README names the private production batch command")
-        must("author-instructions" not in body, f"{lab}: README points at private author guides")
+        must("run-all-demo-preflights.sh" not in body, f"{lab}: README names a restricted batch command")
+        must("author-instructions" not in body, f"{lab}: README names a restricted guide path")
         must("lab-down.sh" in body, f"{lab}: README missing teardown instructions")
 
 branch = os.environ.get("GITHUB_REF_NAME", "").strip() or subprocess.run(
