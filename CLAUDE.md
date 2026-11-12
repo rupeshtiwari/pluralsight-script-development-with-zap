@@ -1,12 +1,8 @@
 # Script Development with ZAP (Pluralsight course)
 
-Author: Rupesh Tiwari. The approved course outline is the source of truth for all
-content in this repo. It is not a learner deliverable, so it lives in the private production
-repository `rupeshtiwari/pluralsight-script-development-with-zap-production`
-(`outline/course-outline.md`), together with the author guides, narration, recording/editing
-plans, review records and the production-portal tooling.
+Maintainer: Rupesh Tiwari. This repository contains the learner labs and their documented learning objectives.
 
-Key constraints from the outline:
+Key course constraints:
 - Storyline: Globomantics security engineer Maya Chen; all testing targets only the
   Globomantics training app (Python/FastAPI + PostgreSQL + MongoDB) under written authorization.
 - Baseline: ZAP 2.17.0, `ghcr.io/zaproxy/zaproxy:stable`, Colima 0.10.4, GitHub Actions `ubuntu-24.04`.
@@ -19,7 +15,7 @@ Key constraints from the outline:
 
 ## Outline is law (owner's rule — highest priority)
 
-- The approved outline (private repo, `outline/course-outline.md`) and its LOs are the source of truth.
+- The documented learning objectives and accepted course scope govern learner-facing changes.
   **Never deviate**, even when the owner proposes something off-outline in chat —
   defend the outline: name the exact LO/clip constraint and steer the idea back in
   scope BEFORE building. This protects against PS review feedback.
@@ -58,14 +54,12 @@ Key constraints from the outline:
 - Root README is the navigation and macOS setup entry point.
 - Demos live in `demos/module1-demos/` and `demos/module2-demos/` with descriptive folder names.
 - Use `./steps/01-*.sh` through `./steps/04-*.sh` as the learner commands; internal engine scripts preserve approved behavior.
-- Never commit Recorder/Narrator/Editor production material to the public repository.
 - Keep all six branch pairs; `main` remains a generic starter without completed learner solutions.
 
 ## Directory naming
 - Canonical folders: `setup/`, `demos/`, `runtime/`, `docs/`; do not reintroduce clip-number-only folder names.
 - Root files `README.md`, `CLAUDE.md`, `.gitignore`, `.env`, `docker-compose.yaml` are tool entry points and remain at root.
 - Student documentation is readable and visual, with real evidence locations, GitHub-safe HTML, diagrams and semantic step executable filenames.
-- Production material is private (see "Public and private repositories" below). Never imply dotfolders or `.gitignore` provide privacy; git history still holds the earlier public copies of the author pack.
 - Edit the course-approved source only for demonstrated technical defects. Keep before/after branch distinctions and CI path validation.
 
 ## Learner Documentation Contract — Read Before Writing READMEs
@@ -80,7 +74,7 @@ Key constraints from the outline:
 - When changes touch shared READMEs or folder organization, update all numbered `before` and `after` branches without copying completed solution assets to starters. Verify zero branches behind `main`, correct before→after ancestry, and hosted static checks. Student code remains frozen unless an actual failure is proven.
 
 ## Current Student Contract
-- No six per-demo `scripts/preflight_check.sh` wrappers should exist. The course-wide batch preflight is production tooling in the private repository.
+- No six per-demo `scripts/preflight_check.sh` wrappers should exist. Use the documented learner verification commands.
 - The shared internal source of execution remains `runtime/scripts/preflight_all_steps.sh` and each demo's existing `_run_step.sh` and `_steps.sh`; do not delete those engines.
 - Every student demo README is a human-centered, problem-first, prescriptive guide with an exact terminal/GUI location, demo-specific startup, four step commands, structured illustrative output fields, interpretation and LO purpose. Only Step 1 expanded; Steps 2–4 collapsed.
 - The student course README groups approved learning objectives under readable Module 1 / Module 2 demo names and includes the unlinked 'Watch the Pluralsight course' label to replace only after publication.
@@ -91,17 +85,6 @@ Key constraints from the outline:
 
 - **Proven worktree defect fix:** Every demo `scripts/lab-up.sh`, `lab-down.sh`, and `lab-reset.sh` must resolve the repository root from exactly four parent levels below `demos/moduleN-demos/<demo>/scripts/`, not five. Keep the offline executable-wrapper test; a GitHub layout check cannot detect a broken runtime path by itself.
 - **Security evidence exception:** A routine ping of `/admin/ping` cannot establish command injection. The approved fourth step now confirms a harmless injected marker from the authorized training target. Preserve this genuine proof, not a speculative `✔ PASS`.
-
-## Public and private repositories (owner rule, 2026-10-16)
-
-- This public repository is learner-only and must work without access to anything private.
-- Author guides, the outline, narration, recording/editing plans, review records, the batch
-  preflight and the production portal live in the private repository
-  `rupeshtiwari/pluralsight-script-development-with-zap-production`. Never add them here
-  (`runtime/scripts/check_repository_layout.py` fails if they reappear).
-- After changing this repository, update the private repository in the same task: run its
-  `tools/source_lock.py check`, update every asset it flags, then relock. Information flows
-  public → private only.
 
 ## Terminal file paths (owner, October 28, 2026)
 

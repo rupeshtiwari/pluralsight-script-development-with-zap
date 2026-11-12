@@ -167,7 +167,7 @@ Values in `<…>` are run-specific and must be read from your own output. The na
 | ZAP runtime  (GET core/view/version) | `2.17.0` |
 | Authenticated plan  (automation/view/planProgress) | `plan 0 · finished · 0 errors · scanning as alice` |
 | Active scan  (GET ascan/view/scans) | `id=0 · progress=100% · state=FINISHED` |
-| Requests the scan sent | `<live count>` |
+| Requests the scan sent | `5` |
 
 **`✔ PASS`** the API reports the ZAP runtime and a finished authenticated scan.
 
@@ -262,8 +262,10 @@ Why go to this trouble? Because **a report is a file, and files go stale.** The 
 
 | OBSERVED FIELD | ACTUAL VALUE |
 |---|---|
+| Report file  (in ZAP container) | `/tmp/globo-api-report-<timestamp>-<id>.json` |
+| Saved for inspection (on your Mac) | `pluralsight-script-development-with-zap/demos/module2-demos/m2-demo2-zap-api-scan-evidence/logs/globo-api-report-<timestamp>-<id>.json` |
 | Report  pluginid · riskdesc · param | `50000 · Medium (Medium) · note` |
-| API (Step 3)  pluginId · risk (confidence) · param | `50000 · Medium (Medium) · note` |
+| API (Step 2)  pluginId · risk (confidence) · param | `50000 · Medium (Medium) · note` |
 | Fields that match | `3 of 3` |
 
 **`✔ PASS`** the official JSON report matches the API alert on rule ID, risk/confidence and parameter.
