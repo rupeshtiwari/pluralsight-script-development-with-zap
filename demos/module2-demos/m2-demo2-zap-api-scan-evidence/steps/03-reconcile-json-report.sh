@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# reconcile json report.
+# reconcile json report (displays repo-relative pluralsight-script-development-with-zap/demos/module2-demos/... path).
 # This public command calls the same real ZAP step engine in preflight and recording.
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
