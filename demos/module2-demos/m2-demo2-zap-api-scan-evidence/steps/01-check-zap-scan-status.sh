@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check zap scan status.
+# check zap scan status (deterministic plan 0 · finished · 0 errors · scanning as alice, 5 requests).
 # This public command calls the same real ZAP step engine in preflight and recording.
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
